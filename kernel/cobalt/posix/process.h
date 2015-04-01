@@ -51,6 +51,7 @@ struct cobalt_process {
 	struct rb_root usems;
 	struct list_head sigwaiters;
 	struct cobalt_resources resources;
+	struct list_head thread_list;
 	DECLARE_BITMAP(timers_map, CONFIG_XENO_OPT_NRTIMERS);
 	struct cobalt_timer *timers[CONFIG_XENO_OPT_NRTIMERS];
 	void *priv[NR_PERSONALITIES];
@@ -86,7 +87,7 @@ int cobalt_yield(xnticks_t min, xnticks_t max);
 
 int cobalt_process_init(void);
 
-extern struct list_head cobalt_thread_list;
+extern struct list_head cobalt_global_thread_list;
 
 extern struct cobalt_resources cobalt_global_resources;
 

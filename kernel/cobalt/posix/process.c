@@ -83,7 +83,7 @@ struct xnthread_personality *cobalt_personalities[NR_PERSONALITIES];
 
 static struct xnsynch yield_sync;
 
-LIST_HEAD(cobalt_thread_list);
+LIST_HEAD(cobalt_global_thread_list);
 
 struct cobalt_resources cobalt_global_resources = {
 	.condq = LIST_HEAD_INIT(cobalt_global_resources.condq),
@@ -1439,6 +1439,7 @@ static void *cobalt_process_attach(void)
 	INIT_LIST_HEAD(&process->resources.eventq);
 	INIT_LIST_HEAD(&process->resources.schedq);
 	INIT_LIST_HEAD(&process->sigwaiters);
+	INIT_LIST_HEAD(&process->thread_list);
 	xntree_init(&process->usems);
 	bitmap_fill(process->timers_map, CONFIG_XENO_OPT_NRTIMERS);
 	cobalt_set_process(process);

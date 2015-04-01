@@ -359,6 +359,7 @@ static int pthread_create(struct cobalt_thread **thread_p,
 			  const struct sched_param_ex *param_ex,
 			  struct task_struct *task)
 {
+	struct cobalt_process *process = cobalt_current_process();
 	struct xnsched_class *sched_class;
 	union xnsched_policy_param param;
 	struct xnthread_init_attr iattr;
@@ -413,7 +414,8 @@ static int pthread_create(struct cobalt_thread **thread_p,
 	}
 
 	xnlock_get_irqsave(&nklock, s);
-	list_add_tail(&thread->next, &cobalt_thread_list);
+	list_add_tail(&thread->next, process ? &process->thread_list
+					     : &cobalt_global_thread_list);
 	xnlock_put_irqrestore(&nklock, s);
 
 	thread->hkey.u_pth = 0;

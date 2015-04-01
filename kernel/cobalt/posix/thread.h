@@ -91,7 +91,7 @@ struct cobalt_thread {
 	struct xnthread threadbase;
 	struct cobalt_extref extref;
 	struct cobalt_process *process;
-	struct list_head next;	/* in cobalt_thread_list */
+	struct list_head next;	/* in global/process thread_list */
 
 	/** Signal management. */
 	sigset_t sigpending;
