@@ -51,6 +51,7 @@
 #define XNJOINED  0x00080000 /**< Another thread waits for joining this thread */
 #define XNTRAPLB  0x00100000 /**< Trap lock break (i.e. may not sleep with sched lock) */
 #define XNDEBUG   0x00200000 /**< User-level debugging enabled */
+#define XNDBGSTOP 0x00400000 /**< Stopped for synchronous debugging */
 
 /** @} */
 
@@ -101,8 +102,9 @@
  * 'r' -> Undergoes round-robin.
  * 't' -> Runtime mode errors notified.
  * 'L' -> Lock breaks trapped.
+ * 's' -> Ptraced, stopped synchronously.
  */
-#define XNTHREAD_STATE_LABELS  "SWDRU..X.HbTlrt.....L."
+#define XNTHREAD_STATE_LABELS  "SWDRU..X.HbTlrt.....L.s"
 
 struct xnthread_user_window {
 	__u32 state;
