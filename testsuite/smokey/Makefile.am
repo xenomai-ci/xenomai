@@ -14,6 +14,7 @@ COBALT_SUBDIRS = 	\
 	bufp		\
 	cpu-affinity	\
 	fpu-stress	\
+	gdb		\
 	iddp		\
 	leaks		\
 	memory-coreheap	\
