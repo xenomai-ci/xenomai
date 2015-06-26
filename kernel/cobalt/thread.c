@@ -2098,6 +2098,18 @@ void xnthread_relax(int notify, int reason)
 	 * dropped by xnthread_suspend().
 	 */
 	xnlock_get(&nklock);
+#ifdef IPIPE_KEVT_USERINTRET
+	/*
+	 * If the thread is being debugged, record that it should migrate back
+	 * in case it resumes in userspace. If it resumes in kernel space, i.e.
+	 * over a restarting syscall, the associated hardening will both clear
+	 * XNCONTHI and disable the user return notifier again.
+	 */
+	if (xnthread_test_state(thread, XNSSTEP)) {
+		xnthread_set_info(thread, XNCONTHI);
+		ipipe_enable_user_intret_notifier();
+	}
+#endif
 	set_current_state(p->state & ~TASK_NOWAKEUP);
 	xnthread_run_handler_stack(thread, relax_thread);
 	xnthread_suspend(thread, XNRELAX, XN_INFINITE, XN_RELATIVE, NULL);

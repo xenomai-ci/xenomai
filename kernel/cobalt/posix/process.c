@@ -745,6 +745,18 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 
 	trace_cobalt_thread_fault(d);
 
+#ifdef IPIPE_KEVT_USERINTRET
+	if (xnarch_fault_bp_p(d) && user_mode(d->regs)) {
+		spl_t s;
+
+		xnlock_get_irqsave(&nklock, s);
+		xnthread_set_info(thread, XNCONTHI);
+		xnlock_put_irqrestore(&nklock, s);
+
+		ipipe_enable_user_intret_notifier();
+	}
+#endif
+
 	if (xnarch_fault_fpu_p(d)) {
 #ifdef CONFIG_XENO_ARCH_FPU
 		spl_t s;
@@ -962,15 +974,28 @@ void ipipe_migration_hook(struct task_struct *p) /* hw IRQs off */
 {
 	struct xnthread *thread = xnthread_from_task(p);
 
+	xnlock_get(&nklock);
+
 	/*
 	 * We fire the handler before the thread is migrated, so that
 	 * thread->sched does not change between paired invocations of
 	 * relax_thread/harden_thread handlers.
 	 */
-	xnlock_get(&nklock);
 	xnthread_run_handler_stack(thread, harden_thread);
 	if (affinity_ok(p))
 		xnthread_resume(thread, XNRELAX);
+
+#ifdef IPIPE_KEVT_USERINTRET
+	/*
+	 * In case we migrated independently of the user return notifier, clear
+	 * XNCONTHI here and also disable the notifier - we are already done.
+	 */
+	if (unlikely(xnthread_test_info(thread, XNCONTHI))) {
+		xnthread_clear_info(thread, XNCONTHI);
+		ipipe_disable_user_intret_notifier();
+	}
+#endif
+
 	xnlock_put(&nklock);
 
 	xnsched_run();
@@ -1279,6 +1304,42 @@ static inline int handle_clockfreq_event(unsigned int *p)
 	return KEVENT_PROPAGATE;
 }
 
+#ifdef IPIPE_KEVT_USERINTRET
+static int handle_user_return(struct task_struct *task)
+{
+	struct xnthread *thread;
+	spl_t s;
+	int err;
+
+	ipipe_disable_user_intret_notifier();
+
+	thread = xnthread_from_task(task);
+	if (thread == NULL)
+		return KEVENT_PROPAGATE;
+
+	if (xnthread_test_info(thread, XNCONTHI)) {
+		xnlock_get_irqsave(&nklock, s);
+		xnthread_clear_info(thread, XNCONTHI);
+		xnlock_put_irqrestore(&nklock, s);
+
+		err = xnthread_harden();
+
+		/*
+		 * XNCONTHI may or may not have been re-applied if
+		 * harden bailed out due to pending signals. Make sure
+		 * it is set in that case.
+		 */
+		if (err == -ERESTARTSYS) {
+			xnlock_get_irqsave(&nklock, s);
+			xnthread_set_info(thread, XNCONTHI);
+			xnlock_put_irqrestore(&nklock, s);
+		}
+	}
+
+	return KEVENT_PROPAGATE;
+}
+#endif /* IPIPE_KEVT_USERINTRET */
+
 int ipipe_kevent_hook(int kevent, void *data)
 {
 	int ret;
@@ -1305,6 +1366,11 @@ int ipipe_kevent_hook(int kevent, void *data)
 #ifdef IPIPE_KEVT_CLOCKFREQ
 	case IPIPE_KEVT_CLOCKFREQ:
 		ret = handle_clockfreq_event(data);
+		break;
+#endif
+#ifdef IPIPE_KEVT_USERINTRET
+	case IPIPE_KEVT_USERINTRET:
+		ret = handle_user_return(data);
 		break;
 #endif
 	default:
