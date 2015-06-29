@@ -56,6 +56,7 @@ struct cobalt_process {
 	struct cobalt_timer *timers[CONFIG_XENO_OPT_NRTIMERS];
 	void *priv[NR_PERSONALITIES];
 	int ufeatures;
+	unsigned int debugged_threads;
 };
 
 struct cobalt_resnode {

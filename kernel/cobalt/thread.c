@@ -2068,6 +2068,7 @@ void xnthread_relax(int notify, int reason)
 {
 	struct xnthread *thread = xnthread_current();
 	struct task_struct *p = current;
+	int suspension = XNRELAX;
 	int cpu __maybe_unused;
 	kernel_siginfo_t si;
 
@@ -2108,11 +2109,12 @@ void xnthread_relax(int notify, int reason)
 	if (xnthread_test_state(thread, XNSSTEP)) {
 		xnthread_set_info(thread, XNCONTHI);
 		ipipe_enable_user_intret_notifier();
+		suspension |= XNDBGSTOP;
 	}
 #endif
 	set_current_state(p->state & ~TASK_NOWAKEUP);
 	xnthread_run_handler_stack(thread, relax_thread);
-	xnthread_suspend(thread, XNRELAX, XN_INFINITE, XN_RELATIVE, NULL);
+	xnthread_suspend(thread, suspension, XN_INFINITE, XN_RELATIVE, NULL);
 	splnone();
 
 	/*
