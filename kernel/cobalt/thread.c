@@ -2172,6 +2172,8 @@ void xnthread_relax(int notify, int reason)
 	}
 #endif
 
+	ipipe_clear_thread_flag(TIP_MAYDAY);
+
 	trace_cobalt_shadow_relaxed(thread);
 }
 EXPORT_SYMBOL_GPL(xnthread_relax);
