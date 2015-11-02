@@ -113,7 +113,7 @@
 #define sc_cobalt_trace				90
 #define sc_cobalt_corectl			91
 #define sc_cobalt_get_current			92
-#define sc_cobalt_mayday			93
+/* 93: formerly mayday */
 #define sc_cobalt_backtrace			94
 #define sc_cobalt_serialdbg			95
 #define sc_cobalt_extend			96

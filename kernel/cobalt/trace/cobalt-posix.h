@@ -154,7 +154,6 @@
 		__cobalt_symbolic_syscall(trace),			\
 		__cobalt_symbolic_syscall(corectl),			\
 		__cobalt_symbolic_syscall(get_current),			\
-		__cobalt_symbolic_syscall(mayday),			\
 		__cobalt_symbolic_syscall(backtrace),			\
 		__cobalt_symbolic_syscall(serialdbg),			\
 		__cobalt_symbolic_syscall(extend),			\

@@ -32,7 +32,6 @@ struct cobalt_umm {
 
 struct cobalt_ppd {
 	struct cobalt_umm umm;
-	unsigned long mayday_tramp;
 	atomic_t refcnt;
 	char *exe_path;
 	struct rb_root fds;

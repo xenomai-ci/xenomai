@@ -54,7 +54,6 @@
 #include <rtdm/driver.h>
 #include <asm/xenomai/features.h>
 #include <asm/xenomai/syscall.h>
-#include <asm-generic/xenomai/mayday.h>
 #include "../debug.h"
 #include "internal.h"
 #include "thread.h"
@@ -795,16 +794,9 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 
 static int handle_mayday_event(struct pt_regs *regs)
 {
-	struct xnthread *thread = xnthread_current();
-	struct xnarchtcb *tcb = xnthread_archtcb(thread);
-	struct cobalt_ppd *sys_ppd;
+	XENO_BUG_ON(COBALT, !xnthread_test_state(xnthread_current(), XNUSER));
 
-	XENO_BUG_ON(COBALT, !xnthread_test_state(thread, XNUSER));
-
-	/* We enter the mayday handler with hw IRQs off. */
-	sys_ppd = cobalt_ppd_get(0);
-
-	xnarch_handle_mayday(tcb, regs, sys_ppd->mayday_tramp);
+	xnthread_relax(0, 0);
 
 	return KEVENT_PROPAGATE;
 }
@@ -1300,21 +1292,6 @@ int ipipe_kevent_hook(int kevent, void *data)
 	return ret;
 }
 
-static inline unsigned long map_mayday_page(void)
-{
-	void __user *u_addr = NULL;
-	void *mayday_page;
-	int ret;
-
-	mayday_page = xnarch_get_mayday_page();
-	ret = rtdm_mmap_to_user(NULL, mayday_page, PAGE_SIZE,
-				get_mayday_prot(), &u_addr, NULL, NULL);
-	if (ret)
-		return 0UL;
-
-	return (unsigned long)u_addr;
-}
-
 static int attach_process(struct cobalt_process *process)
 {
 	struct cobalt_ppd *p = &process->sys_ppd;
@@ -1327,15 +1304,6 @@ static int attach_process(struct cobalt_process *process)
 		return ret;
 
 	cobalt_umm_set_name(&p->umm, "private heap[%d]", task_pid_nr(current));
-
-	p->mayday_tramp = map_mayday_page();
-	if (p->mayday_tramp == 0) {
-		printk(XENO_WARNING
-		       "%s[%d] cannot map MAYDAY page\n",
-		       current->comm, task_pid_nr(current));
-		ret = -ENOMEM;
-		goto fail_mayday;
-	}
 
 	exe_path = get_exe_path(current);
 	if (IS_ERR(exe_path)) {
@@ -1356,7 +1324,6 @@ static int attach_process(struct cobalt_process *process)
 fail_hash:
 	if (p->exe_path)
 		kfree(p->exe_path);
-fail_mayday:
 	cobalt_umm_destroy(&p->umm);
 
 	return ret;
@@ -1503,14 +1470,6 @@ __init int cobalt_init(void)
 	if (ret)
 		goto fail_debug;
 
-	/*
-	 * Setup the mayday stuff early, before userland can mess with
-	 * real-time ops.
-	 */
-	ret = xnarch_init_mayday();
-	if (ret)
-		goto fail_mayday;
-
 	for (i = 0; i < PROCESS_HASH_SIZE; i++)
 		INIT_HLIST_HEAD(&process_hash[i]);
 
@@ -1542,8 +1501,6 @@ fail_register:
 	cobalt_memdev_cleanup();
 fail_memdev:
 	xnsynch_destroy(&yield_sync);
-	xnarch_cleanup_mayday();
-fail_mayday:
 	xndebug_cleanup();
 fail_debug:
 	kfree(process_hash);

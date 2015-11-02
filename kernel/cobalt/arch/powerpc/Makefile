@@ -1,7 +1,7 @@
 
 obj-$(CONFIG_XENOMAI) += xenomai.o
 
-xenomai-y := machine.o mayday.o thread.o
+xenomai-y := machine.o thread.o
 
 xenomai-$(CONFIG_XENO_ARCH_FPU) += fpu.o
 

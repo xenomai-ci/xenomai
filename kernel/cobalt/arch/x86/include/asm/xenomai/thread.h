@@ -50,10 +50,6 @@ struct xnarchtcb {
 	x86_fpustate *kfpu_state;
 #endif
 	unsigned int root_kfpu: 1;
-	struct {
-		unsigned long ip;
-		unsigned long ax;
-	} mayday;
 };
 
 #define xnarch_fpu_ptr(tcb)     ((tcb)->fpup)

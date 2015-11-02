@@ -26,7 +26,6 @@
 #include <cobalt/kernel/tree.h>
 #include <cobalt/kernel/vdso.h>
 #include <cobalt/kernel/init.h>
-#include <asm-generic/xenomai/mayday.h>
 #include <asm/syscall.h>
 #include "internal.h"
 #include "thread.h"
@@ -269,34 +268,6 @@ static COBALT_SYSCALL(serialdbg, current,
 	}
 
 	return 0;
-}
-
-static COBALT_SYSCALL(mayday, current, (void))
-{
-	struct pt_regs *regs = task_pt_regs(current);
-	struct xnthread *cur;
-
-	cur = xnthread_current();
-	if (cur == NULL) {
-		printk(XENO_WARNING
-		       "MAYDAY received from invalid context %s[%d]\n",
-		       current->comm, task_pid_nr(current));
-		return -EPERM;
-	}
-
-	/*
-	 * If the thread was kicked by the watchdog, this syscall we
-	 * have just forced on it via the mayday escape will cause it
-	 * to relax. See handle_head_syscall().
-	 */
-	xnarch_fixup_mayday(xnthread_archtcb(cur), regs);
-
-	/*
-	 * Return whatever value xnarch_fixup_mayday set for this
-	 * register, in order not to undo what xnarch_fixup_mayday
-	 * did.
-	 */
-	return __xn_reg_rval(regs);
 }
 
 static void stringify_feature_set(unsigned long fset, char *buf, int size)

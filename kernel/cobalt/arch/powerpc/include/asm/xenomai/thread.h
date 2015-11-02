@@ -29,10 +29,6 @@ struct xnarchtcb {
 #else
 #define xnarch_fpu_ptr(tcb)     NULL
 #endif
-	struct {
-		unsigned long nip;
-		unsigned long r0;
-	} mayday;
 };
 
 #define xnarch_fault_regs(d)	((d)->regs)

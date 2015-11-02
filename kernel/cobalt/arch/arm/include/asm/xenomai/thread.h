@@ -37,16 +37,6 @@ struct xnarchtcb {
 #define xnarch_fpu_ptr(tcb)     NULL
 #endif
 #endif
-	struct {
-		unsigned long pc;
-		unsigned long r0;
-#ifdef __ARM_EABI__
-		unsigned long r7;
-#endif
-#ifdef CONFIG_ARM_THUMB
-		unsigned long psr;
-#endif
-	} mayday;
 };
 
 #define xnarch_fault_regs(d)	((d)->regs)

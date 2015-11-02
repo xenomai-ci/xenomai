@@ -39,7 +39,6 @@
 #include <cobalt/kernel/lock.h>
 #include <cobalt/kernel/thread.h>
 #include <trace/events/cobalt-core.h>
-#include <asm-generic/xenomai/mayday.h>
 #include "debug.h"
 
 static DECLARE_WAIT_QUEUE_HEAD(join_all);
