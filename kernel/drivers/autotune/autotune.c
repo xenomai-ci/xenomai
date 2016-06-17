@@ -665,7 +665,7 @@ static int autotune_ioctl_nrt(struct rtdm_fd *fd, unsigned int request, void *ar
 		tuner = &uthread_tuner.tuner;
 		break;
 	default:
-		return -EINVAL;
+		return -ENOSYS;
 	}
 
 	ret = rtdm_copy_from_user(fd, &setup, arg, sizeof(setup));

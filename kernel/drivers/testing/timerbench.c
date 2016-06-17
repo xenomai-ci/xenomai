@@ -453,7 +453,7 @@ static int rt_tmbench_ioctl_nrt(struct rtdm_fd *fd,
 		err = rt_tmbench_stop(ctx, arg);
 		break;
 	default:
-		err = -EINVAL;
+		err = -ENOSYS;
 	}
 
 	return err;

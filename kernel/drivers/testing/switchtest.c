@@ -667,7 +667,7 @@ static int rtswitch_ioctl_nrt(struct rtdm_fd *fd,
 		return 0;
 
 	default:
-		return -ENOTTY;
+		return -ENOSYS;
 	}
 }
 
