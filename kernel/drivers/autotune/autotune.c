@@ -17,6 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <linux/atomic.h>
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/kernel.h>
@@ -79,6 +80,7 @@ struct gravity_tuner {
 	int quiet;
 	struct tuning_score scores[AUTOTUNE_STEPS];
 	int nscores;
+	atomic_t refcount;
 };
 
 struct irq_gravity_tuner {
@@ -103,12 +105,14 @@ struct uthread_gravity_tuner {
 struct autotune_context {
 	struct gravity_tuner *tuner;
 	struct autotune_setup setup;
+	rtdm_lock_t tuner_lock;
 };
 
 static inline void init_tuner(struct gravity_tuner *tuner)
 {
 	rtdm_event_init(&tuner->done, 0);
 	tuner->status = 0;
+	atomic_set(&tuner->refcount, 0);
 }
 
 static inline void destroy_tuner(struct gravity_tuner *tuner)
@@ -643,28 +647,14 @@ static int autotune_ioctl_nrt(struct rtdm_fd *fd, unsigned int request, void *ar
 {
 	struct autotune_context *context;
 	struct autotune_setup setup;
-	struct gravity_tuner *tuner;
+	struct gravity_tuner *tuner, *old_tuner;
+	rtdm_lockctx_t lock_ctx;
 	int ret;
 
-	if (request == AUTOTUNE_RTIOC_RESET) {
+	switch (request) {
+	case AUTOTUNE_RTIOC_RESET:
 		xnclock_reset_gravity(&nkclock);
 		return 0;
-	}
-
-	ret = rtdm_copy_from_user(fd, &setup, arg, sizeof(setup));
-	if (ret)
-		return ret;
-
-	context = rtdm_fd_to_private(fd);
-
-	/* Clear previous tuner. */
-	tuner = context->tuner;
-	if (tuner) {
-		tuner->destroy_tuner(tuner);
-		context->tuner = NULL;
-	}
-
-	switch (request) {
 	case AUTOTUNE_RTIOC_IRQ:
 		tuner = &irq_tuner.tuner;
 		break;
@@ -678,12 +668,32 @@ static int autotune_ioctl_nrt(struct rtdm_fd *fd, unsigned int request, void *ar
 		return -EINVAL;
 	}
 
+	ret = rtdm_copy_from_user(fd, &setup, arg, sizeof(setup));
+	if (ret)
+		return ret;
+
 	ret = tuner->init_tuner(tuner);
 	if (ret)
 		return ret;
 
+	context = rtdm_fd_to_private(fd);
+
+	rtdm_lock_get_irqsave(&context->tuner_lock, lock_ctx);
+
+	old_tuner = context->tuner;
+	if (old_tuner && atomic_read(&old_tuner->refcount) > 0) {
+		rtdm_lock_put_irqrestore(&context->tuner_lock, lock_ctx);
+		tuner->destroy_tuner(tuner);
+		return -EBUSY;
+	}
+
 	context->tuner = tuner;
 	context->setup = setup;
+
+	rtdm_lock_put_irqrestore(&context->tuner_lock, lock_ctx);
+
+	if (old_tuner)
+		old_tuner->destroy_tuner(old_tuner);
 
 	if (setup.quiet <= 1)
 		printk(XENO_INFO "autotune(%s) started\n", tuner->name);
@@ -695,12 +705,21 @@ static int autotune_ioctl_rt(struct rtdm_fd *fd, unsigned int request, void *arg
 {
 	struct autotune_context *context;
 	struct gravity_tuner *tuner;
+	rtdm_lockctx_t lock_ctx;
 	__u64 timestamp;
 	__u32 gravity;
 	int ret;
 
 	context = rtdm_fd_to_private(fd);
+
+	rtdm_lock_get_irqsave(&context->tuner_lock, lock_ctx);
+
 	tuner = context->tuner;
+	if (tuner)
+		atomic_inc(&tuner->refcount);
+
+	rtdm_lock_put_irqrestore(&context->tuner_lock, lock_ctx);
+
 	if (tuner == NULL)
 		return -ENOSYS;
 
@@ -716,17 +735,21 @@ static int autotune_ioctl_rt(struct rtdm_fd *fd, unsigned int request, void *arg
 					     sizeof(gravity));
 		break;
 	case AUTOTUNE_RTIOC_PULSE:
-		if (tuner != &uthread_tuner.tuner)
-			return -EINVAL;
+		if (tuner != &uthread_tuner.tuner) {
+			ret = -EINVAL;
+			break;
+		}
 		ret = rtdm_safe_copy_from_user(fd, &timestamp, arg,
 					       sizeof(timestamp));
 		if (ret)
-			return ret;
+			break;
 		ret = add_uthread_sample(tuner, timestamp);
 		break;
 	default:
 		ret = -ENOSYS;
 	}
+
+	atomic_dec(&tuner->refcount);
 
 	return ret;
 }
@@ -737,6 +760,7 @@ static int autotune_open(struct rtdm_fd *fd, int oflags)
 
 	context = rtdm_fd_to_private(fd);
 	context->tuner = NULL;
+	rtdm_lock_init(&context->tuner_lock);
 
 	return 0;
 }
