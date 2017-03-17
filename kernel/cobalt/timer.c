@@ -840,14 +840,14 @@ int xntimer_grab_hardware(void)
 	int ret, cpu, _cpu;
 	spl_t s;
 
-#ifdef CONFIG_XENO_OPT_STATS
+#ifdef CONFIG_XENO_OPT_STATS_IRQS
 	/*
 	 * Only for statistical purpose, the timer interrupt is
 	 * attached by xntimer_grab_hardware().
 	 */
 	xnintr_init(&nktimer, "[timer]",
 		    per_cpu(ipipe_percpu.hrtimer_irq, 0), NULL, NULL, 0);
-#endif /* CONFIG_XENO_OPT_STATS */
+#endif /* CONFIG_XENO_OPT_STATS_IRQS */
 
 	nkclock.wallclock_offset =
 		xnclock_get_host_time() - xnclock_read_monotonic(&nkclock);
@@ -938,9 +938,9 @@ void xntimer_release_hardware(void)
 
 	xntimer_release_ipi();
 
-#ifdef CONFIG_XENO_OPT_STATS
+#ifdef CONFIG_XENO_OPT_STATS_IRQS
 	xnintr_destroy(&nktimer);
-#endif /* CONFIG_XENO_OPT_STATS */
+#endif /* CONFIG_XENO_OPT_STATS_IRQS */
 }
 EXPORT_SYMBOL_GPL(xntimer_release_hardware);
 

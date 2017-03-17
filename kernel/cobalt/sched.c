@@ -1278,7 +1278,7 @@ static int vfile_schedstat_next(struct xnvfile_snapshot_iterator *it,
 	struct xnthread *thread;
 	struct xnsched *sched;
 	xnticks_t period;
-	int ret;
+	int __maybe_unused ret;
 
 	if (priv->curr == NULL)
 		/*
@@ -1324,6 +1324,7 @@ static int vfile_schedstat_next(struct xnvfile_snapshot_iterator *it,
 	return 1;
 
 scan_irqs:
+#ifdef CONFIG_XENO_OPT_STATS_IRQS
 	if (priv->irq >= IPIPE_NR_IRQS)
 		return 0;	/* All done. */
 
@@ -1353,6 +1354,9 @@ scan_irqs:
 	p->period = 0;
 
 	return 1;
+#else /* !CONFIG_XENO_OPT_STATS_IRQS */
+	return 0;
+#endif /* !CONFIG_XENO_OPT_STATS_IRQS */
 }
 
 static int vfile_schedstat_show(struct xnvfile_snapshot_iterator *it,

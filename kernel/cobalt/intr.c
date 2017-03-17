@@ -37,7 +37,7 @@
 
 static DEFINE_MUTEX(intrlock);
 
-#ifdef CONFIG_XENO_OPT_STATS
+#ifdef CONFIG_XENO_OPT_STATS_IRQS
 struct xnintr nktimer;	     /* Only for statistics */
 static int xnintr_count = 1; /* Number of attached xnintr objects + nktimer */
 static int xnintr_list_rev;  /* Modification counter of xnintr list */
@@ -123,12 +123,19 @@ static void inc_irqstats(struct xnintr *intr, struct xnsched *sched, xnticks_t s
 	xnstat_exectime_lazy_switch(sched, &statp->account, start);
 }
 
-static inline void switch_irqstats(struct xnintr *intr, struct xnsched *sched)
+static inline void switch_to_irqstats(struct xnintr *intr,
+				      struct xnsched *sched)
 {
 	struct xnirqstat *statp;
 
 	statp = raw_cpu_ptr(intr->stats);
 	xnstat_exectime_switch(sched, &statp->account);
+}
+
+static inline void switch_from_irqstats(struct xnsched *sched,
+					xnstat_exectime_t *prev)
+{
+	xnstat_exectime_switch(sched, prev);
 }
 
 static inline xnstat_exectime_t *switch_core_irqstats(struct xnsched *sched)
@@ -143,7 +150,7 @@ static inline xnstat_exectime_t *switch_core_irqstats(struct xnsched *sched)
 	return prev;
 }
 
-#else  /* !CONFIG_XENO_OPT_STATS */
+#else  /* !CONFIG_XENO_OPT_STATS_IRQS */
 
 static inline void stat_counter_inc(void) {}
 
@@ -162,14 +169,18 @@ static inline void query_irqstats(struct xnintr *intr, int cpu,
 
 static inline void inc_irqstats(struct xnintr *intr, struct xnsched *sched, xnticks_t start) {}
 
-static inline void switch_irqstats(struct xnintr *intr, struct xnsched *sched) {}
+static inline void switch_to_irqstats(struct xnintr *intr,
+				      struct xnsched *sched) {}
+
+static inline void switch_from_irqstats(struct xnsched *sched,
+					xnstat_exectime_t *prev) {}
 
 static inline xnstat_exectime_t *switch_core_irqstats(struct xnsched *sched)
 {
 	return NULL;
 }
 
-#endif /* !CONFIG_XENO_OPT_STATS */
+#endif /* !CONFIG_XENO_OPT_STATS_IRQS */
 
 static void xnintr_irq_handler(unsigned int irq, void *cookie);
 
@@ -210,7 +221,7 @@ void xnintr_core_clock_handler(void)
 	xnlock_put(&nklock);
 
 	trace_cobalt_clock_exit(per_cpu(ipipe_percpu.hrtimer_irq, cpu));
-	xnstat_exectime_switch(sched, prev);
+	switch_from_irqstats(sched, prev);
 
 	if (--sched->inesting == 0) {
 		sched->lflags &= ~XNINIRQ;
@@ -353,7 +364,7 @@ static void xnintr_vec_handler(unsigned int irq, void *cookie)
 	else
 		ipipe_end_irq(irq);
 out:
-	xnstat_exectime_switch(sched, prev);
+	switch_from_irqstats(sched, prev);
 
 	trace_cobalt_irq_exit(irq);
 
@@ -393,7 +404,7 @@ static void xnintr_edge_vec_handler(unsigned int irq, void *cookie)
 	}
 
 	while (intr != end) {
-		switch_irqstats(intr, sched);
+		switch_to_irqstats(intr, sched);
 		/*
 		 * NOTE: We assume that no CPU migration will occur
 		 * while running the interrupt service routine.
@@ -439,7 +450,7 @@ static void xnintr_edge_vec_handler(unsigned int irq, void *cookie)
 	else
 		ipipe_end_irq(irq);
 out:
-	xnstat_exectime_switch(sched, prev);
+	switch_from_irqstats(sched, prev);
 
 	trace_cobalt_irq_exit(irq);
 
@@ -658,7 +669,7 @@ done:
 	else
 		ipipe_end_irq(irq);
 out:
-	xnstat_exectime_switch(sched, prev);
+	switch_from_irqstats(sched, prev);
 
 	if (--sched->inesting == 0) {
 		sched->lflags &= ~XNINIRQ;
@@ -1001,7 +1012,7 @@ static inline int xnintr_is_timer_irq(int irq)
 	return 0;
 }
 
-#ifdef CONFIG_XENO_OPT_STATS
+#ifdef CONFIG_XENO_OPT_STATS_IRQS
 
 int xnintr_get_query_lock(void)
 {
@@ -1072,7 +1083,7 @@ int xnintr_query_next(int irq, struct xnintr_iterator *iterator,
 	}
 }
 
-#endif /* CONFIG_XENO_OPT_STATS */
+#endif /* CONFIG_XENO_OPT_STATS_IRQS */
 
 #ifdef CONFIG_XENO_OPT_VFILE
 
