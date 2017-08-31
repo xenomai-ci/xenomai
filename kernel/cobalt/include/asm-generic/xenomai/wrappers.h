@@ -49,7 +49,7 @@
 #define in_ia32_syscall() (current_thread_info()->status & TS_COMPAT)
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0)
 #define cobalt_gpiochip_dev(__gc)	((__gc)->dev)
 #else
 #define cobalt_gpiochip_dev(__gc)	((__gc)->parent)
