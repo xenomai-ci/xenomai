@@ -23,6 +23,12 @@
 #include <asm/ptrace.h>
 #include <asm-generic/xenomai/syscall.h>
 
+/*
+ * Cobalt and Linux syscall numbers can be fetched from ORIG_AX,
+ * masking out the __COBALT_SYSCALL_BIT marker. Make sure to offset
+ * the number by __COBALT_X32_BASE for Cobalt 32-bit compat syscalls
+ * only.
+ */
 #define __xn_reg_sys(regs)    ((regs)->orig_ax)
 #define __xn_reg_rval(regs)   ((regs)->ax)
 #ifdef __i386__
@@ -50,15 +56,13 @@
 #endif
 
 /*
- * Returns the syscall number depending on the handling core. Cobalt
- * and Linux syscall numbers can be fetched from ORIG_AX, masking out
- * the __COBALT_SYSCALL_BIT marker. Make sure to offset the number by
- * __COBALT_X32_BASE for Cobalt 32-bit compat syscalls only.
+ * Root syscall number with predicate (valid only if
+ * !__xn_syscall_p(__regs)).
  */
-#define __xn_get_syscall_nr(__regs)					\
-	({								\
-		__xn_syscall_p(__regs) ? __xn_syscall(__regs) :		\
-			(__xn_reg_sys(__regs) & ~__COBALT_SYSCALL_BIT);	\
+#define __xn_rootcall_p(__regs, __code)			\
+	({						\
+		*(__code) = __xn_reg_sys(__regs);	\
+		*(__code) < ipipe_root_nr_syscalls(current_thread_info()); \
 	})
 
 static inline void __xn_error_return(struct pt_regs *regs, int v)

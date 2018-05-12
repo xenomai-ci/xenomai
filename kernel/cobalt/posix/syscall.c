@@ -645,10 +645,6 @@ ret_handled:
 	return KEVENT_STOP;
 
 linux_syscall:
-	code = __xn_get_syscall_nr(regs);
-	if (code >= ipipe_root_nr_syscalls(current_thread_info()))
-		goto bad_syscall;
-
 	if (xnsched_root_p())
 		/*
 		 * The call originates from the Linux domain, either
@@ -657,6 +653,9 @@ linux_syscall:
 		 * to handle_root_syscall().
 		 */
 		return KEVENT_PROPAGATE;
+
+	if (!__xn_rootcall_p(regs, &code))
+		goto bad_syscall;
 
 	/*
 	 * We know this is a Cobalt thread since it runs over the head

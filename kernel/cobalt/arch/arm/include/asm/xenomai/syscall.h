@@ -33,6 +33,11 @@
 #define __ARM_NR_ipipe	(__NR_SYSCALL_BASE + XENO_ARM_SYSCALL)
 #endif
 
+/*
+ * Cobalt syscall numbers can be fetched from ARM_ORIG_r0 with ARM_r7
+ * containing the Xenomai syscall marker, Linux syscalls directly from
+ * ARM_r7 (may require the OABI tweak).
+ */
 #define __xn_reg_sys(__regs)	((__regs)->ARM_ORIG_r0)
 /* In OABI_COMPAT mode, handle both OABI and EABI userspace syscalls */
 #ifdef CONFIG_OABI_COMPAT
@@ -46,16 +51,15 @@
 #define __xn_syscall(__regs)	(__xn_reg_sys(__regs) & ~__COBALT_SYSCALL_BIT)
 
 /*
- * Returns the syscall number depending on the handling core. Cobalt
- * syscall numbers can be fetched from ARM_ORIG_r0 with ARM_r7
- * containing the Xenomai syscall marker, Linux syscalls directly from
- * ARM_r7 (may require the OABI tweak).
+ * Root syscall number with predicate (valid only if
+ * !__xn_syscall_p(__regs)).
  */
-static inline long __xn_get_syscall_nr(struct pt_regs *regs)
-{
-	return __xn_syscall_p(regs) ? __xn_reg_sys(regs) : __xn_abi_decode(regs);
-}
-
+#define __xn_rootcall_p(__regs, __code)					\
+	({								\
+		*(__code) = __xn_abi_decode(__regs);			\
+		*(__code) < NR_syscalls || *(__code) >= __ARM_NR_BASE;	\
+	})
+	
 #define __xn_reg_rval(__regs)	((__regs)->ARM_r0)
 #define __xn_reg_arg1(__regs)	((__regs)->ARM_r1)
 #define __xn_reg_arg2(__regs)	((__regs)->ARM_r2)

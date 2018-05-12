@@ -26,6 +26,10 @@
 #include <linux/ptrace.h>
 #include <asm-generic/xenomai/syscall.h>
 
+/*
+ * Cobalt and Linux syscall numbers can be fetched from GPR0, masking
+ * out the __COBALT_SYSCALL_BIT marker.
+ */
 #define __xn_reg_sys(__regs)	((__regs)->gpr[0])
 #define __xn_syscall_p(__regs)	(__xn_reg_sys(__regs) & __COBALT_SYSCALL_BIT)
 #define __xn_syscall(__regs)	(__xn_reg_sys(__regs) & ~__COBALT_SYSCALL_BIT)
@@ -40,14 +44,14 @@
 #define __xn_reg_sp(__regs)	((__regs)->gpr[1])
 
 /*
- * Returns the syscall number depending on the handling core. Cobalt
- * and Linux syscall numbers can be fetched from GPR0, masking out the
- * __COBALT_SYSCALL_BIT marker.
+ * Root syscall number with predicate (valid only if
+ * !__xn_syscall_p(__regs)).
  */
-static inline long __xn_get_syscall_nr(struct pt_regs *regs)
-{
-	return __xn_syscall(regs);
-}
+#define __xn_rootcall_p(__regs, __code)			\
+	({						\
+		*(__code) = __xn_syscall(__regs);	\
+		*(__code) < NR_syscalls;		\
+	})
 
 static inline void __xn_error_return(struct pt_regs *regs, int v)
 {
