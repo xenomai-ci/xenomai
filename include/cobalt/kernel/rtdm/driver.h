@@ -1236,14 +1236,10 @@ int rtdm_ratelimit(struct rtdm_ratelimit_state *rs, const char *func);
 #define DEF_RTDM_RATELIMIT_INTERVAL	5000000000LL
 #define DEF_RTDM_RATELIMIT_BURST	10
 
-#define rtdm_printk_ratelimited(fmt, ...)  ({				\
-	static DEFINE_RTDM_RATELIMIT_STATE(_rs,				\
-					   DEF_RTDM_RATELIMIT_INTERVAL,	\
-					   DEF_RTDM_RATELIMIT_BURST);	\
-									\
-	if (rtdm_ratelimit(&_rs, __func__))				\
+#define rtdm_printk_ratelimited(fmt, ...)  do {				\
+	if (xnclock_ratelimit())					\
 		printk(fmt, ##__VA_ARGS__);				\
-})
+} while (0)
 
 #ifndef DOXYGEN_CPP /* Avoid static inline tags for RTDM in doxygen */
 static inline void *rtdm_malloc(size_t size)
