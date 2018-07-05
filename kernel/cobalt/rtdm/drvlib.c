@@ -2106,52 +2106,6 @@ int rtdm_munmap(void *ptr, size_t len)
 }
 EXPORT_SYMBOL_GPL(rtdm_munmap);
 
-/**
- * @brief Enforces a rate limit
- *
- * This function enforces a rate limit: not more than @a rs->burst callbacks
- * in every @a rs->interval.
- *
- * @param[in,out] rs rtdm_ratelimit_state data
- * @param[in] func name of calling function
- *
- * @return 0 means callback will be suppressed and 1 means go ahead and do it
- *
- * @coretags{unrestricted}
- */
-int rtdm_ratelimit(struct rtdm_ratelimit_state *rs, const char *func)
-{
-	rtdm_lockctx_t lock_ctx;
-	int ret;
-
-	if (!rs->interval)
-		return 1;
-
-	rtdm_lock_get_irqsave(&rs->lock, lock_ctx);
-
-	if (!rs->begin)
-		rs->begin = rtdm_clock_read();
-	if (rtdm_clock_read() >= rs->begin + rs->interval) {
-		if (rs->missed)
-			printk(KERN_WARNING "%s: %d callbacks suppressed\n",
-			       func, rs->missed);
-		rs->begin   = 0;
-		rs->printed = 0;
-		rs->missed  = 0;
-	}
-	if (rs->burst && rs->burst > rs->printed) {
-		rs->printed++;
-		ret = 1;
-	} else {
-		rs->missed++;
-		ret = 0;
-	}
-	rtdm_lock_put_irqrestore(&rs->lock, lock_ctx);
-
-	return ret;
-}
-EXPORT_SYMBOL_GPL(rtdm_ratelimit);
-
 int rtdm_get_iovec(struct rtdm_fd *fd, struct iovec **iovp,
 		   const struct user_msghdr *msg,
 		   struct iovec *iov_fast)

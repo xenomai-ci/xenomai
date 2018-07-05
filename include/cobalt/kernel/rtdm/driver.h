@@ -1214,28 +1214,6 @@ void rtdm_mutex_destroy(rtdm_mutex_t *mutex);
 
 #define rtdm_printk(format, ...)	printk(format, ##__VA_ARGS__)
 
-struct rtdm_ratelimit_state {
-	rtdm_lock_t	lock;		/* protect the state */
-	nanosecs_abs_t  interval;
-	int		burst;
-	int		printed;
-	int		missed;
-	nanosecs_abs_t	begin;
-};
-
-int rtdm_ratelimit(struct rtdm_ratelimit_state *rs, const char *func);
-
-#define DEFINE_RTDM_RATELIMIT_STATE(name, interval_init, burst_init)	\
-	struct rtdm_ratelimit_state name = {				\
-		.lock		= RTDM_LOCK_UNLOCKED((name).lock),	\
-		.interval	= interval_init,			\
-		.burst		= burst_init,				\
-	}
-
-/* We use the Linux defaults */
-#define DEF_RTDM_RATELIMIT_INTERVAL	5000000000LL
-#define DEF_RTDM_RATELIMIT_BURST	10
-
 #define rtdm_printk_ratelimited(fmt, ...)  do {				\
 	if (xnclock_ratelimit())					\
 		printk(fmt, ##__VA_ARGS__);				\
