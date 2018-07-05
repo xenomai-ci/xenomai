@@ -153,7 +153,7 @@ struct cobalt_sigpending *cobalt_signal_alloc(void)
 	struct cobalt_sigpending *sigp;
 
 	if (list_empty(&sigpending_pool)) {
-		if (printk_ratelimit())
+		if (xnclock_ratelimit())
 			printk(XENO_WARNING "signal bucket pool underflows\n");
 		return NULL;
 	}
