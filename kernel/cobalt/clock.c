@@ -120,6 +120,41 @@ EXPORT_SYMBOL_GPL(xnclock_core_ticks_to_ns_rounded);
 EXPORT_SYMBOL_GPL(xnclock_core_ns_to_ticks);
 EXPORT_SYMBOL_GPL(xnclock_divrem_billion);
 
+DEFINE_PRIVATE_XNLOCK(ratelimit_lock);
+
+int __xnclock_ratelimit(struct xnclock_ratelimit_state *rs, const char *func)
+{
+	spl_t s;
+	int ret;
+
+	if (!rs->interval)
+		return 1;
+
+	xnlock_get_irqsave(&ratelimit_lock, s);
+
+	if (!rs->begin)
+		rs->begin = xnclock_read_realtime(&nkclock);
+	if (xnclock_read_realtime(&nkclock) >= rs->begin + rs->interval) {
+		if (rs->missed)
+			printk(KERN_WARNING "%s: %d callbacks suppressed\n",
+			       func, rs->missed);
+		rs->begin   = 0;
+		rs->printed = 0;
+		rs->missed  = 0;
+	}
+	if (rs->burst && rs->burst > rs->printed) {
+		rs->printed++;
+		ret = 1;
+	} else {
+		rs->missed++;
+		ret = 0;
+	}
+	xnlock_put_irqrestore(&ratelimit_lock, s);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(__xnclock_ratelimit);
+
 void xnclock_core_local_shot(struct xnsched *sched)
 {
 	struct xntimerdata *tmd;

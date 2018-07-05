@@ -92,6 +92,14 @@ struct xnclock {
 #endif
 };
 
+struct xnclock_ratelimit_state {
+	xnticks_t interval;
+	xnticks_t begin;
+	int burst;
+	int printed;
+	int missed;
+};
+
 extern struct xnclock nkclock;
 
 extern unsigned long nktimerlat;
@@ -124,6 +132,20 @@ static inline xnticks_t xnclock_core_read_raw(void)
 	ipipe_read_tsc(t);
 	return t;
 }
+
+/* We use the Linux defaults */
+#define XN_RATELIMIT_INTERVAL	5000000000LL
+#define XN_RATELIMIT_BURST	10
+
+int __xnclock_ratelimit(struct xnclock_ratelimit_state *rs, const char *func);
+
+#define xnclock_ratelimit()	({					\
+	static struct xnclock_ratelimit_state __state = {		\
+		.interval	= XN_RATELIMIT_INTERVAL,		\
+		.burst		= XN_RATELIMIT_BURST,			\
+	};								\
+	__xnclock_ratelimit(&__state, __func__);			\
+})
 
 #ifdef CONFIG_XENO_OPT_EXTCLOCK
 
