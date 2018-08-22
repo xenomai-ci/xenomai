@@ -45,10 +45,9 @@ static void mach_arm_prefault(struct vm_area_struct *vma)
 
 static unsigned long mach_arm_calibrate(void)
 {
+	unsigned long delay = (cobalt_pipeline.timer_freq + HZ / 2) / HZ;
 	unsigned long long start, end, sum = 0, sum_sq = 0;
-	volatile unsigned const_delay = 0xffffffff;
 	unsigned long result, flags, tsc_lat;
-	unsigned int delay = const_delay;
 	long long diff;
 	int i, j;
 
