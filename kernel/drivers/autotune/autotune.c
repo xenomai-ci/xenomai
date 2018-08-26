@@ -32,8 +32,16 @@ MODULE_LICENSE("GPL");
 /* Auto-tuning services for the Cobalt core clock. */
 
 #define SAMPLING_TIME	500000000UL
+#define ADJUSTMENT_STEP 500
 #define WARMUP_STEPS	3
 #define AUTOTUNE_STEPS  40
+
+#define progress(__tuner, __fmt, __args...)				\
+	do {								\
+		if (!(__tuner)->quiet)					\
+			printk(XENO_INFO "autotune(%s) " __fmt "\n",	\
+			       (__tuner)->name, ##__args);		\
+	} while (0)
 
 struct tuning_score {
 	int pmean;
@@ -435,13 +443,6 @@ static inline void build_score(struct gravity_tuner *tuner, int step)
 	tuner->nscores++;
 }
 
-#define progress(__tuner, __fmt, __args...)				\
-	do {								\
-		if (!(__tuner)->quiet)					\
-			printk(XENO_INFO "autotune(%s) " __fmt "\n",	\
-			       (__tuner)->name, ##__args);		\
-	} while (0)
-
 static int cmp_score_mean(const void *c, const void *r)
 {
 	const struct tuning_score *sc = c, *sr = r;
@@ -541,7 +542,8 @@ static int tune_gravity(struct gravity_tuner *tuner, int period)
 	orig_gravity = tuner->get_gravity(tuner);
 	tuner->set_gravity(tuner, 0);
 	tuner->nscores = 0;
-	adjust = xnclock_ns_to_ticks(&nkclock, 500); /* Gravity adjustment step */
+	/* Gravity adjustment step */
+	adjust = xnclock_ns_to_ticks(&nkclock, ADJUSTMENT_STEP) ?: 1;
 	gravity_limit = state->step;
 	progress(tuner, "warming up...");
 
@@ -579,12 +581,20 @@ static int tune_gravity(struct gravity_tuner *tuner, int period)
 			continue;
 		}
 
+		/*
+		 * We should not be early by more than the gravity
+		 * value minus one tick, to account for the rounding
+		 * error involved when the timer frequency is lower
+		 * than 1e9 / ADJUSTMENT_STEP.
+		 */
 		if (state->min_lat < 0) {
-			if (tuner->get_gravity(tuner) == 0) {
+			if (tuner->get_gravity(tuner) < -state->min_lat - 1) {
 				printk(XENO_WARNING
 				       "autotune(%s) failed with early shot (%Ld ns)\n",
 				       tuner->name,
-				       xnclock_ticks_to_ns(&nkclock, state->min_lat));
+				       xnclock_ticks_to_ns(&nkclock,
+						   -(tuner->get_gravity(tuner) +
+						     state->min_lat)));
 				ret = -EAGAIN;
 				goto fail;
 			}
