@@ -33,7 +33,7 @@ MODULE_LICENSE("GPL");
 
 #define SAMPLING_TIME	500000000UL
 #define ADJUSTMENT_STEP 500
-#define WARMUP_STEPS	3
+#define WARMUP_STEPS	10
 #define AUTOTUNE_STEPS  40
 
 #define progress(__tuner, __fmt, __args...)				\
@@ -534,8 +534,8 @@ static inline void filter_score(struct gravity_tuner *tuner,
 static int tune_gravity(struct gravity_tuner *tuner, int period)
 {
 	struct tuner_state *state = &tuner->state;
-	unsigned int orig_gravity, gravity_limit;
-	int ret, step, adjust;
+	int ret, step, gravity_limit, adjust;
+	unsigned int orig_gravity;
 
 	state->step = xnclock_ns_to_ticks(&nkclock, period);
 	state->max_samples = SAMPLING_TIME / (period ?: 1);
@@ -544,7 +544,7 @@ static int tune_gravity(struct gravity_tuner *tuner, int period)
 	tuner->nscores = 0;
 	/* Gravity adjustment step */
 	adjust = xnclock_ns_to_ticks(&nkclock, ADJUSTMENT_STEP) ?: 1;
-	gravity_limit = state->step;
+	gravity_limit = 0;
 	progress(tuner, "warming up...");
 
 	for (step = 0; step < WARMUP_STEPS + AUTOTUNE_STEPS; step++) {
@@ -573,10 +573,10 @@ static int tune_gravity(struct gravity_tuner *tuner, int period)
 			goto fail;
 
 		if (step < WARMUP_STEPS) {
-			if (step == WARMUP_STEPS - 1 && state->min_lat >= 0) {
+			if (state->min_lat > gravity_limit) {
 				gravity_limit = state->min_lat;
-				progress(tuner, "gravity limit set to %Lu ns",
-					 xnclock_ticks_to_ns(&nkclock, gravity_limit));
+				progress(tuner, "gravity limit set to %Lu ns (%d)",
+					 xnclock_ticks_to_ns(&nkclock, gravity_limit), state->min_lat);
 			}
 			continue;
 		}
@@ -608,12 +608,12 @@ static int tune_gravity(struct gravity_tuner *tuner, int period)
 		build_score(tuner, step - WARMUP_STEPS);
 
 		/*
-		 * Anticipating more than the minimum latency detected
-		 * at warmup would make no sense: cap the gravity we
-		 * may try.
+		 * Anticipating by more than the minimum latency
+		 * detected at warmup would make no sense: cap the
+		 * gravity we may try.
 		 */
 		if (tuner->adjust_gravity(tuner, adjust) > gravity_limit) {
-			progress(tuner, "gravity limit reached at %Lu ns",
+			progress(tuner, "beyond gravity limit at %Lu ns",
 				 xnclock_ticks_to_ns(&nkclock,
 						     tuner->get_gravity(tuner)));
 			break;
