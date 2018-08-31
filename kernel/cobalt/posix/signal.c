@@ -376,7 +376,7 @@ out:
 		/* no more ref. to sigp beyond this point. */
 	}
 
-	return ret ?: sig;
+	return ret ? -EFAULT : sig;
 fail:
 	xnlock_put_irqrestore(&nklock, s);
 
