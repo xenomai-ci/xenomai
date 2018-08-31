@@ -349,18 +349,17 @@ done:
 		ret = sys32_put_siginfo(u_si, sip, overrun);
 		if (!ret)
 			/* Allow an extended target to receive more data. */
-			ret = cobalt_call_extension(signal_copyinfo_compat,
-						    &curr->extref, ret, u_si,
-						    sip, overrun);
+			cobalt_call_extension(signal_copyinfo_compat,
+					      &curr->extref, ret, u_si, sip,
+					      overrun);
 	} else
 #endif
 	{
 		ret = signal_put_siginfo(u_si, sip, overrun);
 		if (!ret)
 			/* Allow an extended target to receive more data. */
-			ret = cobalt_call_extension(signal_copyinfo,
-						    &curr->extref, ret, u_si,
-						    sip, overrun);
+			cobalt_call_extension(signal_copyinfo, &curr->extref,
+					      ret, u_si, sip, overrun);
 	}
 
 out:
