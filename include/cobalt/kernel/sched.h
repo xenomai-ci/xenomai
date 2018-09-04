@@ -410,9 +410,9 @@ void xnsched_cleanup_proc(void);
 
 void xnsched_register_classes(void);
 
-void xnsched_init(struct xnsched *sched, int cpu);
+void xnsched_init_all(void);
 
-void xnsched_destroy(struct xnsched *sched);
+void xnsched_destroy_all(void);
 
 struct xnthread *xnsched_pick_next(struct xnsched *sched);
 

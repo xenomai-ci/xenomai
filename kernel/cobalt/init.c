@@ -124,34 +124,10 @@ EXPORT_SYMBOL_GPL(cobalt_call_state_chain);
 
 static void sys_shutdown(void)
 {
-	struct xnthread *thread, *tmp;
-	struct xnsched *sched;
 	void *membase;
-	int cpu;
-	spl_t s;
 
 	xntimer_release_hardware();
-#ifdef CONFIG_SMP
-	ipipe_free_irq(&xnsched_realtime_domain, IPIPE_RESCHEDULE_IPI);
-#endif
-
-	xnlock_get_irqsave(&nklock, s);
-
-	/* NOTE: &nkthreadq can't be empty (root thread(s)). */
-	list_for_each_entry_safe(thread, tmp, &nkthreadq, glink) {
-		if (!xnthread_test_state(thread, XNROOT))
-			xnthread_cancel(thread);
-	}
-
-	xnsched_run();
-
-	for_each_online_cpu(cpu) {
-		sched = xnsched_struct(cpu);
-		xnsched_destroy(sched);
-	}
-
-	xnlock_put_irqrestore(&nklock, s);
-
+	xnsched_destroy_all();
 	xnregistry_cleanup();
 	membase = xnheap_get_membase(&cobalt_heap);
 	xnheap_destroy(&cobalt_heap);
@@ -281,9 +257,8 @@ static void __init setup_init_state(void)
 
 static __init int sys_init(void)
 {
-	struct xnsched *sched;
 	void *heapaddr;
-	int ret, cpu;
+	int ret;
 
 	if (sysheap_size_arg == 0)
 		sysheap_size_arg = CONFIG_XENO_OPT_SYS_HEAPSZ;
@@ -295,17 +270,7 @@ static __init int sys_init(void)
 	}
 	xnheap_set_name(&cobalt_heap, "system heap");
 
-	for_each_online_cpu(cpu) {
-		sched = &per_cpu(nksched, cpu);
-		xnsched_init(sched, cpu);
-	}
-
-#ifdef CONFIG_SMP
-	ipipe_request_irq(&xnsched_realtime_domain,
-			  IPIPE_RESCHEDULE_IPI,
-			  (ipipe_irq_handler_t)__xnsched_run_handler,
-			  NULL, NULL);
-#endif
+	xnsched_init_all();
 
 	xnregistry_init();
 

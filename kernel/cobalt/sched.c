@@ -149,7 +149,7 @@ static void roundrobin_handler(struct xntimer *timer)
 	xnsched_tick(sched);
 }
 
-void xnsched_init(struct xnsched *sched, int cpu)
+static void xnsched_init(struct xnsched *sched, int cpu)
 {
 	char rrbtimer_name[XNOBJECT_NAME_LEN];
 	char htimer_name[XNOBJECT_NAME_LEN];
@@ -219,7 +219,25 @@ void xnsched_init(struct xnsched *sched, int cpu)
 #endif /* CONFIG_XENO_OPT_WATCHDOG */
 }
 
-void xnsched_destroy(struct xnsched *sched)
+void xnsched_init_all(void)
+{
+	struct xnsched *sched;
+	int cpu;
+
+	for_each_online_cpu(cpu) {
+		sched = &per_cpu(nksched, cpu);
+		xnsched_init(sched, cpu);
+	}
+
+#ifdef CONFIG_SMP
+	ipipe_request_irq(&xnsched_realtime_domain,
+			  IPIPE_RESCHEDULE_IPI,
+			  (ipipe_irq_handler_t)__xnsched_run_handler,
+			  NULL, NULL);
+#endif
+}
+
+static void xnsched_destroy(struct xnsched *sched)
 {
 	xntimer_destroy(&sched->htimer);
 	xntimer_destroy(&sched->rrbtimer);
@@ -228,6 +246,35 @@ void xnsched_destroy(struct xnsched *sched)
 #ifdef CONFIG_XENO_OPT_WATCHDOG
 	xntimer_destroy(&sched->wdtimer);
 #endif /* CONFIG_XENO_OPT_WATCHDOG */
+}
+
+void xnsched_destroy_all(void)
+{
+	struct xnthread *thread, *tmp;
+	struct xnsched *sched;
+	int cpu;
+	spl_t s;
+
+#ifdef CONFIG_SMP
+	ipipe_free_irq(&xnsched_realtime_domain, IPIPE_RESCHEDULE_IPI);
+#endif
+
+	xnlock_get_irqsave(&nklock, s);
+
+	/* NOTE: &nkthreadq can't be empty (root thread(s)). */
+	list_for_each_entry_safe(thread, tmp, &nkthreadq, glink) {
+		if (!xnthread_test_state(thread, XNROOT))
+			xnthread_cancel(thread);
+	}
+
+	xnsched_run();
+
+	for_each_online_cpu(cpu) {
+		sched = xnsched_struct(cpu);
+		xnsched_destroy(sched);
+	}
+
+	xnlock_put_irqrestore(&nklock, s);
 }
 
 static inline void set_thread_running(struct xnsched *sched,
