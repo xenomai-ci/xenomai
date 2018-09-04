@@ -93,14 +93,20 @@ void xnsched_register_classes(void)
 static unsigned long wd_timeout_arg = CONFIG_XENO_OPT_WATCHDOG_TIMEOUT;
 module_param_named(watchdog_timeout, wd_timeout_arg, ulong, 0644);
 
+static inline xnticks_t get_watchdog_timeout(void)
+{
+	return wd_timeout_arg * 1000000000ULL;
+}
+
 /**
  * @internal
  * @fn void watchdog_handler(struct xntimer *timer)
  * @brief Process watchdog ticks.
  *
- * This internal routine handles incoming watchdog ticks to detect
- * software lockups. It kills any offending thread which is found to
- * monopolize the CPU so as to starve the Linux kernel for too long.
+ * This internal routine handles incoming watchdog triggers to detect
+ * software lockups. It forces the offending thread to stop
+ * monopolizing the CPU, either by kicking it out of primary mode if
+ * running in user space, or cancelling it if kernel-based.
  *
  * @coretags{coreirq-only, atomic-entry}
  */
@@ -109,13 +115,14 @@ static void watchdog_handler(struct xntimer *timer)
 	struct xnsched *sched = xnsched_current();
 	struct xnthread *curr = sched->curr;
 
-	if (likely(xnthread_test_state(curr, XNROOT))) {
-		xnsched_reset_watchdog(sched);
-		return;
-	}
-
-	if (likely(++sched->wdcount < wd_timeout_arg))
-		return;
+	/*
+	 * CAUTION: The watchdog tick might have been delayed while we
+	 * were busy switching the CPU to secondary mode at the
+	 * trigger date eventually. Make sure that we are not about to
+	 * kick the incoming root thread.
+	 */
+	if (xnthread_test_state(curr, XNROOT))
+ 		return;
 
 	trace_cobalt_watchdog_signal(curr);
 
@@ -137,8 +144,6 @@ static void watchdog_handler(struct xntimer *timer)
 		 */
 		xnthread_set_info(curr, XNKICKED|XNCANCELD);
 	}
-
-	xnsched_reset_watchdog(sched);
 }
 
 #endif /* CONFIG_XENO_OPT_WATCHDOG */
@@ -908,6 +913,9 @@ static inline void enter_root(struct xnthread *root)
 {
 	struct xnarchtcb *rootcb __maybe_unused = xnthread_archtcb(root);
 
+#ifdef CONFIG_XENO_OPT_WATCHDOG
+	xntimer_stop(&root->sched->wdtimer);
+#endif
 #ifdef CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH
 	if (rootcb->core.mm == NULL)
 		set_ti_thread_flag(rootcb->core.tip, TIF_MMSWITCH_INT);
@@ -926,6 +934,11 @@ static inline void leave_root(struct xnthread *root)
 	rootcb->core.mm = rootcb->core.active_mm = ipipe_get_active_mm();
 	rootcb->core.tip = task_thread_info(p);
 	xnarch_leave_root(root);
+
+#ifdef CONFIG_XENO_OPT_WATCHDOG
+	xntimer_start(&root->sched->wdtimer, get_watchdog_timeout(),
+		      XN_INFINITE, XN_RELATIVE);
+#endif
 }
 
 void __xnsched_run_handler(void) /* hw interrupts off. */
@@ -982,9 +995,6 @@ reschedule:
 	prev = curr;
 
 	trace_cobalt_switch_context(prev, next);
-
-	if (xnthread_test_state(next, XNROOT))
-		xnsched_reset_watchdog(sched);
 
 	sched->curr = next;
 	shadow = 1;

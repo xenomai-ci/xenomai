@@ -894,10 +894,6 @@ int xntimer_grab_hardware(void)
 		else if (ret == 1)
 			xntimer_start(&sched->htimer, 0, 0, XN_RELATIVE);
 
-#ifdef CONFIG_XENO_OPT_WATCHDOG
-		xntimer_start(&sched->wdtimer, 1000000000UL, 1000000000UL, XN_RELATIVE);
-		xnsched_reset_watchdog(sched);
-#endif
 		xnlock_put_irqrestore(&nklock, s);
 	}
 
@@ -909,9 +905,6 @@ fail:
 		xnlock_get_irqsave(&nklock, s);
 		sched = xnsched_struct(cpu);
 		xntimer_stop(&sched->htimer);
-#ifdef CONFIG_XENO_OPT_WATCHDOG
-		xntimer_stop(&sched->wdtimer);
-#endif
 		xnlock_put_irqrestore(&nklock, s);
 		ipipe_timer_stop(_cpu);
 	}

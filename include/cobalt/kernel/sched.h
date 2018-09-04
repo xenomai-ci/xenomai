@@ -104,8 +104,6 @@ struct xnsched {
 #ifdef CONFIG_XENO_OPT_WATCHDOG
 	/*!< Watchdog timer object. */
 	struct xntimer wdtimer;
-	/*!< Watchdog tick count. */
-	int wdcount;
 #endif
 #ifdef CONFIG_XENO_OPT_STATS
 	/*!< Last account switch date (ticks). */
@@ -386,17 +384,6 @@ xnsched_maybe_resched_after_unlocked_switch(struct xnsched *sched)
 }
 
 #endif /* !CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH */
-
-#ifdef CONFIG_XENO_OPT_WATCHDOG
-static inline void xnsched_reset_watchdog(struct xnsched *sched)
-{
-	sched->wdcount = 0;
-}
-#else /* !CONFIG_XENO_OPT_WATCHDOG */
-static inline void xnsched_reset_watchdog(struct xnsched *sched)
-{
-}
-#endif /* CONFIG_XENO_OPT_WATCHDOG */
 
 bool xnsched_set_effective_priority(struct xnthread *thread,
 				    int prio);
