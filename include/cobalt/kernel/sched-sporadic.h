@@ -56,7 +56,7 @@ struct xnsched_sporadic_data {
 };
 
 struct xnsched_sporadic {
-#if XENO_DEBUG(COBALT)
+#ifdef CONFIG_XENO_OPT_DEBUG_COBALT
 	unsigned long drop_retries;
 #endif
 };

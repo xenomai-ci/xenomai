@@ -751,7 +751,7 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 	 * running in primary mode, move it to the Linux domain,
 	 * leaving the kernel process the exception.
 	 */
-#if XENO_DEBUG(COBALT) || XENO_DEBUG(USER)
+#if defined(CONFIG_XENO_OPT_DEBUG_COBALT) || defined(CONFIG_XENO_OPT_DEBUG_USER)
 	if (!user_mode(d->regs)) {
 		xntrace_panic_freeze();
 		printk(XENO_WARNING

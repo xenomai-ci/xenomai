@@ -63,7 +63,7 @@ typedef unsigned long spl_t;
  */
 #define spltest()   ipipe_test_head()
 
-#if XENO_DEBUG(LOCKING)
+#ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
 
 struct xnlock {
 	unsigned owner;
@@ -152,7 +152,7 @@ static inline int xnlock_dbg_release(struct xnlock *lock)
 
 #endif /* !XENO_DEBUG(LOCKING) */
 
-#if defined(CONFIG_SMP) || XENO_DEBUG(LOCKING)
+#if defined(CONFIG_SMP) || defined(CONFIG_XENO_OPT_DEBUG_LOCKING)
 
 #define xnlock_get(lock)		__xnlock_get(lock  XNLOCK_DBG_CONTEXT)
 #define xnlock_put(lock)		__xnlock_put(lock  XNLOCK_DBG_CONTEXT)
@@ -209,7 +209,7 @@ int ___xnlock_get(struct xnlock *lock /*, */ XNLOCK_DBG_CONTEXT_ARGS);
 void ___xnlock_put(struct xnlock *lock /*, */ XNLOCK_DBG_CONTEXT_ARGS);
 #endif /* out of line xnlock */
 
-#if XENO_DEBUG(LOCKING)
+#ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
 /* Disable UP-over-SMP kernel optimization in debug mode. */
 #define __locking_active__  1
 #else

@@ -902,7 +902,7 @@ void xnsynch_release_all_ownerships(struct xnthread *thread)
 }
 EXPORT_SYMBOL_GPL(xnsynch_release_all_ownerships);
 
-#if XENO_DEBUG(MUTEX_RELAXED)
+#ifdef CONFIG_XENO_OPT_DEBUG_MUTEX_RELAXED
 
 /*
  * Detect when a thread is about to sleep on a synchronization

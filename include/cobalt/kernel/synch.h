@@ -101,7 +101,7 @@ static inline struct xnthread *xnsynch_owner(struct xnsynch *synch)
 #define xnsynch_owner_check(synch, thread) \
 	xnsynch_fast_owner_check((synch)->fastlock, thread->handle)
 
-#if XENO_DEBUG(MUTEX_RELAXED)
+#ifdef CONFIG_XENO_OPT_DEBUG_MUTEX_RELAXED
 
 void xnsynch_detect_relaxed_owner(struct xnsynch *synch,
 				  struct xnthread *sleeper);

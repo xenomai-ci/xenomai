@@ -27,7 +27,7 @@
 #include <xenomai/version.h>
 #include "debug.h"
 
-#if XENO_DEBUG(LOCKING)
+#ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
 
 static int lock_vfile_show(struct xnvfile_regular_iterator *it, void *data)
 {

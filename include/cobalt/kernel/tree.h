@@ -83,7 +83,7 @@ struct xnid *xnid_fetch(struct rb_root *t, xnkey_t key)
 
 static inline int xnid_remove(struct rb_root *t, struct xnid *xnid)
 {
-#if XENO_DEBUG(COBALT)
+#ifdef CONFIG_XENO_OPT_DEBUG_COBALT
 	if (xnid_fetch(t, xnid->key) != xnid)
 		return -ENOENT;
 #endif

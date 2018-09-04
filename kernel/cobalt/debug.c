@@ -549,7 +549,7 @@ static inline void init_thread_relax_trace(struct xnthread *thread)
 
 #endif /* !XENO_OPT_DEBUG_TRACE_RELAX */
 
-#if XENO_DEBUG(LOCKING)
+#ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
 
 void xnlock_dbg_prepare_acquire(unsigned long long *start)
 {

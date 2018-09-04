@@ -63,7 +63,7 @@
 #define realtime_cpu_only()	XENO_BUG_ON(CONTEXT, !xnsched_supported_cpu(ipipe_processor_id()))
 #define thread_only()		XENO_BUG_ON(CONTEXT, xnsched_interrupt_p())
 #define irqoff_only()		XENO_BUG_ON(CONTEXT, hard_irqs_disabled() == 0)
-#if XENO_DEBUG(LOCKING)
+#ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
 #define atomic_only()		XENO_BUG_ON(CONTEXT, (xnlock_is_owner(&nklock) && hard_irqs_disabled()) == 0)
 #define preemptible_only()	XENO_BUG_ON(CONTEXT, xnlock_is_owner(&nklock) || hard_irqs_disabled())
 #else
