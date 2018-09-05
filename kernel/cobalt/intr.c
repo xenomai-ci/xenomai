@@ -531,7 +531,7 @@ static inline void xnintr_irq_detach(struct xnintr *intr)
 #else /* !CONFIG_XENO_OPT_SHIRQ */
 
 struct xnintr_vector {
-#if defined(CONFIG_SMP) || XENO_DEBUG(LOCKING)
+#if defined(CONFIG_SMP) || defined(CONFIG_XENO_OPT_DEBUG_LOCKING)
 	DECLARE_XNLOCK(lock);
 #endif /* CONFIG_SMP || XENO_DEBUG(LOCKING) */
 } ____cacheline_aligned_in_smp;
