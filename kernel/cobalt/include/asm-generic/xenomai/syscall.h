@@ -20,7 +20,12 @@
 #define _COBALT_ASM_GENERIC_SYSCALL_H
 
 #include <linux/types.h>
+#include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,14,0)
 #include <asm/uaccess.h>
+#else
+#include <linux/uaccess.h>
+#endif
 #include <asm/xenomai/features.h>
 #include <asm/xenomai/wrappers.h>
 #include <asm/xenomai/machine.h>
