@@ -24,6 +24,11 @@
 #define __get_user_inatomic __get_user
 #define __put_user_inatomic __put_user
 
+#if LINUX_VERSION_CODE > KERNEL_VERSION(4,9,108) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION(4,10,0)
+#define IPIPE_X86_FPU_EAGER
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0)
 #include <asm/i387.h>
 #include <asm/fpu-internal.h>
