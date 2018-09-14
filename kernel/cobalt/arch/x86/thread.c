@@ -28,9 +28,13 @@
 
 static struct kmem_cache *xstate_cache;
 
+#ifdef IPIPE_X86_FPU_EAGER
+#define fpu_kernel_xstate_size sizeof(struct fpu)
+#else
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,7,0)
 #define fpu_kernel_xstate_size xstate_size
 #endif
+#endif /* IPIPE_X86_FPU_EAGER */
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,6,0)
 #define cpu_has_xmm boot_cpu_has(X86_FEATURE_XMM)
@@ -199,14 +203,17 @@ void xnarch_switch_to(struct xnthread *out, struct xnthread *in)
 	struct mm_struct *prev_mm, *next_mm;
 
 	prev = out_tcb->core.host_task;
+#ifndef IPIPE_X86_FPU_EAGER
 	if (x86_fpregs_active(prev))
 		/*
 		 * __switch_to will try and use __unlazy_fpu, so we
 		 * need to clear the ts bit.
 		 */
 		clts();
+#endif /* ! IPIPE_X86_FPU_EAGER */
 
 	next = in_tcb->core.host_task;
+#ifndef IPIPE_X86_FPU_EAGER
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,2,0)
 	next->thread.fpu.counter = 0;
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0)
@@ -214,6 +221,7 @@ void xnarch_switch_to(struct xnthread *out, struct xnthread *in)
 #else
 	next->fpu_counter = 0;
 #endif
+#endif /* ! IPIPE_X86_FPU_EAGER */
 	prev_mm = out_tcb->core.active_mm;
 	next_mm = in_tcb->core.mm;
 	if (next_mm == NULL) {
@@ -245,8 +253,12 @@ void xnarch_switch_to(struct xnthread *out, struct xnthread *in)
 	switch_to(prev, next, last);
 #endif /* LINUX_VERSION_CODE >= 4.8 */
 
+#ifndef IPIPE_X86_FPU_EAGER
 	stts();
+#endif /* ! IPIPE_X86_FPU_EAGER */
 }
+
+#ifndef IPIPE_X86_FPU_EAGER
 
 #ifdef CONFIG_X86_64
 #define XSAVE_PREFIX	"0x48,"
@@ -359,11 +371,21 @@ int xnarch_handle_fpu_fault(struct xnthread *from,
 
 	return 1;
 }
+#else /* IPIPE_X86_FPU_EAGER */
+
+int xnarch_handle_fpu_fault(struct xnthread *from,
+			struct xnthread *to, struct ipipe_trap_data *d)
+{
+	/* in eager mode there are no such faults */
+	BUG_ON(1);
+}
+#endif /* ! IPIPE_X86_FPU_EAGER */
 
 #define current_task_used_kfpu() kernel_fpu_disabled()
 
 #define tcb_used_kfpu(t) ((t)->root_kfpu)
 
+#ifndef IPIPE_X86_FPU_EAGER
 void xnarch_leave_root(struct xnthread *root)
 {
 	struct xnarchtcb *const rootcb = xnthread_archtcb(root);
@@ -430,6 +452,35 @@ void xnarch_switch_fpu(struct xnthread *from, struct xnthread *to)
 		p->flags &= ~PF_USED_MATH;
 	}
 }
+#else /* IPIPE_X86_FPU_EAGER */
+void xnarch_leave_root(struct xnthread *root)
+{
+	struct xnarchtcb *const rootcb = xnthread_archtcb(root);
+
+	rootcb->root_kfpu = current_task_used_kfpu();
+
+	if (!tcb_used_kfpu(rootcb))
+		return;
+
+	/* save fpregs from in-kernel use */
+	copy_fpregs_to_fpstate(rootcb->kfpu);
+	kernel_fpu_enable();
+	/* mark current thread as not owning the FPU anymore */
+	if (&current->thread.fpu.fpstate_active)
+		fpregs_deactivate(&current->thread.fpu);
+}
+
+void xnarch_switch_fpu(struct xnthread *from, struct xnthread *to)
+{
+	struct xnarchtcb *const to_tcb = xnthread_archtcb(to);
+
+	if (!tcb_used_kfpu(to_tcb))
+		return;
+
+	copy_kernel_to_fpregs(&to_tcb->kfpu->state);
+	kernel_fpu_disable();
+}
+#endif /* ! IPIPE_X86_FPU_EAGER */
 
 void xnarch_init_root_tcb(struct xnthread *thread)
 {
@@ -440,9 +491,13 @@ void xnarch_init_root_tcb(struct xnthread *thread)
 	tcb->spp = &tcb->sp;
 	tcb->ipp = &tcb->ip;
 #endif	
+#ifndef IPIPE_X86_FPU_EAGER
 	tcb->fpup = NULL;
-	tcb->root_kfpu = 0;
 	tcb->kfpu_state = kmem_cache_zalloc(xstate_cache, GFP_KERNEL);
+#else /* IPIPE_X86_FPU_EAGER */
+	tcb->kfpu = kmem_cache_zalloc(xstate_cache, GFP_KERNEL);
+#endif /* ! IPIPE_X86_FPU_EAGER */
+	tcb->root_kfpu = 0;
 }
 
 void xnarch_init_shadow_tcb(struct xnthread *thread)
@@ -459,12 +514,22 @@ void xnarch_init_shadow_tcb(struct xnthread *thread)
 	tcb->ipp = &p->thread.rip; /* <!> raw naming intended. */
 #endif
 #endif
+#ifndef IPIPE_X86_FPU_EAGER
 	tcb->fpup = x86_fpustate_ptr(&p->thread);
-	tcb->root_kfpu = 0;
 	tcb->kfpu_state = NULL;
+#else /* IPIPE_X86_FPU_EAGER */
+	tcb->kfpu = NULL;
+#endif /* ! IPIPE_X86_FPU_EAGER */
+	tcb->root_kfpu = 0;
 
+#ifndef IPIPE_X86_FPU_EAGER
 	/* XNFPU is set upon first FPU fault */
 	xnthread_clear_state(thread, XNFPU);
+#else /* IPIPE_X86_FPU_EAGER */
+	/* XNFPU is always set */
+	xnthread_set_state(thread, XNFPU);
+	fpu__activate_fpstate_read(&p->thread.fpu);
+#endif /* ! IPIPE_X86_FPU_EAGER */
 }
 
 int mach_x86_thread_init(void)

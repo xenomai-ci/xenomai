@@ -24,12 +24,14 @@
 #include <asm/xenomai/wrappers.h>
 #include <asm/traps.h>
 
+#ifndef IPIPE_X86_FPU_EAGER
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
 typedef union thread_xstate x86_fpustate;
 #define x86_fpustate_ptr(t) ((t)->fpu.state)
 #else
 typedef union fpregs_state x86_fpustate;
 #define x86_fpustate_ptr(t) ((t)->fpu.active_state)
+#endif
 #endif
 
 struct xnarchtcb {
@@ -40,10 +42,14 @@ struct xnarchtcb {
 	unsigned long ip;
 	unsigned long *ipp;
 #endif  
+#ifdef IPIPE_X86_FPU_EAGER
+	struct fpu *kfpu;
+#else
 	x86_fpustate *fpup;
-	unsigned int root_kfpu: 1;
 	unsigned int root_used_math: 1;
 	x86_fpustate *kfpu_state;
+#endif
+	unsigned int root_kfpu: 1;
 	struct {
 		unsigned long ip;
 		unsigned long ax;
