@@ -26,8 +26,8 @@
 #include <linux/termios.h>
 #include <linux/spinlock.h>
 #include <linux/device.h>
+#include <linux/uaccess.h>
 #include <asm/io.h>
-#include <asm/uaccess.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/pipe.h>

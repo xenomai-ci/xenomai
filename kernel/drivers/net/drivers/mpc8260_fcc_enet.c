@@ -37,13 +37,13 @@
 #include <linux/etherdevice.h>
 #include <linux/skbuff.h>
 #include <linux/spinlock.h>
+#include <linux/uaccess.h>
 
 #include <asm/immap_8260.h>
 #include <asm/pgtable.h>
 #include <asm/mpc8260.h>
 #include <asm/irq.h>
 #include <asm/bitops.h>
-#include <asm/uaccess.h>
 #include <asm/cpm_8260.h>
 
 #ifdef CONFIG_XENO_DRIVERS_NET_USE_MDIO

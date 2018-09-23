@@ -27,7 +27,7 @@
 #include <linux/time.h>
 #include <linux/delay.h>
 #include <linux/interrupt.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <rtdm/driver.h>
 
 /* --- Trace section  --- */

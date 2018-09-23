@@ -47,8 +47,8 @@
 #include <linux/mii.h>
 #include <linux/completion.h>
 #include <linux/crc32.h>
+#include <linux/uaccess.h>
 #include <asm/io.h>
-#include <asm/uaccess.h>
 
 /* *** RTnet *** */
 #include <rtnet_port.h>

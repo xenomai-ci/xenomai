@@ -23,7 +23,7 @@
  */
 
 #include <linux/module.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 
 #include <nomac_chrdev.h>
 #include <rtmac/nomac/nomac.h>
