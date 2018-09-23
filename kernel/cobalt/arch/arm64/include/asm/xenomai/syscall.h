@@ -23,7 +23,7 @@
 #define _COBALT_ARM64_ASM_SYSCALL_H
 
 #include <linux/errno.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <asm/unistd.h>
 #include <asm/ptrace.h>
 #include <asm-generic/xenomai/syscall.h>

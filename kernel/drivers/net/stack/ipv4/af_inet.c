@@ -24,7 +24,7 @@
  */
 
 #include <linux/module.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 
 #include <ipv4_chrdev.h>
 #include <rtnet_internal.h>

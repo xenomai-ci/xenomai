@@ -29,8 +29,8 @@
 #include <linux/mii.h>
 #include <linux/ethtool.h>
 #include <linux/crc32.h>
+#include <linux/uaccess.h>
 #include <asm/unaligned.h>
-#include <asm/uaccess.h>
 
 #ifdef __sparc__
 #include <asm/pbm.h>

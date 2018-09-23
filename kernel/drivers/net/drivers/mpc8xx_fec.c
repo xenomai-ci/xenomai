@@ -56,13 +56,13 @@
 #include <linux/spinlock.h>
 #include <linux/mii.h>
 #include <linux/ethtool.h>
+#include <linux/uaccess.h>
 
 #include <asm/8xx_immap.h>
 #include <asm/pgtable.h>
 #include <asm/mpc8xx.h>
 #include <asm/irq.h>
 #include <asm/bitops.h>
-#include <asm/uaccess.h>
 #include <asm/commproc.h>
 
 #ifdef CONFIG_XENO_DRIVERS_NET_USE_MDIO

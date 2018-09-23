@@ -28,7 +28,7 @@
 #include <linux/ip.h>
 #include <linux/in.h>
 #include <linux/bitops.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <net/arp.h>
 
 #define rtos_spinlock_t rtdm_lock_t

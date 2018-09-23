@@ -255,10 +255,10 @@ static int vortex_debug = 1;
 #include <linux/skbuff.h>
 #include <linux/ethtool.h>
 #include <linux/highmem.h>
+#include <linux/uaccess.h>
 #include <asm/irq.h>			/* For NR_IRQS only. */
 #include <asm/bitops.h>
 #include <asm/io.h>
-#include <asm/uaccess.h>
 
 // *** RTnet ***
 #include <rtnet_port.h>
