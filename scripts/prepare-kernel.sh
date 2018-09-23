@@ -278,7 +278,7 @@ while : ; do
    arm)
       linux_arch=arm
       ;;
-   arm64)
+   arm64|aarch64)
       linux_arch=arm64
       ;;
    *)
