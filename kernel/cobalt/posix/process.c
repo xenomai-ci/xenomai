@@ -897,7 +897,7 @@ static inline bool affinity_ok(struct task_struct *p) /* nklocked, IRQs off */
 	 * in secondary mode. If so, do the fixups to reflect the
 	 * change.
 	 */
-	if (!xnsched_supported_cpu(cpu)) {
+	if (!xnsched_threading_cpu(cpu)) {
 		/*
 		 * The thread is about to switch to primary mode on a
 		 * non-rt CPU, which is damn wrong and hopeless.

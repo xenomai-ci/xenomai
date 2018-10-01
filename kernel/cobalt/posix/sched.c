@@ -622,7 +622,7 @@ int __cobalt_sched_setconfig_np(int cpu, int policy,
 
 	trace_cobalt_sched_setconfig(cpu, policy, len);
 
-	if (cpu < 0 || cpu >= NR_CPUS || !xnsched_supported_cpu(cpu))
+	if (cpu < 0 || cpu >= NR_CPUS || !xnsched_threading_cpu(cpu))
 		return -EINVAL;
 
 	if (len == 0)
