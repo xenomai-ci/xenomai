@@ -343,16 +343,16 @@ static inline int tsgreater(struct timespec *a, struct timespec *b)
 static inline int64_t calcdiff(struct timespec t1, struct timespec t2)
 {
 	int64_t diff;
-	diff = USEC_PER_SEC * (long long)((int) t1.tv_sec - (int) t2.tv_sec);
-	diff += ((int) t1.tv_nsec - (int) t2.tv_nsec) / 1000;
+	diff = USEC_PER_SEC * (long long)(t1.tv_sec - t2.tv_sec);
+	diff += (t1.tv_nsec - t2.tv_nsec) / 1000;
 	return diff;
 }
 
 static inline int64_t calcdiff_ns(struct timespec t1, struct timespec t2)
 {
 	int64_t diff;
-	diff = NSEC_PER_SEC * (int64_t)((int) t1.tv_sec - (int) t2.tv_sec);
-	diff += ((int) t1.tv_nsec - (int) t2.tv_nsec);
+	diff = NSEC_PER_SEC * (int64_t)(t1.tv_sec - t2.tv_sec);
+	diff += (t1.tv_nsec - t2.tv_nsec);
 	return diff;
 }
 
@@ -856,6 +856,10 @@ void *timerthread(void *param)
 
 	stat->threadstarted++;
 
+#ifdef CONFIG_XENO_COBALT
+	if (pthread_setmode_np(0, PTHREAD_WARNSW, NULL))
+		fatal("pthread_setmode_np()");
+#endif
 	while (!shutdown) {
 
 		uint64_t diff;
@@ -1064,7 +1068,7 @@ static void display_help(int error)
 	       "-N       --nsecs           print results in ns instead of us (default us)\n"
 	       "-o RED   --oscope=RED      oscilloscope mode, reduce verbose output by RED\n"
 	       "-O TOPT  --traceopt=TOPT   trace option\n"
-	       "-p PRIO  --prio=PRIO       priority of highest prio thread\n"
+	       "-p PRIO  --prio=PRIO       priority of highest prio thread (defaults to 99)\n"
 	       "-P       --preemptoff      Preempt off tracing (used with -b)\n"
 	       "-q       --quiet           print only a summary on exit\n"
 	       "	 --priospread       spread priority levels starting at specified value\n"
@@ -1110,8 +1114,8 @@ void application_usage(void)
 static int use_nanosleep;
 static int timermode = TIMER_ABSTIME;
 static int use_system;
-static int priority;
-static int policy = SCHED_OTHER;	/* default policy if not specified */
+static int priority = 99;
+static int policy = SCHED_FIFO;	/* default policy if not specified */
 static int num_threads = 1;
 static int max_cycles;
 static int clocksel = 0;
@@ -1805,9 +1809,52 @@ void *fifothread(void *param)
 	return NULL;
 }
 
+#ifdef CONFIG_XENO_COBALT
+#include <cobalt/uapi/syscall.h>
+
+static const char *reason_str[] = {
+	[SIGDEBUG_UNDEFINED] = "received SIGDEBUG for unknown reason",
+	[SIGDEBUG_MIGRATE_SIGNAL] = "received signal",
+	[SIGDEBUG_MIGRATE_SYSCALL] = "invoked syscall",
+	[SIGDEBUG_MIGRATE_FAULT] = "triggered fault",
+	[SIGDEBUG_MIGRATE_PRIOINV] = "affected by priority inversion",
+	[SIGDEBUG_NOMLOCK] = "process memory not locked",
+	[SIGDEBUG_WATCHDOG] = "watchdog triggered (period too short?)",
+	[SIGDEBUG_LOCK_BREAK] = "scheduler lock break",
+};
+
+static void sigdebug(int sig, siginfo_t *si, void *context)
+{
+	const char fmt[] = "%s, aborting.\n"
+		"(enabling CONFIG_XENO_OPT_DEBUG_TRACE_RELAX may help)\n";
+	unsigned int reason = sigdebug_reason(si);
+	int n __attribute__ ((unused));
+	static char buffer[256];
+
+	if (reason > SIGDEBUG_WATCHDOG)
+		reason = SIGDEBUG_UNDEFINED;
+
+	switch(reason) {
+	case SIGDEBUG_UNDEFINED:
+	case SIGDEBUG_NOMLOCK:
+	case SIGDEBUG_WATCHDOG:
+		n = snprintf(buffer, sizeof(buffer), "latency: %s\n",
+			     reason_str[reason]);
+		write_check(STDERR_FILENO, buffer, n);
+		exit(EXIT_FAILURE);
+	}
+
+	n = snprintf(buffer, sizeof(buffer), fmt, reason_str[reason]);
+	write_check(STDERR_FILENO, buffer, n);
+	signal(sig, SIG_DFL);
+	kill(getpid(), sig);
+}
+
+#endif
 
 int main(int argc, char **argv)
 {
+	struct sigaction sa __attribute__((unused));
 	sigset_t sigset;
 	int signum = SIGALRM;
 	int mode;
@@ -1952,6 +1999,12 @@ int main(int argc, char **argv)
 	signal(SIGINT, sighand);
 	signal(SIGTERM, sighand);
 	signal(SIGUSR1, sighand);
+#ifdef CONFIG_XENO_COBALT
+	sigemptyset(&sa.sa_mask);
+	sa.sa_sigaction = sigdebug;
+	sa.sa_flags = SA_SIGINFO;
+	sigaction(SIGDEBUG, &sa, NULL);
+#endif
 
 	parameters = calloc(num_threads, sizeof(struct thread_param *));
 	if (!parameters)
