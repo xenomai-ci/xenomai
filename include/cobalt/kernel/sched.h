@@ -235,6 +235,11 @@ static inline int xnsched_supported_cpu(int cpu)
 	return cpumask_test_cpu(cpu, &xnsched_realtime_cpus);
 }
 
+static inline int xnsched_threading_cpu(int cpu)
+{
+	return cpumask_test_cpu(cpu, &cobalt_cpu_affinity);
+}
+
 #else /* !CONFIG_SMP */
 
 static inline void xnsched_set_resched(struct xnsched *sched)
@@ -245,6 +250,11 @@ static inline void xnsched_set_resched(struct xnsched *sched)
 #define xnsched_realtime_cpus CPU_MASK_ALL
 
 static inline int xnsched_supported_cpu(int cpu)
+{
+	return 1;
+}
+
+static inline int xnsched_threading_cpu(int cpu)
 {
 	return 1;
 }
