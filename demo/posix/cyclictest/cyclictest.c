@@ -340,20 +340,23 @@ static inline int tsgreater(struct timespec *a, struct timespec *b)
 		(a->tv_sec == b->tv_sec && a->tv_nsec > b->tv_nsec));
 }
 
-static inline int64_t calcdiff(struct timespec t1, struct timespec t2)
-{
-	int64_t diff;
-	diff = USEC_PER_SEC * (long long)(t1.tv_sec - t2.tv_sec);
-	diff += (t1.tv_nsec - t2.tv_nsec) / 1000;
-	return diff;
-}
-
 static inline int64_t calcdiff_ns(struct timespec t1, struct timespec t2)
 {
-	int64_t diff;
-	diff = NSEC_PER_SEC * (int64_t)(t1.tv_sec - t2.tv_sec);
-	diff += (t1.tv_nsec - t2.tv_nsec);
-	return diff;
+	struct timespec r;
+	
+	r.tv_sec = t1.tv_sec - t2.tv_sec;
+	r.tv_nsec = t1.tv_nsec - t2.tv_nsec;
+	if (r.tv_nsec < 0) {
+		r.tv_sec--;
+		r.tv_nsec += NSEC_PER_SEC;
+	}
+
+	return r.tv_sec * NSEC_PER_SEC + r.tv_nsec;
+}
+
+static inline int64_t calcdiff(struct timespec t1, struct timespec t2)
+{
+	return calcdiff_ns(t1, t2) / 1000;
 }
 
 void traceopt(char *option)
