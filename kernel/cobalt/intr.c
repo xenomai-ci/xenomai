@@ -822,7 +822,7 @@ int xnintr_attach(struct xnintr *intr, void *cookie)
 	clear_irqstats(intr);
 
 #ifdef CONFIG_SMP
-	ipipe_set_irq_affinity(intr->irq, cobalt_cpu_affinity);
+	ipipe_set_irq_affinity(intr->irq, xnsched_realtime_cpus);
 #endif /* CONFIG_SMP */
 
 	raw_spin_lock(&intr->lock);
