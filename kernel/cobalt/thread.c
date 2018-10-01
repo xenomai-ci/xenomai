@@ -1924,6 +1924,7 @@ int xnthread_harden(void)
 
 	ret = __ipipe_migrate_head();
 	if (ret) {
+		xnthread_test_cancel();
 		xnthread_set_sync_window(thread, XNRELAX);
 		return ret;
 	}
