@@ -856,7 +856,7 @@ static int handle_setaffinity_event(struct ipipe_cpu_migration_data *d)
 	 * take place on behalf of the target thread itself while
 	 * running in secondary mode. Therefore, that thread needs to
 	 * go through secondary mode first, then move back to primary
-	 * mode, so that check_affinity() does the fixup work.
+	 * mode, so that affinity_ok() does the fixup work.
 	 *
 	 * We force this by sending a SIGSHADOW signal to the migrated
 	 * thread, asking it to switch back to primary mode from the
@@ -873,7 +873,7 @@ static int handle_setaffinity_event(struct ipipe_cpu_migration_data *d)
 	return KEVENT_PROPAGATE;
 }
 
-static inline void check_affinity(struct task_struct *p) /* nklocked, IRQs off */
+static inline bool affinity_ok(struct task_struct *p) /* nklocked, IRQs off */
 {
 	struct xnthread *thread = xnthread_from_task(p);
 	struct xnsched *sched;
@@ -912,12 +912,12 @@ static inline void check_affinity(struct task_struct *p) /* nklocked, IRQs off *
 		 * in xnthread_harden().
 		 */
 		xnthread_set_info(thread, XNCANCELD);
-		return;
+		return false;
 	}
 
 	sched = xnsched_struct(cpu);
 	if (sched == thread->sched)
-		return;
+		return true;
 
 	/*
 	 * The current thread moved to a supported real-time CPU,
@@ -929,6 +929,8 @@ static inline void check_affinity(struct task_struct *p) /* nklocked, IRQs off *
 
 	xnthread_run_handler_stack(thread, move_thread, cpu);
 	xnthread_migrate_passive(thread, sched);
+
+	return true;
 }
 
 #else /* !CONFIG_SMP */
@@ -940,7 +942,10 @@ static int handle_setaffinity_event(struct ipipe_cpu_migration_data *d)
 	return KEVENT_PROPAGATE;
 }
 
-static inline void check_affinity(struct task_struct *p) { }
+static inline bool affinity_ok(struct task_struct *p)
+{
+	return true;
+}
 
 #endif /* CONFIG_SMP */
 
@@ -955,8 +960,8 @@ void ipipe_migration_hook(struct task_struct *p) /* hw IRQs off */
 	 */
 	xnlock_get(&nklock);
 	xnthread_run_handler_stack(thread, harden_thread);
-	check_affinity(p);
-	xnthread_resume(thread, XNRELAX);
+	if (affinity_ok(p))
+		xnthread_resume(thread, XNRELAX);
 	xnlock_put(&nklock);
 
 	xnsched_run();
