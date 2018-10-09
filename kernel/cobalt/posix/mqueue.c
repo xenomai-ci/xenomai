@@ -151,6 +151,7 @@ static inline int mq_init(struct cobalt_mq *mq, const struct mq_attr *attr)
 	xnselect_init(&mq->write_select);
 	mq->magic = COBALT_MQ_MAGIC;
 	mq->refs = 2;
+	INIT_LIST_HEAD(&mq->link);
 
 	return 0;
 }
