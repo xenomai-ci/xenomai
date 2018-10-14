@@ -173,6 +173,8 @@ static int collect_cpu_affinity(const char *cpu_list)
 		return ret;
 	}
 
+	CPU_ZERO(&__base_setup_data.cpu_affinity);
+
 	s = n = strdup(cpu_list);
 	while ((range = strtok_r(n, ",", &range_p)) != NULL) {
 		if (*range == '\0')
@@ -230,6 +232,33 @@ fail:
 	free(s);
 
 	return -EINVAL;
+}
+
+static void retrieve_default_cpu_affinity(void)
+{
+	CPU_ZERO(&__base_setup_data.cpu_affinity);
+
+#ifdef CONFIG_XENO_COBALT
+	/*
+	 * If the Cobalt core has restricted the CPU set, update our
+	 * mask accordingly.
+	 */
+	unsigned long cpumask;
+	FILE *fp;
+	int cpu;
+
+	fp = fopen("/proc/xenomai/affinity", "r");
+	if (fp == NULL)
+		return;	/* uhh? */
+
+	if (fscanf(fp, "%lx", &cpumask) == 1) {
+		for (cpu = 0; cpumask; cpumask >>= 1, cpu++)
+			if (cpumask & 1)
+				CPU_SET(cpu, &__base_setup_data.cpu_affinity);
+	}
+
+	fclose(fp);
+#endif
 }
 
 static inline char **prep_args(int argc, char *const argv[])
@@ -528,8 +557,8 @@ static void __xenomai_init(int *argcp, char *const **argvp, const char *me)
 	/* No ifs, no buts: we must be called over the main thread. */
 	assert(getpid() == __node_id);
 
-	/* Define default CPU affinity, i.e. no particular affinity. */
-	CPU_ZERO(&__base_setup_data.cpu_affinity);
+	/* Retrieve the default CPU affinity. */
+	retrieve_default_cpu_affinity();
 
 	/*
 	 * Parse the base options first, to bootstrap the core with
