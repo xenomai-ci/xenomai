@@ -166,6 +166,7 @@ int rtdm_fd_enter(struct rtdm_fd *fd, int ufd, unsigned int magic,
 	fd->magic = magic;
 	fd->ops = ops;
 	fd->owner = ppd;
+	fd->ufd = ufd;
 	fd->refs = 1;
 	set_compat_bit(fd);
 

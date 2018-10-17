@@ -298,6 +298,7 @@ struct rtdm_fd {
 	struct rtdm_fd_ops *ops;
 	struct cobalt_ppd *owner;
 	unsigned int refs;
+	int ufd;
 	int minor;
 	int oflags;
 #ifdef CONFIG_XENO_ARCH_SYS3264
@@ -318,6 +319,11 @@ void __rtdm_anon_putfd(int ufd);
 static inline struct cobalt_ppd *rtdm_fd_owner(const struct rtdm_fd *fd)
 {
 	return fd->owner;
+}
+
+static inline int rtdm_fd_ufd(const struct rtdm_fd *fd)
+{
+	return fd->ufd;
 }
 
 static inline int rtdm_fd_minor(const struct rtdm_fd *fd)
