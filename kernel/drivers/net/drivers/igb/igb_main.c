@@ -2432,6 +2432,7 @@ static void igb_remove(struct pci_dev *pdev)
 	struct igb_adapter *adapter = rtnetdev_priv(netdev);
 	struct e1000_hw *hw = &adapter->hw;
 
+	rtdev_down(netdev);
 	igb_down(adapter);
 
 	pm_runtime_get_noresume(&pdev->dev);
