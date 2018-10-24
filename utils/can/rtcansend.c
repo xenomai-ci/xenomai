@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <getopt.h>
 
+#include <boilerplate/ancillaries.h>
 #include <alchemy/task.h>
 #include <alchemy/timer.h>
 
@@ -231,7 +232,7 @@ int main(int argc, char **argv)
 	    printf("Using loopback=%d\n", loopback);
     }
 
-    strncpy(ifr.ifr_name, argv[optind], IFNAMSIZ);
+    namecpy(ifr.ifr_name, argv[optind]);
     if (verbose)
 	printf("s=%d, ifr_name=%s\n", s, ifr.ifr_name);
 
