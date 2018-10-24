@@ -1353,7 +1353,7 @@ static void process_options (int argc, char *argv[], int max_cpus)
 		case 'F':
 		case OPT_FIFO:
 			use_fifo = 1;
-			strncpy(fifopath, optarg, strlen(optarg));
+			strncpy(fifopath, optarg, sizeof(fifopath) - 1);
 			break;
 
 		case 'H':
@@ -1458,7 +1458,7 @@ static void process_options (int argc, char *argv[], int max_cpus)
 		case 'T':
 		case OPT_TRACER:
 			tracetype = CUSTOM;
-			strncpy(tracer, optarg, sizeof(tracer));
+			strncpy(tracer, optarg, sizeof(tracer) - 1);
 			break;
 		case 'u':
 		case OPT_UNBUFFERED:

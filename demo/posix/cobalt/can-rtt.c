@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
 	return -1;
     }
 
-    strncpy(ifr.ifr_name, rxdev, IFNAMSIZ);
+    namecpy(ifr.ifr_name, rxdev);
     printf("RX rxsock=%d, ifr_name=%s\n", rxsock, ifr.ifr_name);
 
     if (ioctl(rxsock, SIOCGIFINDEX, &ifr) < 0) {
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
 	    goto failure1;
 	}
 
-	strncpy(ifr.ifr_name, txdev, IFNAMSIZ);
+	namecpy(ifr.ifr_name, txdev);
 	printf("TX txsock=%d, ifr_name=%s\n", txsock, ifr.ifr_name);
 
 	if (ioctl(txsock, SIOCGIFINDEX, &ifr) < 0) {
