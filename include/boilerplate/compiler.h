@@ -46,14 +46,6 @@
 #define __weak		__attribute__((__weak__))
 #endif
 
-#ifndef __const
-#define __const		__attribute__((__const__))
-#endif
-
-#ifndef __pure
-#define __pure		__attribute__((__pure__))
-#endif
-
 #ifndef __maybe_unused
 #define __maybe_unused	__attribute__((__unused__))
 #endif
