@@ -7,6 +7,7 @@
 #include <getopt.h>
 
 #include <alchemy/task.h>
+#include <boilerplate/ancillaries.h>
 
 #include <rtdm/can.h>
 
@@ -248,7 +249,7 @@ int main(int argc, char **argv)
 	if (verbose)
 	    printf("interface %s\n", argv[optind]);
 
-	strncpy(ifr.ifr_name, argv[optind], IFNAMSIZ);
+	namecpy(ifr.ifr_name, argv[optind]);
 	if (verbose)
 	    printf("s=%d, ifr_name=%s\n", s, ifr.ifr_name);
 

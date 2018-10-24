@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <getopt.h>
 #include <sys/mman.h>
+#include <boilerplate/ancillaries.h>
 
 #include <rtdm/can.h>
 
@@ -81,7 +82,7 @@ static int string_to_ctrlmode(char *str)
 
 int main(int argc, char *argv[])
 {
-    char    ifname[16];
+    char    ifname[IFNAMSIZ];
     int     can_fd = -1;
     int     new_baudrate = -1;
     int     new_mode = -1;
@@ -159,8 +160,8 @@ int main(int argc, char *argv[])
 	return 0;
     }
 
-    strncpy(ifname, argv[optind], IFNAMSIZ);
-    strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
+    namecpy(ifname, argv[optind]);
+    namecpy(ifr.ifr_name, ifname);
 
     if (optind == argc - 2) {   /* Get mode setting */
 	new_mode = string_to_mode(argv[optind + 1]);
