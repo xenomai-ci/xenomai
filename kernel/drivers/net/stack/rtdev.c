@@ -666,21 +666,24 @@ int rtdev_up(struct rtnet_device *rtdev, struct rtnet_core_cmd *cmd)
 	      IFF_PROMISC) ||
 	     (cmd->args.up.dev_addr_type != ARPHRD_VOID))) {
 		ret = -EBUSY;
-		goto up_out;
+		goto out;
 	}
+
+	if (cmd->args.up.dev_addr_type != ARPHRD_VOID &&
+	    cmd->args.up.dev_addr_type != rtdev->type) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+	/* Skip upon extraneous call only after args have been checked. */
+	if (test_and_set_bit(PRIV_FLAG_UP, &rtdev->priv_flags))
+		goto out;
 
 	rtdev->flags |= cmd->args.up.set_dev_flags;
 	rtdev->flags &= ~cmd->args.up.clear_dev_flags;
 
-	if (cmd->args.up.dev_addr_type != ARPHRD_VOID) {
-		if (cmd->args.up.dev_addr_type != rtdev->type) {
-			ret = -EINVAL;
-			goto up_out;
-		}
+	if (cmd->args.up.dev_addr_type != ARPHRD_VOID)
 		memcpy(rtdev->dev_addr, cmd->args.up.dev_addr, MAX_ADDR_LEN);
-	}
-
-	set_bit(PRIV_FLAG_UP, &rtdev->priv_flags);
 
 	ret = rtdev_open(rtdev);    /* also == 0 if rtdev is already up */
 
@@ -696,8 +699,7 @@ int rtdev_up(struct rtnet_device *rtdev, struct rtnet_core_cmd *cmd)
 		mutex_unlock(&rtnet_devices_nrt_lock);
 	} else
 		clear_bit(PRIV_FLAG_UP, &rtdev->priv_flags);
-
-up_out:
+out:
 	mutex_unlock(&rtdev->nrt_lock);
 
 	return ret;
@@ -718,12 +720,12 @@ int rtdev_down(struct rtnet_device *rtdev)
 	rtdm_lock_get_irqsave(&rtdev->rtdev_lock, context);
 
 	if (test_bit(PRIV_FLAG_ADDING_ROUTE, &rtdev->priv_flags)) {
-		rtdm_lock_put_irqrestore(&rtdev->rtdev_lock, context);
-
-		mutex_unlock(&rtdev->nrt_lock);
-		return -EBUSY;
+		ret = -EBUSY;
+		goto fail;
 	}
-	clear_bit(PRIV_FLAG_UP, &rtdev->priv_flags);
+
+	if (!test_and_clear_bit(PRIV_FLAG_UP, &rtdev->priv_flags))
+		goto fail;
 
 	rtdm_lock_put_irqrestore(&rtdev->rtdev_lock, context);
 
@@ -743,10 +745,13 @@ int rtdev_down(struct rtnet_device *rtdev)
 
 		ret = rtdev_close(rtdev);
 	}
-
+out:
 	mutex_unlock(&rtdev->nrt_lock);
 
 	return ret;
+fail:
+	rtdm_lock_put_irqrestore(&rtdev->rtdev_lock, context);
+	goto out;
 }
 EXPORT_SYMBOL_GPL(rtdev_down);
 
