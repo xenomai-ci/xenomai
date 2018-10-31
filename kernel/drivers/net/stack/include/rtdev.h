@@ -231,6 +231,10 @@ unsigned int rt_hard_mtu(struct rtnet_device *rtdev, unsigned int priority);
 int rtdev_open(struct rtnet_device *rtdev);
 int rtdev_close(struct rtnet_device *rtdev);
 
+int rtdev_up(struct rtnet_device *rtdev,
+	     struct rtnet_core_cmd *cmd);
+int rtdev_down(struct rtnet_device *rtdev);
+
 int rtdev_map_rtskb(struct rtskb *skb);
 void rtdev_unmap_rtskb(struct rtskb *skb);
 

@@ -34,7 +34,7 @@ void __namecpy_requires_character_array_as_destination(void);
 	({								\
 		if (!__builtin_types_compatible_p(typeof(__dst), char[])) \
 			__namecpy_requires_character_array_as_destination();	\
-		strncpy((__dst), __src, sizeof(__dst) - 1);		\
+		strncpy((__dst), __src, sizeof(__dst));			\
 		__dst[sizeof(__dst) - 1] = '\0';			\
 		__dst;							\
 	 })

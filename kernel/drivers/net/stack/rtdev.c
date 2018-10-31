@@ -650,7 +650,110 @@ void rtdev_del_event_hook(struct rtdev_event_hook *hook)
     mutex_unlock(&rtnet_devices_nrt_lock);
 }
 
+int rtdev_up(struct rtnet_device *rtdev, struct rtnet_core_cmd *cmd)
+{
+	struct list_head        *entry;
+	struct rtdev_event_hook *hook;
+	int ret = 0;
 
+	if (mutex_lock_interruptible(&rtdev->nrt_lock))
+		return -ERESTARTSYS;
+
+	/* We cannot change the promisc flag or the hardware address if
+	   the device is already up. */
+	if ((rtdev->flags & IFF_UP) &&
+	    (((cmd->args.up.set_dev_flags | cmd->args.up.clear_dev_flags) &
+	      IFF_PROMISC) ||
+	     (cmd->args.up.dev_addr_type != ARPHRD_VOID))) {
+		ret = -EBUSY;
+		goto out;
+	}
+
+	if (cmd->args.up.dev_addr_type != ARPHRD_VOID &&
+	    cmd->args.up.dev_addr_type != rtdev->type) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+	/* Skip upon extraneous call only after args have been checked. */
+	if (test_and_set_bit(PRIV_FLAG_UP, &rtdev->priv_flags))
+		goto out;
+
+	rtdev->flags |= cmd->args.up.set_dev_flags;
+	rtdev->flags &= ~cmd->args.up.clear_dev_flags;
+
+	if (cmd->args.up.dev_addr_type != ARPHRD_VOID)
+		memcpy(rtdev->dev_addr, cmd->args.up.dev_addr, MAX_ADDR_LEN);
+
+	ret = rtdev_open(rtdev);    /* also == 0 if rtdev is already up */
+
+	if (ret == 0) {
+		mutex_lock(&rtnet_devices_nrt_lock);
+
+		list_for_each(entry, &event_hook_list) {
+			hook = list_entry(entry, struct rtdev_event_hook, entry);
+			if (hook->ifup)
+				hook->ifup(rtdev, cmd);
+		}
+
+		mutex_unlock(&rtnet_devices_nrt_lock);
+	} else
+		clear_bit(PRIV_FLAG_UP, &rtdev->priv_flags);
+out:
+	mutex_unlock(&rtdev->nrt_lock);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(rtdev_up);
+
+int rtdev_down(struct rtnet_device *rtdev)
+{
+	struct list_head        *entry;
+	struct rtdev_event_hook *hook;
+	rtdm_lockctx_t          context;
+	int ret = 0;
+
+	if (mutex_lock_interruptible(&rtdev->nrt_lock))
+		return -ERESTARTSYS;
+
+	/* spin lock required for sync with routing code */
+	rtdm_lock_get_irqsave(&rtdev->rtdev_lock, context);
+
+	if (test_bit(PRIV_FLAG_ADDING_ROUTE, &rtdev->priv_flags)) {
+		ret = -EBUSY;
+		goto fail;
+	}
+
+	if (!test_and_clear_bit(PRIV_FLAG_UP, &rtdev->priv_flags))
+		goto fail;
+
+	rtdm_lock_put_irqrestore(&rtdev->rtdev_lock, context);
+
+	if (rtdev->mac_detach != NULL)
+		ret = rtdev->mac_detach(rtdev);
+
+	if (ret == 0) {
+		mutex_lock(&rtnet_devices_nrt_lock);
+
+		list_for_each(entry, &event_hook_list) {
+			hook = list_entry(entry, struct rtdev_event_hook, entry);
+			if (hook->ifdown)
+				hook->ifdown(rtdev);
+		}
+
+		mutex_unlock(&rtnet_devices_nrt_lock);
+
+		ret = rtdev_close(rtdev);
+	}
+out:
+	mutex_unlock(&rtdev->nrt_lock);
+
+	return ret;
+fail:
+	rtdm_lock_put_irqrestore(&rtdev->rtdev_lock, context);
+	goto out;
+}
+EXPORT_SYMBOL_GPL(rtdev_down);
 
 /***
  *  rtdev_open

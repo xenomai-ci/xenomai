@@ -2432,6 +2432,7 @@ static void igb_remove(struct pci_dev *pdev)
 	struct igb_adapter *adapter = rtnetdev_priv(netdev);
 	struct e1000_hw *hw = &adapter->hw;
 
+	rtdev_down(netdev);
 	igb_down(adapter);
 
 	pm_runtime_get_noresume(&pdev->dev);
@@ -5066,6 +5067,9 @@ static int igb_mii_ioctl(struct rtnet_device *netdev, struct ifreq *ifr, int cmd
  **/
 static int igb_ioctl(struct rtnet_device *netdev, struct ifreq *ifr, int cmd)
 {
+	if (rtdm_in_rt_context())
+		return -ENOSYS;
+	
 	switch (cmd) {
 	case SIOCGMIIPHY:
 	case SIOCGMIIREG:
