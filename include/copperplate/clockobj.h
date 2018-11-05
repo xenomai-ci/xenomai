@@ -136,7 +136,7 @@ void clockobj_ns_to_timespec(ticks_t ns, struct timespec *ts)
 {
 	unsigned long rem;
 
-	ts->tv_sec = cobalt_divrem_billion(ns, &rem);
+	ts->tv_sec = (time_t)cobalt_divrem_billion(ns, &rem);
 	ts->tv_nsec = rem;
 }
 
