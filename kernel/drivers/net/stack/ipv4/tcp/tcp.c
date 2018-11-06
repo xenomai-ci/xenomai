@@ -182,7 +182,7 @@ static struct {
 } rst_socket_container;
 
 #define rst_fd		(&rst_socket_container.dummy.fd)
-#define rst_socket	(*(struct tcp_socket *)rtdm_private_to_fd(rst_fd))
+#define rst_socket	(*(struct tcp_socket *)rtdm_fd_to_private(rst_fd))
 
 static u32 tcp_auto_port_start = 1024;
 static u32 tcp_auto_port_mask  = ~(RT_TCP_SOCKETS-1);
