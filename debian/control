@@ -8,7 +8,7 @@ Homepage: http://www.xenomai.org/
 
 Package: xenomai-runtime
 Section: devel
-Architecture: amd64 arm armeb armel armhf i386 powerpc powerpcspe
+Architecture: amd64 arm armeb armel armhf arm64 i386 powerpc powerpcspe
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: xenomai-kernel-source
 Replaces: xenomai
@@ -45,7 +45,7 @@ Description: Source for Xenomai kernel-space support
 
 Package: libxenomai1
 Section: libs
-Architecture: amd64 arm armeb armel armhf i386 powerpc powerpcspe
+Architecture: amd64 arm armeb armel armhf arm64 i386 powerpc powerpcspe
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: xenomai-kernel-source
 Replaces: xenomai
@@ -61,7 +61,7 @@ Description: Shared libraries for Xenomai
 
 Package: libxenomai-dev
 Section: libdevel
-Architecture: amd64 arm armeb armel armhf i386 powerpc powerpcspe
+Architecture: amd64 arm armeb armel armhf arm64 i386 powerpc powerpcspe
 Depends: libxenomai1 (= ${binary:Version}), ${misc:Depends}
 Suggests: xenomai-kernel-source
 Replaces: xenomai
