@@ -280,12 +280,6 @@ static inline int rt_tcp_after(__u32 seq1, __u32 seq2)
     return (__s32)(seq2-seq1) <= 0;
 }
 
-static inline void rt_tcp_set_flags(struct tcphdr* th, __be32 flags)
-{
-    __be16 *tf = ((__be16*)th) + 6;
-    *tf = flags;
-}
-
 static inline u32 rt_tcp_compute_ack_seq(struct tcphdr* th, u32 len)
 {
     u32 ack_seq = ntohl(th->seq) + len;
@@ -625,10 +619,9 @@ static void rt_tcp_build_header(struct tcp_socket *ts, struct rtskb *skb,
     if (unlikely(is_keepalive))
 	th->seq--;
 
+    tcp_flag_word(th) = flags;
     th->ack_seq = htonl(ts->sync.ack_seq);
     th->window  = htons(ts->sync.window);
-
-    rt_tcp_set_flags(th, flags);
 
     th->doff = tcphdrlen >> 2; /* No options for now */
     th->res1 = 0;
