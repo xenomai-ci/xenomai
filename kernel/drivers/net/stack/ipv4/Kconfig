@@ -72,4 +72,4 @@ config XENO_DRIVERS_NET_RTIPV4_DEBUG
     may want to turn this on for tracing issues in packet delivery.
 
 source "drivers/xenomai/net/stack/ipv4/udp/Kconfig"
-# source "drivers/xenomai/net/stack/ipv4/tcp/Kconfig"
+source "drivers/xenomai/net/stack/ipv4/tcp/Kconfig"
