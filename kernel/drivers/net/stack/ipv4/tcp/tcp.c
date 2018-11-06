@@ -1790,8 +1790,6 @@ static int rt_tcp_ioctl(struct rtdm_fd *fd,
     struct _rtdm_getsockopt_args _getopt;
     const struct _rtdm_setsockopt_args *setopt;
     struct _rtdm_setsockopt_args _setopt;
-    const long *val;
-    long _val;
     int in_rt;
 
     /* fast path for common socket IOCTLs */
@@ -1815,10 +1813,7 @@ static int rt_tcp_ioctl(struct rtdm_fd *fd,
 		return rt_tcp_connect(ts, setaddr->addr, setaddr->addrlen);
 
 	case _RTIOC_LISTEN:
-		val = rtnet_get_arg(fd, &_val, arg, sizeof(long));
-		if (IS_ERR(val))
-			return PTR_ERR(val);
-		return rt_tcp_listen(ts, *val);
+		return rt_tcp_listen(ts, (unsigned long)arg);
 
 	case _RTIOC_ACCEPT:
 		if (!in_rt)
@@ -1829,10 +1824,7 @@ static int rt_tcp_ioctl(struct rtdm_fd *fd,
 		return rt_tcp_accept(ts, getaddr->addr, getaddr->addrlen);
 
 	case _RTIOC_SHUTDOWN:
-		val = rtnet_get_arg(fd, &_val, arg, sizeof(long));
-		if (IS_ERR(val))
-			return PTR_ERR(val);
-		return rt_tcp_shutdown(ts, *val);
+		return rt_tcp_shutdown(ts, (unsigned long)arg);
 
 	case _RTIOC_SETSOCKOPT:
 		setopt = rtnet_get_arg(fd, &_setopt, arg, sizeof(_setopt));
