@@ -1668,7 +1668,7 @@ static int rt_tcp_accept(struct tcp_socket *ts, struct sockaddr *addr,
     ts->is_accepted = 1;
     rtdm_lock_put_irqrestore(&ts->socket_lock, context);
 
-    ret = rt_socket_fd(&ts->sock)->fd;
+    ret = rtdm_fd_ufd(rt_socket_fd(&ts->sock));
 
  err:
     /* it is not critical to leave this unlocked
