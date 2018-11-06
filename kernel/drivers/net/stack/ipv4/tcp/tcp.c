@@ -1909,6 +1909,11 @@ static ssize_t rt_tcp_read(struct rtdm_fd *fd, void *buf, size_t nbyte)
 		return (copied ? copied : ret);
 
 	    case -EIDRM: /* event is destroyed */
+		if (ts->is_closed)
+			return -EBADF;
+
+		return copied;
+
 	    default:
 		if (ts->is_closed) {
 		    return -EBADF;
