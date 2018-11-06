@@ -249,15 +249,18 @@ static struct rtsocket *rt_tcp_v4_lookup(u32 daddr, u16 dport)
 {
     rtdm_lockctx_t  context;
     struct tcp_socket *ts;
+    int ret;
 
     rtdm_lock_get_irqsave(&tcp_socket_base_lock, context);
     ts = port_hash_search(daddr, dport);
 
-    if (ts && rt_socket_reference(&ts->sock) == 0) {
+    if (ts != NULL) {
+	ret = rt_socket_reference(&ts->sock);
+	if (ret == 0 || (ret == -EIDRM && ts->is_closed)) {
+		rtdm_lock_put_irqrestore(&tcp_socket_base_lock, context);
 
-	rtdm_lock_put_irqrestore(&tcp_socket_base_lock, context);
-
-	return &ts->sock;
+		return &ts->sock;
+	}
     }
 
     rtdm_lock_put_irqrestore(&tcp_socket_base_lock, context);
