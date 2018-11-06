@@ -2084,17 +2084,10 @@ static ssize_t rt_tcp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg, int m
 
 	len = iov[0].iov_len;
 	if (len > 0) {
-		buf = xnmalloc(len);
-		if (buf == NULL) {
-			ret = -ENOMEM;
-			goto out;
-		}
-		ret = rtdm_copy_from_user(fd, buf, iov[0].iov_base, len);
-		if (!ret)
-			ret = rt_tcp_read(fd, buf, len);
-		xnfree(buf);
+		buf = iov[0].iov_base;
+		ret = rt_tcp_read(fd, buf, len);
 	}
-out:
+
 	rtdm_drop_iovec(iov, iov_fast);
 
 	return ret;
