@@ -16,7 +16,8 @@ DEB_BUILD_GNU_TYPE=$(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 CONFIG_OPTS = --prefix=/usr \
             --includedir=/usr/include/xenomai \
             --mandir=/usr/share/man \
-	    --with-testdir=/usr/lib/xenomai/testsuite
+            --with-testdir=/usr/lib/xenomai/testsuite \
+            --enable-smp
 
 ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
 	CONFIG_OPTS += --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE)
