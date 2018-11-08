@@ -51,6 +51,8 @@ void handle_checked_child(struct child *child, fd_set *fds);
 void handle_script_child(struct child *child, fd_set *fds);
 void handle_load_child(struct child *child, fd_set *fds);
 
+static int exit_global = EXIT_SUCCESS;
+
 static inline time_t mono_time(void)
 {
 	struct timespec ts;
@@ -319,6 +321,18 @@ void sigchld_handler(int sig)
 
 		child->exit_status = status;
 		child->dead = 1;
+		fprintf(stderr, "child %d returned: ", pid);
+		if (WIFEXITED(status)) {
+			if (WEXITSTATUS(status))
+				exit_global = EXIT_FAILURE;
+			fprintf(stderr, "exited with status %d\n",
+				WEXITSTATUS(status));
+		} else if WIFSIGNALED(status) {
+			fprintf(stderr, "killed by signal %d\n",
+				WTERMSIG(status));
+		} else {
+			fprintf(stderr, "unknown reason\n");
+		}
 	}
 }
 
@@ -660,5 +674,5 @@ int main(int argc, char *argv[])
 		signal(sigexit, SIG_DFL);
 		raise(sigexit);
 	}
-	exit(EXIT_SUCCESS);
+	exit(exit_global);
 }
