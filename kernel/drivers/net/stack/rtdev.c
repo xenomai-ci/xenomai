@@ -522,7 +522,7 @@ int rt_register_rtnetdev(struct rtnet_device *rtdev)
 
     rtdev->sysdev = device_create(rtnet_class, NULL,
 		  MKDEV(0, rtdev->ifindex), rtdev, rtdev->name);
-    if (rtdev->sysdev == NULL) {
+    if (IS_ERR(rtdev->sysdev)) {
 	    err = PTR_ERR(rtdev->sysdev);
 	    goto fail;
     }
