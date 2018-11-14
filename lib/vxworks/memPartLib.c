@@ -48,17 +48,21 @@ PART_ID memPartCreate(char *pPool, unsigned int poolSize)
 	pthread_mutexattr_t mattr;
 	struct wind_mempart *mp;
 	struct service svc;
+	int ret;
 
 	CANCEL_DEFER(svc);
 
 	mp = xnmalloc(sizeof(*mp));
-	if (mp == NULL)
-		goto fail;
-
-	if (__heapobj_init(&mp->hobj, NULL, poolSize, pPool)) {
-		xnfree(mp);
-	fail:
+	if (mp == NULL) {
 		errno = S_memLib_NOT_ENOUGH_MEMORY;
+		goto fail;
+	}
+
+	ret = __heapobj_init(&mp->hobj, NULL, poolSize, pPool);
+	if (ret) {
+		xnfree(mp);
+		errno = S_memLib_INVALID_NBYTES;
+	fail:
 		CANCEL_RESTORE(svc);
 		return (PART_ID)0;
 	}
