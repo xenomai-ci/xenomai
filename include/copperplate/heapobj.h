@@ -141,6 +141,7 @@ static inline char *pvstrdup(const char *ptr)
 
 #elif defined(CONFIG_XENO_HEAPMEM)
 
+#include <stdlib.h>
 #include <boilerplate/heapmem.h>
 
 extern struct heap_memory heapmem_main;
@@ -149,6 +150,8 @@ static inline
 void pvheapobj_destroy(struct heapobj *hobj)
 {
 	heapmem_destroy((struct heap_memory *)hobj->pool);
+	if (hobj->pool != (void *)&heapmem_main)
+		__STD(free(hobj->pool));
 }
 
 static inline
@@ -206,7 +209,7 @@ static inline char *pvstrdup(const char *ptr)
 
 #else /* !CONFIG_XENO_HEAPMEM, i.e. malloc */
 
-#include <malloc.h>
+#include <stdlib.h>
 
 static inline void *pvmalloc(size_t size)
 {

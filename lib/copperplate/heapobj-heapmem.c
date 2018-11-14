@@ -29,13 +29,21 @@ struct heap_memory heapmem_main;
 int __heapobj_init_private(struct heapobj *hobj, const char *name,
 			   size_t size, void *mem)
 {
+	struct heap_memory *heap;
 	void *_mem = mem;
 	int ret;
 
+	heap = __STD(malloc(sizeof(*heap)));
+	if (heap == NULL)
+		return -ENOMEM;
+
 	if (mem == NULL) {
-		_mem = __STD(malloc(size));
-		if (_mem == NULL)
+		size = HEAPMEM_ARENA_SIZE(size); /* Count meta-data in. */
+		mem = __STD(malloc(size));
+		if (mem == NULL) {
+			__STD(free(heap));
 			return -ENOMEM;
+		}
 	}
 	
 	if (name)
@@ -43,15 +51,16 @@ int __heapobj_init_private(struct heapobj *hobj, const char *name,
 	else
 		snprintf(hobj->name, sizeof(hobj->name), "%p", hobj);
 
-	ret = heapmem_init(hobj->pool, _mem, size);
+	hobj->pool = heap;
+	hobj->size = size;
+
+	ret = heapmem_init(hobj->pool, mem, size);
 	if (ret) {
-		if (mem == NULL)
-			__STD(free(_mem));
+		if (_mem == NULL)
+			__STD(free(mem));
+		__STD(free(heap));
 		return ret;
 	}
-
-	hobj->pool = _mem;
-	hobj->size = size;
 
 	return 0;
 }
@@ -59,8 +68,20 @@ int __heapobj_init_private(struct heapobj *hobj, const char *name,
 int heapobj_init_array_private(struct heapobj *hobj, const char *name,
 			       size_t size, int elems)
 {
+	size_t log2 = sizeof(size) * CHAR_BIT - 1 - __clz(size);
+
+	/*
+	 * Heapmem aligns individual object sizes on the next ^2
+	 * boundary, do likewise when determining the overall heap
+	 * size, so that we can allocate as many as @elems items.
+	 */
+	if (size & (size - 1))
+		log2++;
+
+	size = 1 << log2;
+
 	return __bt(__heapobj_init_private(hobj, name,
-			   HEAPMEM_ARENA_SIZE(size * elems), NULL));
+					   size * elems, NULL));
 }
 
 int heapobj_pkg_init_private(void)
