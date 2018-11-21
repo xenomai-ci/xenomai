@@ -561,6 +561,8 @@ void xnsched_quota_set_limit(struct xnsched_quota_group *tg,
 			     int *quota_sum_r)
 {
 	struct xnsched_quota *qs = &tg->sched->quota;
+	xnticks_t old_quota_ns = tg->quota_ns;
+	xnticks_t now, elapsed, consumed;
 
 	atomic_only();
 
@@ -581,7 +583,30 @@ void xnsched_quota_set_limit(struct xnsched_quota_group *tg,
 
 	tg->quota_percent = quota_percent;
 	tg->quota_peak_percent = quota_peak_percent;
-	tg->run_budget_ns = tg->quota_ns;
+
+	if (group_is_active(tg)) {
+		now = xnclock_read_monotonic(&nkclock);
+
+		elapsed = now - tg->run_start_ns;
+		if (elapsed < tg->run_budget_ns)
+			tg->run_budget_ns -= elapsed;
+		else
+			tg->run_budget_ns = 0;
+
+		tg->run_start_ns = now;
+
+		xntimer_stop(&qs->limit_timer);
+	}
+
+	if (tg->run_budget_ns <= old_quota_ns)
+		consumed = old_quota_ns - tg->run_budget_ns;
+	else
+		consumed = 0;
+	if (tg->quota_ns >= consumed)
+		tg->run_budget_ns = tg->quota_ns - consumed;
+	else
+		tg->run_budget_ns = 0;
+
 	tg->run_credit_ns = 0;	/* Drop accumulated credit. */
 
 	*quota_sum_r = quota_sum_all(qs);
