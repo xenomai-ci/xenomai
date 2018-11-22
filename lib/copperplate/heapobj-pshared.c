@@ -439,7 +439,8 @@ static void *alloc_block(struct shared_heap *heap, size_t size)
 	 */
 	if (size <= HOBJ_PAGE_SIZE * 2) {
 		/* Find log2(size). */
-		log2size = sizeof(size) * 8 - 1 - __clz(size);
+		log2size = sizeof(size) * 8 - 1 -
+			xenomai_count_leading_zeros(size);
 		if (size & (size - 1))
 			log2size++;
 		/* That is the actual block size we need. */
