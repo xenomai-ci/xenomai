@@ -91,25 +91,25 @@ void xnsched_rt_tick(struct xnsched *sched)
 	xnsched_putback(sched->curr);
 }
 
-bool xnsched_rt_setparam(struct xnthread *thread,
-			 const union xnsched_policy_param *p)
+static bool xnsched_rt_setparam(struct xnthread *thread,
+				const union xnsched_policy_param *p)
 {
 	return __xnsched_rt_setparam(thread, p);
 }
 
-void xnsched_rt_getparam(struct xnthread *thread,
-			 union xnsched_policy_param *p)
+static void xnsched_rt_getparam(struct xnthread *thread,
+				union xnsched_policy_param *p)
 {
 	__xnsched_rt_getparam(thread, p);
 }
 
-void xnsched_rt_trackprio(struct xnthread *thread,
-			  const union xnsched_policy_param *p)
+static void xnsched_rt_trackprio(struct xnthread *thread,
+				 const union xnsched_policy_param *p)
 {
 	__xnsched_rt_trackprio(thread, p);
 }
 
-void xnsched_rt_protectprio(struct xnthread *thread, int prio)
+static void xnsched_rt_protectprio(struct xnthread *thread, int prio)
 {
 	__xnsched_rt_protectprio(thread, prio);
 }

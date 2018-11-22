@@ -23,25 +23,25 @@ static struct xnthread *xnsched_idle_pick(struct xnsched *sched)
 	return &sched->rootcb;
 }
 
-bool xnsched_idle_setparam(struct xnthread *thread,
-			   const union xnsched_policy_param *p)
+static bool xnsched_idle_setparam(struct xnthread *thread,
+				  const union xnsched_policy_param *p)
 {
 	return __xnsched_idle_setparam(thread, p);
 }
 
-void xnsched_idle_getparam(struct xnthread *thread,
-			   union xnsched_policy_param *p)
+static void xnsched_idle_getparam(struct xnthread *thread,
+				  union xnsched_policy_param *p)
 {
 	__xnsched_idle_getparam(thread, p);
 }
 
-void xnsched_idle_trackprio(struct xnthread *thread,
-			   const union xnsched_policy_param *p)
+static void xnsched_idle_trackprio(struct xnthread *thread,
+				   const union xnsched_policy_param *p)
 {
 	__xnsched_idle_trackprio(thread, p);
 }
 
-void xnsched_idle_protectprio(struct xnthread *thread, int prio)
+static void xnsched_idle_protectprio(struct xnthread *thread, int prio)
 {
 	__xnsched_idle_protectprio(thread, prio);
 }

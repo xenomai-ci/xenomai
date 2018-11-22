@@ -44,8 +44,8 @@ static struct xnthread *xnsched_weak_pick(struct xnsched *sched)
 	return xnsched_getq(&sched->weak.runnable);
 }
 
-bool xnsched_weak_setparam(struct xnthread *thread,
-			   const union xnsched_policy_param *p)
+static bool xnsched_weak_setparam(struct xnthread *thread,
+				  const union xnsched_policy_param *p)
 {
 	if (!xnthread_test_state(thread, XNBOOST))
 		xnthread_set_state(thread, XNWEAK);
@@ -53,14 +53,14 @@ bool xnsched_weak_setparam(struct xnthread *thread,
 	return xnsched_set_effective_priority(thread, p->weak.prio);
 }
 
-void xnsched_weak_getparam(struct xnthread *thread,
-			   union xnsched_policy_param *p)
+static void xnsched_weak_getparam(struct xnthread *thread,
+				  union xnsched_policy_param *p)
 {
 	p->weak.prio = thread->cprio;
 }
 
-void xnsched_weak_trackprio(struct xnthread *thread,
-			    const union xnsched_policy_param *p)
+static void xnsched_weak_trackprio(struct xnthread *thread,
+				   const union xnsched_policy_param *p)
 {
 	if (p)
 		thread->cprio = p->weak.prio;
@@ -68,7 +68,7 @@ void xnsched_weak_trackprio(struct xnthread *thread,
 		thread->cprio = thread->bprio;
 }
 
-void xnsched_weak_protectprio(struct xnthread *thread, int prio)
+static void xnsched_weak_protectprio(struct xnthread *thread, int prio)
 {
   	if (prio > XNSCHED_WEAK_MAX_PRIO)
 		prio = XNSCHED_WEAK_MAX_PRIO;
