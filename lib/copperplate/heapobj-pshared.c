@@ -488,7 +488,8 @@ static void *sheapmem_alloc(struct shared_heap_memory *heap, size_t size)
 		bsize = size = SHEAPMEM_MIN_ALIGN;
 		log2size = SHEAPMEM_MIN_LOG2;
 	} else {
-		log2size = sizeof(size) * CHAR_BIT - 1 - __clz(size);
+		log2size = sizeof(size) * CHAR_BIT - 1 -
+			xenomai_count_leading_zeros(size);
 		if (log2size < SHEAPMEM_PAGE_SHIFT) {
 			if (size & (size - 1))
 				log2size++;

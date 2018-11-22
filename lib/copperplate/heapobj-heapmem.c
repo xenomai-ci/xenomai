@@ -68,7 +68,8 @@ int __heapobj_init_private(struct heapobj *hobj, const char *name,
 int heapobj_init_array_private(struct heapobj *hobj, const char *name,
 			       size_t size, int elems)
 {
-	size_t log2 = sizeof(size) * CHAR_BIT - 1 - __clz(size);
+	size_t log2 = sizeof(size) * CHAR_BIT - 1 -
+		xenomai_count_leading_zeros(size);
 
 	/*
 	 * Heapmem aligns individual object sizes on the next ^2

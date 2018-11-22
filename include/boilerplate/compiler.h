@@ -93,7 +93,7 @@ void __invalid_operand_size(void);
 		__ret;							\
 	})
 
-#define __clz(__v)							\
+#define xenomai_count_leading_zeros(__v)				\
 	({								\
 		int __ret;						\
 		if (!__v)						\

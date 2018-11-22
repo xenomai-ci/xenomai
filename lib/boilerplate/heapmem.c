@@ -435,7 +435,8 @@ void *heapmem_alloc(struct heap_memory *heap, size_t size)
 		bsize = size = HEAPMEM_MIN_ALIGN;
 		log2size = HEAPMEM_MIN_LOG2;
 	} else {
-		log2size = sizeof(size) * CHAR_BIT - 1 - __clz(size);
+		log2size = sizeof(size) * CHAR_BIT - 1 -
+			xenomai_count_leading_zeros(size);
 		if (log2size < HEAPMEM_PAGE_SHIFT) {
 			if (size & (size - 1))
 				log2size++;
