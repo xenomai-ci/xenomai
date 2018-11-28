@@ -1,7 +1,5 @@
 ACLOCAL_AMFLAGS=-I config
 
-SUDO=sudo
-
 SUBDIRS = 		\
 	doc		\
 	lib 		\
@@ -46,6 +44,9 @@ if XENO_COBALT
 	    done ; \
 	fi
 endif
+
+# legacy alias
+install-user: install
 
 install-exec-local: udev-rules
 
