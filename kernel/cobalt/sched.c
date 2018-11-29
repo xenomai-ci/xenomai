@@ -380,6 +380,10 @@ int xnsched_set_policy(struct xnthread *thread,
 {
 	int ret;
 
+	ret = xnsched_chkparam(sched_class, thread, p);
+	if (ret)
+		return ret;
+
 	/*
 	 * Declaring a thread to a new scheduling class may fail, so
 	 * we do that early, while the thread is still a member of the
