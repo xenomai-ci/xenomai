@@ -138,6 +138,8 @@ struct xnsched_class {
 			     const union xnsched_policy_param *p);
 	void (*sched_migrate)(struct xnthread *thread,
 			      struct xnsched *sched);
+	int (*sched_chkparam)(struct xnthread *thread,
+			      const union xnsched_policy_param *p);
 	/**
 	 * Set base scheduling parameters. This routine is indirectly
 	 * called upon a change of base scheduling settings through
@@ -511,6 +513,16 @@ static inline void xnsched_tick(struct xnsched *sched)
 	    xnthread_test_state(curr, XNTHREAD_BLOCK_BITS|XNRRB) == XNRRB &&
 		curr->lock_count == 0)
 		sched_class->sched_tick(sched);
+}
+
+static inline int xnsched_chkparam(struct xnsched_class *sched_class,
+				   struct xnthread *thread,
+				   const union xnsched_policy_param *p)
+{
+	if (sched_class->sched_chkparam)
+		return sched_class->sched_chkparam(thread, p);
+
+	return 0;
 }
 
 static inline int xnsched_declare(struct xnsched_class *sched_class,
