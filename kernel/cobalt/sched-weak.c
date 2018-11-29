@@ -67,8 +67,8 @@ void xnsched_weak_trackprio(struct xnthread *thread,
 		thread->cprio = thread->bprio;
 }
 
-static int xnsched_weak_declare(struct xnthread *thread,
-				const union xnsched_policy_param *p)
+static int xnsched_weak_chkparam(struct xnthread *thread,
+				 const union xnsched_policy_param *p)
 {
 	if (p->weak.prio < XNSCHED_WEAK_MIN_PRIO ||
 	    p->weak.prio > XNSCHED_WEAK_MAX_PRIO)
@@ -199,7 +199,7 @@ struct xnsched_class xnsched_class_weak = {
 	.sched_rotate		=	NULL,
 	.sched_forget		=	NULL,
 	.sched_kick		=	NULL,
-	.sched_declare		=	xnsched_weak_declare,
+	.sched_chkparam		=	xnsched_weak_chkparam,
 	.sched_setparam		=	xnsched_weak_setparam,
 	.sched_trackprio	=	xnsched_weak_trackprio,
 	.sched_getparam		=	xnsched_weak_getparam,
