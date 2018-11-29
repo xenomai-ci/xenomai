@@ -284,11 +284,9 @@ static void xnsched_sporadic_trackprio(struct xnthread *thread,
 		thread->cprio = thread->bprio;
 }
 
-static int xnsched_sporadic_declare(struct xnthread *thread,
-				    const union xnsched_policy_param *p)
+static int xnsched_sporadic_chkparam(struct xnthread *thread,
+				     const union xnsched_policy_param *p)
 {
-	struct xnsched_sporadic_data *pss;
-
 	if (p->pss.low_prio != -1 &&
 	    (p->pss.low_prio < XNSCHED_SPORADIC_MIN_PRIO ||
 	     p->pss.low_prio > XNSCHED_SPORADIC_MAX_PRIO))
@@ -312,6 +310,14 @@ static int xnsched_sporadic_declare(struct xnthread *thread,
 
 	if (p->pss.max_repl < 1 || p->pss.max_repl > MAX_REPLENISH)
 		return -EINVAL;
+
+	return 0;
+}
+
+static int xnsched_sporadic_declare(struct xnthread *thread,
+				    const union xnsched_policy_param *p)
+{
+	struct xnsched_sporadic_data *pss;
 
 	pss = xnmalloc(sizeof(*pss));
 	if (pss == NULL)
@@ -529,6 +535,7 @@ struct xnsched_class xnsched_class_sporadic = {
 	.sched_tick		=	NULL,
 	.sched_rotate		=	NULL,
 	.sched_migrate		=	NULL,
+	.sched_chkparam		=	xnsched_sporadic_chkparam,
 	.sched_setparam		=	xnsched_sporadic_setparam,
 	.sched_getparam		=	xnsched_sporadic_getparam,
 	.sched_trackprio	=	xnsched_sporadic_trackprio,
