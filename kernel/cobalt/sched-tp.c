@@ -163,16 +163,23 @@ static void xnsched_tp_protectprio(struct xnthread *thread, int prio)
 	thread->cprio = prio;
 }
 
-static int xnsched_tp_declare(struct xnthread *thread,
-			      const union xnsched_policy_param *p)
+static int xnsched_tp_chkparam(struct xnthread *thread,
+			       const union xnsched_policy_param *p)
 {
-	struct xnsched *sched = thread->sched;
-	struct xnsched_tp *tp = &sched->tp;
+	struct xnsched_tp *tp = &thread->sched->tp;
 
 	if (tp->gps == NULL ||
 	    p->tp.prio < XNSCHED_TP_MIN_PRIO ||
 	    p->tp.prio > XNSCHED_TP_MAX_PRIO)
 		return -EINVAL;
+
+	return 0;
+}
+
+static int xnsched_tp_declare(struct xnthread *thread,
+			      const union xnsched_policy_param *p)
+{
+	struct xnsched *sched = thread->sched;
 
 	list_add_tail(&thread->tp_link, &sched->tp.threads);
 
@@ -434,6 +441,7 @@ struct xnsched_class xnsched_class_tp = {
 	.sched_tick		=	NULL,
 	.sched_rotate		=	NULL,
 	.sched_migrate		=	xnsched_tp_migrate,
+	.sched_chkparam		=	xnsched_tp_chkparam,
 	.sched_setparam		=	xnsched_tp_setparam,
 	.sched_getparam		=	xnsched_tp_getparam,
 	.sched_trackprio	=	xnsched_tp_trackprio,
