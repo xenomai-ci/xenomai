@@ -293,8 +293,8 @@ static void xnsched_quota_protectprio(struct xnthread *thread, int prio)
 	thread->cprio = prio;
 }
 
-static int xnsched_quota_declare(struct xnthread *thread,
-				 const union xnsched_policy_param *p)
+static int xnsched_quota_chkparam(struct xnthread *thread,
+				  const union xnsched_policy_param *p)
 {
 	struct xnsched_quota_group *tg;
 	struct xnsched_quota *qs;
@@ -789,11 +789,11 @@ struct xnsched_class xnsched_class_quota = {
 	.sched_tick		=	NULL,
 	.sched_rotate		=	NULL,
 	.sched_migrate		=	xnsched_quota_migrate,
+	.sched_chkparam		=	xnsched_quota_chkparam,
 	.sched_setparam		=	xnsched_quota_setparam,
 	.sched_getparam		=	xnsched_quota_getparam,
 	.sched_trackprio	=	xnsched_quota_trackprio,
 	.sched_protectprio	=	xnsched_quota_protectprio,
-	.sched_declare		=	xnsched_quota_declare,
 	.sched_forget		=	xnsched_quota_forget,
 	.sched_kick		=	xnsched_quota_kick,
 #ifdef CONFIG_XENO_OPT_VFILE
