@@ -371,7 +371,7 @@ int rtdm_fd_fcntl(int ufd, int cmd, ...)
 {
 	struct rtdm_fd *fd;
 	va_list ap;
-	int arg;
+	long arg;
 	int ret;
 
 	fd = rtdm_fd_get(ufd, 0);
@@ -379,7 +379,7 @@ int rtdm_fd_fcntl(int ufd, int cmd, ...)
 		return PTR_ERR(fd);
 
 	va_start(ap, cmd);
-	arg = va_arg(ap, int);
+	arg = va_arg(ap, long);
 	va_end(ap);
 
 	switch (cmd) {

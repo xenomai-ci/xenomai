@@ -53,7 +53,7 @@ COBALT_SYSCALL(close, lostage, (int fd))
 	return rtdm_fd_close(fd, 0);
 }
 
-COBALT_SYSCALL(fcntl, current, (int fd, int cmd, int arg))
+COBALT_SYSCALL(fcntl, current, (int fd, int cmd, long arg))
 {
 	return rtdm_fd_fcntl(fd, cmd, arg);
 }

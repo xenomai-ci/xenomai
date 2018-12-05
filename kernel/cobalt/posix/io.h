@@ -37,7 +37,7 @@ COBALT_SYSCALL_DECL(socket,
 
 COBALT_SYSCALL_DECL(close, (int fd));
 
-COBALT_SYSCALL_DECL(fcntl, (int fd, int cmd, int arg));
+COBALT_SYSCALL_DECL(fcntl, (int fd, int cmd, long arg));
 
 COBALT_SYSCALL_DECL(ioctl,
 		    (int fd, unsigned int request, void __user *arg));
