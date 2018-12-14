@@ -44,9 +44,9 @@ MODULE_PARM_DESC(device_rtskbs, "Number of additional global realtime socket "
 struct rtnet_device         *rtnet_devices[MAX_RT_DEVICES];
 static struct rtnet_device  *loopback_device;
 static DEFINE_RTDM_LOCK(rtnet_devices_rt_lock);
+static LIST_HEAD(rtskb_mapped_list);
 
 LIST_HEAD(event_hook_list);
-LIST_HEAD(rtskb_list);
 DEFINE_MUTEX(rtnet_devices_nrt_lock);
 
 static int rtdev_locked_xmit(struct rtskb *skb, struct rtnet_device *rtdev);
@@ -412,8 +412,8 @@ int rtdev_map_rtskb(struct rtskb *skb)
 	}
     }
 
-    if (!err)
-	list_add(&skb->entry, &rtskb_list);
+    if (!err && skb->buf_dma_addr != RTSKB_UNMAPPED)
+	list_add(&skb->entry, &rtskb_mapped_list);
 
     mutex_unlock(&rtnet_devices_nrt_lock);
 
@@ -430,7 +430,7 @@ static int rtdev_map_all_rtskbs(struct rtnet_device *rtdev)
     if (!rtdev->map_rtskb)
 	return 0;
 
-    list_for_each_entry(skb, &rtskb_list, entry) {
+    list_for_each_entry(skb, &rtskb_mapped_list, entry) {
 	err = rtskb_map(rtdev, skb);
 	if (err)
 	   break;
@@ -474,7 +474,7 @@ static void rtdev_unmap_all_rtskbs(struct rtnet_device *rtdev)
     if (!rtdev->unmap_rtskb)
 	return;
 
-    list_for_each_entry(skb, &rtskb_list, entry) {
+    list_for_each_entry(skb, &rtskb_mapped_list, entry) {
 	rtdev->unmap_rtskb(rtdev, skb);
     }
 }
