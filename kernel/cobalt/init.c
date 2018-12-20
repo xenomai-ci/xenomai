@@ -388,9 +388,8 @@ static int __init xenomai_init(void)
 
 	rtdm_fd_init();
 
-	printk(XENO_INFO "Cobalt v%s (%s) %s%s%s%s\n",
+	printk(XENO_INFO "Cobalt v%s %s%s%s%s\n",
 	       XENO_VERSION_STRING,
-	       XENO_VERSION_NAME,
 	       boot_debug_notice,
 	       boot_lat_trace_notice,
 	       boot_evt_trace_notice,
