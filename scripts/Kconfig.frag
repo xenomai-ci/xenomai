@@ -49,7 +49,3 @@ config XENO_REVISION_LEVEL
 config XENO_VERSION_STRING
        string
        default @VERSION_STRING@
-
-config XENO_VERSION_NAME
-       string
-       default "@VERSION_NAME@"
