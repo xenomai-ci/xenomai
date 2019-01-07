@@ -475,7 +475,7 @@ void xnarch_leave_root(struct xnthread *root)
 	switch_fpu_finish(&current->thread.fpu, smp_processor_id());
 #else
 	/* mark current thread as not owning the FPU anymore */
-	if (&current->thread.fpu.fpstate_active)
+	if (fpregs_active())
 		fpregs_deactivate(&current->thread.fpu);
 #endif
 }
