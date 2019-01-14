@@ -449,6 +449,17 @@ out:
 	}
 }
 
+static inline bool cobalt_owns_irq(int irq)
+{
+	ipipe_irq_handler_t h;
+
+	h = __ipipe_irq_handler(&xnsched_realtime_domain, irq);
+
+	return h == xnintr_vec_handler ||
+		h == xnintr_edge_vec_handler ||
+		h == xnintr_irq_handler;
+}
+
 static inline int xnintr_irq_attach(struct xnintr *intr)
 {
 	struct xnintr_vector *vec = vectors + intr->irq;
@@ -538,9 +549,19 @@ struct xnintr_vector {
 
 static struct xnintr_vector vectors[IPIPE_NR_IRQS];
 
+static inline bool cobalt_owns_irq(int irq)
+{
+	ipipe_irq_handler_t h;
+
+	h = __ipipe_irq_handler(&xnsched_realtime_domain, irq);
+
+	return h == xnintr_irq_handler;
+}
+
 static inline struct xnintr *xnintr_vec_first(unsigned int irq)
 {
-	return __ipipe_irq_cookie(&xnsched_realtime_domain, irq);
+	return cobalt_owns_irq(irq) ?
+		__ipipe_irq_cookie(&xnsched_realtime_domain, irq) : NULL;
 }
 
 static inline struct xnintr *xnintr_vec_next(struct xnintr *prev)
@@ -1067,6 +1088,7 @@ static inline int format_irq_proc(unsigned int irq,
 				  struct xnvfile_regular_iterator *it)
 {
 	struct xnintr *intr;
+	struct irq_desc *d;
 	int cpu;
 
 	for_each_realtime_cpu(cpu)
@@ -1100,15 +1122,21 @@ static inline int format_irq_proc(unsigned int irq,
 
 	mutex_lock(&intrlock);
 
-	intr = xnintr_vec_first(irq);
-	if (intr) {
-		xnvfile_puts(it, "        ");
+	if (!cobalt_owns_irq(irq)) {
+		xnvfile_puts(it, "         ");
+		d = irq_to_desc(irq);
+		xnvfile_puts(it, d && d->name ? d->name : "-");
+	} else {
+		intr = xnintr_vec_first(irq);
+		if (intr) {
+			xnvfile_puts(it, "        ");
 
-		do {
-			xnvfile_putc(it, ' ');
-			xnvfile_puts(it, intr->name);
-			intr = xnintr_vec_next(intr);
-		} while (intr);
+			do {
+				xnvfile_putc(it, ' ');
+				xnvfile_puts(it, intr->name);
+				intr = xnintr_vec_next(intr);
+			} while (intr);
+		}
 	}
 
 	mutex_unlock(&intrlock);
