@@ -4,5 +4,4 @@ EXTRA_DIST= 		\
 	apirev		\
 	version-label	\
 	version-code	\
-	version-name	\
 	ac_prog_cc_for_build.m4
