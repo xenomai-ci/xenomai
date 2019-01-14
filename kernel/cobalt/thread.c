@@ -1471,16 +1471,14 @@ int xnthread_set_slice(struct xnthread *thread, xnticks_t quantum)
 	struct xnsched *sched;
 	spl_t s;
 
-	if (quantum <= xnclock_get_gravity(&nkclock, user))
-		return -EINVAL;
-
 	xnlock_get_irqsave(&nklock, s);
 
 	sched = thread->sched;
 	thread->rrperiod = quantum;
 
 	if (quantum != XN_INFINITE) {
-		if (thread->base_class->sched_tick == NULL) {
+		if (quantum <= xnclock_get_gravity(&nkclock, user) ||
+		    thread->base_class->sched_tick == NULL) {
 			xnlock_put_irqrestore(&nklock, s);
 			return -EINVAL;
 		}
