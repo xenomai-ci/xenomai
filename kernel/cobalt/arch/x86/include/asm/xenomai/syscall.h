@@ -62,7 +62,7 @@
 #define __xn_rootcall_p(__regs, __code)			\
 	({						\
 		*(__code) = __xn_reg_sys(__regs);	\
-		*(__code) < NR_syscalls;		\
+		*(__code) < ipipe_root_nr_syscalls(current_thread_info()); \
 	})
 
 static inline void __xn_error_return(struct pt_regs *regs, int v)
