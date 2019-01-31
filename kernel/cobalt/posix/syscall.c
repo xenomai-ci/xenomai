@@ -646,7 +646,7 @@ ret_handled:
 
 linux_syscall:
 	code = __xn_get_syscall_nr(regs);
-	if (code >= NR_syscalls)
+	if (code >= ipipe_root_nr_syscalls(current_thread_info()))
 		goto bad_syscall;
 
 	if (xnsched_root_p())
