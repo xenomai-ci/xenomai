@@ -28,7 +28,8 @@ struct rtdm_gpio_chan {
 	int requested : 1,
 		has_direction : 1,
 		is_output : 1,
-		is_interrupt : 1;
+	        is_interrupt : 1,
+		want_timestamp : 1;
 };
 
 static LIST_HEAD(rtdm_gpio_chips);
@@ -41,6 +42,7 @@ static int gpio_pin_interrupt(rtdm_irq_t *irqh)
 
 	pin = rtdm_irq_get_arg(irqh, struct rtdm_gpio_pin);
 
+	pin->timestamp = rtdm_clock_read_monotonic();
 	rtdm_event_signal(&pin->event);
 
 	return RTDM_IRQ_HANDLED;
@@ -187,6 +189,12 @@ static int gpio_pin_ioctl_nrt(struct rtdm_fd *fd,
 		gpio_free(gpio);
 		chan->requested = false;
 		break;
+	case GPIO_RTIOC_TS:
+		ret = rtdm_safe_copy_from_user(fd, &val, arg, sizeof(val));
+		if (ret)
+			return ret;
+		chan->want_timestamp = !!val;
+		break;
 	default:
 		return -EINVAL;
 	}
@@ -199,11 +207,9 @@ static ssize_t gpio_pin_read_rt(struct rtdm_fd *fd,
 {
 	struct rtdm_gpio_chan *chan = rtdm_fd_to_private(fd);
 	struct rtdm_device *dev = rtdm_fd_device(fd);
+	struct rtdm_gpio_readout rdo;
 	struct rtdm_gpio_pin *pin;
-	int value, ret;
-
-	if (len < sizeof(value))
-		return -EINVAL;
+	int ret;
 
 	if (!chan->has_direction)
 		return -EAGAIN;
@@ -213,16 +219,37 @@ static ssize_t gpio_pin_read_rt(struct rtdm_fd *fd,
 
 	pin = container_of(dev, struct rtdm_gpio_pin, dev);
 
-	if (!(fd->oflags & O_NONBLOCK)) {
-		ret = rtdm_event_wait(&pin->event);
-		if (ret)
-			return ret;
-	}
+	if (chan->want_timestamp) {
+		if (len < sizeof(rdo))
+			return -EINVAL;
 
-	value = gpiod_get_raw_value(pin->desc);
-	ret = rtdm_safe_copy_to_user(fd, buf, &value, sizeof(value));
+		if (!(fd->oflags & O_NONBLOCK)) {
+			ret = rtdm_event_wait(&pin->event);
+			if (ret)
+				return ret;
+			rdo.timestamp = pin->timestamp;
+		} else
+			rdo.timestamp = rtdm_clock_read_monotonic();
+
+		len = sizeof(rdo);
+		rdo.value = gpiod_get_raw_value(pin->desc);
+		ret = rtdm_safe_copy_to_user(fd, buf, &rdo, len);
+	} else {
+		if (len < sizeof(rdo.value))
+			return -EINVAL;
+
+		if (!(fd->oflags & O_NONBLOCK)) {
+			ret = rtdm_event_wait(&pin->event);
+			if (ret)
+				return ret;
+		}
+
+		len = sizeof(rdo.value);
+		rdo.value = gpiod_get_raw_value(pin->desc);
+		ret = rtdm_safe_copy_to_user(fd, buf, &rdo.value, len);
+	}
 	
-	return ret ?: sizeof(value);
+	return ret ?: len;
 }
 
 static ssize_t gpio_pin_write_rt(struct rtdm_fd *fd,
@@ -462,6 +489,7 @@ int rtdm_gpiochip_post_event(struct rtdm_gpio_chip *rgc,
 		return -EINVAL;
 
 	pin = rgc->pins + offset;
+	pin->timestamp = rtdm_clock_read_monotonic();
 	rtdm_event_signal(&pin->event);
 	
 	return 0;

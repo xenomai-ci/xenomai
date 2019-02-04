@@ -33,6 +33,7 @@ struct rtdm_gpio_pin {
 	rtdm_event_t event;
 	char *name;
 	struct gpio_desc *desc;
+	nanosecs_abs_t timestamp;
 };
 
 struct rtdm_gpio_chip {
