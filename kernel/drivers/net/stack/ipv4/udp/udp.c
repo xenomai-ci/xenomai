@@ -553,8 +553,10 @@ static int rt_udp_getfrag(const void *p, unsigned char *to,
 
 
     // We should optimize this function a bit (copy+csum...)!
-    if (offset)
-	    return rtnet_read_from_iov(ufh->fd, ufh->iov, ufh->iovlen, to, fraglen);
+    if (offset) {
+	    ret = rtnet_read_from_iov(ufh->fd, ufh->iov, ufh->iovlen, to, fraglen);
+	    return ret < 0 ? ret : 0;
+    }
 
     /* Checksum of the complete data part of the UDP message: */
     for (i = 0; i < ufh->iovlen; i++) {
@@ -565,7 +567,7 @@ static int rt_udp_getfrag(const void *p, unsigned char *to,
     ret = rtnet_read_from_iov(ufh->fd, ufh->iov, ufh->iovlen,
 			      to + sizeof(struct udphdr),
 			      fraglen - sizeof(struct udphdr));
-    if (ret)
+    if (ret < 0)
 	    return ret;
 
     /* Checksum of the udp header: */
