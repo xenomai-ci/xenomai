@@ -45,6 +45,7 @@ struct rtnet_device         *rtnet_devices[MAX_RT_DEVICES];
 static struct rtnet_device  *loopback_device;
 static DEFINE_RTDM_LOCK(rtnet_devices_rt_lock);
 static LIST_HEAD(rtskb_mapped_list);
+static LIST_HEAD(rtskb_mapwait_list);
 
 LIST_HEAD(event_hook_list);
 DEFINE_MUTEX(rtnet_devices_nrt_lock);
@@ -459,8 +460,12 @@ int rtdev_map_rtskb(struct rtskb *skb)
 	}
     }
 
-    if (!err && skb->buf_dma_addr != RTSKB_UNMAPPED)
-	list_add(&skb->entry, &rtskb_mapped_list);
+    if (!err) {
+        if (skb->buf_dma_addr != RTSKB_UNMAPPED)
+	    list_add(&skb->entry, &rtskb_mapped_list);
+        else
+	    list_add(&skb->entry, &rtskb_mapwait_list);
+    }
 
     mutex_unlock(&rtnet_devices_nrt_lock);
 
@@ -471,7 +476,7 @@ int rtdev_map_rtskb(struct rtskb *skb)
 
 static int rtdev_map_all_rtskbs(struct rtnet_device *rtdev)
 {
-    struct rtskb *skb;
+    struct rtskb *skb, *n;
     int err = 0;
 
     if (!rtdev->map_rtskb)
@@ -481,6 +486,14 @@ static int rtdev_map_all_rtskbs(struct rtnet_device *rtdev)
 	err = rtskb_map(rtdev, skb);
 	if (err)
 	   break;
+    }
+
+    list_for_each_entry_safe(skb, n, &rtskb_mapwait_list, entry) {
+	err = rtskb_map(rtdev, skb);
+	if (err)
+	   break;
+	list_del(&skb->entry);
+	list_add(&skb->entry, &rtskb_mapped_list);
     }
 
     return err;
@@ -580,7 +593,7 @@ int rt_register_rtnetdev(struct rtnet_device *rtdev)
 	    if (err)
 		    goto fail_link;
     }
-   
+
     err = rtdev_map_all_rtskbs(rtdev);
     if (err)
 	    goto fail_map;
