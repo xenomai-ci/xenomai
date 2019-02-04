@@ -549,7 +549,7 @@ static int rt_udp_getfrag(const void *p, unsigned char *to,
                           unsigned int offset, unsigned int fraglen)
 {
     struct udpfakehdr *ufh = (struct udpfakehdr *)p;
-    int i, ret;
+    int ret;
 
 
     // We should optimize this function a bit (copy+csum...)!
@@ -558,17 +558,16 @@ static int rt_udp_getfrag(const void *p, unsigned char *to,
 	    return ret < 0 ? ret : 0;
     }
 
-    /* Checksum of the complete data part of the UDP message: */
-    for (i = 0; i < ufh->iovlen; i++) {
-            ufh->wcheck = csum_partial(ufh->iov[i].iov_base, ufh->iov[i].iov_len,
-                                       ufh->wcheck);
-    }
-
     ret = rtnet_read_from_iov(ufh->fd, ufh->iov, ufh->iovlen,
 			      to + sizeof(struct udphdr),
 			      fraglen - sizeof(struct udphdr));
     if (ret < 0)
 	    return ret;
+
+    /* Checksum of the complete data part of the UDP message: */
+    ufh->wcheck = csum_partial(to + sizeof(struct udphdr),
+			       fraglen - sizeof(struct udphdr),
+			       ufh->wcheck);
 
     /* Checksum of the udp header: */
     ufh->wcheck = csum_partial((unsigned char *)ufh,
@@ -684,7 +683,7 @@ ssize_t rt_udp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg, int ms
     ufh.uh.len    = htons(ulen);
     ufh.uh.check  = 0;
     ufh.fd        = fd;
-    ufh.iov       = msg->msg_iov;
+    ufh.iov       = iov;
     ufh.iovlen    = msg->msg_iovlen;
     ufh.wcheck    = 0;
 
