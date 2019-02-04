@@ -156,10 +156,11 @@ static struct rtskb *__rtskb_pool_dequeue(struct rtskb_pool *pool)
     struct rtskb_queue *queue = &pool->queue;
     struct rtskb *skb;
 
-    if (!pool->lock_ops->trylock(pool->lock_cookie))
+    if (pool->lock_ops &&
+	!pool->lock_ops->trylock(pool->lock_cookie))
 	    return NULL;
     skb = __rtskb_dequeue(queue);
-    if (skb == NULL)
+    if (skb == NULL && pool->lock_ops)
 	    pool->lock_ops->unlock(pool->lock_cookie);
 
     return skb;
@@ -184,7 +185,8 @@ static void __rtskb_pool_queue_tail(struct rtskb_pool *pool, struct rtskb *skb)
     struct rtskb_queue *queue = &pool->queue;
 
     __rtskb_queue_tail(queue,skb);
-    pool->lock_ops->unlock(pool->lock_cookie);
+    if (pool->lock_ops)
+	    pool->lock_ops->unlock(pool->lock_cookie);
 }
 
 void rtskb_pool_queue_tail(struct rtskb_pool *pool, struct rtskb *skb)
@@ -292,21 +294,6 @@ void kfree_rtskb(struct rtskb *skb)
 EXPORT_SYMBOL_GPL(kfree_rtskb);
 
 
-static int rtskb_nop_pool_trylock(void *cookie)
-{
-    return 1;
-}
-
-static void rtskb_nop_pool_unlock(void *cookie)
-{
-}
-
-static const struct rtskb_pool_lock_ops rtskb_nop_pool_lock_ops = {
-    .trylock = rtskb_nop_pool_trylock,
-    .unlock = rtskb_nop_pool_unlock,
-};
-
-
 /***
  *  rtskb_pool_init
  *  @pool: pool to be initialized
@@ -328,7 +315,7 @@ unsigned int rtskb_pool_init(struct rtskb_pool *pool,
     if (rtskb_pools > rtskb_pools_max)
 	rtskb_pools_max = rtskb_pools;
 
-    pool->lock_ops = lock_ops ?: &rtskb_nop_pool_lock_ops;
+    pool->lock_ops = lock_ops;
     pool->lock_cookie = lock_cookie;
 
     return i;
