@@ -1579,8 +1579,8 @@ static int rt_imx_uart_probe(struct platform_device *pdev)
 	if (IS_ERR(port->clk_per))
 		return PTR_ERR(port->clk_per);
 
-	clk_enable(port->clk_ipg);
-	clk_enable(port->clk_per);
+	clk_prepare_enable(port->clk_ipg);
+	clk_prepare_enable(port->clk_per);
 	port->uartclk = clk_get_rate(port->clk_per);
 
 	port->use_hwflow = 1;
@@ -1605,6 +1605,8 @@ static int rt_imx_uart_remove(struct platform_device *pdev)
 	pdata = pdev->dev.platform_data;
 	platform_set_drvdata(pdev, NULL);
 
+	clk_disable_unprepare(port->clk_ipg);
+	clk_disable_unprepare(port->clk_per);
 	rtdm_dev_unregister(dev);
 
 	return 0;
