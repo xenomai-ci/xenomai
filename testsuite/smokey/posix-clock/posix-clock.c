@@ -417,7 +417,7 @@ static int clock_decrease_after_periodic_timer_first_tick(void)
 
 	diff = now.tv_sec * 1000000000ULL + now.tv_nsec -
 		(timer.it_value.tv_sec * 1000000000ULL + timer.it_value.tv_nsec);
-	if (!smokey_assert(diff < 1000000000))
+	if (!smokey_assert(diff < 2000000000))
 		return -EINVAL;
 	
 	ret = smokey_check_errno(read(t, &ticks, sizeof(ticks)));
