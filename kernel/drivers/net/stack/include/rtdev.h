@@ -180,11 +180,20 @@ extern struct mutex rtnet_devices_nrt_lock;
 extern struct rtnet_device *rtnet_devices[];
 
 
+int __rt_init_etherdev(struct rtnet_device *rtdev,
+		       unsigned int dev_pool_size,
+		       struct module *module);
+
+#define rt_init_etherdev(__rtdev, __dev_pool_size)	\
+    __rt_init_etherdev(__rtdev, __dev_pool_size, THIS_MODULE)
+
 struct rtnet_device *__rt_alloc_etherdev(unsigned sizeof_priv,
 					unsigned dev_pool_size,
 					struct module *module);
 #define rt_alloc_etherdev(priv_size, rx_size) \
     __rt_alloc_etherdev(priv_size, rx_size, THIS_MODULE)
+
+void rtdev_destroy(struct rtnet_device *rtdev);
 
 void rtdev_free(struct rtnet_device *rtdev);
 

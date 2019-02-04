@@ -251,6 +251,39 @@ static const struct rtskb_pool_lock_ops rtdev_ops = {
     .unlock = rtdev_pool_unlock,
 };
 
+int rtdev_init(struct rtnet_device *rtdev, unsigned dev_pool_size)
+{
+    int ret;
+
+    ret = rtskb_pool_init(&rtdev->dev_pool, dev_pool_size, &rtdev_ops, rtdev);
+    if (ret < dev_pool_size) {
+	printk(KERN_ERR "RTnet: cannot allocate rtnet device pool\n");
+	rtskb_pool_release(&rtdev->dev_pool);
+	return -ENOMEM;
+    }
+
+    rtdm_mutex_init(&rtdev->xmit_mutex);
+    rtdm_lock_init(&rtdev->rtdev_lock);
+    mutex_init(&rtdev->nrt_lock);
+
+    atomic_set(&rtdev->refcount, 0);
+
+    /* scale global rtskb pool */
+    rtdev->add_rtskbs = rtskb_pool_extend(&global_pool, device_rtskbs);
+
+    return 0;
+}
+EXPORT_SYMBOL_GPL(rtdev_init);
+
+void rtdev_destroy(struct rtnet_device *rtdev)
+{
+    rtskb_pool_release(&rtdev->dev_pool);
+    rtskb_pool_shrink(&global_pool, rtdev->add_rtskbs);
+    rtdev->stack_event = NULL;
+    rtdm_mutex_destroy(&rtdev->xmit_mutex);
+}
+EXPORT_SYMBOL_GPL(rtdev_destroy);
+
 /***
  *  rtdev_alloc
  *  @int sizeof_priv:
@@ -267,30 +300,17 @@ struct rtnet_device *rtdev_alloc(unsigned sizeof_priv, unsigned dev_pool_size)
     /* ensure 32-byte alignment of the private area */
     alloc_size = sizeof (*rtdev) + sizeof_priv + 31;
 
-    rtdev = (struct rtnet_device *)kmalloc(alloc_size, GFP_KERNEL);
+    rtdev = kzalloc(alloc_size, GFP_KERNEL);
     if (rtdev == NULL) {
 	printk(KERN_ERR "RTnet: cannot allocate rtnet device\n");
 	return NULL;
     }
 
-    memset(rtdev, 0, alloc_size);
-
-    ret = rtskb_pool_init(&rtdev->dev_pool, dev_pool_size, &rtdev_ops, rtdev);
-    if (ret < dev_pool_size) {
-	printk(KERN_ERR "RTnet: cannot allocate rtnet device pool\n");
-	rtskb_pool_release(&rtdev->dev_pool);
+    ret = rtdev_init(rtdev, dev_pool_size);
+    if (ret) {
 	kfree(rtdev);
 	return NULL;
     }
-
-    rtdm_mutex_init(&rtdev->xmit_mutex);
-    rtdm_lock_init(&rtdev->rtdev_lock);
-    mutex_init(&rtdev->nrt_lock);
-
-    atomic_set(&rtdev->refcount, 0);
-
-    /* scale global rtskb pool */
-    rtdev->add_rtskbs = rtskb_pool_extend(&global_pool, device_rtskbs);
 
     if (sizeof_priv)
 	rtdev->priv = (void *)(((long)(rtdev + 1) + 31) & ~31);
@@ -298,46 +318,22 @@ struct rtnet_device *rtdev_alloc(unsigned sizeof_priv, unsigned dev_pool_size)
     return rtdev;
 }
 
-
-
 /***
  *  rtdev_free
  */
 void rtdev_free (struct rtnet_device *rtdev)
 {
     if (rtdev != NULL) {
-	rtskb_pool_release(&rtdev->dev_pool);
-	rtskb_pool_shrink(&global_pool, rtdev->add_rtskbs);
-	rtdev->stack_event = NULL;
-	rtdm_mutex_destroy(&rtdev->xmit_mutex);
+	rtdev_destroy(rtdev);
 	kfree(rtdev);
     }
 }
+EXPORT_SYMBOL_GPL(rtdev_free);
 
 
-
-/**
- * rtalloc_etherdev - Allocates and sets up an ethernet device
- * @sizeof_priv: size of additional driver-private structure to
- *               be allocated for this ethernet device
- * @dev_pool_size: size of the rx pool
- * @module: module creating the deivce
- *
- * Fill in the fields of the device structure with ethernet-generic
- * values. Basically does everything except registering the device.
- *
- * A 32-byte alignment is enforced for the private data area.
- */
-struct rtnet_device *__rt_alloc_etherdev(unsigned sizeof_priv,
-					unsigned dev_pool_size,
-					struct module *module)
+static void init_etherdev(struct rtnet_device *rtdev,
+			  struct module *module)
 {
-    struct rtnet_device *rtdev;
-
-    rtdev = rtdev_alloc(sizeof_priv, dev_pool_size);
-    if (!rtdev)
-	return NULL;
-
     rtdev->hard_header     = rt_eth_header;
     rtdev->type            = ARPHRD_ETHER;
     rtdev->hard_header_len = ETH_HLEN;
@@ -349,10 +345,61 @@ struct rtnet_device *__rt_alloc_etherdev(unsigned sizeof_priv,
 
     memset(rtdev->broadcast, 0xFF, ETH_ALEN);
     strcpy(rtdev->name, "rteth%d");
+}
+
+/**
+ * rt_init_etherdev - sets up an ethernet device
+ * @module: module initializing the device
+ *
+ * Fill in the fields of the device structure with ethernet-generic
+ * values. This routine can be used to set up a pre-allocated device
+ * structure. The device still needs to be registered afterwards.
+ */
+int __rt_init_etherdev(struct rtnet_device *rtdev,
+			unsigned dev_pool_size,
+			struct module *module)
+{
+    int ret;
+
+    ret = rtdev_init(rtdev, dev_pool_size);
+    if (ret)
+	    return ret;
+
+    init_etherdev(rtdev, module);
+
+    return 0;
+}
+EXPORT_SYMBOL_GPL(__rt_init_etherdev);
+
+
+/**
+ * rt_alloc_etherdev - Allocates and sets up an ethernet device
+ * @sizeof_priv: size of additional driver-private structure to
+ *               be allocated for this ethernet device
+ * @dev_pool_size: size of the rx pool
+ * @module: module creating the device
+ *
+ * Allocates then fills in the fields of a new device structure with
+ * ethernet-generic values. Basically does everything except
+ * registering the device.
+ *
+ * A 32-byte alignment is enforced for the private data area.
+ */
+struct rtnet_device *__rt_alloc_etherdev(unsigned sizeof_priv,
+					 unsigned dev_pool_size,
+					 struct module *module)
+{
+    struct rtnet_device *rtdev;
+
+    rtdev = rtdev_alloc(sizeof_priv, dev_pool_size);
+    if (!rtdev)
+	return NULL;
+
+    init_etherdev(rtdev, module);
 
     return rtdev;
 }
-
+EXPORT_SYMBOL_GPL(__rt_alloc_etherdev);
 
 
 static inline int __rtdev_new_index(void)
@@ -906,9 +953,6 @@ unsigned int rt_hard_mtu(struct rtnet_device *rtdev, unsigned int priority)
     return rtdev->mtu;
 }
 
-
-EXPORT_SYMBOL_GPL(__rt_alloc_etherdev);
-EXPORT_SYMBOL_GPL(rtdev_free);
 
 EXPORT_SYMBOL_GPL(rtdev_alloc_name);
 
