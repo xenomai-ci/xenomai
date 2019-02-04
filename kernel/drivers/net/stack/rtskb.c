@@ -223,6 +223,7 @@ struct rtskb *alloc_rtskb(unsigned int size, struct rtskb_pool *pool)
     skb->len = 0;
     skb->pkt_type = PACKET_HOST;
     skb->xmit_stamp = NULL;
+    skb->ip_summed = CHECKSUM_NONE;
 
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_RTCAP)
     skb->cap_flags = 0;
