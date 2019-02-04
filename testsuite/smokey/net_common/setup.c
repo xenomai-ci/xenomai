@@ -36,7 +36,7 @@ struct module {
 static struct rtnet_core_cmd cmd;
 static int fd;
 static pthread_t loopback_server_tid;
-static bool loopback_thread_created;
+static bool loopback_thread_created, ifup;
 static struct module modules[] = {
 	{
 		.name = "rtnet",
@@ -447,6 +447,7 @@ int smokey_net_setup(const char *driver, const char *intf, int tested_config,
 		err = do_up(intf);
 		if (err < 0)
 			goto err;
+		ifup = true;
 	}
 
 	smokey_trace("Waiting for interface %s to be running", intf);
@@ -543,9 +544,11 @@ int smokey_net_teardown(const char *driver, const char *intf, int tested_config)
 				err = tmp;
 		}
 
-		tmp = do_down(intf);
-		if (err == 0)
-			err = tmp;
+		if (ifup) {
+			tmp = do_down(intf);
+			if (err == 0)
+				err = tmp;
+		}
 
 		close(fd);
 	} else
