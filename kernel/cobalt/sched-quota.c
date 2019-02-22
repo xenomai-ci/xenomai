@@ -20,6 +20,7 @@
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/arith.h>
 #include <cobalt/uapi/sched.h>
+#include <trace/events/cobalt-core.h>
 
 /*
  * With this policy, each per-CPU scheduler slot maintains a list of
@@ -155,6 +156,8 @@ static void quota_refill_handler(struct xntimer *timer)
 	XENO_BUG_ON(COBALT, list_empty(&qs->groups));
 	sched = container_of(qs, struct xnsched, quota);
 
+	trace_cobalt_schedquota_refill(0);
+
 	list_for_each_entry(tg, &qs->groups, next) {
 		/* Allot a new runtime budget for the group. */
 		replenish_budget(qs, tg);
@@ -254,6 +257,9 @@ static bool xnsched_quota_setparam(struct xnthread *thread,
 			list_del(&thread->quota_next);
 			thread->quota->nr_threads--;
 		}
+
+		trace_cobalt_schedquota_add_thread(tg, thread);
+
 		thread->quota = tg;
 		list_add(&thread->quota_next, &tg->members);
 		tg->nr_threads++;
@@ -330,6 +336,8 @@ static int xnsched_quota_chkparam(struct xnthread *thread,
 
 static void xnsched_quota_forget(struct xnthread *thread)
 {
+	trace_cobalt_schedquota_remove_thread(thread->quota, thread);
+
 	thread->quota->nr_threads--;
 	XENO_BUG_ON(COBALT, thread->quota->nr_threads < 0);
 	list_del(&thread->quota_next);
@@ -525,6 +533,8 @@ int xnsched_quota_create_group(struct xnsched_quota_group *tg,
 	INIT_LIST_HEAD(&tg->members);
 	INIT_LIST_HEAD(&tg->expired);
 
+	trace_cobalt_schedquota_create_group(tg);
+
 	if (list_empty(&qs->groups))
 		xntimer_start(&qs->refill_timer,
 			      qs->period_ns, qs->period_ns, XN_RELATIVE);
@@ -555,6 +565,8 @@ int xnsched_quota_destroy_group(struct xnsched_quota_group *tg,
 		}
 	}
 
+	trace_cobalt_schedquota_destroy_group(tg);
+
 	list_del(&tg->next);
 	__clear_bit(tg->tgid, group_map);
 
@@ -576,6 +588,9 @@ void xnsched_quota_set_limit(struct xnsched_quota_group *tg,
 	xnticks_t now, elapsed, consumed;
 
 	atomic_only();
+
+	trace_cobalt_schedquota_set_limit(tg, quota_percent,
+					  quota_peak_percent);
 
 	if (quota_percent < 0 || quota_percent > 100) { /* Quota off. */
 		quota_percent = 100;

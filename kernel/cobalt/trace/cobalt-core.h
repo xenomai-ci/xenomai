@@ -203,6 +203,106 @@ TRACE_EVENT(cobalt_switch_context,
 		  __get_str(next_name), __entry->next_pid, __entry->next_prio)
 );
 
+#ifdef CONFIG_XENO_OPT_SCHED_QUOTA
+
+TRACE_EVENT(cobalt_schedquota_refill,
+	TP_PROTO(int dummy),
+	TP_ARGS(dummy),
+
+	TP_STRUCT__entry(
+		__field(int, dummy)
+	),
+
+	TP_fast_assign(
+		(void)dummy;
+	),
+
+	TP_printk("%s", "")
+);
+
+DECLARE_EVENT_CLASS(schedquota_group_event,
+	TP_PROTO(struct xnsched_quota_group *tg),
+	TP_ARGS(tg),
+
+	TP_STRUCT__entry(
+		__field(int, tgid)
+	),
+
+	TP_fast_assign(
+		__entry->tgid = tg->tgid;
+	),
+
+	TP_printk("tgid=%d",
+		  __entry->tgid)
+);
+
+DEFINE_EVENT(schedquota_group_event, cobalt_schedquota_create_group,
+	TP_PROTO(struct xnsched_quota_group *tg),
+	TP_ARGS(tg)
+);
+
+DEFINE_EVENT(schedquota_group_event, cobalt_schedquota_destroy_group,
+	TP_PROTO(struct xnsched_quota_group *tg),
+	TP_ARGS(tg)
+);
+
+TRACE_EVENT(cobalt_schedquota_set_limit,
+	TP_PROTO(struct xnsched_quota_group *tg,
+		 int percent,
+		 int peak_percent),
+	TP_ARGS(tg, percent, peak_percent),
+
+	TP_STRUCT__entry(
+		__field(int, tgid)
+		__field(int, percent)
+		__field(int, peak_percent)
+	),
+
+	TP_fast_assign(
+		__entry->tgid = tg->tgid;
+		__entry->percent = percent;
+		__entry->peak_percent = peak_percent;
+	),
+
+	TP_printk("tgid=%d percent=%d peak_percent=%d",
+		  __entry->tgid, __entry->percent, __entry->peak_percent)
+);
+
+DECLARE_EVENT_CLASS(schedquota_thread_event,
+	TP_PROTO(struct xnsched_quota_group *tg,
+		 struct xnthread *thread),
+	TP_ARGS(tg, thread),
+
+	TP_STRUCT__entry(
+		__field(int, tgid)
+		__field(struct xnthread *, thread)
+		__field(pid_t, pid)
+	),
+
+	TP_fast_assign(
+		__entry->tgid = tg->tgid;
+		__entry->thread = thread;
+		__entry->pid = xnthread_host_pid(thread);
+	),
+
+	TP_printk("tgid=%d thread=%p pid=%d",
+		  __entry->tgid, __entry->thread, __entry->pid)
+);
+
+DEFINE_EVENT(schedquota_thread_event, cobalt_schedquota_add_thread,
+	TP_PROTO(struct xnsched_quota_group *tg,
+		 struct xnthread *thread),
+	TP_ARGS(tg, thread)
+);
+
+DEFINE_EVENT(schedquota_thread_event, cobalt_schedquota_remove_thread,
+	TP_PROTO(struct xnsched_quota_group *tg,
+		 struct xnthread *thread),
+	TP_ARGS(tg, thread)
+);
+
+#endif /* CONFIG_XENO_OPT_SCHED_QUOTA */
+
 TRACE_EVENT(cobalt_thread_init,
 	TP_PROTO(struct xnthread *thread,
 		 const struct xnthread_init_attr *attr,
