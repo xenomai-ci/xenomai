@@ -8,6 +8,7 @@ noinst_HEADERS =	\
 	fd.h		\
 	gpio.h		\
 	ipc.h		\
+	net.h		\
 	rtdm.h		\
 	serial.h	\
 	testing.h	\
