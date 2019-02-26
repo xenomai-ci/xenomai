@@ -46,15 +46,25 @@
 static inline int cobalt_copy_from_user(void *dst, const void __user *src,
 					size_t size)
 {
-	return (!access_rok(src, size) ||
-		__xn_copy_from_user(dst, src, size)) ? -EFAULT : 0;
+	size_t remaining = size;
+
+	if (likely(access_rok(src, size)))
+		remaining = __xn_copy_from_user(dst, src, size);
+
+	if (unlikely(remaining > 0)) {
+		memset(dst + (size - remaining), 0, remaining);
+		return -EFAULT;
+	}
+	return 0;
 }
 
 static inline int cobalt_copy_to_user(void __user *dst, const void *src,
 				      size_t size)
 {
-	return (!access_wok(dst, size) ||
-		__xn_copy_to_user(dst, src, size)) ? -EFAULT : 0;
+	if (unlikely(!access_wok(dst, size) ||
+	    __xn_copy_to_user(dst, src, size)))
+		return -EFAULT;
+	return 0;
 }
 
 static inline int cobalt_strncpy_from_user(char *dst, const char __user *src,
