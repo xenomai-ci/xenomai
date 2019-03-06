@@ -2070,7 +2070,7 @@ void xnthread_relax(int notify, int reason)
 	struct xnthread *thread = xnthread_current();
 	struct task_struct *p = current;
 	int cpu __maybe_unused;
-	siginfo_t si;
+	kernel_siginfo_t si;
 
 	primary_mode_only();
 
@@ -2183,7 +2183,7 @@ static void lostage_task_signal(struct ipipe_work_header *work)
 	struct lostage_signal *rq;
 	struct xnthread *thread;
 	struct task_struct *p;
-	siginfo_t si;
+	kernel_siginfo_t si;
 	int signo;
 
 	rq = container_of(work, struct lostage_signal, work);

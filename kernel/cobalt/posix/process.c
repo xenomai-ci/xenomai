@@ -583,7 +583,7 @@ static inline void clear_threadinfo(void)
 static inline int disable_ondemand_memory(void)
 {
 	struct task_struct *p = current;
-	siginfo_t si;
+	kernel_siginfo_t si;
 
 	if ((p->mm->def_flags & VM_LOCKED) == 0) {
 		memset(&si, 0, sizeof(si));

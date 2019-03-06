@@ -49,4 +49,8 @@
 #define ipipe_root_nr_syscalls(ti)	NR_syscalls
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 20, 0)
+typedef siginfo_t kernel_siginfo_t;
+#endif
+
 #endif /* !_COBALT_LINUX_WRAPPERS_H */
