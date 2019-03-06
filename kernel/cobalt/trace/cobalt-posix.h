@@ -266,7 +266,7 @@ DECLARE_EVENT_CLASS(cobalt_void,
 	TP_PROTO(int dummy),
 	TP_ARGS(dummy),
 	TP_STRUCT__entry(
-		__array(char, dummy, 0)
+		__field(int, dummy)
 	),
 	TP_fast_assign(
 		(void)dummy;
