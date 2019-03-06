@@ -350,9 +350,7 @@ EXPORT_SYMBOL_GPL(xnclock_adjust);
 
 xnticks_t xnclock_get_host_time(void)
 {
-	struct timeval tv;
-	do_gettimeofday(&tv);
-	return tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000;
+	return ktime_to_ns(ktime_get_real());
 }
 EXPORT_SYMBOL_GPL(xnclock_get_host_time);
 

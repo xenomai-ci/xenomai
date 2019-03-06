@@ -32,11 +32,8 @@ static nanosecs_abs_t a4l_clkofs;
 void a4l_init_time(void)
 {
 	nanosecs_abs_t t1, t2;
-	struct timeval tv;
 	t1 = rtdm_clock_read();
-	do_gettimeofday(&tv);
-	t2 = 1000000000 * ((nanosecs_abs_t)tv.tv_sec) +
-		1000000 * ((nanosecs_abs_t)tv.tv_usec);
+	t2 = ktime_to_ns(ktime_get_real());
 	a4l_clkofs = t2 - t1;
 }
 
