@@ -27,8 +27,13 @@
 #include <asm/xenomai/machine.h>
 #include <cobalt/uapi/asm-generic/syscall.h>
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
+#define access_rok(addr, size)	access_ok((addr), (size))
+#define access_wok(addr, size)	access_ok((addr), (size))
+#else
 #define access_rok(addr, size)	access_ok(VERIFY_READ, (addr), (size))
 #define access_wok(addr, size)	access_ok(VERIFY_WRITE, (addr), (size))
+#endif
 
 #define __xn_reg_arglist(regs)	\
 	__xn_reg_arg1(regs),	\
