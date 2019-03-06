@@ -48,4 +48,4 @@ config XENO_REVISION_LEVEL
 
 config XENO_VERSION_STRING
        string
-       default @VERSION_STRING@
+       default "@VERSION_STRING@"

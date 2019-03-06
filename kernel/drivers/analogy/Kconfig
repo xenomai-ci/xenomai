@@ -48,9 +48,9 @@ config XENO_DRIVERS_ANALOGY_DRIVER_DEBUG_LEVEL
        WARNING: this threshold is only applied on the Analogy
        driver. That will not affect the core.
 
-source drivers/xenomai/analogy/testing/Kconfig
-source drivers/xenomai/analogy/intel/Kconfig
-source drivers/xenomai/analogy/national_instruments/Kconfig
-source drivers/xenomai/analogy/sensoray/Kconfig
+source "drivers/xenomai/analogy/testing/Kconfig"
+source "drivers/xenomai/analogy/intel/Kconfig"
+source "drivers/xenomai/analogy/national_instruments/Kconfig"
+source "drivers/xenomai/analogy/sensoray/Kconfig"
 
 endmenu

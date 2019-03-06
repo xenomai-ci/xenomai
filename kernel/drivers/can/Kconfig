@@ -85,7 +85,7 @@ config XENO_DRIVERS_CAN_FLEXCAN
 
 	Say Y here if you want to support for Freescale FlexCAN.
 
-source drivers/xenomai/can/mscan/Kconfig
-source drivers/xenomai/can/sja1000/Kconfig
+source "drivers/xenomai/can/mscan/Kconfig"
+source "drivers/xenomai/can/sja1000/Kconfig"
 
 endmenu
