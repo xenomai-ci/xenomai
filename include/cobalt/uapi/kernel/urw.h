@@ -53,11 +53,15 @@ typedef struct {
 #define URW_INITIALIZER     { 0 }
 #define DEFINE_URW(__name)  urw_t __name = URW_INITIALIZER
 
+#ifndef READ_ONCE
+#define READ_ONCE ACCESS_ONCE
+#endif
+
 static inline void __try_read_start(const urw_t *urw, urwstate_t *tmp)
 {
 	__u32 token;
 repeat:
-	token = ACCESS_ONCE(urw->sequence);
+	token = READ_ONCE(urw->sequence);
 	smp_rmb();
 	if (token & 1) {
 		cpu_relax();
