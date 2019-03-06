@@ -16,7 +16,7 @@ menuconfig XENOMAI
 	  Please visit http://xenomai.org for more information.
 
 if XENOMAI
-source "arch/$SRCARCH/xenomai/Kconfig"
+source "arch/@SRCARCH@/xenomai/Kconfig"
 endif
 
 if MIGRATION
