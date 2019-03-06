@@ -747,8 +747,13 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 		}
 		splexit(s);
 #endif /* CONFIG_XENO_ARCH_FPU */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 16, 0)
+		printk("invalid use of FPU in Xenomai context at %pS\n",
+		       (void *)xnarch_fault_pc(d));
+#else
 		print_symbol("invalid use of FPU in Xenomai context at %s\n",
 			     xnarch_fault_pc(d));
+#endif
 	}
 
 	/*
