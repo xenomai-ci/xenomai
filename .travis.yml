@@ -5,7 +5,9 @@ addons:
   apt:
     packages:
       - gcc-aarch64-linux-gnu
+      - libc6-dev-arm64-cross
       - gcc-arm-linux-gnueabihf
+      - libc6-dev-armhf-cross
       - patch
       - quilt
       - wget
@@ -25,11 +27,17 @@ install:
 
 before_script:
   - case "${ARCH}" in
-      "arm64") export CROSS_COMPILE=aarch64-linux-gnu-
+      "arm64")
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          export CONFIGURE_OPTS="--host=aarch64-linux-gnu --with-cc=aarch64-linux-gnu-gcc"
           ;;
-      "arm"  ) export CROSS_COMPILE=arm-linux-gnueabihf-
+      "arm"  )
+          export CROSS_COMPILE=arm-linux-gnueabihf-
+          export CONFIGURE_OPTS="--host=arm-linux-gnueabihf --with-cc=arm-linux-gnueabihf-gcc"
           ;;
-      "x86"  ) export CROSS_COMPILE=
+      "x86"  )
+          export CROSS_COMPILE=
+          export CONFIGURE_OPTS="--enable-dlopen-libs --enable-lazy-setsched"
           ;;
     esac
   - pushd ${KDIR}
@@ -70,10 +78,15 @@ before_script:
   - popd
 
 script:
-  - ./scripts/prepare-kernel.sh --ipipe=/tmp/ipipe.patch --arch=${ARCH} --linux=${KDIR}
-  - cd ${KDIR}
+  - scripts/prepare-kernel.sh --ipipe=/tmp/ipipe.patch --arch=${ARCH} --linux=${KDIR}
+  - pushd ${KDIR}
   - make -j $(nproc) olddefconfig
   - make -j $(nproc) all
+  - popd
+
+  - scripts/bootstrap
+  - ./configure --enable-smp ${CONFIGURE_OPTS}
+  - make -j $(nproc)
 
 matrix:
   include:
