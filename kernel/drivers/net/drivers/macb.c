@@ -725,7 +725,6 @@ static int gem_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
 				 bp->rx_buffer_size, DMA_FROM_DEVICE);
 
 		skb->protocol = rt_eth_type_trans(skb, bp->dev);
-		rtskb_checksum_none_assert(skb);
 
 		bp->stats.rx_packets++;
 		bp->stats.rx_bytes += skb->len;
@@ -792,7 +791,6 @@ static int macb_rx_frame(struct macb *bp, unsigned int first_frag,
 	offset = 0;
 	len += NET_IP_ALIGN;
 	skb->time_stamp = *time_stamp;
-	rtskb_checksum_none_assert(skb);
 	rtskb_put(skb, len);
 
 	for (frag = first_frag; ; frag++) {
