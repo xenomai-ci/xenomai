@@ -1435,10 +1435,6 @@ static ssize_t rt_imx_uart_write(struct rtdm_fd *fd, const void *buf,
 				 */
 				ret = -EBADF;
 			}
-			if (ret == -EWOULDBLOCK) {
-				/* Fix error code for non-blocking mode. */
-				ret = -EAGAIN;
-			}
 			break;
 		}
 	}
