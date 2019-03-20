@@ -35,6 +35,7 @@ smokey_test_plugin(interrupt,
 			   SMOKEY_STRING(device),
 			   SMOKEY_STRING(trigger),
 			   SMOKEY_BOOL(select),
+			   SMOKEY_BOOL(timestamp),
 		   ),
    "Wait for interrupts from a GPIO pin.\n"
    "\tdevice=<device-path>\n"
