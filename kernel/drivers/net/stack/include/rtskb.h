@@ -294,8 +294,6 @@ extern void kfree_rtskb(struct rtskb *skb);
 #define dev_kfree_rtskb(a)  kfree_rtskb(a)
 
 
-#define rtskb_checksum_none_assert(skb) (skb->ip_summed = CHECKSUM_NONE)
-
 static inline void rtskb_tx_timestamp(struct rtskb *skb)
 {
 	nanosecs_abs_t *ts = skb->xmit_stamp;

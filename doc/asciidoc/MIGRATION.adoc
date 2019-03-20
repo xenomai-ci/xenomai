@@ -1129,8 +1129,7 @@ unsigned int rtskb_module_pool_init(struct rtskb_pool *pool,
     rtnetdev_priv(), rtdev_emerg(), rtdev_alert(), rtdev_crit(),
     rtdev_err(), rtdev_warn(), rtdev_notice(), rtdev_info(),
     rtdev_dbg(), rtdev_vdbg(), RTDEV_TX_OK, RTDEV_TX_BUSY,
-    rtskb_checksum_none_assert(), rtskb_tx_timestamp(). Their
-    declarations are equivalent to:
+    rtskb_tx_timestamp(). Their declarations are equivalent to:
 
 -----------------------------------------------------------------------
 #define RTDEV_TX_OK	0
@@ -1148,7 +1147,6 @@ void rtdev_info(struct rntet_device *dev, const char *format, ...);
 void rtdev_dbg(struct rntet_device *dev, const char *format, ...);
 void rtdev_vdbg(struct rntet_device *dev, const char *format, ...);
 
-void rtskb_checksum_non_assert(struct rtskb *skb);
 void rtskb_tx_timestamp(struct rtskb *skb);
 -----------------------------------------------------------------------
 
