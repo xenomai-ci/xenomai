@@ -422,18 +422,15 @@ static int rt_imx_uart_rx_chars(struct rt_imx_uart_ctx *ctx,
 
 static void rt_imx_uart_tx_chars(struct rt_imx_uart_ctx *ctx)
 {
-	int ch, count;
+	int ch;
 	unsigned int uts_reg = ctx->port->devdata->uts_reg;
 
-	for (count = ctx->port->tx_fifo;
-	     (count > 0) && (ctx->out_npend > 0);
-	     count--, ctx->out_npend--) {
+	while (ctx->out_npend > 0 &&
+	       !(readl(ctx->port->membase + uts_reg) & UTS_TXFULL)) {
 		ch = ctx->out_buf[ctx->out_head++];
 		writel(ch, ctx->port->membase + URTX0);
 		ctx->out_head &= (OUT_BUFFER_SIZE - 1);
-
-		if (readl(ctx->port->membase + uts_reg) & UTS_TXFULL)
-			break;
+		ctx->out_npend--;
 	}
 }
 
