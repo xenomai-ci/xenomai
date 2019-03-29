@@ -380,12 +380,11 @@ static void rt_imx_uart_enable_ms(struct rt_imx_uart_ctx *ctx)
 static int rt_imx_uart_rx_chars(struct rt_imx_uart_ctx *ctx,
 				uint64_t *timestamp)
 {
-	unsigned int rx, temp, max_count = 256;
+	unsigned int rx, temp;
 	int rbytes = 0;
 	int lsr = 0;
 
-	while ((readl(ctx->port->membase + USR2) & USR2_RDR) &&
-	       (max_count-- > 0)) {
+	while (readl(ctx->port->membase + USR2) & USR2_RDR) {
 		rx = readl(ctx->port->membase + URXD0);
 		temp = readl(ctx->port->membase + USR2);
 		if (temp & USR2_BRCD) {
@@ -408,10 +407,10 @@ static int rt_imx_uart_rx_chars(struct rt_imx_uart_ctx *ctx,
 			ctx->in_history[ctx->in_tail] = *timestamp;
 		ctx->in_tail = (ctx->in_tail + 1) & (IN_BUFFER_SIZE - 1);
 
-		if (++ctx->in_npend > IN_BUFFER_SIZE) {
+		if (unlikely(ctx->in_npend >= IN_BUFFER_SIZE))
 			lsr |= RTSER_SOFT_OVERRUN_ERR;
-			ctx->in_npend--;
-		}
+		else
+			ctx->in_npend++;
 
 		rbytes++;
 	}
