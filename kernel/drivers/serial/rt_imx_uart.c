@@ -1352,7 +1352,7 @@ break_unlocked:
 	clear_bit(0, &ctx->in_lock);
 
 	if ((read > 0) && ((ret == 0) || (ret == -EAGAIN) ||
-			   (ret == -ETIMEDOUT) || (ret == -EINTR)))
+			   (ret == -ETIMEDOUT)))
 		ret = read;
 
 	return ret;
@@ -1475,7 +1475,7 @@ static ssize_t rt_imx_uart_write(struct rtdm_fd *fd, const void *buf,
 	rtdm_mutex_unlock(&ctx->out_lock);
 
 	if ((written > 0) && ((ret == 0) || (ret == -EAGAIN) ||
-			      (ret == -ETIMEDOUT) || (ret == -EINTR)))
+			      (ret == -ETIMEDOUT)))
 		ret = written;
 
 	return ret;
