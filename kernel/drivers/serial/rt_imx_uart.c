@@ -463,8 +463,7 @@ static int rt_imx_uart_int(rtdm_irq_t *irq_context)
 	uint64_t timestamp = rtdm_clock_read();
 	struct rt_imx_uart_ctx *ctx;
 	unsigned int usr1, usr2, ucr1;
-	int rbytes = 0;
-	int events = 0;
+	int rbytes = 0, events = 0;
 	int ret = RTDM_IRQ_NONE;
 
 	ctx = rtdm_irq_get_arg(irq_context, struct rt_imx_uart_ctx);
@@ -479,16 +478,19 @@ static int rt_imx_uart_int(rtdm_irq_t *irq_context)
 	 * Read if there is data available
 	 */
 	if (usr1 & USR1_RRDY) {
-		rbytes += rt_imx_uart_rx_chars(ctx, &timestamp);
-		events |= RTSER_EVENT_RXPEND;
+		if (likely(ucr1 & UCR1_RRDYEN)) {
+			rbytes = rt_imx_uart_rx_chars(ctx, &timestamp);
+			events |= RTSER_EVENT_RXPEND;
+		}
 		ret = RTDM_IRQ_HANDLED;
 	}
 
 	/*
 	 * Send data if there is data to be sent
 	 */
-	if ((usr1 & USR1_TRDY) && (ucr1 & UCR1_TXMPTYEN)) {
-		rt_imx_uart_tx_chars(ctx);
+	if (usr1 & USR1_TRDY) {
+		if (likely(ucr1 & UCR1_TXMPTYEN))
+			rt_imx_uart_tx_chars(ctx);
 		ret = RTDM_IRQ_HANDLED;
 	}
 
