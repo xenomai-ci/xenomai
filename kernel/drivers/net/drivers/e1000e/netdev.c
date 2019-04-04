@@ -1222,9 +1222,10 @@ void e1000e_set_interrupt_capability(struct e1000_adapter *adapter)
 				for (i = 0; i < adapter->num_vectors; i++)
 					adapter->msix_entries[i].entry = i;
 
-				err = pci_enable_msix(adapter->pdev,
-						      adapter->msix_entries,
-						      adapter->num_vectors);
+				err = pci_enable_msix_range(adapter->pdev,
+							adapter->msix_entries,
+							adapter->num_vectors,
+							adapter->num_vectors);
 				if (err == 0)
 					return;
 			}
