@@ -242,9 +242,6 @@ struct e1000_phy_regs {
 /* board specific private data structure */
 
 struct e1000_adapter {
-	struct timer_list tx_fifo_stall_timer;
-	struct timer_list watchdog_timer;
-	struct timer_list phy_info_timer;
 #ifdef NETIF_F_HW_VLAN_TX
 	struct vlan_group *vlgrp;
 	u16 mng_vlan_id;
@@ -271,8 +268,6 @@ struct e1000_adapter {
 	u16 tx_itr;
 	u16 rx_itr;
 
-	struct work_struct reset_task;
-	struct work_struct watchdog_task;
 	bool fc_autoneg;
 
 #ifdef ETHTOOL_PHYS_ID
@@ -374,6 +369,10 @@ struct e1000_adapter {
 	/* hardware capability, feature, and workaround flags */
 	unsigned int flags;
 
+	struct work_struct reset_task;
+	struct delayed_work watchdog_task;
+	struct delayed_work fifo_stall_task;
+	struct delayed_work phy_info_task;
 };
 
 #define E1000_FLAG_HAS_SMBUS                (1 << 0)
