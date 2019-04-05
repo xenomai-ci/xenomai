@@ -256,9 +256,6 @@ struct e1000_rx_ring {
 /* board specific private data structure */
 
 struct e1000_adapter {
-	struct timer_list tx_fifo_stall_timer;
-	struct timer_list watchdog_timer;
-	struct timer_list phy_info_timer;
 #ifdef NETIF_F_HW_VLAN_TX
 	struct vlan_group *vlgrp;
 	uint16_t mng_vlan_id;
@@ -381,6 +378,10 @@ struct e1000_adapter {
 #endif
 	boolean_t smart_power_down;	/* phy smart power down */
 	unsigned long flags;
+
+	struct delayed_work watchdog_task;
+	struct delayed_work fifo_stall_task;
+	struct delayed_work phy_info_task;
 };
 
 enum e1000_state_t {
