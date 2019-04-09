@@ -34,6 +34,11 @@ before_script:
   - export PATH=~/ccache:$PATH
   - pushd ${KDIR}
   - make -j $(nproc) ${KERNEL_DEFCONFIG}
+
+  # Generic settings
+  - ./scripts/config -d DEBUG_INFO
+
+  # I-pipe and Xenomai settings
   - ./scripts/config -e IPIPE
   - ./scripts/config -e XENOMAI
   - ./scripts/config -e XENO_OPT_SCHED_CLASSES
@@ -126,6 +131,7 @@ script:
   - scripts/bootstrap
   - ./configure --enable-smp ${CONFIGURE_OPTS}
   - make -j $(nproc)
+
   - ccache -s
 
 matrix:
