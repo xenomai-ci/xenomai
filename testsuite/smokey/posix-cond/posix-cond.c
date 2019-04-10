@@ -198,6 +198,20 @@ static void *cond_signaler(void *cookie)
 	return NULL;
 }
 
+static void autoinit_simple_conddestroy(void)
+{
+	pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+	pthread_cond_t cond2 = PTHREAD_COND_INITIALIZER;
+	unsigned int invalmagic = ~0x86860505; // ~COBALT_COND_MAGIC
+
+	memcpy((char *)&cond2 + sizeof(cond2) - sizeof(invalmagic),
+		&invalmagic, sizeof(invalmagic));
+
+	smokey_trace("%s", __func__);
+	check("cond_destroy", cond_destroy(&cond), 0);
+	check("cond_destroy invalid", cond_destroy(&cond2), -EINVAL);
+}
+
 static void autoinit_simple_condwait(void)
 {
 	pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
@@ -731,6 +745,7 @@ int run_posix_cond(struct smokey_test *t, int argc, char *const argv[])
 	sparam.sched_priority = 2;
 	pthread_setschedparam(pthread_self(), SCHED_FIFO, &sparam);
 
+	autoinit_simple_conddestroy();
 	autoinit_simple_condwait();
 	simple_condwait();
 	relative_condwait();
