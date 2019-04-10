@@ -30,6 +30,12 @@
 #include <asm/xenomai/syscall.h>
 #include "internal.h"
 
+/* support for very old c libraries not supporting O_TMPFILE */
+#ifndef O_TMPFILE
+#define O_TMPFILE (020000000 | 0200000)
+#endif
+
+
 static inline int set_errno(int ret)
 {
 	if (ret >= 0)
@@ -65,7 +71,7 @@ COBALT_IMPL(int, open, (const char *path, int oflag, ...))
 	mode_t mode = 0;
 	va_list ap;
 
-	if (oflag & O_CREAT) {
+	if ((oflag & O_CREAT)  || (oflag & O_TMPFILE) == O_TMPFILE) {
 		va_start(ap, oflag);
 		mode = va_arg(ap, int);
 		va_end(ap);
@@ -79,7 +85,7 @@ COBALT_IMPL(int, open64, (const char *path, int oflag, ...))
 	mode_t mode = 0;
 	va_list ap;
 
-	if (oflag & O_CREAT) {
+	if ((oflag & O_CREAT)  || (oflag & O_TMPFILE) == O_TMPFILE) {
 		va_start(ap, oflag);
 		mode = va_arg(ap, int);
 		va_end(ap);
