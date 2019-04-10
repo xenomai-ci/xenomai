@@ -49,8 +49,12 @@
  * By default, Cobalt mutexes are of the normal type, use no
  * priority protocol and may not be shared between several processes.
  *
- * Note that only pthread_mutex_init() may be used to initialize a mutex, using
- * the static initializer @a PTHREAD_MUTEX_INITIALIZER is not supported.
+ * Note that pthread_mutex_init() should be used to initialize a mutex, using
+ * the static initializer @a PTHREAD_MUTEX_INITIALIZER will delay the
+ * initialization to the first method called on the mutex and will
+ * most likely introduce switches to secondary mode.
+ * The documentation (and specifically api-tags) of the mutex services assumes
+ * a mutex was explicitly initialised with pthread_mutex_init().
  *
  *@{
  */
