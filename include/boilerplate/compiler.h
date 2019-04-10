@@ -71,27 +71,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	
+
 void __invalid_operand_size(void);
 
-#define __ctz(__v)							\
-	({								\
-		int __ret;						\
-		if (!__v)						\
-			__ret = sizeof(__v) * 8;			\
-		else							\
-			switch (sizeof(__v)) {				\
-			case sizeof(int):				\
-				__ret = __builtin_ctz((unsigned int)__v); \
-				break;					\
-			case sizeof(long long):				\
-				__ret = __builtin_ctzll(__v);		\
-				break;					\
-			default:					\
-				__invalid_operand_size();		\
-			}						\
-		__ret;							\
-	})
+#define xenomai_count_trailing_zeros(x)					\
+	((x) == 0 ? (int)(sizeof(x) * __CHAR_BIT__)			\
+	: sizeof(x) <= sizeof(unsigned int) ?				\
+		__builtin_ctz((unsigned int)x)				\
+	: sizeof(x) <= sizeof(unsigned long) ?				\
+		__builtin_ctzl((unsigned long)x)			\
+	: __builtin_ctzll(x))
 
 #define xenomai_count_leading_zeros(__v)				\
 	({								\
@@ -111,9 +100,9 @@ void __invalid_operand_size(void);
 			}						\
 		__ret;							\
 	})
-	
+
 #ifdef __cplusplus
 }
 #endif
-	
+
 #endif /* _BOILERPLATE_COMPILER_H */

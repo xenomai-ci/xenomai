@@ -476,7 +476,7 @@ void *heapmem_alloc(struct heap_memory *heap, size_t size)
 			bmask = ext->pagemap[pg].map;
 			if (bmask == -1U)
 				break;
-			b = __ctz(~bmask);
+			b = xenomai_count_trailing_zeros(~bmask);
 
 			/*
 			 * Got one block from the heading per-bucket
