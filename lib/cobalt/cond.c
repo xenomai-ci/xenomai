@@ -47,9 +47,13 @@
  * several processes (it may not be shared by default, see
  * pthread_condattr_setpshared()).
  *
- * Note that only pthread_cond_init() may be used to initialize a condition
- * variable, using the static initializer @a PTHREAD_COND_INITIALIZER is
- * not supported.
+ * Note that pthread_cond_init() should be used to initialize a condition
+ * variable, using the static initializer @a PTHREAD_COND_INITIALIZER will
+ * delay the initialization to the first method called on the condition
+ * variable and will most likely introduce switches to secondary mode.
+ * The documentation (and specifically api-tags) of the
+ * condition variable services assumes the condition variable was explicitly
+ * initialised with pthread_cond_init().
  *
  *@{
  */
