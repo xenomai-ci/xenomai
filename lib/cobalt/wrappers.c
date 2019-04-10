@@ -44,6 +44,11 @@
 #include <malloc.h>
 #include <boilerplate/compiler.h>
 
+/* support for very old c libraries not supporting O_TMPFILE */
+#ifndef O_TMPFILE
+#define O_TMPFILE (020000000 | 0200000)
+#endif
+
 /* sched */
 __weak
 int __real_pthread_setschedparam(pthread_t thread,
@@ -174,7 +179,7 @@ int __real_open(const char *path, int oflag, ...)
 	mode_t mode = 0;
 	va_list ap;
 
-	if (oflag & O_CREAT) {
+	if ((oflag & O_CREAT) || (oflag & O_TMPFILE) == O_TMPFILE) {
 		va_start(ap, oflag);
 		mode = va_arg(ap, mode_t);
 		va_end(ap);
@@ -190,7 +195,7 @@ int __real_open64(const char *path, int oflag, ...)
 	mode_t mode = 0;
 	va_list ap;
 
-	if (oflag & O_CREAT) {
+	if ((oflag & O_CREAT) || (oflag & O_TMPFILE) == O_TMPFILE) {
 		va_start(ap, oflag);
 		mode = va_arg(ap, mode_t);
 		va_end(ap);
