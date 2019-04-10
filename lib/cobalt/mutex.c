@@ -164,6 +164,84 @@ COBALT_IMPL(int, pthread_mutex_init, (pthread_mutex_t *mutex,
 }
 
 /**
+ * Test if a mutex structure contains a valid autoinitializer.
+ *
+ * @return the mutex type on success,
+ * @return -1 if not in supported autoinitializer state
+ */
+static int __attribute__((cold))
+	cobalt_mutex_autoinit_type(const pthread_mutex_t *mutex)
+{
+	static const pthread_mutex_t mutex_initializers[] = {
+#if HAVE_DECL_PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
+		PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP,
+#endif
+#if HAVE_DECL_PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+		PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP,
+#endif
+		PTHREAD_MUTEX_INITIALIZER
+	};
+	static const int mutex_types[] = {
+#if HAVE_DECL_PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
+		PTHREAD_MUTEX_ERRORCHECK_NP,
+#endif
+#if HAVE_DECL_PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
+		PTHREAD_MUTEX_RECURSIVE_NP,
+#endif
+		PTHREAD_MUTEX_DEFAULT
+	};
+	int i;
+
+	for (i = sizeof(mutex_types) / sizeof(mutex_types[0]); i > 0; --i) {
+		if (memcmp(mutex, &mutex_initializers[i - 1],
+				sizeof(mutex_initializers[0])) == 0)
+			return mutex_types[i - 1];
+	}
+	return -1;
+}
+
+static int __attribute__((cold))
+	cobalt_mutex_doautoinit(union cobalt_mutex_union *umutex)
+{
+	struct cobalt_mutex_shadow *_mutex = &umutex->shadow_mutex;
+	int err __attribute__((unused));
+	pthread_mutexattr_t mattr;
+	int ret = 0, type;
+
+	type = cobalt_mutex_autoinit_type(&umutex->native_mutex);
+	if (type < 0)
+		return EINVAL;
+
+	pthread_mutexattr_init(&mattr);
+	pthread_mutexattr_settype(&mattr, type);
+	err = __COBALT(pthread_mutex_lock(cobalt_autoinit_mutex));
+	if (err) {
+		ret = err;
+		goto out;
+	}
+	if (_mutex->magic != COBALT_MUTEX_MAGIC)
+		ret = __COBALT(pthread_mutex_init(&umutex->native_mutex,
+			&mattr));
+	err = __COBALT(pthread_mutex_unlock(cobalt_autoinit_mutex));
+	if (err) {
+		if (ret == 0)
+			ret = err;
+	}
+
+  out:
+	pthread_mutexattr_destroy(&mattr);
+
+	return ret;
+}
+
+static inline int cobalt_mutex_autoinit(union cobalt_mutex_union *umutex)
+{
+	if (unlikely(umutex->shadow_mutex.magic != COBALT_MUTEX_MAGIC))
+		return cobalt_mutex_doautoinit(umutex);
+	return 0;
+}
+
+/**
  * Destroy a mutex.
  *
  * This service destroys the mutex @a mx, if it is unlocked and not referenced
@@ -191,64 +269,12 @@ COBALT_IMPL(int, pthread_mutex_destroy, (pthread_mutex_t *mutex))
 		&((union cobalt_mutex_union *)mutex)->shadow_mutex;
 	int err;
 
-	if (_mutex->magic != COBALT_MUTEX_MAGIC)
-		return EINVAL;
+	if (unlikely(_mutex->magic != COBALT_MUTEX_MAGIC))
+		return (cobalt_mutex_autoinit_type(mutex) < 0) ? EINVAL : 0;
 
 	err = XENOMAI_SYSCALL1(sc_cobalt_mutex_destroy, _mutex);
 
 	return -err;
-}
-
-static int __attribute__((cold)) cobalt_mutex_autoinit(pthread_mutex_t *mutex)
-{
-	static pthread_mutex_t uninit_normal_mutex =
-		PTHREAD_MUTEX_INITIALIZER;
-#if HAVE_DECL_PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
-	static pthread_mutex_t uninit_recursive_mutex =
-		PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-#endif
-#if HAVE_DECL_PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
-	static pthread_mutex_t uninit_errorcheck_mutex =
-		PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP;
-#endif
-	struct cobalt_mutex_shadow *_mutex =
-		&((union cobalt_mutex_union *)mutex)->shadow_mutex;
-	int err __attribute__((unused));
-	pthread_mutexattr_t mattr;
-	int ret = 0, type;
-
-	if (memcmp(mutex, &uninit_normal_mutex, sizeof(*mutex)) == 0)
-		type = PTHREAD_MUTEX_DEFAULT;
-#if HAVE_DECL_PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP
-	else if (memcmp(mutex, &uninit_recursive_mutex, sizeof(*mutex)) == 0)
-		type = PTHREAD_MUTEX_RECURSIVE_NP;
-#endif
-#if HAVE_DECL_PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
-	else if (memcmp(mutex, &uninit_errorcheck_mutex, sizeof(*mutex)) == 0)
-		type = PTHREAD_MUTEX_ERRORCHECK_NP;
-#endif
-	else
-		return EINVAL;
-
-	pthread_mutexattr_init(&mattr);
-	pthread_mutexattr_settype(&mattr, type);
-	err = __COBALT(pthread_mutex_lock(cobalt_autoinit_mutex));
-	if (err) {
-		ret = err;
-		goto out;
-	}
-	if (_mutex->magic != COBALT_MUTEX_MAGIC)
-		ret = __COBALT(pthread_mutex_init(mutex, &mattr));
-	err = __COBALT(pthread_mutex_unlock(cobalt_autoinit_mutex));
-	if (err) {
-		if (ret == 0)
-			ret = err;
-	}
-
-  out:
-	pthread_mutexattr_destroy(&mattr);
-
-	return ret;
 }
 
 /**
@@ -296,15 +322,15 @@ COBALT_IMPL(int, pthread_mutex_lock, (pthread_mutex_t *mutex))
 	if (cur == XN_NO_HANDLE)
 		return EPERM;
 
-	if (_mutex->magic != COBALT_MUTEX_MAGIC)
-		goto autoinit;
+	ret = cobalt_mutex_autoinit((union cobalt_mutex_union *)mutex);
+	if (ret)
+		return ret;
 
 	/*
 	 * We track resource ownership for auto-relax of non real-time
 	 * shadows and some debug features, so we must always obtain
 	 * them via a syscall.
 	 */
-start:
 	status = cobalt_get_current_mode();
 	if ((status & (XNRELAX|XNWEAK|XNDEBUG)) == 0) {
 		if (_mutex->attr.protocol == PTHREAD_PRIO_PROTECT)
@@ -360,11 +386,6 @@ protect:
 	u_window->pp_pending = _mutex->handle;
 	lazy_protect = 1;
 	goto fast_path;
-autoinit:
-	ret = cobalt_mutex_autoinit(mutex);
-	if (ret)
-		return ret;
-	goto start;
 }
 
 /**
@@ -411,11 +432,11 @@ COBALT_IMPL(int, pthread_mutex_timedlock, (pthread_mutex_t *mutex,
 	if (cur == XN_NO_HANDLE)
 		return EPERM;
 
-	if (_mutex->magic != COBALT_MUTEX_MAGIC)
-		goto autoinit;
+	ret = cobalt_mutex_autoinit((union cobalt_mutex_union *)mutex);
+	if (ret)
+		return ret;
 
 	/* See __cobalt_pthread_mutex_lock() */
-start:
 	status = cobalt_get_current_mode();
 	if ((status & (XNRELAX|XNWEAK|XNDEBUG)) == 0) {
 		if (_mutex->attr.protocol == PTHREAD_PRIO_PROTECT)
@@ -471,11 +492,6 @@ protect:
 	u_window->pp_pending = _mutex->handle;
 	lazy_protect = 1;
 	goto fast_path;
-autoinit:
-	ret = cobalt_mutex_autoinit(mutex);
-	if (ret)
-		return ret;
-	goto start;
 }
 
 /**
@@ -515,9 +531,10 @@ COBALT_IMPL(int, pthread_mutex_trylock, (pthread_mutex_t *mutex))
 	if (cur == XN_NO_HANDLE)
 		return EPERM;
 
-	if (_mutex->magic != COBALT_MUTEX_MAGIC)
-		goto autoinit;
-start:
+	ret = cobalt_mutex_autoinit((union cobalt_mutex_union *)mutex);
+	if (ret)
+		return ret;
+
 	status = cobalt_get_current_mode();
 	if ((status & (XNRELAX|XNWEAK|XNDEBUG)) == 0) {
 		if (_mutex->attr.protocol == PTHREAD_PRIO_PROTECT)
@@ -558,12 +575,8 @@ slow_path:
 		_mutex->lockcnt = 1;
 
 	return -ret;
-autoinit:
-	ret = cobalt_mutex_autoinit(mutex);
-	if (ret)
-		return ret;
-	goto start;
-protect:	
+
+protect:
 	u_window = cobalt_get_current_window();
 	/*
 	 * Can't nest lazy ceiling requests, have to take the slow
@@ -611,9 +624,10 @@ COBALT_IMPL(int, pthread_mutex_unlock, (pthread_mutex_t *mutex))
 	xnhandle_t cur;
 	int err;
 
-	if (_mutex->magic != COBALT_MUTEX_MAGIC)
-		goto autoinit;
-start:
+	err = cobalt_mutex_autoinit((union cobalt_mutex_union *)mutex);
+	if (err)
+		return err;
+
 	cur = cobalt_get_current();
 	if (cur == XN_NO_HANDLE)
 		return EPERM;
@@ -645,11 +659,6 @@ do_syscall:
 
 	return -err;
 
-autoinit:
-	err = cobalt_mutex_autoinit(mutex);
-	if (err)
-		return err;
-	goto start;
 unprotect:
 	u_window = cobalt_get_current_window();
 	u_window->pp_pending = XN_NO_HANDLE;
