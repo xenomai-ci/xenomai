@@ -1015,7 +1015,6 @@ void xnintr_put_query_lock(void)
 
 int xnintr_query_init(struct xnintr_iterator *iterator)
 {
-	iterator->cpu = -1;
 	iterator->prev = NULL;
 
 	/* The order is important here: first xnintr_list_rev then
@@ -1039,43 +1038,38 @@ int xnintr_query_next(int irq, struct xnintr_iterator *iterator,
 	int cpu, nr_cpus = num_present_cpus();
 	struct xnintr *intr;
 
-	for (cpu = iterator->cpu + 1; cpu < nr_cpus; ++cpu) {
-		if (cpu_online(cpu))
-			break;
-	}
-	if (cpu == nr_cpus)
-		cpu = 0;
-	iterator->cpu = cpu;
-
 	if (iterator->list_rev != xnintr_list_rev)
 		return -EAGAIN;
 
-	if (!iterator->prev) {
+	intr = iterator->prev;
+	if (intr == NULL) {
 		if (xnintr_is_timer_irq(irq))
 			intr = &nktimer;
 		else
 			intr = xnintr_vec_first(irq);
-	} else
-		intr = xnintr_vec_next(iterator->prev);
-
-	if (intr == NULL) {
-		cpu = -1;
-		iterator->prev = NULL;
-		return -ENODEV;
+		if (intr == NULL)
+			return -ENODEV;
+		iterator->prev = intr;
+		iterator->cpu = -1;
 	}
 
-	ksformat(name_buf, XNOBJECT_NAME_LEN, "IRQ%d: %s", irq, intr->name);
+	for (;;) {
+		for (cpu = iterator->cpu + 1; cpu < nr_cpus; ++cpu) {
+			if (cpu_online(cpu)) {
+				ksformat(name_buf, XNOBJECT_NAME_LEN, "IRQ%d: %s",
+					irq, intr->name);
+				query_irqstats(intr, cpu, iterator);
+				iterator->cpu = cpu;
+				return 0;
+			}
+		}
 
-	query_irqstats(intr, cpu, iterator);
+		iterator->prev = xnintr_vec_next(intr);
+		if (iterator->prev == NULL)
+			return -ENODEV;
 
-	/*
-	 * Proceed to next entry in shared IRQ chain when all CPUs
-	 * have been visited for this one.
-	 */
-	if (cpu + 1 == nr_cpus)
-		iterator->prev = intr;
-
-	return 0;
+		iterator->cpu = -1;
+	}
 }
 
 #endif /* CONFIG_XENO_OPT_STATS */

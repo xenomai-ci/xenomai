@@ -1114,7 +1114,7 @@ static int vfile_schedstat_rewind(struct xnvfile_snapshot_iterator *it)
 	 */
 	priv->curr = list_first_entry(&nkthreadq, struct xnthread, glink);
 	priv->irq = 0;
-	irqnr = xnintr_query_init(&priv->intr_it) * NR_CPUS;
+	irqnr = xnintr_query_init(&priv->intr_it) * num_online_cpus();
 
 	return irqnr + cobalt_nrthreads;
 }
