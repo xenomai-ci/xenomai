@@ -9,6 +9,9 @@ addons:
       - libc6-dev-arm64-cross
       - gcc-arm-linux-gnueabihf
       - libc6-dev-armhf-cross
+      - gcc-powerpc-linux-gnu
+      - libc6-dev-powerpc-cross
+      - u-boot-tools
 
 env:
   global:
@@ -25,11 +28,15 @@ before_script:
           export CROSS_COMPILE=aarch64-linux-gnu-
           export CONFIGURE_OPTS="--host=aarch64-linux-gnu --with-cc=aarch64-linux-gnu-gcc"
           ;;
-      "arm"  )
+      "arm")
           export CROSS_COMPILE=arm-linux-gnueabihf-
           export CONFIGURE_OPTS="--host=arm-linux-gnueabihf --with-cc=arm-linux-gnueabihf-gcc"
           ;;
-      "x86"  )
+      "powerpc")
+          export CROSS_COMPILE=powerpc-linux-gnu-
+          export CONFIGURE_OPTS="--host=powerpc-linux-gnu --with-cc=powerpc-linux-gnu-gcc"
+          ;;
+      "x86")
           export CROSS_COMPILE=
           export CONFIGURE_OPTS="--enable-dlopen-libs --enable-lazy-setsched"
           ;;
@@ -37,6 +44,7 @@ before_script:
   - mkdir ~/ccache
   - ln -s /usr/bin/ccache ~/ccache/aarch64-linux-gnu-gcc
   - ln -s /usr/bin/ccache ~/ccache/arm-linux-gnueabihf-gcc
+  - ln -s /usr/bin/ccache ~/ccache/powerpc-linux-gnu-gcc
   - export PATH=~/ccache:$PATH
   - pushd ${KDIR}
   - make -j $(nproc) ${KERNEL_DEFCONFIG}
@@ -185,3 +193,8 @@ matrix:
         IPIPE_REV: ipipe-core-4.4.176-x86-14
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe.git
         KERNEL_DEFCONFIG: x86_64_defconfig
+    - env:
+      - ARCH: powerpc
+        IPIPE_REV: ipipe-core-4.14.36-ppc32-1.1
+        IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-ppc32.git
+        KERNEL_DEFCONFIG: mpc5200_defconfig
