@@ -963,10 +963,10 @@ ssize_t rt_16550_write(struct rtdm_fd *fd, const void *buf, size_t nbyte)
 
 	ctx = rtdm_fd_to_private(fd);
 
-	rtdm_toseq_init(&timeout_seq, ctx->config.rx_timeout);
+	rtdm_toseq_init(&timeout_seq, ctx->config.tx_timeout);
 
 	/* Make write operation atomic. */
-	ret = rtdm_mutex_timedlock(&ctx->out_lock, ctx->config.rx_timeout,
+	ret = rtdm_mutex_timedlock(&ctx->out_lock, ctx->config.tx_timeout,
 				   &timeout_seq);
 	if (ret)
 		return ret;
