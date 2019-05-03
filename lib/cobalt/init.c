@@ -184,20 +184,26 @@ static void low_init(void)
 	cobalt_ticks_init(f->clock_freq);
 }
 
+static int cobalt_init_2(void);
+
 static void cobalt_fork_handler(void)
 {
 	cobalt_unmap_umm();
 	cobalt_clear_tsd();
 	cobalt_print_init_atfork();
-	if (cobalt_init())
+	if (cobalt_init_2())
 		exit(EXIT_FAILURE);
 }
 
-static void __cobalt_init(void)
+static inline void commit_stack_memory(void)
+{
+	char stk[PTHREAD_STACK_MIN / 2];
+	cobalt_commit_memory(stk);
+}
+
+static void cobalt_init_1(void)
 {
 	struct sigaction sa;
-
-	low_init();
 
 	sa.sa_sigaction = cobalt_sigdebug_handler;
 	sigemptyset(&sa.sa_mask);
@@ -228,20 +234,9 @@ static void __cobalt_init(void)
 			    " sizeof(cobalt_sem_shadow): %Zd!",
 			    sizeof(sem_t),
 			    sizeof(struct cobalt_sem_shadow));
-
-	cobalt_mutex_init();
-	cobalt_sched_init();
-	cobalt_thread_init();
-	cobalt_print_init();
 }
 
-static inline void commit_stack_memory(void)
-{
-	char stk[PTHREAD_STACK_MIN / 2];
-	cobalt_commit_memory(stk);
-}
-
-int cobalt_init(void)
+static int cobalt_init_2(void)
 {
 	pthread_t ptid = pthread_self();
 	struct sched_param parm;
@@ -249,7 +244,12 @@ int cobalt_init(void)
 
 	commit_stack_memory();	/* We only need this for the main thread */
 	cobalt_default_condattr_init();
-	__cobalt_init();
+
+	low_init();
+	cobalt_mutex_init();
+	cobalt_sched_init();
+	cobalt_thread_init();
+	cobalt_print_init();
 
 	if (__cobalt_control_bind)
 		return 0;
@@ -288,12 +288,19 @@ int cobalt_init(void)
 	return 0;
 }
 
+int cobalt_init(void)
+{
+	cobalt_init_1();
+
+	return cobalt_init_2();
+}
+
 static int get_int_arg(const char *name, const char *arg,
 		       int *valp, int min)
 {
 	int value, ret;
 	char *p;
-	
+
 	errno = 0;
 	value = (int)strtol(arg, &p, 10);
 	if (errno || *p || value < min) {
