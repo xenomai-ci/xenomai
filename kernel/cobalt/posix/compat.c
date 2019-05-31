@@ -313,32 +313,13 @@ EXPORT_SYMBOL_GPL(sys32_get_sigevent);
 
 int sys32_get_sigset(sigset_t *set, const compat_sigset_t *u_cset)
 {
-	compat_sigset_t cset;
-	int ret;
-
-	if (u_cset == NULL)
-		return -EFAULT;
-
-	ret = cobalt_copy_from_user(&cset, u_cset, sizeof(cset));
-	if (ret)
-		return ret;
-
-	sigset_from_compat(set, &cset);
-
-	return 0;
+	return get_compat_sigset(set, u_cset);
 }
 EXPORT_SYMBOL_GPL(sys32_get_sigset);
 
 int sys32_put_sigset(compat_sigset_t *u_cset, const sigset_t *set)
 {
-	compat_sigset_t cset;
-
-	if (u_cset == NULL)
-		return -EFAULT;
-
-	sigset_to_compat(&cset, set);
-
-	return cobalt_copy_to_user(u_cset, &cset, sizeof(cset));
+	return put_compat_sigset(u_cset, set, sizeof(*u_cset));
 }
 EXPORT_SYMBOL_GPL(sys32_put_sigset);
 

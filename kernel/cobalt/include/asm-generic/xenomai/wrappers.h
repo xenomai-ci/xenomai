@@ -38,6 +38,27 @@
  *   symbol, so that obsolete wrappers can be spotted.
  */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,15,0)
+#define get_compat_sigset(set, compat)					\
+({									\
+	compat_sigset_t set32;						\
+	int ret;							\
+									\
+	ret = cobalt_copy_from_user(&set32, compat, sizeof(compat_sigset_t)); \
+	if (!ret)							\
+		sigset_from_compat(set, &set32);			\
+	ret;								\
+})
+
+#define put_compat_sigset(compat, set, size)				\
+({									\
+	compat_sigset_t set32;						\
+									\
+	sigset_to_compat(&set32, set);					\
+	cobalt_copy_to_user(compat, &set32, size);			\
+})
+#endif /* < 4.15 */
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
 #define raw_copy_to_user(__to, __from, __n)	__copy_to_user_inatomic(__to, __from, __n)
 #define raw_copy_from_user(__to, __from, __n)	__copy_from_user_inatomic(__to, __from, __n)
