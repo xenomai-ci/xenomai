@@ -163,7 +163,7 @@ static void low_init(void)
 		early_panic("ABI mismatch: required r%lu, provided r%lu",
 			    XENOMAI_ABI_REV, f->feat_abirev);
 	case -EAGAIN:
-		early_panic("Cobalt core present but disabled "
+		early_panic("Cobalt core present but stopped "
 			    "(use corectl --start)");
 	case -ENOSYS:
 		early_panic("Cobalt core not enabled in kernel");
