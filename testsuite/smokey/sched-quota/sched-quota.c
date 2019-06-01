@@ -327,7 +327,7 @@ static int run_sched_quota(struct smokey_test *t, int argc, char *const argv[])
 	smokey_trace("%d thread%s: cap=%d%%, effective=%.1f%%",
 		     nrthreads, nrthreads > 1 ? "s": "", quota, effective);
 
-	if (!smokey_on_vm && fabs(effective - (double)quota) > 0.5) {
+	if (!smokey_on_vm && fabs(effective - (double)quota) > 1.5) {
 		smokey_warning("out of quota: %.1f%%",
 			       effective - (double)quota);
 		return -EPROTO;
