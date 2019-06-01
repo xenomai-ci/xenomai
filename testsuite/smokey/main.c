@@ -22,6 +22,7 @@
 
 int main(int argc, char *const argv[])
 {
+	struct sched_param param = { .sched_priority = 0 };
 	struct smokey_test *t;
 	int ret, fails = 0;
 
@@ -29,6 +30,7 @@ int main(int argc, char *const argv[])
 		return 0;
 
 	for_each_smokey_test(t) {
+		pthread_setschedparam(pthread_self(), SCHED_OTHER, &param);
 		ret = t->run(t, argc, argv);
 		if (ret) {
 			if (ret == -ENOSYS) {
