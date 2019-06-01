@@ -306,7 +306,7 @@ struct udd_device {
 	/** Reserved to the UDD core. */
 	struct udd_reserved {
 		rtdm_irq_t irqh;
-		atomic_t event;
+		u32 event_count;
 		struct udd_signotify signfy;
 		struct rtdm_event pulse;
 		struct rtdm_driver driver;
