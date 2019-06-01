@@ -89,9 +89,17 @@ static void sigshadow_handler(int sig, siginfo_t *si, void *ctxt)
 
 static void install_sigshadow(void)
 {
+	void *dummy[SIGSHADOW_BACKTRACE_DEPTH];
 	struct sigaction new_sigshadow_action;
 	sigset_t saved_sigset;
 	sigset_t mask_sigset;
+
+	/*
+	 * Kickstart backtrace() so that it may call malloc() from a
+	 * safe context right now, not later on from the sigshadow
+	 * handler.
+	 */
+	backtrace(dummy, SIGSHADOW_BACKTRACE_DEPTH);
 
 	sigemptyset(&mask_sigset);
 	sigaddset(&mask_sigset, SIGSHADOW);
