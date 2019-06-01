@@ -117,7 +117,8 @@ static ssize_t udd_read_rt(struct rtdm_fd *fd,
 	struct udd_context *context;
 	struct udd_reserved *ur;
 	struct udd_device *udd;
-	ssize_t ret;
+	rtdm_lockctx_t ctx;
+	ssize_t ret = 0;
 	u32 count;
 
 	if (len != sizeof(count))
@@ -130,15 +131,20 @@ static ssize_t udd_read_rt(struct rtdm_fd *fd,
 	ur = &udd->__reserved;
 	context = rtdm_fd_to_private(fd);
 
-	for (;;) {
-		if (atomic_read(&ur->event) != context->event_count)
-			break;
-		ret = rtdm_event_wait(&ur->pulse);
-		if (ret)
-			return ret;
-	}
+	cobalt_atomic_enter(ctx);
 
-	count = atomic_read(&ur->event);
+	if (ur->event_count != context->event_count)
+		rtdm_event_clear(&ur->pulse);
+	else
+		ret = rtdm_event_wait(&ur->pulse);
+
+	count = ur->event_count;
+
+	cobalt_atomic_leave(ctx);
+
+	if (ret)
+		return ret;
+
 	context->event_count = count;
 	ret = rtdm_copy_to_user(fd, buf, &count, sizeof(count));
 
@@ -404,7 +410,7 @@ int udd_register_device(struct udd_device *udd)
 	} else
 		ur->mapper_name = NULL;
 
-	atomic_set(&ur->event, 0);
+	ur->event_count = 0;
 	rtdm_event_init(&ur->pulse, 0);
 	ur->signfy.pid = -1;
 
@@ -501,12 +507,15 @@ void udd_notify_event(struct udd_device *udd)
 {
 	struct udd_reserved *ur = &udd->__reserved;
 	union sigval sival;
+	rtdm_lockctx_t ctx;
 
-	atomic_inc(&ur->event);
+	cobalt_atomic_enter(ctx);
+	ur->event_count++;
 	rtdm_event_signal(&ur->pulse);
+	cobalt_atomic_leave(ctx);
 
 	if (ur->signfy.pid > 0) {
-		sival.sival_int = atomic_read(&ur->event);
+		sival.sival_int = (int)ur->event_count;
 		__cobalt_sigqueue(ur->signfy.pid, ur->signfy.sig, &sival);
 	}
 }
