@@ -2131,11 +2131,11 @@ void xnthread_relax(int notify, int reason)
 	 * information.
 	 */
 	xnthread_propagate_schedparam(thread);
-	
+
 	if (xnthread_test_state(thread, XNUSER) && notify) {
-		xndebug_notify_relax(thread, reason);
 		if (xnthread_test_state(thread, XNWARN)) {
 			/* Help debugging spurious relaxes. */
+			xndebug_notify_relax(thread, reason);
 			memset(&si, 0, sizeof(si));
 			si.si_signo = SIGDEBUG;
 			si.si_code = SI_QUEUE;
