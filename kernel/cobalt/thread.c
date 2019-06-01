@@ -2520,7 +2520,7 @@ int xnthread_killall(int grace, int mask)
 	xnlock_get_irqsave(&nklock, s);
 
 	nrthreads = cobalt_nrthreads;
-	
+
 	xnsched_for_each_thread(t) {
 		if (xnthread_test_state(t, XNROOT) ||
 		    xnthread_test_state(t, mask) != mask ||
@@ -2564,10 +2564,10 @@ int xnthread_killall(int grace, int mask)
 		printk(XENO_INFO "joined %d threads\n",
 		       count + nrkilled - cobalt_nrthreads);
 
-	return ret < 0 ? EINTR : 0;
+	return ret < 0 ? -EINTR : 0;
 }
 EXPORT_SYMBOL_GPL(xnthread_killall);
-		     
+
 /* Xenomai's generic personality. */
 struct xnthread_personality xenomai_personality = {
 	.name = "core",
