@@ -15,7 +15,8 @@ XENO_CC="@CC@"
 XENO_TARGET_ARCH="@XENO_TARGET_ARCH@"
 XENO_INCLUDE_DIR="${staging}${includedir}"
 XENO_BASE_CFLAGS="-I$XENO_INCLUDE_DIR/cobalt -I$XENO_INCLUDE_DIR @XENO_USER_APP_CFLAGS@ -D__COBALT__"
-XENO_POSIX_LDFLAGS="-L${staging}${libdir} -lcobalt -lmodechk -lpthread -lrt @XENO_USER_APP_LDFLAGS@"
+XENO_COBALT_LDFLAGS="-L${staging}${libdir} -lcobalt"
+XENO_POSIX_LDFLAGS="-lpthread -lrt @XENO_USER_APP_LDFLAGS@"
 XENO_LIBRARY_DIR="${staging}${libdir}"
 LD_FILE_OPTION="@LD_FILE_OPTION@"
 
@@ -243,9 +244,11 @@ if test x$do_ldflags = xy; then
 	echo "no API specified, missing --skin before --ldflags" 1>&2
 	exit 1
     fi
+    lmodeck=
     ldflags=
     if test x$do_mode_check = xy; then
 	ldflags="`dump_wrappers modechk.wrappers`"
+	lmodeck=-lmodechk
     fi
     test x$compat = xy && ldflags="-ltrank $ldflags"
     copperplate=
@@ -283,7 +286,8 @@ if test x$do_ldflags = xy; then
 	bootstrap="${XENO_LIBRARY_DIR}/xenomai/bootstrap${codegen}.o"
     fi
     ldflags="-Wl,--no-as-needed $ldflags"
-    echo "$ldflags $copperplate $bootstrap $wrap_main $XENO_POSIX_LDFLAGS"
+    echo "$ldflags $copperplate $bootstrap $wrap_main $XENO_COBALT_LDFLAGS" \
+		"$lmodeck $XENO_POSIX_LDFLAGS"
 fi
 
 exit 0
