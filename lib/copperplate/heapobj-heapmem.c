@@ -33,15 +33,15 @@ int __heapobj_init_private(struct heapobj *hobj, const char *name,
 	void *_mem = mem;
 	int ret;
 
-	heap = __STD(malloc(sizeof(*heap)));
+	heap = malloc(sizeof(*heap));
 	if (heap == NULL)
 		return -ENOMEM;
 
 	if (mem == NULL) {
 		size = HEAPMEM_ARENA_SIZE(size); /* Count meta-data in. */
-		mem = __STD(malloc(size));
+		mem = malloc(size);
 		if (mem == NULL) {
-			__STD(free(heap));
+			free(heap);
 			return -ENOMEM;
 		}
 	}
@@ -57,8 +57,8 @@ int __heapobj_init_private(struct heapobj *hobj, const char *name,
 	ret = heapmem_init(hobj->pool, mem, size);
 	if (ret) {
 		if (_mem == NULL)
-			__STD(free(mem));
-		__STD(free(heap));
+			free(mem);
+		free(heap);
 		return ret;
 	}
 
@@ -99,13 +99,13 @@ int heapobj_pkg_init_private(void)
 		size = MIN_HEAPMEM_HEAPSZ;
 #endif
 	size = HEAPMEM_ARENA_SIZE(size);
-	mem = __STD(malloc(size));
+	mem = malloc(size);
 	if (mem == NULL)
 		return -ENOMEM;
 
 	ret = heapmem_init(&heapmem_main, mem, size);
 	if (ret) {
-		__STD(free(mem));
+		free(mem);
 		return ret;
 	}
 

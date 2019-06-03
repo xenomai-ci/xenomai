@@ -92,7 +92,7 @@ void pvheapobj_destroy(struct heapobj *hobj)
 	struct pool_header *ph = hobj->pool;
 
 	__RT(pthread_mutex_destroy(&ph->lock));
-	__STD(free(ph));
+	free(ph);
 }
 
 int pvheapobj_extend(struct heapobj *hobj, size_t size, void *mem)
@@ -122,7 +122,7 @@ void *pvheapobj_alloc(struct heapobj *hobj, size_t size)
 	write_unlock(&ph->lock);
 
 	/* malloc(3) is not a cancellation point. */
-	ptr = __STD(malloc(size + sizeof(*bh)));
+	ptr = malloc(size + sizeof(*bh));
 	if (ptr == NULL) {
 		write_lock(&ph->lock);
 		goto fail;
@@ -149,7 +149,7 @@ void pvheapobj_free(struct heapobj *hobj, void *ptr)
 	write_lock(&ph->lock);
 	ph->used -= bh->size;
 	write_unlock(&ph->lock);
-	__STD(free(bh));
+	free(bh);
 }
 
 size_t pvheapobj_inquire(struct heapobj *hobj)

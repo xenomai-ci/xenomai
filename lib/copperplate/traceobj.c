@@ -78,7 +78,7 @@ int traceobj_init(struct traceobj *trobj, const char *label, int nr_marks)
 	trobj->cur_mark = 0;
 
 	if (nr_marks > 0) {
-		trobj->marks = __STD(malloc(sizeof(struct tracemark) * nr_marks));
+		trobj->marks = malloc(sizeof(struct tracemark) * nr_marks);
 		if (trobj->marks == NULL)
 			panic("cannot allocate mark table for tracing");
 	}
@@ -177,7 +177,7 @@ fail:
 
 void traceobj_destroy(struct traceobj *trobj)
 {
-	__STD(free(trobj->marks));
+	free(trobj->marks);
 	__RT(pthread_mutex_destroy(&trobj->lock));
 }
 

@@ -400,7 +400,7 @@ static int regfs_open(const char *path, struct fuse_file_info *fi)
 	}
 
 	if (fsobj->privsz) {
-		priv = __STD(malloc(fsobj->privsz));
+		priv = malloc(fsobj->privsz);
 		if (priv == NULL) {
 			ret = -ENOMEM;
 			goto done;
@@ -448,7 +448,7 @@ static int regfs_release(const char *path, struct fuse_file_info *fi)
 		CANCEL_RESTORE(svc);
 	}
 	if (priv)
-		__STD(free(priv));
+		free(priv);
 done:
 	read_unlock(&p->lock);
 	pop_cleanup_lock(&p->lock);
@@ -705,7 +705,7 @@ static int connect_regd(const char *sessdir, char **mountpt, int flags)
 	unsigned int hash;
 	socklen_t addrlen;
 
-	*mountpt = __STD(malloc(PATH_MAX));
+	*mountpt = malloc(PATH_MAX);
 	if (*mountpt == NULL)
 		return -ENOMEM;
 
@@ -720,7 +720,7 @@ static int connect_regd(const char *sessdir, char **mountpt, int flags)
 		s = __STD(socket(AF_UNIX, SOCK_SEQPACKET|SOCK_CLOEXEC, 0));
 		if (s < 0) {
 			ret = -errno;
-			__STD(free(*mountpt));
+			free(*mountpt);
 			return ret;
 		}
 		ret = __STD(connect(s, (struct sockaddr *)&sun, addrlen));
@@ -736,7 +736,7 @@ static int connect_regd(const char *sessdir, char **mountpt, int flags)
 		ret = -EAGAIN;
 	}
 
-	__STD(free(*mountpt));
+	free(*mountpt);
 
 	early_warning("cannot connect to registry daemon");
 
@@ -868,13 +868,13 @@ int fsobstack_grow_format(struct fsobstack *o, const char *fmt, ...)
 		       obstack_grow(&o->obstack, p, n);
 
 	       if (p != buf)
-		       __STD(free(p));
+		       free(p);
 
 	       if (n < len)
 		       return n < 0 ? -EINVAL : n;
 
 	       len = n + 1;
-	       p = __STD(malloc(len));
+	       p = malloc(len);
 	       if (p == NULL)
 		       break;
 	   }
