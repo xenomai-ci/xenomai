@@ -2088,6 +2088,11 @@ void xnthread_relax(int notify, int reason)
 		set_cpus_allowed_ptr(p, cpumask_of(cpu));
 	}
 #endif
+	/*
+	 * After migration there will be no syscall restart (rather a signal
+	 * delivery).
+	 */
+	xnthread_clear_localinfo(thread, XNSYSRST);
 
 	trace_cobalt_shadow_relaxed(thread);
 }
