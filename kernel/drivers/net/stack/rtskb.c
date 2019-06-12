@@ -397,8 +397,10 @@ unsigned int rtskb_pool_extend(struct rtskb_pool *pool,
 	skb->buf_end = skb->buf_start + SKB_DATA_ALIGN(RTSKB_SIZE) - 1;
 #endif
 
-	if (rtdev_map_rtskb(skb) < 0)
+	if (rtdev_map_rtskb(skb) < 0) {
+	    kmem_cache_free(rtskb_slab_pool, skb);
 	    break;
+	}
 
 	rtskb_queue_tail(&pool->queue, skb);
 
