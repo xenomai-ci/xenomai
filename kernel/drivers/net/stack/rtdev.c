@@ -459,17 +459,16 @@ void rtdev_unmap_rtskb(struct rtskb *skb)
     struct rtnet_device *rtdev;
     int i;
 
-    if (skb->buf_dma_addr == RTSKB_UNMAPPED)
-	return;
-
     mutex_lock(&rtnet_devices_nrt_lock);
 
     list_del(&skb->entry);
 
-    for (i = 0; i < MAX_RT_DEVICES; i++) {
-	rtdev = rtnet_devices[i];
-	if (rtdev && rtdev->unmap_rtskb) {
-	    rtdev->unmap_rtskb(rtdev, skb);
+    if (skb->buf_dma_addr != RTSKB_UNMAPPED) {
+	for (i = 0; i < MAX_RT_DEVICES; i++) {
+	    rtdev = rtnet_devices[i];
+	    if (rtdev && rtdev->unmap_rtskb) {
+		rtdev->unmap_rtskb(rtdev, skb);
+	    }
 	}
     }
 
