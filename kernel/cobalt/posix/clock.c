@@ -276,7 +276,6 @@ int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 	struct restart_block *restart;
 	struct xnthread *cur;
 	xnsticks_t timeout, rem;
-	int ret = 0;
 	spl_t s;
 
 	trace_cobalt_clock_nanosleep(clock_id, flags, rqt);
@@ -347,7 +346,7 @@ int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 
 	xnlock_put_irqrestore(&nklock, s);
 
-	return ret;
+	return 0;
 }
 
 COBALT_SYSCALL(clock_nanosleep, primary,
