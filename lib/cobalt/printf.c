@@ -20,6 +20,7 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <pthread.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -640,9 +641,13 @@ static void *printer_loop(void *arg)
 static void spawn_printer_thread(void)
 {
 	pthread_attr_t thattr;
+	sigset_t sset, oset;
 
 	pthread_attr_init(&thattr);
+	sigfillset(&sset);
+	pthread_sigmask(SIG_BLOCK, &sset, &oset);
 	pthread_create(&printer_thread, &thattr, printer_loop, NULL);
+	sigprocmask(SIG_SETMASK, &oset, NULL);
 }
 
 void cobalt_print_init_atfork(void)
