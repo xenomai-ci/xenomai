@@ -648,6 +648,7 @@ static void spawn_printer_thread(void)
 	pthread_sigmask(SIG_BLOCK, &sset, &oset);
 	pthread_create(&printer_thread, &thattr, printer_loop, NULL);
 	sigprocmask(SIG_SETMASK, &oset, NULL);
+	pthread_setname_np(printer_thread, "cobalt_printf");
 }
 
 void cobalt_print_init_atfork(void)
