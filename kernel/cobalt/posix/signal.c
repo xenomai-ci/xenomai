@@ -45,6 +45,7 @@ static int cobalt_signal_deliver(struct cobalt_thread *thread,
 {				/* nklocked, IRQs off */
 	struct cobalt_sigwait_context *swc;
 	struct xnthread_wait_context *wc;
+	struct list_head *sigwaiters;
 	int sig, ret;
 
 	sig = sigp->si.si_signo;
@@ -66,10 +67,11 @@ static int cobalt_signal_deliver(struct cobalt_thread *thread,
 	 * group, try to deliver to any thread from the same process
 	 * waiting for that signal.
 	 */
-	if (!group || list_empty(&thread->process->sigwaiters))
+	sigwaiters = &thread->process->sigwaiters;
+	if (!group || list_empty(sigwaiters))
 		return 0;
 
-	list_for_each_entry(thread, &thread->process->sigwaiters, signext) {
+	list_for_each_entry(thread, sigwaiters, signext) {
 		wc = xnthread_get_wait_context(&thread->threadbase);
 		swc = container_of(wc, struct cobalt_sigwait_context, wc);
 		if (sigismember(swc->set, sig))
