@@ -175,12 +175,17 @@ matrix:
         KERNEL_DEFCONFIG: defconfig
     - env:
       - ARCH: x86
-        IPIPE_REV: ipipe-x86-4.14.y
+        IPIPE_REV: ipipe-x86-4.19.y
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-x86.git
         KERNEL_DEFCONFIG: x86_64_defconfig
     - env:
       - ARCH: x86
-        IPIPE_REV: ipipe-core-4.14.111-x86-3
+        IPIPE_REV: ipipe-core-4.19.56-x86-2
+        IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-x86.git
+        KERNEL_DEFCONFIG: x86_64_defconfig
+    - env:
+      - ARCH: x86
+        IPIPE_REV: ipipe-core-4.14.128-x86-5
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-x86.git
         KERNEL_DEFCONFIG: x86_64_defconfig
     - env:
@@ -190,7 +195,7 @@ matrix:
         KERNEL_DEFCONFIG: x86_64_defconfig
     - env:
       - ARCH: x86
-        IPIPE_REV: ipipe-core-4.4.176-x86-14
+        IPIPE_REV: ipipe-core-4.4.182-x86-15
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe.git
         KERNEL_DEFCONFIG: x86_64_defconfig
     - env:
