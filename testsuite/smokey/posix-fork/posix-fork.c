@@ -32,5 +32,5 @@ static int run_posix_fork(struct smokey_test *t, int argc, char *const argv[])
 	 * Re-exec ourselves without running any test, this is
 	 * enough for creating a shadow context.
 	 */
-	return smokey_fork_exec(XENO_TEST_DIR "/smokey", "smokey");
+	return smokey_fork_exec(argv[0], "smokey");
 }
