@@ -461,7 +461,7 @@ static void sigdebug(int sig, siginfo_t *si, void *context)
 {
 	const char fmt[] = "%s, aborting.\n"
 		"(enabling CONFIG_XENO_OPT_DEBUG_TRACE_RELAX may help)\n";
-	unsigned int reason = si->si_value.sival_int;
+	unsigned int reason = sigdebug_reason(si);
 	int n __attribute__ ((unused));
 	static char buffer[256];
 
