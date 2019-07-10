@@ -37,10 +37,10 @@ static inline int __may_change_config_tunable(void)
 	__read_ ## __name ## _ ## __scope
 
 #define __define_tunable(__name, __type, __val, __scope)	\
-	void __tunable_set_call(__name, __scope)(typeof(__type) __val)
+	void __tunable_set_call(__name, __scope)(__typeof__(__type) __val)
 
 #define __read_tunable(__name, __type, __scope)	\
-	typeof(__type) __tunable_get_call(__name, __scope)(void)
+	__typeof__(__type) __tunable_get_call(__name, __scope)(void)
 
 #define define_config_tunable(__name, __type, __val)	\
 	__define_tunable(__name, __type, __val, config)
