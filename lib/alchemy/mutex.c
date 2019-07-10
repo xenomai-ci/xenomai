@@ -182,7 +182,7 @@ out:
  *
  * - -EBUSY is returned upon an attempt to destroy the object
  * referenced by @a mutex while it is referenced (for example, while
- * being used in a rt_mutex_acquite(), rt_mutex_acquire_timed() or
+ * being used in a rt_mutex_acquire(), rt_mutex_acquire_timed() or
  * rt_mutex_acquire_until() by another task).
  *
  * @apitags{mode-unrestricted, switch-secondary}
