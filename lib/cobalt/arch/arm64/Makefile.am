@@ -1,6 +1,6 @@
 noinst_LTLIBRARIES = libarch.la
 
-libarch_la_LDFLAGS = @XENO_LIB_LDFLAGS@ -version-info 0:0:0
+libarch_la_LDFLAGS = @XENO_LIB_LDFLAGS@
 
 libarch_la_SOURCES = features.c
 
