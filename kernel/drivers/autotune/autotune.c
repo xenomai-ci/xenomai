@@ -49,8 +49,8 @@ struct tuner_state {
 	int min_lat;
 	int max_lat;
 	int prev_mean;
-	int prev_sqs;
-	int cur_sqs;
+	long long prev_sqs;
+	long long cur_sqs;
 	unsigned int sum;
 	unsigned int cur_samples;
 	unsigned int max_samples;
@@ -427,7 +427,7 @@ static inline void build_score(struct gravity_tuner *tuner, int step)
 
 	n = state->cur_samples;
 	tuner->scores[step].pmean = state->sum / n;
-	variance = n > 1 ? state->cur_sqs / (n - 1) : 0;
+	variance = n > 1 ? xnarch_llimd(state->cur_sqs, 1, n - 1) : 0;
 	tuner->scores[step].stddev = int_sqrt(variance);
 	tuner->scores[step].minlat = state->min_lat;
 	tuner->scores[step].gravity = tuner->get_gravity(tuner);
