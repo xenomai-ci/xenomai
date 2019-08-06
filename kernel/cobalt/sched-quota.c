@@ -573,7 +573,8 @@ int xnsched_quota_destroy_group(struct xnsched_quota_group *tg,
 	if (list_empty(&qs->groups))
 		xntimer_stop(&qs->refill_timer);
 
-	*quota_sum_r = quota_sum_all(qs);
+	if (quota_sum_r)
+		*quota_sum_r = quota_sum_all(qs);
 
 	return 0;
 }

@@ -830,9 +830,6 @@ void cobalt_sched_reclaim(struct cobalt_process *process)
 {
 	struct cobalt_resources *p = &process->resources;
 	struct cobalt_sched_group *group;
-#ifdef CONFIG_XENO_OPT_SCHED_QUOTA
-	int quota_sum;
-#endif
 	spl_t s;
 
 	xnlock_get_irqsave(&nklock, s);
@@ -840,7 +837,7 @@ void cobalt_sched_reclaim(struct cobalt_process *process)
 	while (!list_empty(&p->schedq)) {
 		group = list_get_entry(&p->schedq, struct cobalt_sched_group, next);
 #ifdef CONFIG_XENO_OPT_SCHED_QUOTA
-		xnsched_quota_destroy_group(&group->quota, 1, &quota_sum);
+		xnsched_quota_destroy_group(&group->quota, 1, NULL);
 #endif
 		xnlock_put_irqrestore(&nklock, s);
 		xnfree(group);
