@@ -18,6 +18,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
+#include <linux/printk.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -93,7 +96,7 @@ static int __init loopback_init(void)
     int err;
     struct rtnet_device *rtdev;
 
-    printk("initializing loopback...\n");
+    pr_info("initializing loopback interface...\n");
 
     if ((rtdev = rt_alloc_etherdev(0, 1)) == NULL)
 	return -ENODEV;
@@ -129,7 +132,7 @@ static void __exit loopback_cleanup(void)
 {
     struct rtnet_device *rtdev = rt_loopback_dev;
 
-    printk("removing loopback...\n");
+    pr_info("removing loopback interface...\n");
 
     rt_unregister_rtnetdev(rtdev);
     rt_rtdev_disconnect(rtdev);
