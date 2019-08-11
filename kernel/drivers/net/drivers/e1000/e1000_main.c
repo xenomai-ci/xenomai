@@ -918,8 +918,9 @@ static int e1000_probe(struct pci_dev *pdev,
 		 "32-bit"));
 	}
 
+	printk(KERN_INFO "e1000: hw ");
 	for (i = 0; i < 6; i++)
-		printk("%2.2x%c", netdev->dev_addr[i], i == 5 ? '\n' : ':');
+		printk(KERN_CONT "%2.2x%c", netdev->dev_addr[i], i == 5 ? '\n' : ':');
 
 	/* reset the hardware with the new settings */
 	e1000_reset(adapter);
