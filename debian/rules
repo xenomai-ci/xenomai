@@ -102,7 +102,7 @@ binary-arch: build install
 	dh_installdocs -s -A README
 	dh_link -s
 	dh_installchangelogs -s
-	dh_strip -s
+	dh_strip -s --exclude=smokey
 	dh_compress -s
 	dh_fixperms -s
 	dh_makeshlibs -s
