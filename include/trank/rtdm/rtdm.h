@@ -35,6 +35,7 @@ extern "C" {
 
 #define rt_dev_open(__args...)		rt_dev_call(open, __args)
 #define rt_dev_ioctl(__args...)		rt_dev_call(ioctl, __args)
+#define rt_dev_recvfrom(__args...)	rt_dev_call(recvfrom, __args)
 
 static inline int rt_dev_socket(int domain, int type, int protocol)
 {
