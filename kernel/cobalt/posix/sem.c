@@ -36,8 +36,7 @@ static inline int sem_check(struct cobalt_sem *sem)
 	if (sem == NULL || sem->magic != COBALT_SEM_MAGIC)
 		return -EINVAL;
 
-	if (IS_ENABLED(CONFIG_XENO_OPT_DEBUG_POSIX_SYNCHRO) &&
-	    sem->resnode.scope && sem->resnode.scope != sem_kqueue(sem))
+	if (sem->resnode.scope && sem->resnode.scope != sem_kqueue(sem))
 		return -EPERM;
 
 	return 0;

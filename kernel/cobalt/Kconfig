@@ -436,17 +436,6 @@ config XENO_OPT_DEBUG_MUTEX_SLEEP
 	 disables the normal fast mutex operations from user-space,
 	 causing a system call for each mutex acquisition/release.
 
-config XENO_OPT_DEBUG_POSIX_SYNCHRO
-        bool "Detect POSIX synchronization issues"
-	default n
-	help
-	  When this debug category is enabled, calls to the thread
-	  synchronization services are checked for consistency, beyond
-	  the requirements of the POSIX standard. In most cases, a
-	  faulty call results in error EPERM when detected.
-
-	  This option has negligible overhead.
- 
 config XENO_OPT_DEBUG_LEGACY
         bool "Detect usage of legacy constructs/features"
 	default n

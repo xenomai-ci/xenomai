@@ -67,7 +67,6 @@ before_script:
   - ./scripts/config -e XENO_OPT_DEBUG_MEMORY
   - ./scripts/config -e XENO_OPT_DEBUG_CONTEXT
   - ./scripts/config -e XENO_OPT_DEBUG_USER
-  - ./scripts/config -e XENO_OPT_DEBUG_POSIX_SYNCHRO
   - ./scripts/config -e XENO_OPT_DEBUG_LEGACY
   - ./scripts/config -e XENO_OPT_DEBUG_TRACE_RELAX
   - ./scripts/config -e XENO_DRIVERS_16550A

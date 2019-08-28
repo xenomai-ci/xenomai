@@ -104,8 +104,7 @@ int cobalt_mutex_release(struct xnthread *curr,
 	if (!cobalt_obj_active(mutex, COBALT_MUTEX_MAGIC, struct cobalt_mutex))
 		 return -EINVAL;
 
-	if (IS_ENABLED(CONFIG_XENO_OPT_DEBUG_POSIX_SYNCHRO) &&
-	    mutex->resnode.scope !=
+	if (mutex->resnode.scope !=
 	    cobalt_current_resources(mutex->attr.pshared))
 		return -EPERM;
 
@@ -159,8 +158,7 @@ redo:
 		goto out;
 	}
 
-	if (IS_ENABLED(CONFIG_XENO_OPT_DEBUG_POSIX_SYNCHRO) &&
-	    mutex->resnode.scope !=
+	if (mutex->resnode.scope !=
 	    cobalt_current_resources(mutex->attr.pshared)) {
 		ret = -EPERM;
 		goto out;
@@ -190,7 +188,7 @@ redo:
 	switch(mutex->attr.type) {
 	case PTHREAD_MUTEX_NORMAL:
 		/* Attempting to relock a normal mutex, deadlock. */
-		if (IS_ENABLED(CONFIG_XENO_OPT_DEBUG_POSIX_SYNCHRO))
+		if (IS_ENABLED(XENO_OPT_DEBUG_USER))
 			printk(XENO_WARNING
 			       "thread %s deadlocks on non-recursive mutex\n",
 			       curr->name);
