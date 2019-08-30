@@ -131,7 +131,7 @@ static inline void xnpipe_dequeue_all(struct xnpipe_state *state, int mask)
 		if (__sigpending)					\
 			break;						\
 		prepare_to_wait_exclusive(__waitq, &__wait, TASK_INTERRUPTIBLE); \
-		if (__cond)						\
+		if (__cond || (__state)->status & XNPIPE_KERN_LCLOSE)	\
 			break;						\
 		schedule();						\
 	}								\
