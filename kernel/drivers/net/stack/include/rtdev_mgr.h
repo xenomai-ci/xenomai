@@ -24,18 +24,16 @@
 
 #include <rtnet_internal.h>
 
-
 extern void rtnetif_err_rx(struct rtnet_device *rtdev);
 extern void rtnetif_err_tx(struct rtnet_device *rtdev);
 
-extern void rt_rtdev_connect (struct rtnet_device *rtdev, struct rtnet_mgr *mgr);
-extern void rt_rtdev_disconnect (struct rtnet_device *rtdev);
-extern int rt_rtdev_mgr_init (struct rtnet_mgr *mgr);
-extern void rt_rtdev_mgr_delete (struct rtnet_mgr *mgr);
-extern int rt_rtdev_mgr_start (struct rtnet_mgr *mgr);
-extern int rt_rtdev_mgr_stop (struct rtnet_mgr *mgr);
+extern void rt_rtdev_connect(struct rtnet_device *rtdev, struct rtnet_mgr *mgr);
+extern void rt_rtdev_disconnect(struct rtnet_device *rtdev);
+extern int rt_rtdev_mgr_init(struct rtnet_mgr *mgr);
+extern void rt_rtdev_mgr_delete(struct rtnet_mgr *mgr);
+extern int rt_rtdev_mgr_start(struct rtnet_mgr *mgr);
+extern int rt_rtdev_mgr_stop(struct rtnet_mgr *mgr);
 
+#endif /* __KERNEL__ */
 
-#endif  /* __KERNEL__ */
-
-#endif  /* __RTDEV_MGR_H_ */
+#endif /* __RTDEV_MGR_H_ */

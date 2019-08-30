@@ -38,13 +38,12 @@
 #include <rtnet_socket.h>
 #include <ipv4/protocol.h>
 
-
-#define SKB_POOL_CLOSED     0
+#define SKB_POOL_CLOSED 0
 
 static unsigned int socket_rtskbs = DEFAULT_SOCKET_RTSKBS;
 module_param(socket_rtskbs, uint, 0444);
-MODULE_PARM_DESC(socket_rtskbs, "Default number of realtime socket buffers in socket pools");
-
+MODULE_PARM_DESC(socket_rtskbs,
+		 "Default number of realtime socket buffers in socket pools");
 
 /************************************************************************
  *  internal socket functions                                           *
@@ -53,17 +52,17 @@ MODULE_PARM_DESC(socket_rtskbs, "Default number of realtime socket buffers in so
 int rt_bare_socket_init(struct rtdm_fd *fd, unsigned short protocol,
 			unsigned int priority, unsigned int pool_size)
 {
-    struct rtsocket *sock = rtdm_fd_to_private(fd);
-    int err;
+	struct rtsocket *sock = rtdm_fd_to_private(fd);
+	int err;
 
-    err = rtskb_pool_init(&sock->skb_pool, pool_size, NULL, fd);
-    if (err < 0)
+	err = rtskb_pool_init(&sock->skb_pool, pool_size, NULL, fd);
+	if (err < 0)
+		return err;
+
+	sock->protocol = protocol;
+	sock->priority = priority;
+
 	return err;
-
-    sock->protocol = protocol;
-    sock->priority = priority;
-
-    return err;
 }
 EXPORT_SYMBOL_GPL(rt_bare_socket_init);
 
@@ -72,78 +71,74 @@ EXPORT_SYMBOL_GPL(rt_bare_socket_init);
  */
 int rt_socket_init(struct rtdm_fd *fd, unsigned short protocol)
 {
-    struct rtsocket *sock = rtdm_fd_to_private(fd);
-    unsigned int    pool_size;
+	struct rtsocket *sock = rtdm_fd_to_private(fd);
+	unsigned int pool_size;
 
-    sock->flags = 0;
-    sock->callback_func = NULL;
+	sock->flags = 0;
+	sock->callback_func = NULL;
 
-    rtskb_queue_init(&sock->incoming);
+	rtskb_queue_init(&sock->incoming);
 
-    sock->timeout = 0;
+	sock->timeout = 0;
 
-    rtdm_lock_init(&sock->param_lock);
-    rtdm_sem_init(&sock->pending_sem, 0);
+	rtdm_lock_init(&sock->param_lock);
+	rtdm_sem_init(&sock->pending_sem, 0);
 
-    pool_size = rt_bare_socket_init(fd, protocol,
-				    RTSKB_PRIO_VALUE(SOCK_DEF_PRIO,
-						    RTSKB_DEF_RT_CHANNEL),
-				    socket_rtskbs);
-    sock->pool_size = pool_size;
-    mutex_init(&sock->pool_nrt_lock);
+	pool_size = rt_bare_socket_init(fd, protocol,
+					RTSKB_PRIO_VALUE(SOCK_DEF_PRIO,
+							 RTSKB_DEF_RT_CHANNEL),
+					socket_rtskbs);
+	sock->pool_size = pool_size;
+	mutex_init(&sock->pool_nrt_lock);
 
-    if (pool_size < socket_rtskbs) {
-	/* fix statistics */
-	if (pool_size == 0)
-	    rtskb_pools--;
+	if (pool_size < socket_rtskbs) {
+		/* fix statistics */
+		if (pool_size == 0)
+			rtskb_pools--;
 
-	rt_socket_cleanup(fd);
-	return -ENOMEM;
-    }
+		rt_socket_cleanup(fd);
+		return -ENOMEM;
+	}
 
-    return 0;
+	return 0;
 }
 EXPORT_SYMBOL_GPL(rt_socket_init);
-
 
 /***
  *  rt_socket_cleanup - releases resources allocated for the socket
  */
 void rt_socket_cleanup(struct rtdm_fd *fd)
 {
-    struct rtsocket *sock  = rtdm_fd_to_private(fd);
+	struct rtsocket *sock = rtdm_fd_to_private(fd);
 
+	rtdm_sem_destroy(&sock->pending_sem);
 
-    rtdm_sem_destroy(&sock->pending_sem);
+	mutex_lock(&sock->pool_nrt_lock);
 
-    mutex_lock(&sock->pool_nrt_lock);
+	set_bit(SKB_POOL_CLOSED, &sock->flags);
 
-    set_bit(SKB_POOL_CLOSED, &sock->flags);
+	if (sock->pool_size > 0)
+		rtskb_pool_release(&sock->skb_pool);
 
-    if (sock->pool_size > 0)
-	rtskb_pool_release(&sock->skb_pool);
-
-    mutex_unlock(&sock->pool_nrt_lock);
+	mutex_unlock(&sock->pool_nrt_lock);
 }
 EXPORT_SYMBOL_GPL(rt_socket_cleanup);
-
 
 /***
  *  rt_socket_common_ioctl
  */
 int rt_socket_common_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 {
-    struct rtsocket         *sock = rtdm_fd_to_private(fd);
-    int                     ret = 0;
-    struct rtnet_callback   *callback;
-    const unsigned int *val;
-    unsigned int _val;
-    const nanosecs_rel_t *timeout;
-    nanosecs_rel_t _timeout;
-    rtdm_lockctx_t          context;
+	struct rtsocket *sock = rtdm_fd_to_private(fd);
+	int ret = 0;
+	struct rtnet_callback *callback;
+	const unsigned int *val;
+	unsigned int _val;
+	const nanosecs_rel_t *timeout;
+	nanosecs_rel_t _timeout;
+	rtdm_lockctx_t context;
 
-
-    switch (request) {
+	switch (request) {
 	case RTNET_RTIOC_XMITPARAMS:
 		val = rtnet_get_arg(fd, &_val, arg, sizeof(_val));
 		if (IS_ERR(val))
@@ -159,17 +154,17 @@ int rt_socket_common_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 		break;
 
 	case RTNET_RTIOC_CALLBACK:
-	    if (rtdm_fd_is_user(fd))
-		return -EACCES;
+		if (rtdm_fd_is_user(fd))
+			return -EACCES;
 
-	    rtdm_lock_get_irqsave(&sock->param_lock, context);
+		rtdm_lock_get_irqsave(&sock->param_lock, context);
 
-	    callback = arg;
-	    sock->callback_func = callback->func;
-	    sock->callback_arg  = callback->arg;
+		callback = arg;
+		sock->callback_func = callback->func;
+		sock->callback_arg = callback->arg;
 
-	    rtdm_lock_put_irqrestore(&sock->param_lock, context);
-	    break;
+		rtdm_lock_put_irqrestore(&sock->param_lock, context);
+		break;
 
 	case RTNET_RTIOC_EXTPOOL:
 		val = rtnet_get_arg(fd, &_val, arg, sizeof(_val));
@@ -216,86 +211,86 @@ int rt_socket_common_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 		break;
 
 	default:
-	    ret = -EOPNOTSUPP;
-	    break;
-    }
+		ret = -EOPNOTSUPP;
+		break;
+	}
 
-    return ret;
+	return ret;
 }
 EXPORT_SYMBOL_GPL(rt_socket_common_ioctl);
-
-
 
 /***
  *  rt_socket_if_ioctl
  */
 int rt_socket_if_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 {
-    struct rtnet_device *rtdev;
-    struct ifreq _ifr, *ifr, *u_ifr;
-    struct sockaddr_in  _sin;
-    struct ifconf _ifc, *ifc, *u_ifc;
-    int ret = 0, size = 0, i;
-    short flags;
+	struct rtnet_device *rtdev;
+	struct ifreq _ifr, *ifr, *u_ifr;
+	struct sockaddr_in _sin;
+	struct ifconf _ifc, *ifc, *u_ifc;
+	int ret = 0, size = 0, i;
+	short flags;
 
+	if (request == SIOCGIFCONF) {
+		u_ifc = arg;
+		ifc = rtnet_get_arg(fd, &_ifc, u_ifc, sizeof(_ifc));
+		if (IS_ERR(ifc))
+			return PTR_ERR(ifc);
 
-    if (request == SIOCGIFCONF) {
-	u_ifc = arg;
-	ifc = rtnet_get_arg(fd, &_ifc, u_ifc, sizeof(_ifc));
-	if (IS_ERR(ifc))
-		return PTR_ERR(ifc);
+		for (u_ifr = ifc->ifc_req, i = 1; i <= MAX_RT_DEVICES;
+		     i++, u_ifr++) {
+			rtdev = rtdev_get_by_index(i);
+			if (rtdev == NULL)
+				continue;
 
-	for (u_ifr = ifc->ifc_req, i = 1; i <= MAX_RT_DEVICES; i++, u_ifr++) {
-		rtdev = rtdev_get_by_index(i);
-		if (rtdev == NULL)
-			continue;
+			if ((rtdev->flags & IFF_UP) == 0) {
+				rtdev_dereference(rtdev);
+				continue;
+			}
 
-		if ((rtdev->flags & IFF_UP) == 0) {
+			size += sizeof(struct ifreq);
+			if (size > ifc->ifc_len) {
+				rtdev_dereference(rtdev);
+				size = ifc->ifc_len;
+				break;
+			}
+
+			ret = rtnet_put_arg(fd, u_ifr->ifr_name, rtdev->name,
+					    IFNAMSIZ);
+			if (ret == 0) {
+				memset(&_sin, 0, sizeof(_sin));
+				_sin.sin_family = AF_INET;
+				_sin.sin_addr.s_addr = rtdev->local_ip;
+				ret = rtnet_put_arg(fd, &u_ifr->ifr_addr, &_sin,
+						    sizeof(_sin));
+			}
+
 			rtdev_dereference(rtdev);
-			continue;
+			if (ret)
+				return ret;
 		}
 
-		size += sizeof(struct ifreq);
-		if (size > ifc->ifc_len) {
-			rtdev_dereference(rtdev);
-			size = ifc->ifc_len;
-			break;
-		}
-
-		ret = rtnet_put_arg(fd, u_ifr->ifr_name, rtdev->name, IFNAMSIZ);
-		if (ret == 0) {
-			memset(&_sin, 0, sizeof(_sin));
-			_sin.sin_family      = AF_INET;
-			_sin.sin_addr.s_addr = rtdev->local_ip;
-			ret = rtnet_put_arg(fd, &u_ifr->ifr_addr, &_sin, sizeof(_sin));
-		}
-		
-		rtdev_dereference(rtdev);
-		if (ret)
-			return ret;
+		return rtnet_put_arg(fd, &u_ifc->ifc_len, &size, sizeof(size));
 	}
 
-	return rtnet_put_arg(fd, &u_ifc->ifc_len, &size, sizeof(size));
-    }
+	u_ifr = arg;
+	ifr = rtnet_get_arg(fd, &_ifr, u_ifr, sizeof(_ifr));
+	if (IS_ERR(ifr))
+		return PTR_ERR(ifr);
 
-    u_ifr = arg;
-    ifr = rtnet_get_arg(fd, &_ifr, u_ifr, sizeof(_ifr));
-    if (IS_ERR(ifr))
-	    return PTR_ERR(ifr);
+	if (request == SIOCGIFNAME) {
+		rtdev = rtdev_get_by_index(ifr->ifr_ifindex);
+		if (rtdev == NULL)
+			return -ENODEV;
+		ret = rtnet_put_arg(fd, u_ifr->ifr_name, rtdev->name, IFNAMSIZ);
+		goto out;
+	}
 
-    if (request == SIOCGIFNAME) {
-        rtdev = rtdev_get_by_index(ifr->ifr_ifindex);
-        if (rtdev == NULL)
-            return -ENODEV;
-	ret = rtnet_put_arg(fd, u_ifr->ifr_name, rtdev->name, IFNAMSIZ);
-	goto out;
-    }
+	rtdev = rtdev_get_by_name(ifr->ifr_name);
+	if (rtdev == NULL)
+		return -ENODEV;
 
-    rtdev = rtdev_get_by_name(ifr->ifr_name);
-    if (rtdev == NULL)
-	    return -ENODEV;
-
-    switch (request) {
+	switch (request) {
 	case SIOCGIFINDEX:
 		ret = rtnet_put_arg(fd, &u_ifr->ifr_ifindex, &rtdev->ifindex,
 				    sizeof(u_ifr->ifr_ifindex));
@@ -303,11 +298,10 @@ int rt_socket_if_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 
 	case SIOCGIFFLAGS:
 		flags = rtdev->flags;
-		if ((ifr->ifr_flags & IFF_UP)
-		    && (rtdev->link_state
-			& (RTNET_LINK_STATE_PRESENT
-			   | RTNET_LINK_STATE_NOCARRIER))
-                    == RTNET_LINK_STATE_PRESENT)
+		if ((ifr->ifr_flags & IFF_UP) &&
+		    (rtdev->link_state &
+		     (RTNET_LINK_STATE_PRESENT | RTNET_LINK_STATE_NOCARRIER)) ==
+			    RTNET_LINK_STATE_PRESENT)
 			flags |= IFF_RUNNING;
 		ret = rtnet_put_arg(fd, &u_ifr->ifr_flags, &flags,
 				    sizeof(u_ifr->ifr_flags));
@@ -317,13 +311,14 @@ int rt_socket_if_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 		ret = rtnet_put_arg(fd, &u_ifr->ifr_hwaddr.sa_data,
 				    rtdev->dev_addr, rtdev->addr_len);
 		if (!ret)
-			ret = rtnet_put_arg(fd, &u_ifr->ifr_hwaddr.sa_family,
-					    &rtdev->type, sizeof(u_ifr->ifr_hwaddr.sa_family));
+			ret = rtnet_put_arg(
+				fd, &u_ifr->ifr_hwaddr.sa_family, &rtdev->type,
+				sizeof(u_ifr->ifr_hwaddr.sa_family));
 		break;
 
 	case SIOCGIFADDR:
 		memset(&_sin, 0, sizeof(_sin));
-		_sin.sin_family      = AF_INET;
+		_sin.sin_family = AF_INET;
 		_sin.sin_addr.s_addr = rtdev->local_ip;
 		ret = rtnet_put_arg(fd, &u_ifr->ifr_addr, &_sin, sizeof(_sin));
 		break;
@@ -347,38 +342,35 @@ int rt_socket_if_ioctl(struct rtdm_fd *fd, int request, void __user *arg)
 	default:
 		ret = -EOPNOTSUPP;
 		break;
-    }
+	}
 
-  out:
-    rtdev_dereference(rtdev);
-    return ret;
+out:
+	rtdev_dereference(rtdev);
+	return ret;
 }
 EXPORT_SYMBOL_GPL(rt_socket_if_ioctl);
 
-
-int rt_socket_select_bind(struct rtdm_fd *fd,
-			  rtdm_selector_t *selector,
-			  enum rtdm_selecttype type,
-			  unsigned fd_index)
+int rt_socket_select_bind(struct rtdm_fd *fd, rtdm_selector_t *selector,
+			  enum rtdm_selecttype type, unsigned fd_index)
 {
-    struct rtsocket *sock = rtdm_fd_to_private(fd);
+	struct rtsocket *sock = rtdm_fd_to_private(fd);
 
-    switch (type) {
+	switch (type) {
 	case XNSELECT_READ:
-	    return rtdm_sem_select(&sock->pending_sem, selector,
-				XNSELECT_READ, fd_index);
+		return rtdm_sem_select(&sock->pending_sem, selector,
+				       XNSELECT_READ, fd_index);
 	default:
-	    return -EBADF;
-    }
+		return -EBADF;
+	}
 
-    return -EINVAL;
+	return -EINVAL;
 }
 EXPORT_SYMBOL_GPL(rt_socket_select_bind);
 
 void *rtnet_get_arg(struct rtdm_fd *fd, void *tmp, const void *src, size_t len)
 {
 	int ret;
-	
+
 	if (!rtdm_fd_is_user(fd))
 		return (void *)src;
 

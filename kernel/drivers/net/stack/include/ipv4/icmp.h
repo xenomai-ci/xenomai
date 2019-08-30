@@ -32,12 +32,9 @@
 #include <rtnet_rtpc.h>
 #include <ipv4/protocol.h>
 
+#define RT_ICMP_PRIO RTSKB_PRIO_VALUE(QUEUE_MIN_PRIO - 1, RTSKB_DEF_NRT_CHANNEL)
 
-#define RT_ICMP_PRIO            RTSKB_PRIO_VALUE(QUEUE_MIN_PRIO-1, \
-                                                 RTSKB_DEF_NRT_CHANNEL)
-
-#define ICMP_REPLY_POOL_SIZE    8
-
+#define ICMP_REPLY_POOL_SIZE 8
 
 void rt_icmp_queue_echo_request(struct rt_proc_call *call);
 void rt_icmp_dequeue_echo_request(struct rt_proc_call *call);
@@ -48,9 +45,12 @@ int rt_icmp_send_echo(u32 daddr, u16 id, u16 sequence, size_t msg_size);
 void __init rt_icmp_init(void);
 void rt_icmp_release(void);
 #else /* !CONFIG_XENO_DRIVERS_NET_RTIPV4_ICMP */
-#define rt_icmp_init() do {} while (0)
-#define rt_icmp_release() do {} while (0)
+#define rt_icmp_init()                                                         \
+	do {                                                                   \
+	} while (0)
+#define rt_icmp_release()                                                      \
+	do {                                                                   \
+	} while (0)
 #endif /* CONFIG_XENO_DRIVERS_NET_RTIPV4_ICMP */
 
-
-#endif  /* __RTNET_ICMP_H_ */
+#endif /* __RTNET_ICMP_H_ */

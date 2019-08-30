@@ -28,80 +28,72 @@
 #include <nomac_chrdev.h>
 #include <rtmac/nomac/nomac.h>
 
-
 static int nomac_ioctl_attach(struct rtnet_device *rtdev)
 {
-    struct nomac_priv   *nomac;
-    int                 ret;
+	struct nomac_priv *nomac;
+	int ret;
 
+	if (rtdev->mac_priv == NULL) {
+		ret = rtmac_disc_attach(rtdev, &nomac_disc);
+		if (ret < 0)
+			return ret;
+	}
 
-    if (rtdev->mac_priv == NULL) {
-        ret = rtmac_disc_attach(rtdev, &nomac_disc);
-        if (ret < 0)
-            return ret;
-    }
+	nomac = (struct nomac_priv *)rtdev->mac_priv->disc_priv;
+	if (nomac->magic != NOMAC_MAGIC)
+		return -ENOTTY;
 
-    nomac = (struct nomac_priv *)rtdev->mac_priv->disc_priv;
-    if (nomac->magic != NOMAC_MAGIC)
-        return -ENOTTY;
+	/* ... */
 
-    /* ... */
-
-    return 0;
+	return 0;
 }
-
-
 
 static int nomac_ioctl_detach(struct rtnet_device *rtdev)
 {
-    struct nomac_priv   *nomac;
-    int                 ret;
+	struct nomac_priv *nomac;
+	int ret;
 
+	if (rtdev->mac_priv == NULL)
+		return -ENOTTY;
 
-    if (rtdev->mac_priv == NULL)
-        return -ENOTTY;
+	nomac = (struct nomac_priv *)rtdev->mac_priv->disc_priv;
+	if (nomac->magic != NOMAC_MAGIC)
+		return -ENOTTY;
 
-    nomac = (struct nomac_priv *)rtdev->mac_priv->disc_priv;
-    if (nomac->magic != NOMAC_MAGIC)
-        return -ENOTTY;
+	ret = rtmac_disc_detach(rtdev);
 
-    ret = rtmac_disc_detach(rtdev);
+	/* ... */
 
-    /* ... */
-
-    return ret;
+	return ret;
 }
 
-
-
 int nomac_ioctl(struct rtnet_device *rtdev, unsigned int request,
-                unsigned long arg)
+		unsigned long arg)
 {
-    struct nomac_config cfg;
-    int                 ret;
+	struct nomac_config cfg;
+	int ret;
 
+	ret = copy_from_user(&cfg, (void *)arg, sizeof(cfg));
+	if (ret != 0)
+		return -EFAULT;
 
-    ret = copy_from_user(&cfg, (void *)arg, sizeof(cfg));
-    if (ret != 0)
-        return -EFAULT;
+	if (mutex_lock_interruptible(&rtdev->nrt_lock))
+		return -ERESTARTSYS;
 
-    if (mutex_lock_interruptible(&rtdev->nrt_lock))
-        return -ERESTARTSYS;
+	switch (request) {
+	case NOMAC_IOC_ATTACH:
+		ret = nomac_ioctl_attach(rtdev);
+		break;
 
-    switch (request) {
-        case NOMAC_IOC_ATTACH:
-            ret = nomac_ioctl_attach(rtdev);
-            break;
+	case NOMAC_IOC_DETACH:
+		ret = nomac_ioctl_detach(rtdev);
+		break;
 
-        case NOMAC_IOC_DETACH:
-            ret = nomac_ioctl_detach(rtdev);
-            break;
+	default:
+		ret = -ENOTTY;
+	}
 
-        default:
-            ret = -ENOTTY;
-    }
+	mutex_unlock(&rtdev->nrt_lock);
 
-    mutex_unlock(&rtdev->nrt_lock);
-
-    return ret;
+	return ret;
 }

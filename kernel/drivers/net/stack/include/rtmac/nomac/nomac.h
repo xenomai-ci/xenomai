@@ -29,26 +29,23 @@
 
 #include <rtmac/rtmac_disc.h>
 
+#define RTMAC_TYPE_NOMAC 0
 
-#define RTMAC_TYPE_NOMAC        0
-
-#define NOMAC_MAGIC             0x004D0A0C
-
+#define NOMAC_MAGIC 0x004D0A0C
 
 struct nomac_priv {
-    unsigned int                magic;
-    struct rtnet_device         *rtdev;
-    char                        device_name[32];
-    struct rtdm_driver          api_driver;
-    struct rtdm_device          api_device;
-    /* ... */
+	unsigned int magic;
+	struct rtnet_device *rtdev;
+	char device_name[32];
+	struct rtdm_driver api_driver;
+	struct rtdm_device api_device;
+	/* ... */
 
 #ifdef CONFIG_XENO_OPT_VFILE
-    struct list_head            list_entry;
+	struct list_head list_entry;
 #endif
 };
 
-
-extern struct rtmac_disc        nomac_disc;
+extern struct rtmac_disc nomac_disc;
 
 #endif /* __NOMAC_H_ */

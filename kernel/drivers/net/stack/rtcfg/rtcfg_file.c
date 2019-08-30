@@ -29,7 +29,6 @@
 #include <rtcfg/rtcfg.h>
 #include <rtcfg/rtcfg_file.h>
 
-
 /* Note:
  * We don't need any special lock protection while manipulating the
  * rtcfg_files list. The list is only accessed through valid connections, and
@@ -37,50 +36,46 @@
  */
 LIST_HEAD(rtcfg_files);
 
-
 struct rtcfg_file *rtcfg_get_file(const char *filename)
 {
-    struct list_head  *entry;
-    struct rtcfg_file *file;
+	struct list_head *entry;
+	struct rtcfg_file *file;
 
+	RTCFG_DEBUG(4, "RTcfg: looking for file %s\n", filename);
 
-    RTCFG_DEBUG(4, "RTcfg: looking for file %s\n", filename);
+	list_for_each (entry, &rtcfg_files) {
+		file = list_entry(entry, struct rtcfg_file, entry);
 
-    list_for_each(entry, &rtcfg_files) {
-        file = list_entry(entry, struct rtcfg_file, entry);
+		if (strcmp(file->name, filename) == 0) {
+			file->ref_count++;
 
-        if (strcmp(file->name, filename) == 0) {
-            file->ref_count++;
+			RTCFG_DEBUG(4,
+				    "RTcfg: reusing file entry, now %d users\n",
+				    file->ref_count);
 
-            RTCFG_DEBUG(4, "RTcfg: reusing file entry, now %d users\n",
-                        file->ref_count);
+			return file;
+		}
+	}
 
-            return file;
-        }
-    }
-
-    return NULL;
+	return NULL;
 }
-
-
 
 void rtcfg_add_file(struct rtcfg_file *file)
 {
-    RTCFG_DEBUG(4, "RTcfg: adding file %s to list\n", file->name);
+	RTCFG_DEBUG(4, "RTcfg: adding file %s to list\n", file->name);
 
-    file->ref_count = 1;
-    list_add_tail(&file->entry, &rtcfg_files);
+	file->ref_count = 1;
+	list_add_tail(&file->entry, &rtcfg_files);
 }
-
-
 
 int rtcfg_release_file(struct rtcfg_file *file)
 {
-    if (--file->ref_count == 0) {
-        RTCFG_DEBUG(4, "RTcfg: removing file %s from list\n", file->name);
+	if (--file->ref_count == 0) {
+		RTCFG_DEBUG(4, "RTcfg: removing file %s from list\n",
+			    file->name);
 
-        list_del(&file->entry);
-    }
+		list_del(&file->entry);
+	}
 
-    return file->ref_count;
+	return file->ref_count;
 }

@@ -27,20 +27,19 @@
 
 #include <rtcfg_chrdev.h>
 
-
 int rtcfg_main_state_client_0(int ifindex, RTCFG_EVENT event_id,
-                              void* event_data);
+			      void *event_data);
 int rtcfg_main_state_client_1(int ifindex, RTCFG_EVENT event_id,
-                              void* event_data);
+			      void *event_data);
 int rtcfg_main_state_client_announced(int ifindex, RTCFG_EVENT event_id,
-                                      void* event_data);
+				      void *event_data);
 int rtcfg_main_state_client_all_known(int ifindex, RTCFG_EVENT event_id,
-                                      void* event_data);
+				      void *event_data);
 int rtcfg_main_state_client_all_frames(int ifindex, RTCFG_EVENT event_id,
-                                       void* event_data);
+				       void *event_data);
 int rtcfg_main_state_client_2(int ifindex, RTCFG_EVENT event_id,
-                              void* event_data);
+			      void *event_data);
 int rtcfg_main_state_client_ready(int ifindex, RTCFG_EVENT event_id,
-                                  void* event_data);
+				  void *event_data);
 
 #endif /* __RTCFG_CLIENT_EVENT_H_ */

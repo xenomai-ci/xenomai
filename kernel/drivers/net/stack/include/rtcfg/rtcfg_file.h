@@ -28,15 +28,13 @@
 #include <linux/list.h>
 #include <linux/types.h>
 
-
 struct rtcfg_file {
-    struct list_head entry;
-    int              ref_count;
-    const char*      name;
-    size_t           size;
-    void*            buffer;
+	struct list_head entry;
+	int ref_count;
+	const char *name;
+	size_t size;
+	void *buffer;
 };
-
 
 struct rtcfg_file *rtcfg_get_file(const char *filename);
 void rtcfg_add_file(struct rtcfg_file *file);

@@ -27,7 +27,6 @@
 
 #include <rtdev.h>
 
-
 int nomac_rt_packet_tx(struct rtskb *rtskb, struct rtnet_device *rtdev);
 int nomac_nrt_packet_tx(struct rtskb *rtskb);
 

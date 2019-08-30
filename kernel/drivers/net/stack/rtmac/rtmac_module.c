@@ -30,54 +30,48 @@
 #include <rtmac/rtmac_proto.h>
 #include <rtmac/rtmac_vnic.h>
 
-
 int __init rtmac_init(void)
 {
-    int ret = 0;
+	int ret = 0;
 
-
-    printk("RTmac: init realtime media access control\n");
+	printk("RTmac: init realtime media access control\n");
 
 #ifdef CONFIG_XENO_OPT_VFILE
-    ret = rtmac_proc_register();
-    if (ret < 0)
-        return ret;
+	ret = rtmac_proc_register();
+	if (ret < 0)
+		return ret;
 #endif
 
-    ret = rtmac_vnic_module_init();
-    if (ret < 0)
-        goto error1;
+	ret = rtmac_vnic_module_init();
+	if (ret < 0)
+		goto error1;
 
-    ret = rtmac_proto_init();
-    if (ret < 0)
-        goto error2;
+	ret = rtmac_proto_init();
+	if (ret < 0)
+		goto error2;
 
-    return 0;
+	return 0;
 
 error2:
-    rtmac_vnic_module_cleanup();
+	rtmac_vnic_module_cleanup();
 
 error1:
 #ifdef CONFIG_XENO_OPT_VFILE
-    rtmac_proc_release();
+	rtmac_proc_release();
 #endif
-    return ret;
+	return ret;
 }
-
-
 
 void rtmac_release(void)
 {
-    rtmac_proto_release();
-    rtmac_vnic_module_cleanup();
+	rtmac_proto_release();
+	rtmac_vnic_module_cleanup();
 #ifdef CONFIG_XENO_OPT_VFILE
-    rtmac_proc_release();
+	rtmac_proc_release();
 #endif
 
-    printk("RTmac: unloaded\n");
+	printk("RTmac: unloaded\n");
 }
-
-
 
 module_init(rtmac_init);
 module_exit(rtmac_release);

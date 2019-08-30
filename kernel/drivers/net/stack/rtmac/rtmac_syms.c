@@ -25,7 +25,6 @@
 #include <rtmac/rtmac_disc.h>
 #include <rtmac/rtmac_vnic.h>
 
-
 EXPORT_SYMBOL_GPL(__rtmac_disc_register);
 EXPORT_SYMBOL_GPL(rtmac_disc_deregister);
 

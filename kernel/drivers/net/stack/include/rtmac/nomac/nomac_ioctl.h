@@ -25,8 +25,7 @@
 #ifndef __NOMAC_IOCTL_H_
 #define __NOMAC_IOCTL_H_
 
-
 int nomac_ioctl(struct rtnet_device *rtdev, unsigned int request,
-                unsigned long arg);
+		unsigned long arg);
 
 #endif /* __NOMAC_IOCTL_H_ */

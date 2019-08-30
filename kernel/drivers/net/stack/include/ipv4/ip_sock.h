@@ -26,7 +26,6 @@
 
 #include <rtnet_socket.h>
 
-
 extern int rt_ip_ioctl(struct rtdm_fd *fd, int request, void *arg);
 
-#endif  /* __RTNET_IP_SOCK_H_ */
+#endif /* __RTNET_IP_SOCK_H_ */

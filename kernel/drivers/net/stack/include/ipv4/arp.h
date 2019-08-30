@@ -32,23 +32,20 @@
 
 #include <ipv4/route.h>
 
+#define RT_ARP_SKB_PRIO                                                        \
+	RTSKB_PRIO_VALUE(QUEUE_MIN_PRIO - 1, RTSKB_DEF_NRT_CHANNEL)
 
-#define RT_ARP_SKB_PRIO     RTSKB_PRIO_VALUE(QUEUE_MIN_PRIO-1, \
-                                             RTSKB_DEF_NRT_CHANNEL)
-
-void rt_arp_send(int type, int ptype, u32 dest_ip,
-                 struct rtnet_device *rtdev, u32 src_ip,
-                 unsigned char *dest_hw, unsigned char *src_hw,
-                 unsigned char *target_hw);
+void rt_arp_send(int type, int ptype, u32 dest_ip, struct rtnet_device *rtdev,
+		 u32 src_ip, unsigned char *dest_hw, unsigned char *src_hw,
+		 unsigned char *target_hw);
 
 static inline void rt_arp_solicit(struct rtnet_device *rtdev, u32 target)
 {
-    rt_arp_send(ARPOP_REQUEST, ETH_P_ARP, target, rtdev, rtdev->local_ip,
-                NULL, NULL, NULL);
+	rt_arp_send(ARPOP_REQUEST, ETH_P_ARP, target, rtdev, rtdev->local_ip,
+		    NULL, NULL, NULL);
 }
 
 void __init rt_arp_init(void);
 void rt_arp_release(void);
 
-
-#endif  /* __RTNET_ARP_H_ */
+#endif /* __RTNET_ARP_H_ */

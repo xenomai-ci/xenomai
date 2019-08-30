@@ -25,38 +25,37 @@
 #include <linux/list.h>
 #include <rtdm/net.h>
 
-#define TIMERWHEEL_TIMER_UNUSED    -1
+#define TIMERWHEEL_TIMER_UNUSED -1
 
 typedef void (*timerwheel_timer_handler)(void *);
 
 struct timerwheel_timer {
-    struct list_head            link;
-    timerwheel_timer_handler    handler;
-    void                        *data;
-    int                         slot;
-    volatile int                refcount; /* only written by wheel task */
+	struct list_head link;
+	timerwheel_timer_handler handler;
+	void *data;
+	int slot;
+	volatile int refcount; /* only written by wheel task */
 };
 
-static inline void
-timerwheel_init_timer(struct timerwheel_timer *timer,
-                      timerwheel_timer_handler handler, void *data)
+static inline void timerwheel_init_timer(struct timerwheel_timer *timer,
+					 timerwheel_timer_handler handler,
+					 void *data)
 {
-    timer->slot     = TIMERWHEEL_TIMER_UNUSED;
-    timer->handler  = handler;
-    timer->data     = data;
-    timer->refcount = 0;
+	timer->slot = TIMERWHEEL_TIMER_UNUSED;
+	timer->handler = handler;
+	timer->data = data;
+	timer->refcount = 0;
 }
 
 /* passed data must remain valid till a timer fireup */
 int timerwheel_add_timer(struct timerwheel_timer *timer,
-                         nanosecs_rel_t expires);
+			 nanosecs_rel_t expires);
 
 int timerwheel_remove_timer(struct timerwheel_timer *timer);
 
 void timerwheel_remove_timer_sync(struct timerwheel_timer *timer);
 
-int timerwheel_init(nanosecs_rel_t timeout,
-                    unsigned int granularity);
+int timerwheel_init(nanosecs_rel_t timeout, unsigned int granularity);
 
 void timerwheel_cleanup(void);
 

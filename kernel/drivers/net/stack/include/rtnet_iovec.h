@@ -28,13 +28,11 @@
 struct user_msghdr;
 struct rtdm_fd;
 
-ssize_t rtnet_write_to_iov(struct rtdm_fd *fd,
-			   struct iovec *iov, int iovlen,
+ssize_t rtnet_write_to_iov(struct rtdm_fd *fd, struct iovec *iov, int iovlen,
 			   const void *data, size_t len);
 
-ssize_t rtnet_read_from_iov(struct rtdm_fd *fd,
-			    struct iovec *iov, int iovlen,
+ssize_t rtnet_read_from_iov(struct rtdm_fd *fd, struct iovec *iov, int iovlen,
 			    void *data, size_t len);
-#endif  /* __KERNEL__ */
+#endif /* __KERNEL__ */
 
-#endif  /* __RTNET_IOVEC_H_ */
+#endif /* __RTNET_IOVEC_H_ */

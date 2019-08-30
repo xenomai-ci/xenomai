@@ -27,9 +27,7 @@
 
 #include <rtdm/driver.h>
 
-
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
-
 
 /***
  * RTcfg debugging
@@ -39,7 +37,7 @@
 extern int rtcfg_debug;
 
 /* use 0 for production, 1 for verification, >2 for debug */
-#define RTCFG_DEFAULT_DEBUG_LEVEL    10
+#define RTCFG_DEFAULT_DEBUG_LEVEL 10
 
 #define RTCFG_DEBUG(n, args...) (rtcfg_debug >= (n)) ? (rtdm_printk(args)) : 0
 #else

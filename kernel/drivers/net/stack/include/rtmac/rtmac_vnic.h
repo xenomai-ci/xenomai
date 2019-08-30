@@ -29,8 +29,7 @@
 
 #include <rtmac/rtmac_disc.h>
 
-#define DEFAULT_VNIC_RTSKBS     32
-
+#define DEFAULT_VNIC_RTSKBS 32
 
 int rtmac_vnic_rx(struct rtskb *skb, u16 type);
 
@@ -43,9 +42,9 @@ int rtmac_vnic_unregister(struct rtnet_device *rtdev);
 
 static inline void rtmac_vnic_cleanup(struct rtnet_device *rtdev)
 {
-    struct rtmac_priv   *mac_priv = rtdev->mac_priv;
+	struct rtmac_priv *mac_priv = rtdev->mac_priv;
 
-    rtskb_pool_release(&mac_priv->vnic_skb_pool);
+	rtskb_pool_release(&mac_priv->vnic_skb_pool);
 }
 
 #ifdef CONFIG_XENO_OPT_VFILE
@@ -54,7 +53,6 @@ int rtnet_rtmac_vnics_show(struct xnvfile_regular_iterator *it, void *data);
 
 int __init rtmac_vnic_module_init(void);
 void rtmac_vnic_module_cleanup(void);
-
 
 #endif /* __KERNEL__ */
 

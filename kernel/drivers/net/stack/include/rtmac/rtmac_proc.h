@@ -25,12 +25,10 @@
 #ifndef __RTMAC_PROC_H_
 #define __RTMAC_PROC_H_
 
-
 int rtmac_disc_proc_register(struct rtmac_disc *disc);
 void rtmac_disc_proc_unregister(struct rtmac_disc *disc);
 
 int rtmac_proc_register(void);
 void rtmac_proc_release(void);
-
 
 #endif /* __RTMAC_PROC_H_ */

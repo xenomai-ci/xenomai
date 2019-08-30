@@ -25,10 +25,9 @@
 #ifndef __RTCFG_IOCTL_H_
 #define __RTCFG_IOCTL_H_
 
-
 extern struct rtnet_ioctls rtcfg_ioctls;
 
-#define rtcfg_init_ioctls()     rtnet_register_ioctls(&rtcfg_ioctls)
-#define rtcfg_cleanup_ioctls()  rtnet_unregister_ioctls(&rtcfg_ioctls)
+#define rtcfg_init_ioctls() rtnet_register_ioctls(&rtcfg_ioctls)
+#define rtcfg_cleanup_ioctls() rtnet_unregister_ioctls(&rtcfg_ioctls)
 
 #endif /* __RTCFG_IOCTL_H_ */

@@ -20,13 +20,13 @@
 #ifndef __RTNET_ETH_H_
 #define __RTNET_ETH_H_
 
-
 #include <rtskb.h>
 #include <rtdev.h>
 
-extern int rt_eth_header(struct rtskb *skb,struct rtnet_device *rtdev, 
-			 unsigned short type,void *daddr,void *saddr,unsigned int len);
-extern unsigned short rt_eth_type_trans(struct rtskb *skb, struct rtnet_device *dev);
+extern int rt_eth_header(struct rtskb *skb, struct rtnet_device *rtdev,
+			 unsigned short type, void *daddr, void *saddr,
+			 unsigned int len);
+extern unsigned short rt_eth_type_trans(struct rtskb *skb,
+					struct rtnet_device *dev);
 
-
-#endif  /* __RTNET_ETH_H_ */
+#endif /* __RTNET_ETH_H_ */

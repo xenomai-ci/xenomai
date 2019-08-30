@@ -29,28 +29,26 @@
 #include <rtnet_socket.h>
 #include <rtskb.h>
 
-
-#define MAX_RT_INET_PROTOCOLS   32
+#define MAX_RT_INET_PROTOCOLS 32
 
 /***
  * transport layer protocol
  */
 struct rtinet_protocol {
-    char                *name;
-    unsigned short      protocol;
+	char *name;
+	unsigned short protocol;
 
-    struct rtsocket     *(*dest_socket)(struct rtskb *);
-    void                (*rcv_handler)(struct rtskb *);
-    void                (*err_handler)(struct rtskb *);
-    int                 (*init_socket)(struct rtdm_fd *);
+	struct rtsocket *(*dest_socket)(struct rtskb *);
+	void (*rcv_handler)(struct rtskb *);
+	void (*err_handler)(struct rtskb *);
+	int (*init_socket)(struct rtdm_fd *);
 };
-
 
 extern struct rtinet_protocol *rt_inet_protocols[];
 
-#define rt_inet_hashkey(id)  (id & (MAX_RT_INET_PROTOCOLS-1))
+#define rt_inet_hashkey(id) (id & (MAX_RT_INET_PROTOCOLS - 1))
 extern void rt_inet_add_protocol(struct rtinet_protocol *prot);
 extern void rt_inet_del_protocol(struct rtinet_protocol *prot);
 extern int rt_inet_socket(struct rtdm_fd *fd, int protocol);
 
-#endif  /* __RTNET_PROTOCOL_H_ */
+#endif /* __RTNET_PROTOCOL_H_ */

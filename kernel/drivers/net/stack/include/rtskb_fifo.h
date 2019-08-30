@@ -26,122 +26,119 @@
 
 #include <rtskb.h>
 
-
 struct rtskb_fifo {
-    unsigned long       read_pos ____cacheline_aligned_in_smp;
-    rtdm_lock_t         read_lock;
-    unsigned long       size_mask;
-    unsigned long       write_pos ____cacheline_aligned_in_smp;
-    rtdm_lock_t         write_lock;
-    struct rtskb        *buffer[0];
+	unsigned long read_pos ____cacheline_aligned_in_smp;
+	rtdm_lock_t read_lock;
+	unsigned long size_mask;
+	unsigned long write_pos ____cacheline_aligned_in_smp;
+	rtdm_lock_t write_lock;
+	struct rtskb *buffer[0];
 };
 
-#define DECLARE_RTSKB_FIFO(name_prefix, size)   \
-struct {                                        \
-    struct rtskb_fifo   fifo;                   \
-    struct rtskb        *__buffer[(size)];      \
-} name_prefix                                   \
-
+#define DECLARE_RTSKB_FIFO(name_prefix, size)                                  \
+	struct {                                                               \
+		struct rtskb_fifo fifo;                                        \
+		struct rtskb *__buffer[(size)];                                \
+	} name_prefix
 
 static inline int __rtskb_fifo_insert(struct rtskb_fifo *fifo,
-                                      struct rtskb *rtskb)
+				      struct rtskb *rtskb)
 {
-    unsigned long pos = fifo->write_pos;
-    unsigned long new_pos = (pos + 1) & fifo->size_mask;
+	unsigned long pos = fifo->write_pos;
+	unsigned long new_pos = (pos + 1) & fifo->size_mask;
 
-    if (unlikely(new_pos == fifo->read_pos))
-        return -EAGAIN;
+	if (unlikely(new_pos == fifo->read_pos))
+		return -EAGAIN;
 
-    fifo->buffer[pos] = rtskb;
+	fifo->buffer[pos] = rtskb;
 
-    /* rtskb must have been written before write_pos update */
-    smp_wmb();
+	/* rtskb must have been written before write_pos update */
+	smp_wmb();
 
-    fifo->write_pos = new_pos;
+	fifo->write_pos = new_pos;
 
-    return 0;
+	return 0;
 }
 
 static inline int rtskb_fifo_insert(struct rtskb_fifo *fifo,
-                                    struct rtskb *rtskb)
+				    struct rtskb *rtskb)
 {
-    rtdm_lockctx_t context;
-    int result;
+	rtdm_lockctx_t context;
+	int result;
 
-    rtdm_lock_get_irqsave(&fifo->write_lock, context);
-    result = __rtskb_fifo_insert(fifo, rtskb);
-    rtdm_lock_put_irqrestore(&fifo->write_lock, context);
+	rtdm_lock_get_irqsave(&fifo->write_lock, context);
+	result = __rtskb_fifo_insert(fifo, rtskb);
+	rtdm_lock_put_irqrestore(&fifo->write_lock, context);
 
-    return result;
+	return result;
 }
 
 static inline int rtskb_fifo_insert_inirq(struct rtskb_fifo *fifo,
-                                          struct rtskb *rtskb)
+					  struct rtskb *rtskb)
 {
-    int result;
+	int result;
 
-    rtdm_lock_get(&fifo->write_lock);
-    result = __rtskb_fifo_insert(fifo, rtskb);
-    rtdm_lock_put(&fifo->write_lock);
+	rtdm_lock_get(&fifo->write_lock);
+	result = __rtskb_fifo_insert(fifo, rtskb);
+	rtdm_lock_put(&fifo->write_lock);
 
-    return result;
+	return result;
 }
 
 static inline struct rtskb *__rtskb_fifo_remove(struct rtskb_fifo *fifo)
 {
-    unsigned long pos = fifo->read_pos;
-    struct rtskb *result;
+	unsigned long pos = fifo->read_pos;
+	struct rtskb *result;
 
-    /* check FIFO status first */
-    if (unlikely(pos == fifo->write_pos))
-        return NULL;
+	/* check FIFO status first */
+	if (unlikely(pos == fifo->write_pos))
+		return NULL;
 
-    /* at least one rtskb is enqueued, so get the next one */
-    result = fifo->buffer[pos];
+	/* at least one rtskb is enqueued, so get the next one */
+	result = fifo->buffer[pos];
 
-    /* result must have been read before read_pos update */
-    smp_rmb();
+	/* result must have been read before read_pos update */
+	smp_rmb();
 
-    fifo->read_pos = (pos + 1) & fifo->size_mask;
+	fifo->read_pos = (pos + 1) & fifo->size_mask;
 
-    /* read_pos must have been written for a consitent fifo state on exit */
-    smp_wmb();
+	/* read_pos must have been written for a consitent fifo state on exit */
+	smp_wmb();
 
-    return result;
+	return result;
 }
 
 static inline struct rtskb *rtskb_fifo_remove(struct rtskb_fifo *fifo)
 {
-    rtdm_lockctx_t context;
-    struct rtskb *result;
+	rtdm_lockctx_t context;
+	struct rtskb *result;
 
-    rtdm_lock_get_irqsave(&fifo->read_lock, context);
-    result = __rtskb_fifo_remove(fifo);
-    rtdm_lock_put_irqrestore(&fifo->read_lock, context);
+	rtdm_lock_get_irqsave(&fifo->read_lock, context);
+	result = __rtskb_fifo_remove(fifo);
+	rtdm_lock_put_irqrestore(&fifo->read_lock, context);
 
-    return result;
+	return result;
 }
 
 static inline struct rtskb *rtskb_fifo_remove_inirq(struct rtskb_fifo *fifo)
 {
-    struct rtskb *result;
+	struct rtskb *result;
 
-    rtdm_lock_get(&fifo->read_lock);
-    result = __rtskb_fifo_remove(fifo);
-    rtdm_lock_put(&fifo->read_lock);
+	rtdm_lock_get(&fifo->read_lock);
+	result = __rtskb_fifo_remove(fifo);
+	rtdm_lock_put(&fifo->read_lock);
 
-    return result;
+	return result;
 }
 
 /* for now inlined... */
-static inline void rtskb_fifo_init(struct rtskb_fifo *fifo,
-                                   unsigned long size)
+static inline void rtskb_fifo_init(struct rtskb_fifo *fifo, unsigned long size)
 {
-    fifo->read_pos  = 0;
-    fifo->write_pos = 0;
-    fifo->size_mask = size - 1;
-    rtdm_lock_init(&fifo->read_lock);
-    rtdm_lock_init(&fifo->write_lock);
+	fifo->read_pos = 0;
+	fifo->write_pos = 0;
+	fifo->size_mask = size - 1;
+	rtdm_lock_init(&fifo->read_lock);
+	rtdm_lock_init(&fifo->write_lock);
 }
 
-#endif  /* __RTSKB_FIFO_H_ */
+#endif /* __RTSKB_FIFO_H_ */

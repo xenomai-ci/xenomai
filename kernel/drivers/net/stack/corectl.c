@@ -18,8 +18,8 @@
 #include <asm/xenomai/syscall.h>
 #include <xenomai/posix/corectl.h>
 
-static int
-rtnet_corectl_call(struct notifier_block *self, unsigned long arg, void *cookie)
+static int rtnet_corectl_call(struct notifier_block *self, unsigned long arg,
+			      void *cookie)
 {
 	struct cobalt_config_vector *vec = cookie;
 	int ret = 0;

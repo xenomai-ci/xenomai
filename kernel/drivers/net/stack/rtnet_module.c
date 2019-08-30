@@ -38,7 +38,6 @@
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("RTnet stack core");
 
-
 struct class *rtnet_class;
 
 struct rtnet_mgr STACK_manager;
@@ -48,7 +47,7 @@ EXPORT_SYMBOL_GPL(STACK_manager);
 EXPORT_SYMBOL_GPL(RTDEV_manager);
 
 const char rtnet_rtdm_provider_name[] =
-    "(C) 1999-2008 RTnet Development Team, http://www.rtnet.org";
+	"(C) 1999-2008 RTnet Development Team, http://www.rtnet.org";
 
 EXPORT_SYMBOL_GPL(rtnet_rtdm_provider_name);
 
@@ -61,7 +60,6 @@ void rtnet_corectl_unregister(void);
  */
 struct xnvfile_directory rtnet_proc_root;
 EXPORT_SYMBOL_GPL(rtnet_proc_root);
-
 
 static int rtnet_devices_nrt_lock_get(struct xnvfile *vfile)
 {
@@ -99,7 +97,7 @@ static int rtnet_devices_show(struct xnvfile_regular_iterator *it, void *data)
 	struct rtnet_device *rtdev;
 
 	if (data == NULL) {
-	    xnvfile_printf(it, "Index\tName\t\tFlags\n");
+		xnvfile_printf(it, "Index\tName\t\tFlags\n");
 		return 0;
 	}
 
@@ -107,12 +105,11 @@ static int rtnet_devices_show(struct xnvfile_regular_iterator *it, void *data)
 	if (rtdev == NULL)
 		return VFILE_SEQ_SKIP;
 
-	xnvfile_printf(it, "%d\t%-15s %s%s%s%s\n",
-				rtdev->ifindex, rtdev->name,
-				(rtdev->flags & IFF_UP) ? "UP" : "DOWN",
-				(rtdev->flags & IFF_BROADCAST) ? " BROADCAST" : "",
-				(rtdev->flags & IFF_LOOPBACK) ? " LOOPBACK" : "",
-				(rtdev->flags & IFF_PROMISC) ? " PROMISC" : "");
+	xnvfile_printf(it, "%d\t%-15s %s%s%s%s\n", rtdev->ifindex, rtdev->name,
+		       (rtdev->flags & IFF_UP) ? "UP" : "DOWN",
+		       (rtdev->flags & IFF_BROADCAST) ? " BROADCAST" : "",
+		       (rtdev->flags & IFF_LOOPBACK) ? " LOOPBACK" : "",
+		       (rtdev->flags & IFF_PROMISC) ? " PROMISC" : "");
 	return 0;
 }
 
@@ -129,17 +126,18 @@ static struct xnvfile_regular rtnet_devices_vfile = {
 
 static int rtnet_rtskb_show(struct xnvfile_regular_iterator *it, void *data)
 {
-    unsigned int rtskb_len;
+	unsigned int rtskb_len;
 
-    rtskb_len = ALIGN_RTSKB_STRUCT_LEN + SKB_DATA_ALIGN(RTSKB_SIZE);
+	rtskb_len = ALIGN_RTSKB_STRUCT_LEN + SKB_DATA_ALIGN(RTSKB_SIZE);
 
-    xnvfile_printf(it, "Statistics\t\tCurrent\tMaximum\n"
-		     "rtskb pools\t\t%d\t%d\n"
-		     "rtskbs\t\t\t%d\t%d\n"
-		     "rtskb memory need\t%d\t%d\n",
-		     rtskb_pools, rtskb_pools_max,
-		     rtskb_amount, rtskb_amount_max,
-		     rtskb_amount * rtskb_len, rtskb_amount_max * rtskb_len);
+	xnvfile_printf(it,
+		       "Statistics\t\tCurrent\tMaximum\n"
+		       "rtskb pools\t\t%d\t%d\n"
+		       "rtskbs\t\t\t%d\t%d\n"
+		       "rtskb memory need\t%d\t%d\n",
+		       rtskb_pools, rtskb_pools_max, rtskb_amount,
+		       rtskb_amount_max, rtskb_amount * rtskb_len,
+		       rtskb_amount_max * rtskb_len);
 	return 0;
 }
 
@@ -153,25 +151,24 @@ static struct xnvfile_regular rtnet_rtskb_vfile = {
 
 static int rtnet_version_show(struct xnvfile_regular_iterator *it, void *data)
 {
-    const char verstr[] =
-	    "RTnet for Xenomai v" XENO_VERSION_STRING "\n"
-		"RTcap:      "
+	const char verstr[] = "RTnet for Xenomai v" XENO_VERSION_STRING "\n"
+			      "RTcap:      "
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_RTCAP)
-	    "yes\n"
+			      "yes\n"
 #else
-	    "no\n"
+			      "no\n"
 #endif
-		"rtnetproxy: "
+			      "rtnetproxy: "
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_PROXY)
-	    "yes\n"
+			      "yes\n"
 #else
-	    "no\n"
+			      "no\n"
 #endif
-		"bug checks: "
+			      "bug checks: "
 #ifdef CONFIG_XENO_DRIVERS_NET_CHECKED
-	    "yes\n"
+			      "yes\n"
 #else
-	    "no\n"
+			      "no\n"
 #endif
 		;
 
@@ -207,11 +204,13 @@ static int rtnet_stats_show(struct xnvfile_regular_iterator *it, void *data)
 	struct rtnet_device *rtdev;
 
 	if (it->pos == 0) {
-		xnvfile_printf(it, "Inter-|   Receive                            "
-					"                    |  Transmit\n");
-		xnvfile_printf(it, " face |bytes    packets errs drop fifo frame "
-					"compressed multicast|bytes    packets errs "
-					"drop fifo colls carrier compressed\n");
+		xnvfile_printf(it,
+			       "Inter-|   Receive                            "
+			       "                    |  Transmit\n");
+		xnvfile_printf(it,
+			       " face |bytes    packets errs drop fifo frame "
+			       "compressed multicast|bytes    packets errs "
+			       "drop fifo colls carrier compressed\n");
 		return 0;
 	}
 
@@ -220,29 +219,27 @@ static int rtnet_stats_show(struct xnvfile_regular_iterator *it, void *data)
 		return VFILE_SEQ_SKIP;
 
 	if (rtdev->get_stats == NULL) {
-		xnvfile_printf(it, "%6s: No statistics available.\n", rtdev->name);
+		xnvfile_printf(it, "%6s: No statistics available.\n",
+			       rtdev->name);
 		return 0;
 	}
 
 	stats = rtdev->get_stats(rtdev);
-	xnvfile_printf(it,
-				"%6s:%8lu %7lu %4lu %4lu %4lu %5lu %10lu %9lu "
-				"%8lu %7lu %4lu %4lu %4lu %5lu %7lu %10lu\n",
-				rtdev->name, stats->rx_bytes, stats->rx_packets,
-				stats->rx_errors,
-				stats->rx_dropped + stats->rx_missed_errors,
-				stats->rx_fifo_errors,
-				stats->rx_length_errors + stats->rx_over_errors +
-				stats->rx_crc_errors + stats->rx_frame_errors,
-				stats->rx_compressed, stats->multicast,
-				stats->tx_bytes, stats->tx_packets,
-				stats->tx_errors, stats->tx_dropped,
-				stats->tx_fifo_errors, stats->collisions,
-				stats->tx_carrier_errors +
-				stats->tx_aborted_errors +
-				stats->tx_window_errors +
-				stats->tx_heartbeat_errors,
-				stats->tx_compressed);
+	xnvfile_printf(
+		it,
+		"%6s:%8lu %7lu %4lu %4lu %4lu %5lu %10lu %9lu "
+		"%8lu %7lu %4lu %4lu %4lu %5lu %7lu %10lu\n",
+		rtdev->name, stats->rx_bytes, stats->rx_packets,
+		stats->rx_errors, stats->rx_dropped + stats->rx_missed_errors,
+		stats->rx_fifo_errors,
+		stats->rx_length_errors + stats->rx_over_errors +
+			stats->rx_crc_errors + stats->rx_frame_errors,
+		stats->rx_compressed, stats->multicast, stats->tx_bytes,
+		stats->tx_packets, stats->tx_errors, stats->tx_dropped,
+		stats->tx_fifo_errors, stats->collisions,
+		stats->tx_carrier_errors + stats->tx_aborted_errors +
+			stats->tx_window_errors + stats->tx_heartbeat_errors,
+		stats->tx_compressed);
 	return 0;
 }
 
@@ -265,42 +262,44 @@ static int rtnet_proc_register(void)
 	if (err < 0)
 		goto error1;
 
-	err = xnvfile_init_regular("devices", &rtnet_devices_vfile, &rtnet_proc_root);
+	err = xnvfile_init_regular("devices", &rtnet_devices_vfile,
+				   &rtnet_proc_root);
 	if (err < 0)
 		goto error2;
 
-	err = xnvfile_init_regular("rtskb", &rtnet_rtskb_vfile, &rtnet_proc_root);
+	err = xnvfile_init_regular("rtskb", &rtnet_rtskb_vfile,
+				   &rtnet_proc_root);
 	if (err < 0)
 		goto error3;
 
-	err = xnvfile_init_regular("version", &rtnet_version_vfile, &rtnet_proc_root);
+	err = xnvfile_init_regular("version", &rtnet_version_vfile,
+				   &rtnet_proc_root);
 	if (err < 0)
 		goto error4;
 
-	err = xnvfile_init_regular("stats", &rtnet_stats_vfile, &rtnet_proc_root);
+	err = xnvfile_init_regular("stats", &rtnet_stats_vfile,
+				   &rtnet_proc_root);
 	if (err < 0)
 		goto error5;
 
-    return 0;
+	return 0;
 
-  error5:
+error5:
 	xnvfile_destroy_regular(&rtnet_version_vfile);
 
-  error4:
+error4:
 	xnvfile_destroy_regular(&rtnet_rtskb_vfile);
 
-  error3:
+error3:
 	xnvfile_destroy_regular(&rtnet_devices_vfile);
 
-  error2:
+error2:
 	xnvfile_destroy_dir(&rtnet_proc_root);
 
-  error1:
-    printk("RTnet: unable to initialize /proc entries\n");
-    return err;
+error1:
+	printk("RTnet: unable to initialize /proc entries\n");
+	return err;
 }
-
-
 
 static void rtnet_proc_unregister(void)
 {
@@ -310,106 +309,100 @@ static void rtnet_proc_unregister(void)
 	xnvfile_destroy_regular(&rtnet_devices_vfile);
 	xnvfile_destroy_dir(&rtnet_proc_root);
 }
-#endif  /* CONFIG_XENO_OPT_VFILE */
-
-
+#endif /* CONFIG_XENO_OPT_VFILE */
 
 /**
  *  rtnet_init()
  */
 int __init rtnet_init(void)
 {
-    int err = 0;
+	int err = 0;
 
+	printk("\n*** RTnet for Xenomai v" XENO_VERSION_STRING " ***\n\n");
+	printk("RTnet: initialising real-time networking\n");
 
-    printk("\n*** RTnet for Xenomai v" XENO_VERSION_STRING " ***\n\n");
-    printk("RTnet: initialising real-time networking\n");
+	rtnet_class = class_create(THIS_MODULE, "rtnet");
+	if (IS_ERR(rtnet_class))
+		return PTR_ERR(rtnet_class);
 
-    rtnet_class = class_create(THIS_MODULE, "rtnet");
-    if (IS_ERR(rtnet_class))
-	    return PTR_ERR(rtnet_class);
-
-    if ((err = rtskb_pools_init()) != 0)
-	goto err_out1;
+	if ((err = rtskb_pools_init()) != 0)
+		goto err_out1;
 
 #ifdef CONFIG_XENO_OPT_VFILE
-    if ((err = rtnet_proc_register()) != 0)
-	goto err_out2;
+	if ((err = rtnet_proc_register()) != 0)
+		goto err_out2;
 #endif
 
-    /* initialize the Stack-Manager */
-    if ((err = rt_stack_mgr_init(&STACK_manager)) != 0)
-	goto err_out3;
+	/* initialize the Stack-Manager */
+	if ((err = rt_stack_mgr_init(&STACK_manager)) != 0)
+		goto err_out3;
 
-    /* initialize the RTDEV-Manager */
-    if ((err = rt_rtdev_mgr_init(&RTDEV_manager)) != 0)
-	goto err_out4;
+	/* initialize the RTDEV-Manager */
+	if ((err = rt_rtdev_mgr_init(&RTDEV_manager)) != 0)
+		goto err_out4;
 
-    rtnet_chrdev_init();
+	rtnet_chrdev_init();
 
-    if ((err = rtwlan_init()) != 0)
-	goto err_out5;
+	if ((err = rtwlan_init()) != 0)
+		goto err_out5;
 
-    if ((err = rtpc_init()) != 0)
-	goto err_out6;
+	if ((err = rtpc_init()) != 0)
+		goto err_out6;
 
-    rtnet_corectl_register();
+	rtnet_corectl_register();
 
-    return 0;
-
+	return 0;
 
 err_out6:
-    rtwlan_exit();
+	rtwlan_exit();
 
 err_out5:
-    rtnet_chrdev_release();
-    rt_rtdev_mgr_delete(&RTDEV_manager);
+	rtnet_chrdev_release();
+	rt_rtdev_mgr_delete(&RTDEV_manager);
 
 err_out4:
-    rt_stack_mgr_delete(&STACK_manager);
+	rt_stack_mgr_delete(&STACK_manager);
 
 err_out3:
 #ifdef CONFIG_XENO_OPT_VFILE
-    rtnet_proc_unregister();
+	rtnet_proc_unregister();
 
 err_out2:
 #endif
-    rtskb_pools_release();
+	rtskb_pools_release();
 
 err_out1:
-    class_destroy(rtnet_class);
-   
-    return err;
-}
+	class_destroy(rtnet_class);
 
+	return err;
+}
 
 /**
  *  rtnet_release()
  */
 void __exit rtnet_release(void)
 {
-    rtnet_corectl_unregister();
+	rtnet_corectl_unregister();
 
-    rtpc_cleanup();
+	rtpc_cleanup();
 
-    rtwlan_exit();
+	rtwlan_exit();
 
-    rtnet_chrdev_release();
+	rtnet_chrdev_release();
 
-    rt_stack_mgr_delete(&STACK_manager);
-    rt_rtdev_mgr_delete(&RTDEV_manager);
+	rt_stack_mgr_delete(&STACK_manager);
+	rt_rtdev_mgr_delete(&RTDEV_manager);
 
-    rtskb_pools_release();
+	rtskb_pools_release();
 
 #ifdef CONFIG_XENO_OPT_VFILE
-    rtnet_proc_unregister();
+	rtnet_proc_unregister();
 #endif
 
-    class_destroy(rtnet_class);
+	class_destroy(rtnet_class);
 
-    printk("RTnet: unloaded\n");
+	printk("RTnet: unloaded\n");
 }
-
 
 module_init(rtnet_init);
 module_exit(rtnet_release);

@@ -22,56 +22,47 @@
  *
  */
 
-
 #include <rtdm/driver.h>
 #include <stack_mgr.h>
 #include <rtmac/rtmac_disc.h>
 #include <rtmac/rtmac_proto.h>
 #include <rtmac/rtmac_vnic.h>
 
-
-
 int rtmac_proto_rx(struct rtskb *skb, struct rtpacket_type *pt)
 {
-    struct rtmac_disc *disc = skb->rtdev->mac_disc;
-    struct rtmac_hdr  *hdr;
+	struct rtmac_disc *disc = skb->rtdev->mac_disc;
+	struct rtmac_hdr *hdr;
 
+	if (disc == NULL) {
+		goto error;
+	}
 
-    if (disc == NULL) {
-        goto error;
-    }
+	hdr = (struct rtmac_hdr *)skb->data;
+	rtskb_pull(skb, sizeof(struct rtmac_hdr));
 
-    hdr = (struct rtmac_hdr *)skb->data;
-    rtskb_pull(skb, sizeof(struct rtmac_hdr));
+	if (hdr->ver != RTMAC_VERSION) {
+		rtdm_printk(
+			"RTmac: received unsupported RTmac protocol version on "
+			"device %s.  Got 0x%x but expected 0x%x\n",
+			skb->rtdev->name, hdr->ver, RTMAC_VERSION);
+		goto error;
+	}
 
-    if (hdr->ver != RTMAC_VERSION) {
-        rtdm_printk("RTmac: received unsupported RTmac protocol version on "
-                    "device %s.  Got 0x%x but expected 0x%x\n",
-                    skb->rtdev->name, hdr->ver, RTMAC_VERSION);
-        goto error;
-    }
+	if (hdr->flags & RTMAC_FLAG_TUNNEL)
+		rtmac_vnic_rx(skb, hdr->type);
+	else if (disc->disc_type == hdr->type)
+		disc->packet_rx(skb);
+	return 0;
 
-    if (hdr->flags & RTMAC_FLAG_TUNNEL)
-        rtmac_vnic_rx(skb, hdr->type);
-    else if (disc->disc_type == hdr->type)
-        disc->packet_rx(skb);
-    return 0;
-
-  error:
-    kfree_rtskb(skb);
-    return 0;
+error:
+	kfree_rtskb(skb);
+	return 0;
 }
 
-
-
-struct rtpacket_type rtmac_packet_type = {
-    .type =     __constant_htons(ETH_RTMAC),
-    .handler =  rtmac_proto_rx
-};
-
-
+struct rtpacket_type rtmac_packet_type = { .type = __constant_htons(ETH_RTMAC),
+					   .handler = rtmac_proto_rx };
 
 void rtmac_proto_release(void)
 {
-    rtdev_remove_pack(&rtmac_packet_type);
+	rtdev_remove_pack(&rtmac_packet_type);
 }

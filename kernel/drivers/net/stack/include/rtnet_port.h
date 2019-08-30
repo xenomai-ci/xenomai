@@ -37,33 +37,33 @@
 
 static inline void rtnetif_start_queue(struct rtnet_device *rtdev)
 {
-    clear_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state);
+	clear_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state);
 }
 
 static inline void rtnetif_wake_queue(struct rtnet_device *rtdev)
 {
-    if (test_and_clear_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state))
-    /*TODO __netif_schedule(dev); */ ;
+	if (test_and_clear_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state))
+		/*TODO __netif_schedule(dev); */;
 }
 
 static inline void rtnetif_stop_queue(struct rtnet_device *rtdev)
 {
-    set_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state);
+	set_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state);
 }
 
 static inline int rtnetif_queue_stopped(struct rtnet_device *rtdev)
 {
-    return test_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state);
+	return test_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state);
 }
 
 static inline int rtnetif_running(struct rtnet_device *rtdev)
 {
-    return test_bit(__RTNET_LINK_STATE_START, &rtdev->link_state);
+	return test_bit(__RTNET_LINK_STATE_START, &rtdev->link_state);
 }
 
 static inline int rtnetif_device_present(struct rtnet_device *rtdev)
 {
-    return test_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
+	return test_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
 }
 
 static inline void rtnetif_device_detach(struct rtnet_device *rtdev)
@@ -77,8 +77,7 @@ static inline void rtnetif_device_detach(struct rtnet_device *rtdev)
 
 static inline void rtnetif_device_attach(struct rtnet_device *rtdev)
 {
-	if (!test_and_set_bit(__RTNET_LINK_STATE_PRESENT,
-			      &rtdev->link_state) &&
+	if (!test_and_set_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state) &&
 	    rtnetif_running(rtdev)) {
 		rtnetif_wake_queue(rtdev);
 		/* __netdev_watchdog_up(rtdev); */
@@ -87,8 +86,8 @@ static inline void rtnetif_device_attach(struct rtnet_device *rtdev)
 
 static inline void rtnetif_carrier_on(struct rtnet_device *rtdev)
 {
-    clear_bit(__RTNET_LINK_STATE_NOCARRIER, &rtdev->link_state);
-    /*
+	clear_bit(__RTNET_LINK_STATE_NOCARRIER, &rtdev->link_state);
+	/*
     if (netif_running(dev))
 	__netdev_watchdog_up(dev);
     */
@@ -96,19 +95,17 @@ static inline void rtnetif_carrier_on(struct rtnet_device *rtdev)
 
 static inline void rtnetif_carrier_off(struct rtnet_device *rtdev)
 {
-    set_bit(__RTNET_LINK_STATE_NOCARRIER, &rtdev->link_state);
+	set_bit(__RTNET_LINK_STATE_NOCARRIER, &rtdev->link_state);
 }
 
 static inline int rtnetif_carrier_ok(struct rtnet_device *rtdev)
 {
-    return !test_bit(__RTNET_LINK_STATE_NOCARRIER, &rtdev->link_state);
+	return !test_bit(__RTNET_LINK_STATE_NOCARRIER, &rtdev->link_state);
 }
 
-#define NIPQUAD(addr) \
-	((unsigned char *)&addr)[0],	\
-	((unsigned char *)&addr)[1],	\
-	((unsigned char *)&addr)[2],	\
-	((unsigned char *)&addr)[3]
+#define NIPQUAD(addr)                                                          \
+	((unsigned char *)&addr)[0], ((unsigned char *)&addr)[1],              \
+		((unsigned char *)&addr)[2], ((unsigned char *)&addr)[3]
 #define NIPQUAD_FMT "%u.%u.%u.%u"
 
 #endif /* __KERNEL__ */

@@ -26,14 +26,12 @@
 #include <rtskb.h>
 #include <ipv4/protocol.h>
 
-
 extern struct rtskb *rt_ip_defrag(struct rtskb *skb,
-                                  struct rtinet_protocol *ipprot);
+				  struct rtinet_protocol *ipprot);
 
 extern void rt_ip_frag_invalidate_socket(struct rtsocket *sock);
 
 extern int __init rt_ip_fragment_init(void);
 extern void rt_ip_fragment_cleanup(void);
 
-
-#endif  /* __RTNET_IP_FRAGMENT_H_ */
+#endif /* __RTNET_IP_FRAGMENT_H_ */

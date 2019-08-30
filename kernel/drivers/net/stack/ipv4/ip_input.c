@@ -38,98 +38,92 @@ rt_ip_fallback_handler_t rt_ip_fallback_handler = NULL;
 EXPORT_SYMBOL_GPL(rt_ip_fallback_handler);
 #endif /* CONFIG_XENO_DRIVERS_NET_ADDON_PROXY */
 
-
-
 /***
  *  rt_ip_local_deliver
  */
 static inline void rt_ip_local_deliver(struct rtskb *skb)
 {
-    struct iphdr *iph       = skb->nh.iph;
-    unsigned short protocol = iph->protocol;
-    struct rtinet_protocol *ipprot;
-    struct rtsocket *sock;
-    int err;
+	struct iphdr *iph = skb->nh.iph;
+	unsigned short protocol = iph->protocol;
+	struct rtinet_protocol *ipprot;
+	struct rtsocket *sock;
+	int err;
 
+	ipprot = rt_inet_protocols[rt_inet_hashkey(protocol)];
 
-    ipprot = rt_inet_protocols[rt_inet_hashkey(protocol)];
+	/* Check if we are supporting the protocol */
+	if ((ipprot != NULL) && (ipprot->protocol == protocol)) {
+		__rtskb_pull(skb, iph->ihl * 4);
 
-    /* Check if we are supporting the protocol */
-    if ((ipprot != NULL) && (ipprot->protocol == protocol))
-    {
-        __rtskb_pull(skb, iph->ihl*4);
+		/* Point into the IP datagram, just past the header. */
+		skb->h.raw = skb->data;
 
-        /* Point into the IP datagram, just past the header. */
-        skb->h.raw = skb->data;
+		/* Reassemble IP fragments */
+		if (iph->frag_off & htons(IP_MF | IP_OFFSET)) {
+			skb = rt_ip_defrag(skb, ipprot);
+			if (!skb)
+				return;
 
-        /* Reassemble IP fragments */
-        if (iph->frag_off & htons(IP_MF|IP_OFFSET)) {
-            skb = rt_ip_defrag(skb, ipprot);
-            if (!skb)
-                return;
-
-	    sock = skb->sk;
-        } else {
-            /* Get the destination socket */
-            if ((sock = ipprot->dest_socket(skb)) == NULL) {
+			sock = skb->sk;
+		} else {
+			/* Get the destination socket */
+			if ((sock = ipprot->dest_socket(skb)) == NULL) {
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_PROXY)
-                if (rt_ip_fallback_handler) {
-                    __rtskb_push(skb, iph->ihl*4);
-                    rt_ip_fallback_handler(skb);
-                    return;
-                }
+				if (rt_ip_fallback_handler) {
+					__rtskb_push(skb, iph->ihl * 4);
+					rt_ip_fallback_handler(skb);
+					return;
+				}
 #endif
-                kfree_rtskb(skb);
-                return;
-            }
+				kfree_rtskb(skb);
+				return;
+			}
 
-            /* Acquire the rtskb, to unlock the device skb pool */
-            err = rtskb_acquire(skb, &sock->skb_pool);
+			/* Acquire the rtskb, to unlock the device skb pool */
+			err = rtskb_acquire(skb, &sock->skb_pool);
 
-            if (err) {
-                kfree_rtskb(skb);
+			if (err) {
+				kfree_rtskb(skb);
+				rt_socket_dereference(sock);
+				return;
+			}
+		}
+
+		/* Deliver the packet to the next layer */
+		ipprot->rcv_handler(skb);
+
+		/* Packet is queued, socket can be released */
 		rt_socket_dereference(sock);
-                return;
-            }
-        }
-
-        /* Deliver the packet to the next layer */
-        ipprot->rcv_handler(skb);
-
-	/* Packet is queued, socket can be released */
-	rt_socket_dereference(sock);
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_PROXY)
-    } else if (rt_ip_fallback_handler) {
-        /* If a fallback handler for IP protocol has been installed,
+	} else if (rt_ip_fallback_handler) {
+		/* If a fallback handler for IP protocol has been installed,
          * call it. */
-        rt_ip_fallback_handler(skb);
+		rt_ip_fallback_handler(skb);
 #endif /* CONFIG_XENO_DRIVERS_NET_ADDON_PROXY */
-    } else {
-	if (IS_ENABLED(CONFIG_XENO_DRIVERS_NET_RTIPV4_DEBUG))
-		rtdm_printk("RTnet: no protocol found\n");
-        kfree_rtskb(skb);
-    }
+	} else {
+		if (IS_ENABLED(CONFIG_XENO_DRIVERS_NET_RTIPV4_DEBUG))
+			rtdm_printk("RTnet: no protocol found\n");
+		kfree_rtskb(skb);
+	}
 }
-
-
 
 /***
  *  rt_ip_rcv
  */
 int rt_ip_rcv(struct rtskb *skb, struct rtpacket_type *pt)
 {
-    struct iphdr *iph;
-    __u32 len;
+	struct iphdr *iph;
+	__u32 len;
 
-    /* When the interface is in promisc. mode, drop all the crap
+	/* When the interface is in promisc. mode, drop all the crap
      * that it receives, do not try to analyse it.
      */
-    if (skb->pkt_type == PACKET_OTHERHOST)
-        goto drop;
+	if (skb->pkt_type == PACKET_OTHERHOST)
+		goto drop;
 
-    iph = skb->nh.iph;
+	iph = skb->nh.iph;
 
-    /*
+	/*
      *  RFC1122: 3.1.2.2 MUST silently discard any IP frame that fails the checksum.
      *
      *  Is the datagram acceptable?
@@ -139,27 +133,27 @@ int rt_ip_rcv(struct rtskb *skb, struct rtpacket_type *pt)
      *  3.  Checksums correctly. [Speed optimisation for later, skip loopback checksums]
      *  4.  Doesn't have a bogus length
      */
-    if (iph->ihl < 5 || iph->version != 4)
-        goto drop;
+	if (iph->ihl < 5 || iph->version != 4)
+		goto drop;
 
-    if ( ip_fast_csum((u8 *)iph, iph->ihl)!=0 )
-        goto drop;
+	if (ip_fast_csum((u8 *)iph, iph->ihl) != 0)
+		goto drop;
 
-    len = ntohs(iph->tot_len);
-    if ( (skb->len<len) || (len<((__u32)iph->ihl<<2)) )
-        goto drop;
+	len = ntohs(iph->tot_len);
+	if ((skb->len < len) || (len < ((__u32)iph->ihl << 2)))
+		goto drop;
 
-    rtskb_trim(skb, len);
+	rtskb_trim(skb, len);
 
 #ifdef CONFIG_XENO_DRIVERS_NET_RTIPV4_ROUTER
-    if (rt_ip_route_forward(skb, iph->daddr))
-        return 0;
+	if (rt_ip_route_forward(skb, iph->daddr))
+		return 0;
 #endif /* CONFIG_XENO_DRIVERS_NET_RTIPV4_ROUTER */
 
-    rt_ip_local_deliver(skb);
-    return 0;
+	rt_ip_local_deliver(skb);
+	return 0;
 
-  drop:
-    kfree_rtskb(skb);
-    return 0;
+drop:
+	kfree_rtskb(skb);
+	return 0;
 }

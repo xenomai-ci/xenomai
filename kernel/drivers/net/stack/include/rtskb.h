@@ -32,7 +32,6 @@
 #include <rtdm/net.h>
 #include <rtnet_internal.h>
 
-
 /***
 
 rtskb Management - A Short Introduction
@@ -136,15 +135,14 @@ cap_rtmac_stamp field now contains valid data.
 
  ***/
 
-
 #ifndef CHECKSUM_PARTIAL
-#define CHECKSUM_PARTIAL        CHECKSUM_HW
+#define CHECKSUM_PARTIAL CHECKSUM_HW
 #endif
 
-#define RTSKB_CAP_SHARED        1   /* rtskb shared between stack and RTcap */
-#define RTSKB_CAP_RTMAC_STAMP   2   /* cap_rtmac_stamp is valid             */
+#define RTSKB_CAP_SHARED 1 /* rtskb shared between stack and RTcap */
+#define RTSKB_CAP_RTMAC_STAMP 2 /* cap_rtmac_stamp is valid             */
 
-#define RTSKB_UNMAPPED          0
+#define RTSKB_UNMAPPED 0
 
 struct rtskb_queue;
 struct rtsocket;
@@ -154,130 +152,127 @@ struct rtnet_device;
  *  rtskb - realtime socket buffer
  */
 struct rtskb {
-    struct rtskb        *next;      /* used for queuing rtskbs */
-    struct rtskb        *chain_end; /* marks the end of a rtskb chain starting
+	struct rtskb *next; /* used for queuing rtskbs */
+	struct rtskb *chain_end; /* marks the end of a rtskb chain starting
 				       with this very rtskb */
 
-    struct rtskb_pool   *pool;      /* owning pool */
+	struct rtskb_pool *pool; /* owning pool */
 
-    unsigned int        priority;   /* bit 0..15: prio, 16..31: user-defined */
+	unsigned int priority; /* bit 0..15: prio, 16..31: user-defined */
 
-    struct rtsocket     *sk;        /* assigned socket */
-    struct rtnet_device *rtdev;     /* source or destination device */
+	struct rtsocket *sk; /* assigned socket */
+	struct rtnet_device *rtdev; /* source or destination device */
 
-    nanosecs_abs_t      time_stamp; /* arrival or transmission (RTcap) time */
+	nanosecs_abs_t time_stamp; /* arrival or transmission (RTcap) time */
 
-    /* patch address of the transmission time stamp, can be NULL
+	/* patch address of the transmission time stamp, can be NULL
      * calculation: *xmit_stamp = cpu_to_be64(time_in_ns + *xmit_stamp)
      */
-    nanosecs_abs_t      *xmit_stamp;
+	nanosecs_abs_t *xmit_stamp;
 
-    /* transport layer */
-    union
-    {
-	struct tcphdr   *th;
-	struct udphdr   *uh;
-	struct icmphdr  *icmph;
-	struct iphdr    *ipihdr;
-	unsigned char   *raw;
-    } h;
+	/* transport layer */
+	union {
+		struct tcphdr *th;
+		struct udphdr *uh;
+		struct icmphdr *icmph;
+		struct iphdr *ipihdr;
+		unsigned char *raw;
+	} h;
 
-    /* network layer */
-    union
-    {
-	struct iphdr    *iph;
-	struct arphdr   *arph;
-	unsigned char   *raw;
-    } nh;
+	/* network layer */
+	union {
+		struct iphdr *iph;
+		struct arphdr *arph;
+		unsigned char *raw;
+	} nh;
 
-    /* link layer */
-    union
-    {
-	struct ethhdr   *ethernet;
-	unsigned char   *raw;
-    } mac;
+	/* link layer */
+	union {
+		struct ethhdr *ethernet;
+		unsigned char *raw;
+	} mac;
 
-    unsigned short      protocol;
-    unsigned char       pkt_type;
+	unsigned short protocol;
+	unsigned char pkt_type;
 
-    unsigned char       ip_summed;
-    unsigned int        csum;
+	unsigned char ip_summed;
+	unsigned int csum;
 
-    unsigned char       *data;
-    unsigned char       *tail;
-    unsigned char       *end;
-    unsigned int        len;
+	unsigned char *data;
+	unsigned char *tail;
+	unsigned char *end;
+	unsigned int len;
 
-    dma_addr_t          buf_dma_addr;
+	dma_addr_t buf_dma_addr;
 
-    unsigned char       *buf_start;
+	unsigned char *buf_start;
 
 #ifdef CONFIG_XENO_DRIVERS_NET_CHECKED
-    unsigned char       *buf_end;
+	unsigned char *buf_end;
 #endif
 
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_RTCAP)
-    int                 cap_flags;  /* see RTSKB_CAP_xxx                    */
-    struct rtskb        *cap_comp_skb; /* compensation rtskb                */
-    struct rtskb        *cap_next;  /* used for capture queue               */
-    unsigned char       *cap_start; /* start offset for capturing           */
-    unsigned int        cap_len;    /* capture length of this rtskb         */
-    nanosecs_abs_t      cap_rtmac_stamp; /* RTmac enqueuing time            */
+	int cap_flags; /* see RTSKB_CAP_xxx                    */
+	struct rtskb *cap_comp_skb; /* compensation rtskb                */
+	struct rtskb *cap_next; /* used for capture queue               */
+	unsigned char *cap_start; /* start offset for capturing           */
+	unsigned int cap_len; /* capture length of this rtskb         */
+	nanosecs_abs_t cap_rtmac_stamp; /* RTmac enqueuing time            */
 #endif
 
-    struct list_head    entry; /* for global rtskb list */
+	struct list_head entry; /* for global rtskb list */
 };
 
 struct rtskb_queue {
-    struct rtskb        *first;
-    struct rtskb        *last;
-    rtdm_lock_t         lock;
+	struct rtskb *first;
+	struct rtskb *last;
+	rtdm_lock_t lock;
 };
 
 struct rtskb_pool_lock_ops {
-    int (*trylock)(void *cookie);
-    void (*unlock)(void *cookie);
+	int (*trylock)(void *cookie);
+	void (*unlock)(void *cookie);
 };
 
 struct rtskb_pool {
-    struct rtskb_queue queue;
-    const struct rtskb_pool_lock_ops *lock_ops;
-    void *lock_cookie;
+	struct rtskb_queue queue;
+	const struct rtskb_pool_lock_ops *lock_ops;
+	void *lock_cookie;
 };
 
-#define QUEUE_MAX_PRIO          0
-#define QUEUE_MIN_PRIO          31
+#define QUEUE_MAX_PRIO 0
+#define QUEUE_MIN_PRIO 31
 
 struct rtskb_prio_queue {
-    rtdm_lock_t         lock;
-    unsigned long       usage;  /* bit array encoding non-empty sub-queues */
-    struct rtskb_queue  queue[QUEUE_MIN_PRIO+1];
+	rtdm_lock_t lock;
+	unsigned long usage; /* bit array encoding non-empty sub-queues */
+	struct rtskb_queue queue[QUEUE_MIN_PRIO + 1];
 };
 
-#define RTSKB_PRIO_MASK         0x0000FFFF  /* bits  0..15: xmit prio    */
-#define RTSKB_CHANNEL_MASK      0xFFFF0000  /* bits 16..31: xmit channel */
-#define RTSKB_CHANNEL_SHIFT     16
+#define RTSKB_PRIO_MASK 0x0000FFFF /* bits  0..15: xmit prio    */
+#define RTSKB_CHANNEL_MASK 0xFFFF0000 /* bits 16..31: xmit channel */
+#define RTSKB_CHANNEL_SHIFT 16
 
-#define RTSKB_DEF_RT_CHANNEL    SOCK_DEF_RT_CHANNEL
-#define RTSKB_DEF_NRT_CHANNEL   SOCK_DEF_NRT_CHANNEL
-#define RTSKB_USER_CHANNEL      SOCK_USER_CHANNEL
+#define RTSKB_DEF_RT_CHANNEL SOCK_DEF_RT_CHANNEL
+#define RTSKB_DEF_NRT_CHANNEL SOCK_DEF_NRT_CHANNEL
+#define RTSKB_USER_CHANNEL SOCK_USER_CHANNEL
 
 /* Note: always keep SOCK_XMIT_PARAMS consistent with definitions above! */
-#define RTSKB_PRIO_VALUE        SOCK_XMIT_PARAMS
-
+#define RTSKB_PRIO_VALUE SOCK_XMIT_PARAMS
 
 /* default values for the module parameter */
-#define DEFAULT_GLOBAL_RTSKBS       0       /* default number of rtskb's in global pool */
-#define DEFAULT_DEVICE_RTSKBS       16      /* default additional rtskbs per network adapter */
-#define DEFAULT_SOCKET_RTSKBS       16      /* default number of rtskb's in socket pools */
+#define DEFAULT_GLOBAL_RTSKBS 0 /* default number of rtskb's in global pool */
+#define DEFAULT_DEVICE_RTSKBS                                                  \
+	16 /* default additional rtskbs per network adapter */
+#define DEFAULT_SOCKET_RTSKBS 16 /* default number of rtskb's in socket pools */
 
-#define ALIGN_RTSKB_STRUCT_LEN      SKB_DATA_ALIGN(sizeof(struct rtskb))
-#define RTSKB_SIZE                  1544    /* maximum needed by pcnet32-rt */
+#define ALIGN_RTSKB_STRUCT_LEN SKB_DATA_ALIGN(sizeof(struct rtskb))
+#define RTSKB_SIZE 1544 /* maximum needed by pcnet32-rt */
 
-extern unsigned int rtskb_pools;        /* current number of rtskb pools      */
-extern unsigned int rtskb_pools_max;    /* maximum number of rtskb pools      */
-extern unsigned int rtskb_amount;       /* current number of allocated rtskbs */
-extern unsigned int rtskb_amount_max;   /* maximum number of allocated rtskbs */
+extern unsigned int rtskb_pools; /* current number of rtskb pools      */
+extern unsigned int rtskb_pools_max; /* maximum number of rtskb pools      */
+extern unsigned int rtskb_amount; /* current number of allocated rtskbs */
+extern unsigned int rtskb_amount_max; /* maximum number of allocated rtskbs */
 
 #ifdef CONFIG_XENO_DRIVERS_NET_CHECKED
 extern void rtskb_over_panic(struct rtskb *skb, int len, void *here);
@@ -291,8 +286,7 @@ extern void rtskb_pool_queue_tail(struct rtskb_pool *pool, struct rtskb *skb);
 extern struct rtskb *alloc_rtskb(unsigned int size, struct rtskb_pool *pool);
 
 extern void kfree_rtskb(struct rtskb *skb);
-#define dev_kfree_rtskb(a)  kfree_rtskb(a)
-
+#define dev_kfree_rtskb(a) kfree_rtskb(a)
 
 static inline void rtskb_tx_timestamp(struct rtskb *skb)
 {
@@ -310,9 +304,9 @@ static inline void rtskb_tx_timestamp(struct rtskb *skb)
  */
 static inline void rtskb_queue_init(struct rtskb_queue *queue)
 {
-    rtdm_lock_init(&queue->lock);
-    queue->first = NULL;
-    queue->last  = NULL;
+	rtdm_lock_init(&queue->lock);
+	queue->first = NULL;
+	queue->last = NULL;
 }
 
 /***
@@ -321,8 +315,8 @@ static inline void rtskb_queue_init(struct rtskb_queue *queue)
  */
 static inline void rtskb_prio_queue_init(struct rtskb_prio_queue *prioqueue)
 {
-    memset(prioqueue, 0, sizeof(struct rtskb_prio_queue));
-    rtdm_lock_init(&prioqueue->lock);
+	memset(prioqueue, 0, sizeof(struct rtskb_prio_queue));
+	rtdm_lock_init(&prioqueue->lock);
 }
 
 /***
@@ -331,7 +325,7 @@ static inline void rtskb_prio_queue_init(struct rtskb_prio_queue *prioqueue)
  */
 static inline int rtskb_queue_empty(struct rtskb_queue *queue)
 {
-    return (queue->first == NULL);
+	return (queue->first == NULL);
 }
 
 /***
@@ -340,7 +334,7 @@ static inline int rtskb_queue_empty(struct rtskb_queue *queue)
  */
 static inline int rtskb_prio_queue_empty(struct rtskb_prio_queue *prioqueue)
 {
-    return (prioqueue->usage == 0);
+	return (prioqueue->usage == 0);
 }
 
 /***
@@ -351,13 +345,13 @@ static inline int rtskb_prio_queue_empty(struct rtskb_prio_queue *prioqueue)
 static inline void __rtskb_queue_head(struct rtskb_queue *queue,
 				      struct rtskb *skb)
 {
-    struct rtskb *chain_end = skb->chain_end;
+	struct rtskb *chain_end = skb->chain_end;
 
-    chain_end->next = queue->first;
+	chain_end->next = queue->first;
 
-    if (queue->first == NULL)
-	queue->last = chain_end;
-    queue->first = skb;
+	if (queue->first == NULL)
+		queue->last = chain_end;
+	queue->first = skb;
 }
 
 /***
@@ -365,13 +359,14 @@ static inline void __rtskb_queue_head(struct rtskb_queue *queue,
  *  @queue: queue to use
  *  @skb: buffer to queue
  */
-static inline void rtskb_queue_head(struct rtskb_queue *queue, struct rtskb *skb)
+static inline void rtskb_queue_head(struct rtskb_queue *queue,
+				    struct rtskb *skb)
 {
-    rtdm_lockctx_t context;
+	rtdm_lockctx_t context;
 
-    rtdm_lock_get_irqsave(&queue->lock, context);
-    __rtskb_queue_head(queue, skb);
-    rtdm_lock_put_irqrestore(&queue->lock, context);
+	rtdm_lock_get_irqsave(&queue->lock, context);
+	__rtskb_queue_head(queue, skb);
+	rtdm_lock_put_irqrestore(&queue->lock, context);
 }
 
 /***
@@ -383,12 +378,12 @@ static inline void rtskb_queue_head(struct rtskb_queue *queue, struct rtskb *skb
 static inline void __rtskb_prio_queue_head(struct rtskb_prio_queue *prioqueue,
 					   struct rtskb *skb)
 {
-    unsigned int prio = skb->priority & RTSKB_PRIO_MASK;
+	unsigned int prio = skb->priority & RTSKB_PRIO_MASK;
 
-    RTNET_ASSERT(prio <= 31, prio = 31;);
+	RTNET_ASSERT(prio <= 31, prio = 31;);
 
-    __rtskb_queue_head(&prioqueue->queue[prio], skb);
-    __set_bit(prio, &prioqueue->usage);
+	__rtskb_queue_head(&prioqueue->queue[prio], skb);
+	__set_bit(prio, &prioqueue->usage);
 }
 
 /***
@@ -400,11 +395,11 @@ static inline void __rtskb_prio_queue_head(struct rtskb_prio_queue *prioqueue,
 static inline void rtskb_prio_queue_head(struct rtskb_prio_queue *prioqueue,
 					 struct rtskb *skb)
 {
-    rtdm_lockctx_t context;
+	rtdm_lockctx_t context;
 
-    rtdm_lock_get_irqsave(&prioqueue->lock, context);
-    __rtskb_prio_queue_head(prioqueue, skb);
-    rtdm_lock_put_irqrestore(&prioqueue->lock, context);
+	rtdm_lock_get_irqsave(&prioqueue->lock, context);
+	__rtskb_prio_queue_head(prioqueue, skb);
+	rtdm_lock_put_irqrestore(&prioqueue->lock, context);
 }
 
 /***
@@ -415,15 +410,15 @@ static inline void rtskb_prio_queue_head(struct rtskb_prio_queue *prioqueue,
 static inline void __rtskb_queue_tail(struct rtskb_queue *queue,
 				      struct rtskb *skb)
 {
-    struct rtskb *chain_end = skb->chain_end;
+	struct rtskb *chain_end = skb->chain_end;
 
-    chain_end->next = NULL;
+	chain_end->next = NULL;
 
-    if (queue->first == NULL)
-	queue->first = skb;
-    else
-	queue->last->next = skb;
-    queue->last = chain_end;
+	if (queue->first == NULL)
+		queue->first = skb;
+	else
+		queue->last->next = skb;
+	queue->last = chain_end;
 }
 
 /***
@@ -434,11 +429,11 @@ static inline void __rtskb_queue_tail(struct rtskb_queue *queue,
 static inline void rtskb_queue_tail(struct rtskb_queue *queue,
 				    struct rtskb *skb)
 {
-    rtdm_lockctx_t context;
+	rtdm_lockctx_t context;
 
-    rtdm_lock_get_irqsave(&queue->lock, context);
-    __rtskb_queue_tail(queue, skb);
-    rtdm_lock_put_irqrestore(&queue->lock, context);
+	rtdm_lock_get_irqsave(&queue->lock, context);
+	__rtskb_queue_tail(queue, skb);
+	rtdm_lock_put_irqrestore(&queue->lock, context);
 }
 
 /***
@@ -450,12 +445,12 @@ static inline void rtskb_queue_tail(struct rtskb_queue *queue,
 static inline void __rtskb_prio_queue_tail(struct rtskb_prio_queue *prioqueue,
 					   struct rtskb *skb)
 {
-    unsigned int prio = skb->priority & RTSKB_PRIO_MASK;
+	unsigned int prio = skb->priority & RTSKB_PRIO_MASK;
 
-    RTNET_ASSERT(prio <= 31, prio = 31;);
+	RTNET_ASSERT(prio <= 31, prio = 31;);
 
-    __rtskb_queue_tail(&prioqueue->queue[prio], skb);
-    __set_bit(prio, &prioqueue->usage);
+	__rtskb_queue_tail(&prioqueue->queue[prio], skb);
+	__set_bit(prio, &prioqueue->usage);
 }
 
 /***
@@ -467,11 +462,11 @@ static inline void __rtskb_prio_queue_tail(struct rtskb_prio_queue *prioqueue,
 static inline void rtskb_prio_queue_tail(struct rtskb_prio_queue *prioqueue,
 					 struct rtskb *skb)
 {
-    rtdm_lockctx_t context;
+	rtdm_lockctx_t context;
 
-    rtdm_lock_get_irqsave(&prioqueue->lock, context);
-    __rtskb_prio_queue_tail(prioqueue, skb);
-    rtdm_lock_put_irqrestore(&prioqueue->lock, context);
+	rtdm_lock_get_irqsave(&prioqueue->lock, context);
+	__rtskb_prio_queue_tail(prioqueue, skb);
+	rtdm_lock_put_irqrestore(&prioqueue->lock, context);
 }
 
 /***
@@ -480,14 +475,14 @@ static inline void rtskb_prio_queue_tail(struct rtskb_prio_queue *prioqueue,
  */
 static inline struct rtskb *__rtskb_dequeue(struct rtskb_queue *queue)
 {
-    struct rtskb *result;
+	struct rtskb *result;
 
-    if ((result = queue->first) != NULL) {
-	queue->first = result->next;
-	result->next = NULL;
-    }
+	if ((result = queue->first) != NULL) {
+		queue->first = result->next;
+		result->next = NULL;
+	}
 
-    return result;
+	return result;
 }
 
 /***
@@ -496,14 +491,14 @@ static inline struct rtskb *__rtskb_dequeue(struct rtskb_queue *queue)
  */
 static inline struct rtskb *rtskb_dequeue(struct rtskb_queue *queue)
 {
-    rtdm_lockctx_t context;
-    struct rtskb *result;
+	rtdm_lockctx_t context;
+	struct rtskb *result;
 
-    rtdm_lock_get_irqsave(&queue->lock, context);
-    result = __rtskb_dequeue(queue);
-    rtdm_lock_put_irqrestore(&queue->lock, context);
+	rtdm_lock_get_irqsave(&queue->lock, context);
+	result = __rtskb_dequeue(queue);
+	rtdm_lock_put_irqrestore(&queue->lock, context);
 
-    return result;
+	return result;
 }
 
 /***
@@ -512,21 +507,21 @@ static inline struct rtskb *rtskb_dequeue(struct rtskb_queue *queue)
  *  @prioqueue: queue to remove from
  */
 static inline struct rtskb *
-    __rtskb_prio_dequeue(struct rtskb_prio_queue *prioqueue)
+__rtskb_prio_dequeue(struct rtskb_prio_queue *prioqueue)
 {
-    int prio;
-    struct rtskb *result = NULL;
-    struct rtskb_queue *sub_queue;
+	int prio;
+	struct rtskb *result = NULL;
+	struct rtskb_queue *sub_queue;
 
-    if (prioqueue->usage) {
-	prio      = ffz(~prioqueue->usage);
-	sub_queue = &prioqueue->queue[prio];
-	result    = __rtskb_dequeue(sub_queue);
-	if (rtskb_queue_empty(sub_queue))
-	    __change_bit(prio, &prioqueue->usage);
-    }
+	if (prioqueue->usage) {
+		prio = ffz(~prioqueue->usage);
+		sub_queue = &prioqueue->queue[prio];
+		result = __rtskb_dequeue(sub_queue);
+		if (rtskb_queue_empty(sub_queue))
+			__change_bit(prio, &prioqueue->usage);
+	}
 
-    return result;
+	return result;
 }
 
 /***
@@ -535,16 +530,16 @@ static inline struct rtskb *
  *  @prioqueue: queue to remove from
  */
 static inline struct rtskb *
-    rtskb_prio_dequeue(struct rtskb_prio_queue *prioqueue)
+rtskb_prio_dequeue(struct rtskb_prio_queue *prioqueue)
 {
-    rtdm_lockctx_t context;
-    struct rtskb *result;
+	rtdm_lockctx_t context;
+	struct rtskb *result;
 
-    rtdm_lock_get_irqsave(&prioqueue->lock, context);
-    result = __rtskb_prio_dequeue(prioqueue);
-    rtdm_lock_put_irqrestore(&prioqueue->lock, context);
+	rtdm_lock_get_irqsave(&prioqueue->lock, context);
+	result = __rtskb_prio_dequeue(prioqueue);
+	rtdm_lock_put_irqrestore(&prioqueue->lock, context);
 
-    return result;
+	return result;
 }
 
 /***
@@ -554,16 +549,16 @@ static inline struct rtskb *
  */
 static inline struct rtskb *__rtskb_dequeue_chain(struct rtskb_queue *queue)
 {
-    struct rtskb *result;
-    struct rtskb *chain_end;
+	struct rtskb *result;
+	struct rtskb *chain_end;
 
-    if ((result = queue->first) != NULL) {
-	chain_end = result->chain_end;
-	queue->first = chain_end->next;
-	chain_end->next = NULL;
-    }
+	if ((result = queue->first) != NULL) {
+		chain_end = result->chain_end;
+		queue->first = chain_end->next;
+		chain_end->next = NULL;
+	}
 
-    return result;
+	return result;
 }
 
 /***
@@ -573,14 +568,14 @@ static inline struct rtskb *__rtskb_dequeue_chain(struct rtskb_queue *queue)
  */
 static inline struct rtskb *rtskb_dequeue_chain(struct rtskb_queue *queue)
 {
-    rtdm_lockctx_t context;
-    struct rtskb *result;
+	rtdm_lockctx_t context;
+	struct rtskb *result;
 
-    rtdm_lock_get_irqsave(&queue->lock, context);
-    result = __rtskb_dequeue_chain(queue);
-    rtdm_lock_put_irqrestore(&queue->lock, context);
+	rtdm_lock_get_irqsave(&queue->lock, context);
+	result = __rtskb_dequeue_chain(queue);
+	rtdm_lock_put_irqrestore(&queue->lock, context);
 
-    return result;
+	return result;
 }
 
 /***
@@ -588,25 +583,25 @@ static inline struct rtskb *rtskb_dequeue_chain(struct rtskb_queue *queue)
  *                             prioritized queue
  *  @prioqueue: queue to remove from
  */
-static inline
-    struct rtskb *rtskb_prio_dequeue_chain(struct rtskb_prio_queue *prioqueue)
+static inline struct rtskb *
+rtskb_prio_dequeue_chain(struct rtskb_prio_queue *prioqueue)
 {
-    rtdm_lockctx_t context;
-    int prio;
-    struct rtskb *result = NULL;
-    struct rtskb_queue *sub_queue;
+	rtdm_lockctx_t context;
+	int prio;
+	struct rtskb *result = NULL;
+	struct rtskb_queue *sub_queue;
 
-    rtdm_lock_get_irqsave(&prioqueue->lock, context);
-    if (prioqueue->usage) {
-	prio      = ffz(~prioqueue->usage);
-	sub_queue = &prioqueue->queue[prio];
-	result    = __rtskb_dequeue_chain(sub_queue);
-	if (rtskb_queue_empty(sub_queue))
-	    __change_bit(prio, &prioqueue->usage);
-    }
-    rtdm_lock_put_irqrestore(&prioqueue->lock, context);
+	rtdm_lock_get_irqsave(&prioqueue->lock, context);
+	if (prioqueue->usage) {
+		prio = ffz(~prioqueue->usage);
+		sub_queue = &prioqueue->queue[prio];
+		result = __rtskb_dequeue_chain(sub_queue);
+		if (rtskb_queue_empty(sub_queue))
+			__change_bit(prio, &prioqueue->usage);
+	}
+	rtdm_lock_put_irqrestore(&prioqueue->lock, context);
 
-    return result;
+	return result;
 }
 
 /***
@@ -615,108 +610,110 @@ static inline
  */
 static inline void rtskb_queue_purge(struct rtskb_queue *queue)
 {
-    struct rtskb *skb;
-    while ( (skb=rtskb_dequeue(queue))!=NULL )
-	kfree_rtskb(skb);
+	struct rtskb *skb;
+	while ((skb = rtskb_dequeue(queue)) != NULL)
+		kfree_rtskb(skb);
 }
 
 static inline int rtskb_headlen(const struct rtskb *skb)
 {
-    return skb->len;
+	return skb->len;
 }
 
 static inline void rtskb_reserve(struct rtskb *skb, unsigned int len)
 {
-    skb->data+=len;
-    skb->tail+=len;
+	skb->data += len;
+	skb->tail += len;
 }
 
 static inline unsigned char *__rtskb_put(struct rtskb *skb, unsigned int len)
 {
-    unsigned char *tmp=skb->tail;
+	unsigned char *tmp = skb->tail;
 
-    skb->tail+=len;
-    skb->len+=len;
-    return tmp;
+	skb->tail += len;
+	skb->len += len;
+	return tmp;
 }
 
-#define rtskb_put(skb, length) \
-({ \
-    struct rtskb *__rtskb = (skb); \
-    unsigned int __len = (length); \
-    unsigned char *tmp=__rtskb->tail; \
-\
-    __rtskb->tail += __len; \
-    __rtskb->len  += __len; \
-\
-    RTNET_ASSERT(__rtskb->tail <= __rtskb->buf_end, \
-	rtskb_over_panic(__rtskb, __len, current_text_addr());); \
-\
-    tmp; \
-})
+#define rtskb_put(skb, length)                                                 \
+	({                                                                     \
+		struct rtskb *__rtskb = (skb);                                 \
+		unsigned int __len = (length);                                 \
+		unsigned char *tmp = __rtskb->tail;                            \
+                                                                               \
+		__rtskb->tail += __len;                                        \
+		__rtskb->len += __len;                                         \
+                                                                               \
+		RTNET_ASSERT(__rtskb->tail <= __rtskb->buf_end,                \
+			     rtskb_over_panic(__rtskb, __len,                  \
+					      current_text_addr()););          \
+                                                                               \
+		tmp;                                                           \
+	})
 
 static inline unsigned char *__rtskb_push(struct rtskb *skb, unsigned int len)
 {
-    skb->data-=len;
-    skb->len+=len;
-    return skb->data;
+	skb->data -= len;
+	skb->len += len;
+	return skb->data;
 }
 
-#define rtskb_push(skb, length) \
-({ \
-    struct rtskb *__rtskb = (skb); \
-    unsigned int __len = (length); \
-\
-    __rtskb->data -= __len; \
-    __rtskb->len  += __len; \
-\
-    RTNET_ASSERT(__rtskb->data >= __rtskb->buf_start, \
-	rtskb_under_panic(__rtskb, __len, current_text_addr());); \
-\
-    __rtskb->data; \
-})
+#define rtskb_push(skb, length)                                                \
+	({                                                                     \
+		struct rtskb *__rtskb = (skb);                                 \
+		unsigned int __len = (length);                                 \
+                                                                               \
+		__rtskb->data -= __len;                                        \
+		__rtskb->len += __len;                                         \
+                                                                               \
+		RTNET_ASSERT(__rtskb->data >= __rtskb->buf_start,              \
+			     rtskb_under_panic(__rtskb, __len,                 \
+					       current_text_addr()););         \
+                                                                               \
+		__rtskb->data;                                                 \
+	})
 
 static inline unsigned char *__rtskb_pull(struct rtskb *skb, unsigned int len)
 {
-    RTNET_ASSERT(len <= skb->len, return NULL;);
+	RTNET_ASSERT(len <= skb->len, return NULL;);
 
-    skb->len -= len;
+	skb->len -= len;
 
-    return skb->data += len;
+	return skb->data += len;
 }
 
 static inline unsigned char *rtskb_pull(struct rtskb *skb, unsigned int len)
 {
-    if (len > skb->len)
-	return NULL;
+	if (len > skb->len)
+		return NULL;
 
-    skb->len -= len;
+	skb->len -= len;
 
-    return skb->data += len;
+	return skb->data += len;
 }
 
 static inline void rtskb_trim(struct rtskb *skb, unsigned int len)
 {
-    if (skb->len>len) {
-	skb->len = len;
-	skb->tail = skb->data+len;
-    }
+	if (skb->len > len) {
+		skb->len = len;
+		skb->tail = skb->data + len;
+	}
 }
 
 static inline struct rtskb *rtskb_padto(struct rtskb *rtskb, unsigned int len)
 {
-    RTNET_ASSERT(len <= (unsigned int)(rtskb->buf_end + 1 - rtskb->data),
-		 return NULL;);
+	RTNET_ASSERT(len <= (unsigned int)(rtskb->buf_end + 1 - rtskb->data),
+		     return NULL;);
 
-    memset(rtskb->data + rtskb->len, 0, len - rtskb->len);
+	memset(rtskb->data + rtskb->len, 0, len - rtskb->len);
 
-    return rtskb;
+	return rtskb;
 }
 
 static inline dma_addr_t rtskb_data_dma_addr(struct rtskb *rtskb,
 					     unsigned int offset)
 {
-    return rtskb->buf_dma_addr + rtskb->data - rtskb->buf_start + offset;
+	return rtskb->buf_dma_addr + rtskb->data - rtskb->buf_start + offset;
 }
 
 extern struct rtskb_pool global_pool;
@@ -727,11 +724,11 @@ extern unsigned int rtskb_pool_init(struct rtskb_pool *pool,
 				    void *lock_cookie);
 
 extern unsigned int __rtskb_module_pool_init(struct rtskb_pool *pool,
-					    unsigned int initial_size,
-					    struct module *module);
+					     unsigned int initial_size,
+					     struct module *module);
 
-#define rtskb_module_pool_init(pool, size) \
-    __rtskb_module_pool_init(pool, size, THIS_MODULE)
+#define rtskb_module_pool_init(pool, size)                                     \
+	__rtskb_module_pool_init(pool, size, THIS_MODULE)
 
 extern void rtskb_pool_release(struct rtskb_pool *pool);
 
@@ -740,8 +737,7 @@ extern unsigned int rtskb_pool_extend(struct rtskb_pool *pool,
 extern unsigned int rtskb_pool_shrink(struct rtskb_pool *pool,
 				      unsigned int rem_rtskbs);
 extern int rtskb_acquire(struct rtskb *rtskb, struct rtskb_pool *comp_pool);
-extern struct rtskb* rtskb_clone(struct rtskb *rtskb,
-				 struct rtskb_pool *pool);
+extern struct rtskb *rtskb_clone(struct rtskb *rtskb, struct rtskb_pool *pool);
 
 extern int rtskb_pools_init(void);
 extern void rtskb_pools_release(void);
@@ -751,7 +747,6 @@ extern unsigned int rtskb_copy_and_csum_bits(const struct rtskb *skb,
 					     unsigned int csum);
 extern void rtskb_copy_and_csum_dev(const struct rtskb *skb, u8 *to);
 
-
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_RTCAP)
 
 extern rtdm_lock_t rtcap_lock;
@@ -759,27 +754,26 @@ extern void (*rtcap_handler)(struct rtskb *skb);
 
 static inline void rtcap_mark_incoming(struct rtskb *skb)
 {
-    skb->cap_start = skb->data;
-    skb->cap_len   = skb->len;
+	skb->cap_start = skb->data;
+	skb->cap_len = skb->len;
 }
 
 static inline void rtcap_report_incoming(struct rtskb *skb)
 {
-    rtdm_lockctx_t context;
+	rtdm_lockctx_t context;
 
+	rtdm_lock_get_irqsave(&rtcap_lock, context);
+	if (rtcap_handler != NULL)
+		rtcap_handler(skb);
 
-    rtdm_lock_get_irqsave(&rtcap_lock, context);
-    if (rtcap_handler != NULL)
-	rtcap_handler(skb);
-
-    rtdm_lock_put_irqrestore(&rtcap_lock, context);
+	rtdm_lock_put_irqrestore(&rtcap_lock, context);
 }
 
 static inline void rtcap_mark_rtmac_enqueue(struct rtskb *skb)
 {
-    /* rtskb start and length are probably not valid yet */
-    skb->cap_flags |= RTSKB_CAP_RTMAC_STAMP;
-    skb->cap_rtmac_stamp = rtdm_clock_read();
+	/* rtskb start and length are probably not valid yet */
+	skb->cap_flags |= RTSKB_CAP_RTMAC_STAMP;
+	skb->cap_rtmac_stamp = rtdm_clock_read();
 }
 
 #else /* ifndef CONFIG_XENO_DRIVERS_NET_ADDON_RTCAP */
@@ -790,7 +784,6 @@ static inline void rtcap_mark_rtmac_enqueue(struct rtskb *skb)
 
 #endif /* CONFIG_XENO_DRIVERS_NET_ADDON_RTCAP */
 
-
 #endif /* __KERNEL__ */
 
-#endif  /* __RTSKB_H_ */
+#endif /* __RTSKB_H_ */

@@ -31,7 +31,6 @@
 #include <rtcfg/rtcfg_file.h>
 #include <rtnet_internal.h>
 
-
 typedef enum {
 	RTCFG_CONN_SEARCHING,
 	RTCFG_CONN_STAGE_1,
@@ -41,31 +40,30 @@ typedef enum {
 } RTCFG_CONN_STATE;
 
 struct rtcfg_connection {
-	struct list_head		entry;
-	int						ifindex;
-	RTCFG_CONN_STATE		state;
-	u8						mac_addr[MAX_ADDR_LEN];
-	unsigned int			addr_type;
+	struct list_head entry;
+	int ifindex;
+	RTCFG_CONN_STATE state;
+	u8 mac_addr[MAX_ADDR_LEN];
+	unsigned int addr_type;
 	union {
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_RTIPV4)
-		u32					ip_addr;
+		u32 ip_addr;
 #endif
 	} addr;
-	void					*stage1_data;
-	size_t					stage1_size;
-	struct rtcfg_file		*stage2_file;
-	u32						cfg_offs;
-	unsigned int			flags;
-	unsigned int			burstrate;
-	nanosecs_abs_t			last_frame;
-	u64						cfg_timeout;
+	void *stage1_data;
+	size_t stage1_size;
+	struct rtcfg_file *stage2_file;
+	u32 cfg_offs;
+	unsigned int flags;
+	unsigned int burstrate;
+	nanosecs_abs_t last_frame;
+	u64 cfg_timeout;
 #ifdef CONFIG_XENO_OPT_VFILE
-	struct xnvfile_regular	proc_entry;
+	struct xnvfile_regular proc_entry;
 #endif
 };
 
-
 int rtcfg_do_conn_event(struct rtcfg_connection *conn, RTCFG_EVENT event_id,
-						void* event_data);
+			void *event_data);
 
 #endif /* __RTCFG_CONN_EVENT_H_ */

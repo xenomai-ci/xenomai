@@ -28,60 +28,57 @@
 #include <rtmac.h>
 #include <rtmac/nomac/nomac.h>
 
-
 static int nomac_dev_openclose(void)
 {
-    return 0;
+	return 0;
 }
-
-
 
 static int nomac_dev_ioctl(struct rtdm_fd *fd, unsigned int request, void *arg)
 {
-    struct nomac_priv   *nomac;
+	struct nomac_priv *nomac;
 
+	nomac = container_of(rtdm_fd_to_context(fd)->device, struct nomac_priv,
+			     api_device);
 
-    nomac = container_of(rtdm_fd_to_context(fd)->device,
-			 struct nomac_priv, api_device);
-
-    switch (request) {
+	switch (request) {
 	case RTMAC_RTIOC_TIMEOFFSET:
 
 	case RTMAC_RTIOC_WAITONCYCLE:
 
 	default:
-	    return -ENOTTY;
-    }
+		return -ENOTTY;
+	}
 }
 
-static struct rtdm_driver nomac_driver = {
-    .profile_info = RTDM_PROFILE_INFO(nomac,
-				    RTDM_CLASS_RTMAC,
-				    RTDM_SUBCLASS_UNMANAGED,
-				    RTNET_RTDM_VER),
-    .device_flags = RTDM_NAMED_DEVICE,
-    .device_count = 1,
-    .context_size = 0,
-    .ops = {
-	.open =         (typeof(nomac_driver.ops.open))nomac_dev_openclose,
-	.ioctl_rt =     nomac_dev_ioctl,
-	.ioctl_nrt =    nomac_dev_ioctl,
-	.close =        (typeof(nomac_driver.ops.close))nomac_dev_openclose,
-    }
-};
+static struct rtdm_driver
+	nomac_driver = { .profile_info = RTDM_PROFILE_INFO(
+				 nomac, RTDM_CLASS_RTMAC,
+				 RTDM_SUBCLASS_UNMANAGED, RTNET_RTDM_VER),
+			 .device_flags = RTDM_NAMED_DEVICE,
+			 .device_count = 1,
+			 .context_size = 0,
+			 .ops = {
+				 .open = (typeof(nomac_driver.ops.open))
+					 nomac_dev_openclose,
+				 .ioctl_rt = nomac_dev_ioctl,
+				 .ioctl_nrt = nomac_dev_ioctl,
+				 .close = (typeof(nomac_driver.ops.close))
+					 nomac_dev_openclose,
+			 } };
 
 int nomac_dev_init(struct rtnet_device *rtdev, struct nomac_priv *nomac)
 {
-    char    *pos;
+	char *pos;
 
-    strcpy(nomac->device_name, "NOMAC");
-    for (pos = rtdev->name + strlen(rtdev->name) - 1;
-	(pos >= rtdev->name) && ((*pos) >= '0') && (*pos <= '9'); pos--);
-    strncat(nomac->device_name+5, pos+1, IFNAMSIZ-5);
+	strcpy(nomac->device_name, "NOMAC");
+	for (pos = rtdev->name + strlen(rtdev->name) - 1;
+	     (pos >= rtdev->name) && ((*pos) >= '0') && (*pos <= '9'); pos--)
+		;
+	strncat(nomac->device_name + 5, pos + 1, IFNAMSIZ - 5);
 
-    nomac->api_driver           = nomac_driver;
-    nomac->api_device.driver    = &nomac->api_driver;
-    nomac->api_device.label     = nomac->device_name;
+	nomac->api_driver = nomac_driver;
+	nomac->api_device.driver = &nomac->api_driver;
+	nomac->api_device.label = nomac->device_name;
 
-    return rtdm_dev_register(&nomac->api_device);
+	return rtdm_dev_register(&nomac->api_device);
 }

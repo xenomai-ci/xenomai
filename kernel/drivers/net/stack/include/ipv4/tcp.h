@@ -18,7 +18,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
- 
+
 #ifndef __RTNET_TCP_H_
 #define __RTNET_TCP_H_
 
@@ -26,25 +26,25 @@
 #include <ipv4/protocol.h>
 
 /* Maximum number of active tcp sockets, must be power of 2 */
-#define RT_TCP_SOCKETS      32
+#define RT_TCP_SOCKETS 32
 
 /*Maximum number of active tcp connections, must be power of 2 */
-#define RT_TCP_CONNECTIONS  64
+#define RT_TCP_CONNECTIONS 64
 
 /* Maximum size of TCP input window */
-#define RT_TCP_WINDOW       4096
+#define RT_TCP_WINDOW 4096
 
 /* Maximum number of retransmissions of invalid segments */
-#define RT_TCP_RETRANSMIT   3
+#define RT_TCP_RETRANSMIT 3
 
 /* Number of milliseconds to wait for ACK */
-#define RT_TCP_WAIT_TIME    10
+#define RT_TCP_WAIT_TIME 10
 
 /* Priority of RST|ACK replies (error condition => non-RT prio) */
-#define RT_TCP_RST_PRIO     RTSKB_PRIO_VALUE(QUEUE_MIN_PRIO-1, \
-                                             RTSKB_DEF_NRT_CHANNEL)
+#define RT_TCP_RST_PRIO                                                        \
+	RTSKB_PRIO_VALUE(QUEUE_MIN_PRIO - 1, RTSKB_DEF_NRT_CHANNEL)
 
 /* rtskb pool for sending socket-less RST|ACK */
 #define RT_TCP_RST_POOL_SIZE 8
 
-#endif  /* __RTNET_TCP_H_ */
+#endif /* __RTNET_TCP_H_ */

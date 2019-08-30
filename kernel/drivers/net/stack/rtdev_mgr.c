@@ -65,61 +65,60 @@ void rtnetif_err_tx(struct rtnet_device *rtdev)
 /***
  *  rt_rtdev_connect
  */
-void rt_rtdev_connect (struct rtnet_device *rtdev, struct rtnet_mgr *mgr)
+void rt_rtdev_connect(struct rtnet_device *rtdev, struct rtnet_mgr *mgr)
 {
-/*    rtdev->rtdev_mbx=&(mgr->mbx);*/
+	/*    rtdev->rtdev_mbx=&(mgr->mbx);*/
 }
 
 /***
  *  rt_rtdev_disconnect
  */
-void rt_rtdev_disconnect (struct rtnet_device *rtdev)
+void rt_rtdev_disconnect(struct rtnet_device *rtdev)
 {
-/*    rtdev->rtdev_mbx=NULL;*/
+	/*    rtdev->rtdev_mbx=NULL;*/
 }
 
 /***
  *  rt_rtdev_mgr_start
  */
-int rt_rtdev_mgr_start (struct rtnet_mgr *mgr)
+int rt_rtdev_mgr_start(struct rtnet_mgr *mgr)
 {
-    return /*(rt_task_resume(&(mgr->task)))*/ 0;
+	return /*(rt_task_resume(&(mgr->task)))*/ 0;
 }
 
 /***
  *  rt_rtdev_mgr_stop
  */
-int rt_rtdev_mgr_stop (struct rtnet_mgr *mgr)
+int rt_rtdev_mgr_stop(struct rtnet_mgr *mgr)
 {
-    return /*(rt_task_suspend(&(mgr->task)))*/ 0;
+	return /*(rt_task_suspend(&(mgr->task)))*/ 0;
 }
 
 /***
  *  rt_rtdev_mgr_init
  */
-int rt_rtdev_mgr_init (struct rtnet_mgr *mgr)
+int rt_rtdev_mgr_init(struct rtnet_mgr *mgr)
 {
-    int ret = 0;
+	int ret = 0;
 
-/*    if ( (ret=rt_mbx_init (&(mgr->mbx), sizeof(struct rtnet_msg))) )
+	/*    if ( (ret=rt_mbx_init (&(mgr->mbx), sizeof(struct rtnet_msg))) )
         return ret;
     if ( (ret=rt_task_init(&(mgr->task), &do_rtdev_task, (int)mgr, 4096, RTNET_RTDEV_PRIORITY, 0, 0)) )
         return ret;
     if ( (ret=rt_task_resume(&(mgr->task))) )
         return ret;*/
 
-    return (ret);
+	return (ret);
 }
 
 /***
  *  rt_rtdev_mgr_delete
  */
-void rt_rtdev_mgr_delete (struct rtnet_mgr *mgr)
+void rt_rtdev_mgr_delete(struct rtnet_mgr *mgr)
 {
-/*    rt_task_delete(&(mgr->task));
+	/*    rt_task_delete(&(mgr->task));
     rt_mbx_delete(&(mgr->mbx));*/
 }
-
 
 EXPORT_SYMBOL_GPL(rtnetif_err_rx);
 EXPORT_SYMBOL_GPL(rtnetif_err_tx);

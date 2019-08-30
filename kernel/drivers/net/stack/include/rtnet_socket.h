@@ -35,82 +35,74 @@
 #include <rtdm/driver.h>
 #include <stack_mgr.h>
 
-
 struct rtsocket {
-    unsigned short          protocol;
+	unsigned short protocol;
 
-    struct rtskb_pool       skb_pool;
-    unsigned int            pool_size;
-    struct mutex            pool_nrt_lock;
+	struct rtskb_pool skb_pool;
+	unsigned int pool_size;
+	struct mutex pool_nrt_lock;
 
-    struct rtskb_queue      incoming;
+	struct rtskb_queue incoming;
 
-    rtdm_lock_t             param_lock;
+	rtdm_lock_t param_lock;
 
-    unsigned int            priority;
-    nanosecs_rel_t          timeout;    /* receive timeout, 0 for infinite */
+	unsigned int priority;
+	nanosecs_rel_t timeout; /* receive timeout, 0 for infinite */
 
-    rtdm_sem_t              pending_sem;
+	rtdm_sem_t pending_sem;
 
-    void                    (*callback_func)(struct rtdm_fd *, void *arg);
-    void                    *callback_arg;
+	void (*callback_func)(struct rtdm_fd *, void *arg);
+	void *callback_arg;
 
-    unsigned long           flags;
+	unsigned long flags;
 
-    union {
-	/* IP specific */
-	struct {
-	    u32             saddr;      /* source ip-addr (bind) */
-	    u32             daddr;      /* destination ip-addr */
-	    u16             sport;      /* source port */
-	    u16             dport;      /* destination port */
+	union {
+		/* IP specific */
+		struct {
+			u32 saddr; /* source ip-addr (bind) */
+			u32 daddr; /* destination ip-addr */
+			u16 sport; /* source port */
+			u16 dport; /* destination port */
 
-	    int             reg_index;  /* index in port registry */
-	    u8              tos;
-	    u8              state;
-	} inet;
+			int reg_index; /* index in port registry */
+			u8 tos;
+			u8 state;
+		} inet;
 
-	/* packet socket specific */
-	struct {
-	    struct rtpacket_type packet_type;
-	    int                  ifindex;
-	} packet;
-    } prot;
+		/* packet socket specific */
+		struct {
+			struct rtpacket_type packet_type;
+			int ifindex;
+		} packet;
+	} prot;
 };
-
 
 static inline struct rtdm_fd *rt_socket_fd(struct rtsocket *sock)
 {
-    return rtdm_private_to_fd(sock);
+	return rtdm_private_to_fd(sock);
 }
 
-void *rtnet_get_arg(struct rtdm_fd *fd, void *tmp,
-		    const void *src, size_t len);
+void *rtnet_get_arg(struct rtdm_fd *fd, void *tmp, const void *src, size_t len);
 
-int rtnet_put_arg(struct rtdm_fd *fd, void *dst,
-		  const void *src, size_t len);
+int rtnet_put_arg(struct rtdm_fd *fd, void *dst, const void *src, size_t len);
 
-#define rt_socket_reference(sock)   \
-    rtdm_fd_lock(rt_socket_fd(sock))
-#define rt_socket_dereference(sock) \
-    rtdm_fd_unlock(rt_socket_fd(sock))
+#define rt_socket_reference(sock) rtdm_fd_lock(rt_socket_fd(sock))
+#define rt_socket_dereference(sock) rtdm_fd_unlock(rt_socket_fd(sock))
 
 int rt_socket_init(struct rtdm_fd *fd, unsigned short protocol);
 
 void rt_socket_cleanup(struct rtdm_fd *fd);
 int rt_socket_common_ioctl(struct rtdm_fd *fd, int request, void __user *arg);
 int rt_socket_if_ioctl(struct rtdm_fd *fd, int request, void __user *arg);
-int rt_socket_select_bind(struct rtdm_fd *fd,
-			  rtdm_selector_t *selector,
-			  enum rtdm_selecttype type,
-			  unsigned fd_index);
+int rt_socket_select_bind(struct rtdm_fd *fd, rtdm_selector_t *selector,
+			  enum rtdm_selecttype type, unsigned fd_index);
 
 int rt_bare_socket_init(struct rtdm_fd *fd, unsigned short protocol,
 			unsigned int priority, unsigned int pool_size);
 
 static inline void rt_bare_socket_cleanup(struct rtsocket *sock)
 {
-    rtskb_pool_release(&sock->skb_pool);
+	rtskb_pool_release(&sock->skb_pool);
 }
 
-#endif  /* __RTNET_SOCKET_H_ */
+#endif /* __RTNET_SOCKET_H_ */

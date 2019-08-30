@@ -29,109 +29,104 @@
 #include <rtmac/rtmac_vnic.h>
 #include <rtmac/rtmac_proc.h>
 
-
 #ifdef CONFIG_XENO_OPT_VFILE
 struct xnvfile_directory rtmac_proc_root;
 
 static struct xnvfile_regular_ops rtnet_rtmac_disciplines_vfile_ops = {
-    .show = rtnet_rtmac_disciplines_show,
+	.show = rtnet_rtmac_disciplines_show,
 };
 
 static struct xnvfile_regular rtnet_rtmac_disciplines_vfile = {
-    .ops = &rtnet_rtmac_disciplines_vfile_ops,
+	.ops = &rtnet_rtmac_disciplines_vfile_ops,
 };
 
 static struct xnvfile_regular_ops rtnet_rtmac_vnics_vfile_ops = {
-    .show = rtnet_rtmac_vnics_show,
+	.show = rtnet_rtmac_vnics_show,
 };
 
 static struct xnvfile_regular rtnet_rtmac_vnics_vfile = {
-    .ops = &rtnet_rtmac_vnics_vfile_ops,
+	.ops = &rtnet_rtmac_vnics_vfile_ops,
 };
 
-static int
-rtnet_rtmac_disc_show(struct xnvfile_regular_iterator *it, void *data)
+static int rtnet_rtmac_disc_show(struct xnvfile_regular_iterator *it,
+				 void *data)
 {
-    struct rtmac_proc_entry *entry;
-    entry = container_of(it->vfile, struct rtmac_proc_entry, vfile);
-    return entry->handler(it, data);
+	struct rtmac_proc_entry *entry;
+	entry = container_of(it->vfile, struct rtmac_proc_entry, vfile);
+	return entry->handler(it, data);
 }
 
 static struct xnvfile_regular_ops rtnet_rtmac_disc_vfile_ops = {
-    .show = rtnet_rtmac_disc_show,
+	.show = rtnet_rtmac_disc_show,
 };
 
 int rtmac_disc_proc_register(struct rtmac_disc *disc)
 {
-    int                     i, err;
-    struct rtmac_proc_entry *entry;
+	int i, err;
+	struct rtmac_proc_entry *entry;
 
+	for (i = 0; i < disc->nr_proc_entries; i++) {
+		entry = &disc->proc_entries[i];
 
-    for (i = 0; i < disc->nr_proc_entries; i++) {
-	entry = &disc->proc_entries[i];
-
-	entry->vfile.ops = &rtnet_rtmac_disc_vfile_ops;
-	err = xnvfile_init_regular(entry->name, &entry->vfile, &rtmac_proc_root);
-	if (err < 0) {
-	    while (--i >= 0)
-		xnvfile_destroy_regular(&disc->proc_entries[i].vfile);
-	    return err;
+		entry->vfile.ops = &rtnet_rtmac_disc_vfile_ops;
+		err = xnvfile_init_regular(entry->name, &entry->vfile,
+					   &rtmac_proc_root);
+		if (err < 0) {
+			while (--i >= 0)
+				xnvfile_destroy_regular(
+					&disc->proc_entries[i].vfile);
+			return err;
+		}
 	}
-    }
 
-    return 0;
+	return 0;
 }
-
-
 
 void rtmac_disc_proc_unregister(struct rtmac_disc *disc)
 {
-    int i;
+	int i;
 
-    for (i = 0; i < disc->nr_proc_entries; i++)
-	xnvfile_destroy_regular(&disc->proc_entries[i].vfile);
+	for (i = 0; i < disc->nr_proc_entries; i++)
+		xnvfile_destroy_regular(&disc->proc_entries[i].vfile);
 }
-
-
 
 int rtmac_proc_register(void)
 {
-    int err;
+	int err;
 
-    err = xnvfile_init_dir("rtmac", &rtmac_proc_root, &rtnet_proc_root);
-    if (err < 0)
-	goto err1;
+	err = xnvfile_init_dir("rtmac", &rtmac_proc_root, &rtnet_proc_root);
+	if (err < 0)
+		goto err1;
 
-    err = xnvfile_init_regular("disciplines", &rtnet_rtmac_disciplines_vfile,
-			    &rtmac_proc_root);
-    if (err < 0)
-	goto err2;
+	err = xnvfile_init_regular("disciplines",
+				   &rtnet_rtmac_disciplines_vfile,
+				   &rtmac_proc_root);
+	if (err < 0)
+		goto err2;
 
-    err = xnvfile_init_regular("vnics", &rtnet_rtmac_vnics_vfile,
-			    &rtmac_proc_root);
-    if (err < 0)
-	goto err3;
+	err = xnvfile_init_regular("vnics", &rtnet_rtmac_vnics_vfile,
+				   &rtmac_proc_root);
+	if (err < 0)
+		goto err3;
 
-    return 0;
+	return 0;
 
-  err3:
-    xnvfile_destroy_regular(&rtnet_rtmac_disciplines_vfile);
+err3:
+	xnvfile_destroy_regular(&rtnet_rtmac_disciplines_vfile);
 
-  err2:
-    xnvfile_destroy_dir(&rtmac_proc_root);
+err2:
+	xnvfile_destroy_dir(&rtmac_proc_root);
 
-  err1:
-    /*ERRMSG*/printk("RTmac: unable to initialize /proc entries\n");
-    return err;
+err1:
+	/*ERRMSG*/ printk("RTmac: unable to initialize /proc entries\n");
+	return err;
 }
-
-
 
 void rtmac_proc_release(void)
 {
-    xnvfile_destroy_regular(&rtnet_rtmac_vnics_vfile);
-    xnvfile_destroy_regular(&rtnet_rtmac_disciplines_vfile);
-    xnvfile_destroy_dir(&rtmac_proc_root);
+	xnvfile_destroy_regular(&rtnet_rtmac_vnics_vfile);
+	xnvfile_destroy_regular(&rtnet_rtmac_disciplines_vfile);
+	xnvfile_destroy_dir(&rtmac_proc_root);
 }
 
 #endif /* CONFIG_XENO_OPT_VFILE */

@@ -31,59 +31,53 @@
 #include <rtcfg/rtcfg_ioctl.h>
 #include <rtcfg/rtcfg_proc.h>
 
-
 MODULE_LICENSE("GPL");
 
 int __init rtcfg_init(void)
 {
-    int ret;
+	int ret;
 
+	printk("RTcfg: init real-time configuration distribution protocol\n");
 
-    printk("RTcfg: init real-time configuration distribution protocol\n");
+	ret = rtcfg_init_ioctls();
+	if (ret != 0)
+		goto error1;
 
-    ret = rtcfg_init_ioctls();
-    if (ret != 0)
-	goto error1;
+	rtcfg_init_state_machines();
 
-    rtcfg_init_state_machines();
-
-    ret = rtcfg_init_frames();
-    if (ret != 0)
-	goto error2;
+	ret = rtcfg_init_frames();
+	if (ret != 0)
+		goto error2;
 
 #ifdef CONFIG_XENO_OPT_VFILE
-    ret = rtcfg_init_proc();
-    if (ret != 0) {
-	rtcfg_cleanup_frames();
-	goto error2;
-    }
+	ret = rtcfg_init_proc();
+	if (ret != 0) {
+		rtcfg_cleanup_frames();
+		goto error2;
+	}
 #endif
 
-    return 0;
+	return 0;
 
-  error2:
-    rtcfg_cleanup_state_machines();
-    rtcfg_cleanup_ioctls();
+error2:
+	rtcfg_cleanup_state_machines();
+	rtcfg_cleanup_ioctls();
 
-  error1:
-    return ret;
+error1:
+	return ret;
 }
-
-
 
 void rtcfg_cleanup(void)
 {
 #ifdef CONFIG_XENO_OPT_VFILE
-    rtcfg_cleanup_proc();
+	rtcfg_cleanup_proc();
 #endif
-    rtcfg_cleanup_frames();
-    rtcfg_cleanup_state_machines();
-    rtcfg_cleanup_ioctls();
+	rtcfg_cleanup_frames();
+	rtcfg_cleanup_state_machines();
+	rtcfg_cleanup_ioctls();
 
-    printk("RTcfg: unloaded\n");
+	printk("RTcfg: unloaded\n");
 }
-
-
 
 module_init(rtcfg_init);
 module_exit(rtcfg_cleanup);

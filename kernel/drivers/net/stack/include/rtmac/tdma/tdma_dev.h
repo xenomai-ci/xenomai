@@ -27,13 +27,11 @@
 
 #include <rtmac/tdma/tdma.h>
 
-
 int tdma_dev_init(struct rtnet_device *rtdev, struct tdma_priv *tdma);
-
 
 static inline void tdma_dev_release(struct tdma_priv *tdma)
 {
-    rtdm_dev_unregister(&tdma->api_device);
+	rtdm_dev_unregister(&tdma->api_device);
 }
 
 #endif /* __TDMA_DEV_H_ */

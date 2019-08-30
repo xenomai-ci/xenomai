@@ -30,16 +30,14 @@
 
 #include <rtdev.h>
 
-
 struct dest_route {
-    u32                 ip;
-    unsigned char       dev_addr[MAX_ADDR_LEN];
-    struct rtnet_device *rtdev;
+	u32 ip;
+	unsigned char dev_addr[MAX_ADDR_LEN];
+	struct rtnet_device *rtdev;
 };
 
-
 int rt_ip_route_add_host(u32 addr, unsigned char *dev_addr,
-                         struct rtnet_device *rtdev);
+			 struct rtnet_device *rtdev);
 void rt_ip_route_del_all(struct rtnet_device *rtdev);
 
 #ifdef CONFIG_XENO_DRIVERS_NET_RTIPV4_NETROUTING
@@ -52,11 +50,11 @@ int rt_ip_route_forward(struct rtskb *rtskb, u32 daddr);
 #endif /* CONFIG_XENO_DRIVERS_NET_RTIPV4_ROUTER */
 
 int rt_ip_route_del_host(u32 addr, struct rtnet_device *rtdev);
-int rt_ip_route_get_host(u32 addr, char* if_name, unsigned char *dev_addr,
-                         struct rtnet_device *rtdev);
+int rt_ip_route_get_host(u32 addr, char *if_name, unsigned char *dev_addr,
+			 struct rtnet_device *rtdev);
 int rt_ip_route_output(struct dest_route *rt_buf, u32 daddr, u32 saddr);
 
 int __init rt_ip_routing_init(void);
 void rt_ip_routing_release(void);
 
-#endif  /* __RTNET_ROUTE_H_ */
+#endif /* __RTNET_ROUTE_H_ */

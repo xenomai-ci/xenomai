@@ -27,8 +27,7 @@
 
 #include <rtdm/driver.h>
 
-
-#define DEF_WORKER_PRIO         RTDM_TASK_HIGHEST_PRIORITY
+#define DEF_WORKER_PRIO RTDM_TASK_HIGHEST_PRIORITY
 
 void tdma_worker(void *arg);
 

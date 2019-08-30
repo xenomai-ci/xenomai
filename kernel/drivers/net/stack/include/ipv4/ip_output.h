@@ -30,13 +30,13 @@
 #include <rtdev.h>
 #include <ipv4/route.h>
 
-
 extern int rt_ip_build_xmit(struct rtsocket *sk,
-    int getfrag (const void *, unsigned char *, unsigned int, unsigned int),
-    const void *frag, unsigned length, struct dest_route *rt, int flags);
+			    int getfrag(const void *, unsigned char *,
+					unsigned int, unsigned int),
+			    const void *frag, unsigned length,
+			    struct dest_route *rt, int flags);
 
 extern void __init rt_ip_init(void);
 extern void rt_ip_release(void);
 
-
-#endif  /* __RTNET_IP_OUTPUT_H_ */
+#endif /* __RTNET_IP_OUTPUT_H_ */

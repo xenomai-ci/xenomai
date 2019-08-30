@@ -28,6 +28,6 @@
 
 /* Maximum number of active udp sockets
    Only increase with care (look-up delays!), must be power of 2 */
-#define RT_UDP_SOCKETS      64
+#define RT_UDP_SOCKETS 64
 
-#endif  /* __RTNET_UDP_H_ */
+#endif /* __RTNET_UDP_H_ */

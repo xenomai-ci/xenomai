@@ -27,13 +27,11 @@
 
 #include <rtmac/nomac/nomac.h>
 
-
 int nomac_dev_init(struct rtnet_device *rtdev, struct nomac_priv *nomac);
-
 
 static inline void nomac_dev_release(struct nomac_priv *nomac)
 {
-    rtdm_dev_unregister(&nomac->api_device);
+	rtdm_dev_unregister(&nomac->api_device);
 }
 
 #endif /* __NOMAC_DEV_H_ */

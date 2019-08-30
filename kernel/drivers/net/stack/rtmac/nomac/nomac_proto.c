@@ -28,116 +28,100 @@
 #include <rtmac/rtmac_proto.h>
 #include <rtmac/nomac/nomac.h>
 
-
-static struct rtskb_queue   nrt_rtskb_queue;
-static rtdm_task_t          wrapper_task;
-static rtdm_event_t         wakeup_sem;
-
+static struct rtskb_queue nrt_rtskb_queue;
+static rtdm_task_t wrapper_task;
+static rtdm_event_t wakeup_sem;
 
 int nomac_rt_packet_tx(struct rtskb *rtskb, struct rtnet_device *rtdev)
 {
-    /* unused here, just to demonstrate access to the discipline state
+	/* unused here, just to demonstrate access to the discipline state
     struct nomac_priv   *nomac =
         (struct nomac_priv *)rtdev->mac_priv->disc_priv; */
-    int                 ret;
+	int ret;
 
+	rtcap_mark_rtmac_enqueue(rtskb);
 
-    rtcap_mark_rtmac_enqueue(rtskb);
+	/* no MAC: we simply transmit the packet under xmit_lock */
+	rtdm_mutex_lock(&rtdev->xmit_mutex);
+	ret = rtmac_xmit(rtskb);
+	rtdm_mutex_unlock(&rtdev->xmit_mutex);
 
-    /* no MAC: we simply transmit the packet under xmit_lock */
-    rtdm_mutex_lock(&rtdev->xmit_mutex);
-    ret = rtmac_xmit(rtskb);
-    rtdm_mutex_unlock(&rtdev->xmit_mutex);
-
-    return ret;
+	return ret;
 }
-
-
 
 int nomac_nrt_packet_tx(struct rtskb *rtskb)
 {
-    struct rtnet_device *rtdev = rtskb->rtdev;
-    /* unused here, just to demonstrate access to the discipline state
+	struct rtnet_device *rtdev = rtskb->rtdev;
+	/* unused here, just to demonstrate access to the discipline state
     struct nomac_priv   *nomac =
         (struct nomac_priv *)rtdev->mac_priv->disc_priv; */
-    int                 ret;
+	int ret;
 
+	rtcap_mark_rtmac_enqueue(rtskb);
 
-    rtcap_mark_rtmac_enqueue(rtskb);
-
-    /* note: this routine may be called both in rt and non-rt context
+	/* note: this routine may be called both in rt and non-rt context
      *       => detect and wrap the context if necessary */
-    if (!rtdm_in_rt_context()) {
-        rtskb_queue_tail(&nrt_rtskb_queue, rtskb);
-        rtdm_event_signal(&wakeup_sem);
-        return 0;
-    } else {
-        /* no MAC: we simply transmit the packet under xmit_lock */
-        rtdm_mutex_lock(&rtdev->xmit_mutex);
-        ret = rtmac_xmit(rtskb);
-        rtdm_mutex_unlock(&rtdev->xmit_mutex);
+	if (!rtdm_in_rt_context()) {
+		rtskb_queue_tail(&nrt_rtskb_queue, rtskb);
+		rtdm_event_signal(&wakeup_sem);
+		return 0;
+	} else {
+		/* no MAC: we simply transmit the packet under xmit_lock */
+		rtdm_mutex_lock(&rtdev->xmit_mutex);
+		ret = rtmac_xmit(rtskb);
+		rtdm_mutex_unlock(&rtdev->xmit_mutex);
 
-        return ret;
-    }
+		return ret;
+	}
 }
-
-
 
 void nrt_xmit_task(void *arg)
 {
-    struct rtskb        *rtskb;
-    struct rtnet_device *rtdev;
+	struct rtskb *rtskb;
+	struct rtnet_device *rtdev;
 
+	while (!rtdm_task_should_stop()) {
+		if (rtdm_event_wait(&wakeup_sem) < 0)
+			break;
 
-    while (!rtdm_task_should_stop()) {
-	if (rtdm_event_wait(&wakeup_sem) < 0)
-	    break;
+		while ((rtskb = rtskb_dequeue(&nrt_rtskb_queue))) {
+			rtdev = rtskb->rtdev;
 
-        while ((rtskb = rtskb_dequeue(&nrt_rtskb_queue))) {
-            rtdev = rtskb->rtdev;
-
-            /* no MAC: we simply transmit the packet under xmit_lock */
-            rtdm_mutex_lock(&rtdev->xmit_mutex);
-            rtmac_xmit(rtskb);
-            rtdm_mutex_unlock(&rtdev->xmit_mutex);
-        }
-    }
+			/* no MAC: we simply transmit the packet under xmit_lock */
+			rtdm_mutex_lock(&rtdev->xmit_mutex);
+			rtmac_xmit(rtskb);
+			rtdm_mutex_unlock(&rtdev->xmit_mutex);
+		}
+	}
 }
-
-
 
 int nomac_packet_rx(struct rtskb *rtskb)
 {
-    /* actually, NoMAC doesn't expect any control packet */
-    kfree_rtskb(rtskb);
+	/* actually, NoMAC doesn't expect any control packet */
+	kfree_rtskb(rtskb);
 
-    return 0;
+	return 0;
 }
-
-
 
 int __init nomac_proto_init(void)
 {
-    int ret;
+	int ret;
 
+	rtskb_queue_init(&nrt_rtskb_queue);
+	rtdm_event_init(&wakeup_sem, 0);
 
-    rtskb_queue_init(&nrt_rtskb_queue);
-    rtdm_event_init(&wakeup_sem, 0);
+	ret = rtdm_task_init(&wrapper_task, "rtnet-nomac", nrt_xmit_task, 0,
+			     RTDM_TASK_LOWEST_PRIORITY, 0);
+	if (ret < 0) {
+		rtdm_event_destroy(&wakeup_sem);
+		return ret;
+	}
 
-    ret = rtdm_task_init(&wrapper_task, "rtnet-nomac", nrt_xmit_task, 0,
-                         RTDM_TASK_LOWEST_PRIORITY, 0);
-    if (ret < 0) {
-        rtdm_event_destroy(&wakeup_sem);
-        return ret;
-    }
-
-    return 0;
+	return 0;
 }
-
-
 
 void nomac_proto_cleanup(void)
 {
-    rtdm_event_destroy(&wakeup_sem);
-    rtdm_task_destroy(&wrapper_task);
+	rtdm_event_destroy(&wakeup_sem);
+	rtdm_task_destroy(&wrapper_task);
 }

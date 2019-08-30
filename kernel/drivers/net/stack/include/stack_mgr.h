@@ -32,44 +32,41 @@
 #include <rtnet_internal.h>
 #include <rtdev.h>
 
-
 /***
  * network layer protocol (layer 3)
  */
 
-#define RTPACKET_HASH_TBL_SIZE  64
-#define RTPACKET_HASH_KEY_MASK  (RTPACKET_HASH_TBL_SIZE-1)
+#define RTPACKET_HASH_TBL_SIZE 64
+#define RTPACKET_HASH_KEY_MASK (RTPACKET_HASH_TBL_SIZE - 1)
 
 struct rtpacket_type {
-    struct list_head    list_entry;
+	struct list_head list_entry;
 
-    unsigned short      type;
-    short               refcount;
+	unsigned short type;
+	short refcount;
 
-    int                 (*handler)(struct rtskb *, struct rtpacket_type *);
-    int                 (*err_handler)(struct rtskb *, struct rtnet_device *,
-                                       struct rtpacket_type *);
-    bool                (*trylock)(struct rtpacket_type *);
-    void                (*unlock)(struct rtpacket_type *);
+	int (*handler)(struct rtskb *, struct rtpacket_type *);
+	int (*err_handler)(struct rtskb *, struct rtnet_device *,
+			   struct rtpacket_type *);
+	bool (*trylock)(struct rtpacket_type *);
+	void (*unlock)(struct rtpacket_type *);
 
-    struct module	*owner;
+	struct module *owner;
 };
 
-
 int __rtdev_add_pack(struct rtpacket_type *pt, struct module *module);
-#define rtdev_add_pack(pt) \
-    __rtdev_add_pack(pt, THIS_MODULE)
+#define rtdev_add_pack(pt) __rtdev_add_pack(pt, THIS_MODULE)
 
 void rtdev_remove_pack(struct rtpacket_type *pt);
 
 static inline bool rtdev_lock_pack(struct rtpacket_type *pt)
 {
-    return try_module_get(pt->owner);
+	return try_module_get(pt->owner);
 }
 
 static inline void rtdev_unlock_pack(struct rtpacket_type *pt)
 {
-    module_put(pt->owner);
+	module_put(pt->owner);
 }
 
 void rt_stack_connect(struct rtnet_device *rtdev, struct rtnet_mgr *mgr);
@@ -90,9 +87,9 @@ static inline void rtnetif_tx(struct rtnet_device *rtdev)
 
 static inline void rt_mark_stack_mgr(struct rtnet_device *rtdev)
 {
-    rtdm_event_signal(rtdev->stack_event);
+	rtdm_event_signal(rtdev->stack_event);
 }
 
 #endif /* __KERNEL__ */
 
-#endif  /* __STACK_MGR_H_ */
+#endif /* __STACK_MGR_H_ */

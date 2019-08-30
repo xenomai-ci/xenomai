@@ -44,53 +44,49 @@
 
 #include <rtdm/rtdm.h>
 
-
 /* sub-classes: RTDM_CLASS_RTMAC */
-#define RTDM_SUBCLASS_TDMA          0
-#define RTDM_SUBCLASS_UNMANAGED     1
+#define RTDM_SUBCLASS_TDMA 0
+#define RTDM_SUBCLASS_UNMANAGED 1
 
-#define RTIOC_TYPE_RTMAC            RTDM_CLASS_RTMAC
-
+#define RTIOC_TYPE_RTMAC RTDM_CLASS_RTMAC
 
 /* ** Common Cycle Event Types ** */
 /* standard event, wake up once per cycle */
-#define RTMAC_WAIT_ON_DEFAULT       0x00
+#define RTMAC_WAIT_ON_DEFAULT 0x00
 /* wake up on media access of the station, may trigger multiple times per
    cycle */
-#define RTMAC_WAIT_ON_XMIT          0x01
+#define RTMAC_WAIT_ON_XMIT 0x01
 
 /* ** TDMA-specific Cycle Event Types ** */
 /* tigger on on SYNC frame reception/transmission */
-#define TDMA_WAIT_ON_SYNC           RTMAC_WAIT_ON_DEFAULT
-#define TDMA_WAIT_ON_SOF            TDMA_WAIT_ON_SYNC /* legacy support */
-
+#define TDMA_WAIT_ON_SYNC RTMAC_WAIT_ON_DEFAULT
+#define TDMA_WAIT_ON_SOF TDMA_WAIT_ON_SYNC /* legacy support */
 
 /* RTMAC_RTIOC_WAITONCYCLE_EX control and status data */
 struct rtmac_waitinfo {
-    /** Set to wait type before invoking the service */
-    unsigned int    type;
+	/** Set to wait type before invoking the service */
+	unsigned int type;
 
-    /** Set to sizeof(struct rtmac_waitinfo) before invoking the service */
-    size_t          size;
+	/** Set to sizeof(struct rtmac_waitinfo) before invoking the service */
+	size_t size;
 
-    /** Counter of elementary cycles of the underlying RTmac discipline
+	/** Counter of elementary cycles of the underlying RTmac discipline
         (if applicable) */
-    unsigned long   cycle_no;
+	unsigned long cycle_no;
 
-    /** Date (in local time) of the last elementary cycle start of the RTmac
+	/** Date (in local time) of the last elementary cycle start of the RTmac
         discipline (if applicable) */
-    nanosecs_abs_t  cycle_start;
+	nanosecs_abs_t cycle_start;
 
-    /** Offset of the local clock to the global clock provided by the RTmac
+	/** Offset of the local clock to the global clock provided by the RTmac
         discipline (if applicable): t_global = t_local + clock_offset */
-    nanosecs_rel_t  clock_offset;
+	nanosecs_rel_t clock_offset;
 };
 
-
 /* RTmac Discipline IOCTLs */
-#define RTMAC_RTIOC_TIMEOFFSET      _IOR(RTIOC_TYPE_RTMAC, 0x00, int64_t)
-#define RTMAC_RTIOC_WAITONCYCLE     _IOW(RTIOC_TYPE_RTMAC, 0x01, unsigned int)
-#define RTMAC_RTIOC_WAITONCYCLE_EX  _IOWR(RTIOC_TYPE_RTMAC, 0x02, \
-                                          struct rtmac_waitinfo)
+#define RTMAC_RTIOC_TIMEOFFSET _IOR(RTIOC_TYPE_RTMAC, 0x00, int64_t)
+#define RTMAC_RTIOC_WAITONCYCLE _IOW(RTIOC_TYPE_RTMAC, 0x01, unsigned int)
+#define RTMAC_RTIOC_WAITONCYCLE_EX                                             \
+	_IOWR(RTIOC_TYPE_RTMAC, 0x02, struct rtmac_waitinfo)
 
 #endif /* __RTMAC_H_ */

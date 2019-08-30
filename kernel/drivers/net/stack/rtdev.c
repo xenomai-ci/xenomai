@@ -35,14 +35,13 @@
 #include <rtmac/rtmac_disc.h>
 #include <rtnet_port.h>
 
-
 static unsigned int device_rtskbs = DEFAULT_DEVICE_RTSKBS;
 module_param(device_rtskbs, uint, 0444);
 MODULE_PARM_DESC(device_rtskbs, "Number of additional global realtime socket "
-		 "buffers per network adapter");
+				"buffers per network adapter");
 
-struct rtnet_device         *rtnet_devices[MAX_RT_DEVICES];
-static struct rtnet_device  *loopback_device;
+struct rtnet_device *rtnet_devices[MAX_RT_DEVICES];
+static struct rtnet_device *loopback_device;
 static DEFINE_RTDM_LOCK(rtnet_devices_rt_lock);
 static LIST_HEAD(rtskb_mapped_list);
 static LIST_HEAD(rtskb_mapwait_list);
@@ -58,23 +57,25 @@ static int rtdev_locked_xmit(struct rtskb *skb, struct rtnet_device *rtdev);
 
 int rtdev_reference(struct rtnet_device *rtdev)
 {
-    smp_mb__before_atomic();
-    if (rtdev->rt_owner && atomic_fetch_add_unless(&rtdev->refcount, 1, 0) == 0) {
-	if (!try_module_get(rtdev->rt_owner))
-	    return 0;
-	if (atomic_inc_return(&rtdev->refcount) != 1)
-	    module_put(rtdev->rt_owner);
-    }
-    return 1;
+	smp_mb__before_atomic();
+	if (rtdev->rt_owner &&
+	    atomic_fetch_add_unless(&rtdev->refcount, 1, 0) == 0) {
+		if (!try_module_get(rtdev->rt_owner))
+			return 0;
+		if (atomic_inc_return(&rtdev->refcount) != 1)
+			module_put(rtdev->rt_owner);
+	}
+	return 1;
 }
 EXPORT_SYMBOL_GPL(rtdev_reference);
 
-struct rtskb *rtnetdev_alloc_rtskb(struct rtnet_device *rtdev, unsigned int size)
+struct rtskb *rtnetdev_alloc_rtskb(struct rtnet_device *rtdev,
+				   unsigned int size)
 {
-    struct rtskb *rtskb = alloc_rtskb(size, &rtdev->dev_pool);
-    if (rtskb)
-	rtskb->rtdev = rtdev;
-    return rtskb;
+	struct rtskb *rtskb = alloc_rtskb(size, &rtdev->dev_pool);
+	if (rtskb)
+		rtskb->rtdev = rtdev;
+	return rtskb;
 }
 EXPORT_SYMBOL_GPL(rtnetdev_alloc_rtskb);
 
@@ -85,18 +86,17 @@ EXPORT_SYMBOL_GPL(rtnetdev_alloc_rtskb);
  */
 static struct rtnet_device *__rtdev_get_by_name(const char *name)
 {
-    int                 i;
-    struct rtnet_device *rtdev;
+	int i;
+	struct rtnet_device *rtdev;
 
-
-    for (i = 0; i < MAX_RT_DEVICES; i++) {
-	rtdev = rtnet_devices[i];
-	if ((rtdev != NULL) && (strncmp(rtdev->name, name, IFNAMSIZ) == 0))
-	    return rtdev;
-    }
-    return NULL;
+	for (i = 0; i < MAX_RT_DEVICES; i++) {
+		rtdev = rtnet_devices[i];
+		if ((rtdev != NULL) &&
+		    (strncmp(rtdev->name, name, IFNAMSIZ) == 0))
+			return rtdev;
+	}
+	return NULL;
 }
-
 
 /***
  *  rtdev_get_by_name - find and lock a rtnet_device by its name
@@ -104,22 +104,19 @@ static struct rtnet_device *__rtdev_get_by_name(const char *name)
  */
 struct rtnet_device *rtdev_get_by_name(const char *name)
 {
-    struct rtnet_device *rtdev;
-    rtdm_lockctx_t      context;
+	struct rtnet_device *rtdev;
+	rtdm_lockctx_t context;
 
+	rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
 
-    rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
+	rtdev = __rtdev_get_by_name(name);
+	if (rtdev != NULL && !rtdev_reference(rtdev))
+		rtdev = NULL;
 
-    rtdev = __rtdev_get_by_name(name);
-    if (rtdev != NULL && !rtdev_reference(rtdev))
-	    rtdev = NULL;
+	rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
 
-    rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
-
-    return rtdev;
+	return rtdev;
 }
-
-
 
 /***
  *  rtdev_get_by_index - find and lock a rtnet_device by its ifindex
@@ -127,48 +124,43 @@ struct rtnet_device *rtdev_get_by_name(const char *name)
  */
 struct rtnet_device *rtdev_get_by_index(int ifindex)
 {
-    struct rtnet_device *rtdev;
-    rtdm_lockctx_t      context;
+	struct rtnet_device *rtdev;
+	rtdm_lockctx_t context;
 
+	if ((ifindex <= 0) || (ifindex > MAX_RT_DEVICES))
+		return NULL;
 
-    if ((ifindex <= 0) || (ifindex > MAX_RT_DEVICES))
-	return NULL;
+	rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
 
-    rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
+	rtdev = __rtdev_get_by_index(ifindex);
+	if (rtdev != NULL && !rtdev_reference(rtdev))
+		rtdev = NULL;
 
-    rtdev = __rtdev_get_by_index(ifindex);
-    if (rtdev != NULL && !rtdev_reference(rtdev))
-	    rtdev = NULL;
+	rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
 
-    rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
-
-    return rtdev;
+	return rtdev;
 }
-
-
 
 /***
  *  __rtdev_get_by_hwaddr - find a rtnetdevice by its mac-address
  *  @type:          Type of the net_device (may be ARPHRD_ETHER)
  *  @hw_addr:       MAC-Address
  */
-static inline struct rtnet_device *__rtdev_get_by_hwaddr(unsigned short type, char *hw_addr)
+static inline struct rtnet_device *__rtdev_get_by_hwaddr(unsigned short type,
+							 char *hw_addr)
 {
-    int                 i;
-    struct rtnet_device *rtdev;
+	int i;
+	struct rtnet_device *rtdev;
 
-
-    for (i = 0; i < MAX_RT_DEVICES; i++) {
-	rtdev = rtnet_devices[i];
-	if ((rtdev != NULL) && (rtdev->type == type) &&
-	    (!memcmp(rtdev->dev_addr, hw_addr, rtdev->addr_len))) {
-	    return rtdev;
+	for (i = 0; i < MAX_RT_DEVICES; i++) {
+		rtdev = rtnet_devices[i];
+		if ((rtdev != NULL) && (rtdev->type == type) &&
+		    (!memcmp(rtdev->dev_addr, hw_addr, rtdev->addr_len))) {
+			return rtdev;
+		}
 	}
-    }
-    return NULL;
+	return NULL;
 }
-
-
 
 /***
  *  rtdev_get_by_hwaddr - find and lock a rtnetdevice by its mac-address
@@ -177,44 +169,38 @@ static inline struct rtnet_device *__rtdev_get_by_hwaddr(unsigned short type, ch
  */
 struct rtnet_device *rtdev_get_by_hwaddr(unsigned short type, char *hw_addr)
 {
-    struct rtnet_device *rtdev;
-    rtdm_lockctx_t      context;
+	struct rtnet_device *rtdev;
+	rtdm_lockctx_t context;
 
+	rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
 
-    rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
+	rtdev = __rtdev_get_by_hwaddr(type, hw_addr);
+	if (rtdev != NULL && !rtdev_reference(rtdev))
+		rtdev = NULL;
 
-    rtdev = __rtdev_get_by_hwaddr(type, hw_addr);
-    if (rtdev != NULL && !rtdev_reference(rtdev))
-	    rtdev = NULL;
+	rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
 
-    rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
-
-    return rtdev;
+	return rtdev;
 }
-
-
 
 /***
  *  rtdev_get_by_hwaddr - find and lock the loopback device if available
  */
 struct rtnet_device *rtdev_get_loopback(void)
 {
-    struct rtnet_device *rtdev;
-    rtdm_lockctx_t      context;
+	struct rtnet_device *rtdev;
+	rtdm_lockctx_t context;
 
+	rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
 
-    rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
+	rtdev = loopback_device;
+	if (rtdev != NULL && !rtdev_reference(rtdev))
+		rtdev = NULL;
 
-    rtdev = loopback_device;
-    if (rtdev != NULL && !rtdev_reference(rtdev))
-	    rtdev = NULL;
+	rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
 
-    rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
-
-    return rtdev;
+	return rtdev;
 }
-
-
 
 /***
  *  rtdev_alloc_name - allocate a name for the rtnet_device
@@ -225,67 +211,66 @@ struct rtnet_device *rtdev_get_loopback(void)
  */
 void rtdev_alloc_name(struct rtnet_device *rtdev, const char *mask)
 {
-    char                buf[IFNAMSIZ];
-    int                 i;
-    struct rtnet_device *tmp;
+	char buf[IFNAMSIZ];
+	int i;
+	struct rtnet_device *tmp;
 
-
-    for (i = 0; i < MAX_RT_DEVICES; i++) {
-	snprintf(buf, IFNAMSIZ, mask, i);
-	if ((tmp = rtdev_get_by_name(buf)) == NULL) {
-	    strncpy(rtdev->name, buf, IFNAMSIZ);
-	    break;
+	for (i = 0; i < MAX_RT_DEVICES; i++) {
+		snprintf(buf, IFNAMSIZ, mask, i);
+		if ((tmp = rtdev_get_by_name(buf)) == NULL) {
+			strncpy(rtdev->name, buf, IFNAMSIZ);
+			break;
+		} else
+			rtdev_dereference(tmp);
 	}
-	else
-	    rtdev_dereference(tmp);
-    }
 }
 
 static int rtdev_pool_trylock(void *cookie)
 {
-    return rtdev_reference(cookie);
+	return rtdev_reference(cookie);
 }
 
 static void rtdev_pool_unlock(void *cookie)
 {
-    rtdev_dereference(cookie);
+	rtdev_dereference(cookie);
 }
 
 static const struct rtskb_pool_lock_ops rtdev_ops = {
-    .trylock = rtdev_pool_trylock,
-    .unlock = rtdev_pool_unlock,
+	.trylock = rtdev_pool_trylock,
+	.unlock = rtdev_pool_unlock,
 };
 
 int rtdev_init(struct rtnet_device *rtdev, unsigned dev_pool_size)
 {
-    int ret;
+	int ret;
 
-    ret = rtskb_pool_init(&rtdev->dev_pool, dev_pool_size, &rtdev_ops, rtdev);
-    if (ret < dev_pool_size) {
-	printk(KERN_ERR "RTnet: cannot allocate rtnet device pool\n");
-	rtskb_pool_release(&rtdev->dev_pool);
-	return -ENOMEM;
-    }
+	ret = rtskb_pool_init(&rtdev->dev_pool, dev_pool_size, &rtdev_ops,
+			      rtdev);
+	if (ret < dev_pool_size) {
+		printk(KERN_ERR "RTnet: cannot allocate rtnet device pool\n");
+		rtskb_pool_release(&rtdev->dev_pool);
+		return -ENOMEM;
+	}
 
-    rtdm_mutex_init(&rtdev->xmit_mutex);
-    rtdm_lock_init(&rtdev->rtdev_lock);
-    mutex_init(&rtdev->nrt_lock);
+	rtdm_mutex_init(&rtdev->xmit_mutex);
+	rtdm_lock_init(&rtdev->rtdev_lock);
+	mutex_init(&rtdev->nrt_lock);
 
-    atomic_set(&rtdev->refcount, 0);
+	atomic_set(&rtdev->refcount, 0);
 
-    /* scale global rtskb pool */
-    rtdev->add_rtskbs = rtskb_pool_extend(&global_pool, device_rtskbs);
+	/* scale global rtskb pool */
+	rtdev->add_rtskbs = rtskb_pool_extend(&global_pool, device_rtskbs);
 
-    return 0;
+	return 0;
 }
 EXPORT_SYMBOL_GPL(rtdev_init);
 
 void rtdev_destroy(struct rtnet_device *rtdev)
 {
-    rtskb_pool_release(&rtdev->dev_pool);
-    rtskb_pool_shrink(&global_pool, rtdev->add_rtskbs);
-    rtdev->stack_event = NULL;
-    rtdm_mutex_destroy(&rtdev->xmit_mutex);
+	rtskb_pool_release(&rtdev->dev_pool);
+	rtskb_pool_shrink(&global_pool, rtdev->add_rtskbs);
+	rtdev->stack_event = NULL;
+	rtdm_mutex_destroy(&rtdev->xmit_mutex);
 }
 EXPORT_SYMBOL_GPL(rtdev_destroy);
 
@@ -297,59 +282,56 @@ EXPORT_SYMBOL_GPL(rtdev_destroy);
  */
 struct rtnet_device *rtdev_alloc(unsigned sizeof_priv, unsigned dev_pool_size)
 {
-    struct rtnet_device *rtdev;
-    unsigned            alloc_size;
-    int                 ret;
+	struct rtnet_device *rtdev;
+	unsigned alloc_size;
+	int ret;
 
+	/* ensure 32-byte alignment of the private area */
+	alloc_size = sizeof(*rtdev) + sizeof_priv + 31;
 
-    /* ensure 32-byte alignment of the private area */
-    alloc_size = sizeof (*rtdev) + sizeof_priv + 31;
+	rtdev = kzalloc(alloc_size, GFP_KERNEL);
+	if (rtdev == NULL) {
+		printk(KERN_ERR "RTnet: cannot allocate rtnet device\n");
+		return NULL;
+	}
 
-    rtdev = kzalloc(alloc_size, GFP_KERNEL);
-    if (rtdev == NULL) {
-	printk(KERN_ERR "RTnet: cannot allocate rtnet device\n");
-	return NULL;
-    }
+	ret = rtdev_init(rtdev, dev_pool_size);
+	if (ret) {
+		kfree(rtdev);
+		return NULL;
+	}
 
-    ret = rtdev_init(rtdev, dev_pool_size);
-    if (ret) {
-	kfree(rtdev);
-	return NULL;
-    }
+	if (sizeof_priv)
+		rtdev->priv = (void *)(((long)(rtdev + 1) + 31) & ~31);
 
-    if (sizeof_priv)
-	rtdev->priv = (void *)(((long)(rtdev + 1) + 31) & ~31);
-
-    return rtdev;
+	return rtdev;
 }
 
 /***
  *  rtdev_free
  */
-void rtdev_free (struct rtnet_device *rtdev)
+void rtdev_free(struct rtnet_device *rtdev)
 {
-    if (rtdev != NULL) {
-	rtdev_destroy(rtdev);
-	kfree(rtdev);
-    }
+	if (rtdev != NULL) {
+		rtdev_destroy(rtdev);
+		kfree(rtdev);
+	}
 }
 EXPORT_SYMBOL_GPL(rtdev_free);
 
-
-static void init_etherdev(struct rtnet_device *rtdev,
-			  struct module *module)
+static void init_etherdev(struct rtnet_device *rtdev, struct module *module)
 {
-    rtdev->hard_header     = rt_eth_header;
-    rtdev->type            = ARPHRD_ETHER;
-    rtdev->hard_header_len = ETH_HLEN;
-    rtdev->mtu             = 1500; /* eth_mtu */
-    rtdev->addr_len        = ETH_ALEN;
-    rtdev->flags           = IFF_BROADCAST; /* TODO: IFF_MULTICAST; */
-    rtdev->get_mtu         = rt_hard_mtu;
-    rtdev->rt_owner	   = module;
+	rtdev->hard_header = rt_eth_header;
+	rtdev->type = ARPHRD_ETHER;
+	rtdev->hard_header_len = ETH_HLEN;
+	rtdev->mtu = 1500; /* eth_mtu */
+	rtdev->addr_len = ETH_ALEN;
+	rtdev->flags = IFF_BROADCAST; /* TODO: IFF_MULTICAST; */
+	rtdev->get_mtu = rt_hard_mtu;
+	rtdev->rt_owner = module;
 
-    memset(rtdev->broadcast, 0xFF, ETH_ALEN);
-    strcpy(rtdev->name, "rteth%d");
+	memset(rtdev->broadcast, 0xFF, ETH_ALEN);
+	strcpy(rtdev->name, "rteth%d");
 }
 
 /**
@@ -360,22 +342,20 @@ static void init_etherdev(struct rtnet_device *rtdev,
  * values. This routine can be used to set up a pre-allocated device
  * structure. The device still needs to be registered afterwards.
  */
-int __rt_init_etherdev(struct rtnet_device *rtdev,
-			unsigned dev_pool_size,
-			struct module *module)
+int __rt_init_etherdev(struct rtnet_device *rtdev, unsigned dev_pool_size,
+		       struct module *module)
 {
-    int ret;
+	int ret;
 
-    ret = rtdev_init(rtdev, dev_pool_size);
-    if (ret)
-	    return ret;
+	ret = rtdev_init(rtdev, dev_pool_size);
+	if (ret)
+		return ret;
 
-    init_etherdev(rtdev, module);
+	init_etherdev(rtdev, module);
 
-    return 0;
+	return 0;
 }
 EXPORT_SYMBOL_GPL(__rt_init_etherdev);
-
 
 /**
  * rt_alloc_etherdev - Allocates and sets up an ethernet device
@@ -394,155 +374,140 @@ struct rtnet_device *__rt_alloc_etherdev(unsigned sizeof_priv,
 					 unsigned dev_pool_size,
 					 struct module *module)
 {
-    struct rtnet_device *rtdev;
+	struct rtnet_device *rtdev;
 
-    rtdev = rtdev_alloc(sizeof_priv, dev_pool_size);
-    if (!rtdev)
-	return NULL;
+	rtdev = rtdev_alloc(sizeof_priv, dev_pool_size);
+	if (!rtdev)
+		return NULL;
 
-    init_etherdev(rtdev, module);
+	init_etherdev(rtdev, module);
 
-    return rtdev;
+	return rtdev;
 }
 EXPORT_SYMBOL_GPL(__rt_alloc_etherdev);
 
-
 static inline int __rtdev_new_index(void)
 {
-    int i;
+	int i;
 
+	for (i = 0; i < MAX_RT_DEVICES; i++)
+		if (rtnet_devices[i] == NULL)
+			return i + 1;
 
-    for (i = 0; i < MAX_RT_DEVICES; i++)
-	if (rtnet_devices[i] == NULL)
-	     return i+1;
-
-    return -ENOMEM;
+	return -ENOMEM;
 }
-
-
 
 static int rtskb_map(struct rtnet_device *rtdev, struct rtskb *skb)
 {
-    dma_addr_t addr;
+	dma_addr_t addr;
 
-    addr = rtdev->map_rtskb(rtdev, skb);
+	addr = rtdev->map_rtskb(rtdev, skb);
 
-    if (WARN_ON(addr == RTSKB_UNMAPPED))
-	return -ENOMEM;
+	if (WARN_ON(addr == RTSKB_UNMAPPED))
+		return -ENOMEM;
 
-    if (skb->buf_dma_addr != RTSKB_UNMAPPED &&
-	addr != skb->buf_dma_addr) {
-	printk("RTnet: device %s maps skb differently than others. "
-	       "Different IOMMU domain?\nThis is not supported.\n",
-	       rtdev->name);
-	return -EACCES;
-    }
+	if (skb->buf_dma_addr != RTSKB_UNMAPPED && addr != skb->buf_dma_addr) {
+		printk("RTnet: device %s maps skb differently than others. "
+		       "Different IOMMU domain?\nThis is not supported.\n",
+		       rtdev->name);
+		return -EACCES;
+	}
 
-    skb->buf_dma_addr = addr;
+	skb->buf_dma_addr = addr;
 
-    return 0;
+	return 0;
 }
-
-
 
 int rtdev_map_rtskb(struct rtskb *skb)
 {
-    struct rtnet_device *rtdev;
-    int err = 0;
-    int i;
+	struct rtnet_device *rtdev;
+	int err = 0;
+	int i;
 
-    skb->buf_dma_addr = RTSKB_UNMAPPED;
+	skb->buf_dma_addr = RTSKB_UNMAPPED;
 
-    mutex_lock(&rtnet_devices_nrt_lock);
+	mutex_lock(&rtnet_devices_nrt_lock);
 
-    for (i = 0; i < MAX_RT_DEVICES; i++) {
-	rtdev = rtnet_devices[i];
-	if (rtdev && rtdev->map_rtskb) {
-	    err = rtskb_map(rtdev, skb);
-	    if (err)
-		break;
+	for (i = 0; i < MAX_RT_DEVICES; i++) {
+		rtdev = rtnet_devices[i];
+		if (rtdev && rtdev->map_rtskb) {
+			err = rtskb_map(rtdev, skb);
+			if (err)
+				break;
+		}
 	}
-    }
 
-    if (!err) {
-        if (skb->buf_dma_addr != RTSKB_UNMAPPED)
-	    list_add(&skb->entry, &rtskb_mapped_list);
-        else
-	    list_add(&skb->entry, &rtskb_mapwait_list);
-    }
+	if (!err) {
+		if (skb->buf_dma_addr != RTSKB_UNMAPPED)
+			list_add(&skb->entry, &rtskb_mapped_list);
+		else
+			list_add(&skb->entry, &rtskb_mapwait_list);
+	}
 
-    mutex_unlock(&rtnet_devices_nrt_lock);
+	mutex_unlock(&rtnet_devices_nrt_lock);
 
-    return err;
+	return err;
 }
-
-
 
 static int rtdev_map_all_rtskbs(struct rtnet_device *rtdev)
 {
-    struct rtskb *skb, *n;
-    int err = 0;
+	struct rtskb *skb, *n;
+	int err = 0;
 
-    if (!rtdev->map_rtskb)
-	return 0;
+	if (!rtdev->map_rtskb)
+		return 0;
 
-    list_for_each_entry(skb, &rtskb_mapped_list, entry) {
-	err = rtskb_map(rtdev, skb);
-	if (err)
-	   break;
-    }
+	list_for_each_entry (skb, &rtskb_mapped_list, entry) {
+		err = rtskb_map(rtdev, skb);
+		if (err)
+			break;
+	}
 
-    list_for_each_entry_safe(skb, n, &rtskb_mapwait_list, entry) {
-	err = rtskb_map(rtdev, skb);
-	if (err)
-	   break;
-	list_del(&skb->entry);
-	list_add(&skb->entry, &rtskb_mapped_list);
-    }
+	list_for_each_entry_safe (skb, n, &rtskb_mapwait_list, entry) {
+		err = rtskb_map(rtdev, skb);
+		if (err)
+			break;
+		list_del(&skb->entry);
+		list_add(&skb->entry, &rtskb_mapped_list);
+	}
 
-    return err;
+	return err;
 }
-
-
 
 void rtdev_unmap_rtskb(struct rtskb *skb)
 {
-    struct rtnet_device *rtdev;
-    int i;
+	struct rtnet_device *rtdev;
+	int i;
 
-    mutex_lock(&rtnet_devices_nrt_lock);
+	mutex_lock(&rtnet_devices_nrt_lock);
 
-    list_del(&skb->entry);
+	list_del(&skb->entry);
 
-    if (skb->buf_dma_addr != RTSKB_UNMAPPED) {
-	for (i = 0; i < MAX_RT_DEVICES; i++) {
-	    rtdev = rtnet_devices[i];
-	    if (rtdev && rtdev->unmap_rtskb) {
-		rtdev->unmap_rtskb(rtdev, skb);
-	    }
+	if (skb->buf_dma_addr != RTSKB_UNMAPPED) {
+		for (i = 0; i < MAX_RT_DEVICES; i++) {
+			rtdev = rtnet_devices[i];
+			if (rtdev && rtdev->unmap_rtskb) {
+				rtdev->unmap_rtskb(rtdev, skb);
+			}
+		}
 	}
-    }
 
-    skb->buf_dma_addr = RTSKB_UNMAPPED;
+	skb->buf_dma_addr = RTSKB_UNMAPPED;
 
-    mutex_unlock(&rtnet_devices_nrt_lock);
+	mutex_unlock(&rtnet_devices_nrt_lock);
 }
-
-
 
 static void rtdev_unmap_all_rtskbs(struct rtnet_device *rtdev)
 {
-    struct rtskb *skb;
+	struct rtskb *skb;
 
-    if (!rtdev->unmap_rtskb)
-	return;
+	if (!rtdev->unmap_rtskb)
+		return;
 
-    list_for_each_entry(skb, &rtskb_mapped_list, entry) {
-	rtdev->unmap_rtskb(rtdev, skb);
-    }
+	list_for_each_entry (skb, &rtskb_mapped_list, entry) {
+		rtdev->unmap_rtskb(rtdev, skb);
+	}
 }
-
-
 
 /***
  * rt_register_rtnetdev: register a new rtnet_device (linux-like)
@@ -550,101 +515,100 @@ static void rtdev_unmap_all_rtskbs(struct rtnet_device *rtdev)
  */
 int rt_register_rtnetdev(struct rtnet_device *rtdev)
 {
-    struct list_head        *entry;
-    struct rtdev_event_hook *hook;
-    rtdm_lockctx_t          context;
-    int                     ifindex;
-    int                     err;
+	struct list_head *entry;
+	struct rtdev_event_hook *hook;
+	rtdm_lockctx_t context;
+	int ifindex;
+	int err;
 
+	/* requires at least driver layer version 2.0 */
+	if (rtdev->vers < RTDEV_VERS_2_0)
+		return -EINVAL;
 
-    /* requires at least driver layer version 2.0 */
-    if (rtdev->vers < RTDEV_VERS_2_0)
-	return -EINVAL;
+	if (rtdev->features & NETIF_F_LLTX)
+		rtdev->start_xmit = rtdev->hard_start_xmit;
+	else
+		rtdev->start_xmit = rtdev_locked_xmit;
 
-    if (rtdev->features & NETIF_F_LLTX)
-	rtdev->start_xmit = rtdev->hard_start_xmit;
-    else
-	rtdev->start_xmit = rtdev_locked_xmit;
+	mutex_lock(&rtnet_devices_nrt_lock);
 
-    mutex_lock(&rtnet_devices_nrt_lock);
-
-    ifindex = __rtdev_new_index();
-    if (ifindex < 0) {
-	    err = ifindex;
-	    goto fail;
-    }
-    rtdev->ifindex = ifindex;
-
-    if (strchr(rtdev->name,'%') != NULL)
-	rtdev_alloc_name(rtdev, rtdev->name);
-
-    if (__rtdev_get_by_name(rtdev->name) != NULL) {
-	    err = -EEXIST;
-	    goto fail;
-    }
-
-    rtdev->sysdev = device_create(rtnet_class, NULL,
-		  MKDEV(0, rtdev->ifindex), rtdev, rtdev->name);
-    if (IS_ERR(rtdev->sysdev)) {
-	    err = PTR_ERR(rtdev->sysdev);
-	    goto fail;
-    }
-
-    if (rtdev->sysbind) {
-	    err = sysfs_create_link(&rtdev->sysdev->kobj,
-				    &rtdev->sysbind->kobj, "adapter");
-	    if (err)
-		    goto fail_link;
-    }
-
-    err = rtdev_map_all_rtskbs(rtdev);
-    if (err)
-	    goto fail_map;
-
-    rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
-
-    if (rtdev->flags & IFF_LOOPBACK) {
-	/* allow only one loopback device */
-	if (loopback_device) {
-	    rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
-	    err = -EEXIST;
-	    goto fail_loopback;
+	ifindex = __rtdev_new_index();
+	if (ifindex < 0) {
+		err = ifindex;
+		goto fail;
 	}
-	loopback_device = rtdev;
-    }
-    rtnet_devices[rtdev->ifindex-1] = rtdev;
+	rtdev->ifindex = ifindex;
 
-    rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
+	if (strchr(rtdev->name, '%') != NULL)
+		rtdev_alloc_name(rtdev, rtdev->name);
 
-    list_for_each(entry, &event_hook_list) {
-	hook = list_entry(entry, struct rtdev_event_hook, entry);
-	if (hook->register_device)
-	    hook->register_device(rtdev);
-    }
+	if (__rtdev_get_by_name(rtdev->name) != NULL) {
+		err = -EEXIST;
+		goto fail;
+	}
 
-    mutex_unlock(&rtnet_devices_nrt_lock);
+	rtdev->sysdev =
+		device_create(rtnet_class, NULL, MKDEV(0, rtdev->ifindex),
+			      rtdev, rtdev->name);
+	if (IS_ERR(rtdev->sysdev)) {
+		err = PTR_ERR(rtdev->sysdev);
+		goto fail;
+	}
 
-    /* Default state at registration is that the device is present. */
-    set_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
+	if (rtdev->sysbind) {
+		err = sysfs_create_link(&rtdev->sysdev->kobj,
+					&rtdev->sysbind->kobj, "adapter");
+		if (err)
+			goto fail_link;
+	}
 
-    printk("RTnet: registered %s\n", rtdev->name);
+	err = rtdev_map_all_rtskbs(rtdev);
+	if (err)
+		goto fail_map;
 
-    return 0;
+	rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
+
+	if (rtdev->flags & IFF_LOOPBACK) {
+		/* allow only one loopback device */
+		if (loopback_device) {
+			rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock,
+						 context);
+			err = -EEXIST;
+			goto fail_loopback;
+		}
+		loopback_device = rtdev;
+	}
+	rtnet_devices[rtdev->ifindex - 1] = rtdev;
+
+	rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
+
+	list_for_each (entry, &event_hook_list) {
+		hook = list_entry(entry, struct rtdev_event_hook, entry);
+		if (hook->register_device)
+			hook->register_device(rtdev);
+	}
+
+	mutex_unlock(&rtnet_devices_nrt_lock);
+
+	/* Default state at registration is that the device is present. */
+	set_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
+
+	printk("RTnet: registered %s\n", rtdev->name);
+
+	return 0;
 
 fail_loopback:
-    rtdev_unmap_all_rtskbs(rtdev);
+	rtdev_unmap_all_rtskbs(rtdev);
 fail_map:
-    if (rtdev->sysbind)
-	    sysfs_remove_link(&rtdev->sysdev->kobj, "adapter");
+	if (rtdev->sysbind)
+		sysfs_remove_link(&rtdev->sysdev->kobj, "adapter");
 fail_link:
-    device_destroy(rtnet_class, MKDEV(0, rtdev->ifindex));
+	device_destroy(rtnet_class, MKDEV(0, rtdev->ifindex));
 fail:
-    mutex_unlock(&rtnet_devices_nrt_lock);
+	mutex_unlock(&rtnet_devices_nrt_lock);
 
-    return err;
+	return err;
 }
-
-
 
 /***
  * rt_unregister_rtnetdev: unregister a rtnet_device
@@ -652,70 +616,67 @@ fail:
  */
 int rt_unregister_rtnetdev(struct rtnet_device *rtdev)
 {
-    struct list_head        *entry;
-    struct rtdev_event_hook *hook;
-    rtdm_lockctx_t          context;
+	struct list_head *entry;
+	struct rtdev_event_hook *hook;
+	rtdm_lockctx_t context;
 
-    RTNET_ASSERT(rtdev->ifindex != 0,
-	printk("RTnet: device %s/%p was not registered\n", rtdev->name, rtdev);
-	return -ENODEV;);
+	RTNET_ASSERT(rtdev->ifindex != 0,
+		     printk("RTnet: device %s/%p was not registered\n",
+			    rtdev->name, rtdev);
+		     return -ENODEV;);
 
-    if (rtdev->sysbind)
-	    sysfs_remove_link(&rtdev->sysdev->kobj, "adapter");
+	if (rtdev->sysbind)
+		sysfs_remove_link(&rtdev->sysdev->kobj, "adapter");
 
-    device_destroy(rtnet_class, MKDEV(0, rtdev->ifindex));
+	device_destroy(rtnet_class, MKDEV(0, rtdev->ifindex));
 
-    mutex_lock(&rtnet_devices_nrt_lock);
-    rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
+	mutex_lock(&rtnet_devices_nrt_lock);
+	rtdm_lock_get_irqsave(&rtnet_devices_rt_lock, context);
 
-    RTNET_ASSERT(atomic_read(&rtdev->refcount == 0), BUG());
-    rtnet_devices[rtdev->ifindex-1] = NULL;
-    if (rtdev->flags & IFF_LOOPBACK)
-	loopback_device = NULL;
+	RTNET_ASSERT(atomic_read(&rtdev->refcount == 0), BUG());
+	rtnet_devices[rtdev->ifindex - 1] = NULL;
+	if (rtdev->flags & IFF_LOOPBACK)
+		loopback_device = NULL;
 
-    rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
+	rtdm_lock_put_irqrestore(&rtnet_devices_rt_lock, context);
 
-    list_for_each(entry, &event_hook_list) {
-	hook = list_entry(entry, struct rtdev_event_hook, entry);
-	if (hook->unregister_device)
-	    hook->unregister_device(rtdev);
-    }
+	list_for_each (entry, &event_hook_list) {
+		hook = list_entry(entry, struct rtdev_event_hook, entry);
+		if (hook->unregister_device)
+			hook->unregister_device(rtdev);
+	}
 
-    rtdev_unmap_all_rtskbs(rtdev);
+	rtdev_unmap_all_rtskbs(rtdev);
 
-    mutex_unlock(&rtnet_devices_nrt_lock);
+	mutex_unlock(&rtnet_devices_nrt_lock);
 
-    clear_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
+	clear_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
 
-    RTNET_ASSERT(atomic_read(&rtdev->refcount) == 0,
-	   printk("RTnet: rtdev reference counter < 0!\n"););
+	RTNET_ASSERT(atomic_read(&rtdev->refcount) == 0,
+		     printk("RTnet: rtdev reference counter < 0!\n"););
 
-    printk("RTnet: unregistered %s\n", rtdev->name);
+	printk("RTnet: unregistered %s\n", rtdev->name);
 
-    return 0;
+	return 0;
 }
-
-
 
 void rtdev_add_event_hook(struct rtdev_event_hook *hook)
 {
-    mutex_lock(&rtnet_devices_nrt_lock);
-    list_add(&hook->entry, &event_hook_list);
-    mutex_unlock(&rtnet_devices_nrt_lock);
+	mutex_lock(&rtnet_devices_nrt_lock);
+	list_add(&hook->entry, &event_hook_list);
+	mutex_unlock(&rtnet_devices_nrt_lock);
 }
-
-
 
 void rtdev_del_event_hook(struct rtdev_event_hook *hook)
 {
-    mutex_lock(&rtnet_devices_nrt_lock);
-    list_del(&hook->entry);
-    mutex_unlock(&rtnet_devices_nrt_lock);
+	mutex_lock(&rtnet_devices_nrt_lock);
+	list_del(&hook->entry);
+	mutex_unlock(&rtnet_devices_nrt_lock);
 }
 
 int rtdev_up(struct rtnet_device *rtdev, struct rtnet_core_cmd *cmd)
 {
-	struct list_head        *entry;
+	struct list_head *entry;
 	struct rtdev_event_hook *hook;
 	int ret = 0;
 
@@ -748,13 +709,14 @@ int rtdev_up(struct rtnet_device *rtdev, struct rtnet_core_cmd *cmd)
 	if (cmd->args.up.dev_addr_type != ARPHRD_VOID)
 		memcpy(rtdev->dev_addr, cmd->args.up.dev_addr, MAX_ADDR_LEN);
 
-	ret = rtdev_open(rtdev);    /* also == 0 if rtdev is already up */
+	ret = rtdev_open(rtdev); /* also == 0 if rtdev is already up */
 
 	if (ret == 0) {
 		mutex_lock(&rtnet_devices_nrt_lock);
 
-		list_for_each(entry, &event_hook_list) {
-			hook = list_entry(entry, struct rtdev_event_hook, entry);
+		list_for_each (entry, &event_hook_list) {
+			hook = list_entry(entry, struct rtdev_event_hook,
+					  entry);
 			if (hook->ifup)
 				hook->ifup(rtdev, cmd);
 		}
@@ -771,9 +733,9 @@ EXPORT_SYMBOL_GPL(rtdev_up);
 
 int rtdev_down(struct rtnet_device *rtdev)
 {
-	struct list_head        *entry;
+	struct list_head *entry;
 	struct rtdev_event_hook *hook;
-	rtdm_lockctx_t          context;
+	rtdm_lockctx_t context;
 	int ret = 0;
 
 	if (mutex_lock_interruptible(&rtdev->nrt_lock))
@@ -798,8 +760,9 @@ int rtdev_down(struct rtnet_device *rtdev)
 	if (ret == 0) {
 		mutex_lock(&rtnet_devices_nrt_lock);
 
-		list_for_each(entry, &event_hook_list) {
-			hook = list_entry(entry, struct rtdev_event_hook, entry);
+		list_for_each (entry, &event_hook_list) {
+			hook = list_entry(entry, struct rtdev_event_hook,
+					  entry);
 			if (hook->ifdown)
 				hook->ifdown(rtdev);
 		}
@@ -825,107 +788,95 @@ EXPORT_SYMBOL_GPL(rtdev_down);
  */
 int rtdev_open(struct rtnet_device *rtdev)
 {
-    int ret = 0;
+	int ret = 0;
 
+	if (rtdev->flags & IFF_UP) /* Is it already up?                */
+		return 0;
 
-    if (rtdev->flags & IFF_UP)              /* Is it already up?                */
-	return 0;
+	if (!rtdev_reference(rtdev))
+		return -EIDRM;
 
-    if (!rtdev_reference(rtdev))
-	return -EIDRM;
+	if (rtdev->open) /* Call device private open method  */
+		ret = rtdev->open(rtdev);
 
-    if (rtdev->open)                        /* Call device private open method  */
-	ret = rtdev->open(rtdev);
+	if (!ret) {
+		rtdev->flags |= IFF_UP;
+		set_bit(__RTNET_LINK_STATE_START, &rtdev->link_state);
+	} else
+		rtdev_dereference(rtdev);
 
-    if ( !ret )  {
-	rtdev->flags |= IFF_UP;
-	set_bit(__RTNET_LINK_STATE_START, &rtdev->link_state);
-    } else
-	rtdev_dereference(rtdev);
-
-    return ret;
+	return ret;
 }
-
-
 
 /***
  *  rtdev_close
  */
 int rtdev_close(struct rtnet_device *rtdev)
 {
-    int ret = 0;
+	int ret = 0;
 
+	if (!(rtdev->flags & IFF_UP))
+		return 0;
 
-    if ( !(rtdev->flags & IFF_UP) )
-	return 0;
+	if (rtdev->stop)
+		ret = rtdev->stop(rtdev);
 
-    if (rtdev->stop)
-	ret = rtdev->stop(rtdev);
+	rtdev->flags &= ~(IFF_UP | IFF_RUNNING);
+	clear_bit(__RTNET_LINK_STATE_START, &rtdev->link_state);
 
-    rtdev->flags &= ~(IFF_UP|IFF_RUNNING);
-    clear_bit(__RTNET_LINK_STATE_START, &rtdev->link_state);
+	if (ret == 0)
+		rtdev_dereference(rtdev);
 
-    if (ret == 0)
-	rtdev_dereference(rtdev);
-
-    return ret;
+	return ret;
 }
-
-
 
 static int rtdev_locked_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
 {
-    int ret;
+	int ret;
 
+	rtdm_mutex_lock(&rtdev->xmit_mutex);
+	ret = rtdev->hard_start_xmit(skb, rtdev);
+	rtdm_mutex_unlock(&rtdev->xmit_mutex);
 
-    rtdm_mutex_lock(&rtdev->xmit_mutex);
-    ret = rtdev->hard_start_xmit(skb, rtdev);
-    rtdm_mutex_unlock(&rtdev->xmit_mutex);
-
-    return ret;
+	return ret;
 }
-
-
 
 /***
  *  rtdev_xmit - send real-time packet
  */
 int rtdev_xmit(struct rtskb *rtskb)
 {
-    struct rtnet_device *rtdev;
-    int                 err;
+	struct rtnet_device *rtdev;
+	int err;
 
+	RTNET_ASSERT(rtskb != NULL, return -EINVAL;);
 
-    RTNET_ASSERT(rtskb != NULL, return -EINVAL;);
+	rtdev = rtskb->rtdev;
 
-    rtdev = rtskb->rtdev;
+	if (!rtnetif_carrier_ok(rtdev)) {
+		err = -EAGAIN;
+		kfree_rtskb(rtskb);
+		return err;
+	}
 
-    if (!rtnetif_carrier_ok(rtdev)) {
-	err = -EAGAIN;
-	kfree_rtskb(rtskb);
+	if (rtskb_acquire(rtskb, &rtdev->dev_pool) != 0) {
+		err = -ENOBUFS;
+		kfree_rtskb(rtskb);
+		return err;
+	}
+
+	RTNET_ASSERT(rtdev != NULL, return -EINVAL;);
+
+	err = rtdev->start_xmit(rtskb, rtdev);
+	if (err) {
+		/* on error we must free the rtskb here */
+		kfree_rtskb(rtskb);
+
+		rtdm_printk("hard_start_xmit returned %d\n", err);
+	}
+
 	return err;
-    }
-
-    if (rtskb_acquire(rtskb, &rtdev->dev_pool) != 0) {
-	err = -ENOBUFS;
-	kfree_rtskb(rtskb);
-	return err;
-    }
-
-    RTNET_ASSERT(rtdev != NULL, return -EINVAL;);
-
-    err = rtdev->start_xmit(rtskb, rtdev);
-    if (err) {
-	/* on error we must free the rtskb here */
-	kfree_rtskb(rtskb);
-
-	rtdm_printk("hard_start_xmit returned %d\n", err);
-    }
-
-    return err;
 }
-
-
 
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_PROXY)
 /***
@@ -933,42 +884,39 @@ int rtdev_xmit(struct rtskb *rtskb)
  */
 int rtdev_xmit_proxy(struct rtskb *rtskb)
 {
-    struct rtnet_device *rtdev;
-    int                 err;
+	struct rtnet_device *rtdev;
+	int err;
 
+	RTNET_ASSERT(rtskb != NULL, return -EINVAL;);
 
-    RTNET_ASSERT(rtskb != NULL, return -EINVAL;);
+	rtdev = rtskb->rtdev;
 
-    rtdev = rtskb->rtdev;
+	RTNET_ASSERT(rtdev != NULL, return -EINVAL;);
 
-    RTNET_ASSERT(rtdev != NULL, return -EINVAL;);
+	/* TODO: make these lines race-condition-safe */
+	if (rtdev->mac_disc) {
+		RTNET_ASSERT(rtdev->mac_disc->nrt_packet_tx != NULL,
+			     return -EINVAL;);
 
-    /* TODO: make these lines race-condition-safe */
-    if (rtdev->mac_disc) {
-	RTNET_ASSERT(rtdev->mac_disc->nrt_packet_tx != NULL, return -EINVAL;);
+		err = rtdev->mac_disc->nrt_packet_tx(rtskb);
+	} else {
+		err = rtdev->start_xmit(rtskb, rtdev);
+		if (err) {
+			/* on error we must free the rtskb here */
+			kfree_rtskb(rtskb);
 
-	err = rtdev->mac_disc->nrt_packet_tx(rtskb);
-    } else {
-	err = rtdev->start_xmit(rtskb, rtdev);
-	if (err) {
-	    /* on error we must free the rtskb here */
-	    kfree_rtskb(rtskb);
-
-	    rtdm_printk("hard_start_xmit returned %d\n", err);
+			rtdm_printk("hard_start_xmit returned %d\n", err);
+		}
 	}
-    }
 
-    return err;
+	return err;
 }
 #endif /* CONFIG_XENO_DRIVERS_NET_ADDON_PROXY */
 
-
-
 unsigned int rt_hard_mtu(struct rtnet_device *rtdev, unsigned int priority)
 {
-    return rtdev->mtu;
+	return rtdev->mtu;
 }
-
 
 EXPORT_SYMBOL_GPL(rtdev_alloc_name);
 
