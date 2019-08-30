@@ -77,7 +77,7 @@ config XENO_DRIVERS_NET_DRV_R8169
     tristate "Realtek 8169 (Gigabit)"
 
 
-if ARCH = ppc
+if PPC
 
 comment "Embedded MPC Drivers"
     depends on XENO_DRIVERS_NET
@@ -116,7 +116,7 @@ config XENO_DRIVERS_NET_DRV_SMC91111
     depends on XENO_DRIVERS_NET
     tristate "SMSC LAN91C111"
 
-if ARCH = arm
+if ARM
 
 config XENO_DRIVERS_NET_DRV_AT91_ETHER
     depends on XENO_DRIVERS_NET && SOC_AT91RM9200
