@@ -168,6 +168,10 @@ static int xnsched_tp_chkparam(struct xnthread *thread,
 {
 	struct xnsched_tp *tp = &thread->sched->tp;
 
+	if (p->tp.ptid < 0 ||
+		p->tp.ptid >= CONFIG_XENO_OPT_SCHED_TP_NRPART)
+		return -EINVAL;
+
 	if (tp->gps == NULL ||
 	    p->tp.prio < XNSCHED_TP_MIN_PRIO ||
 	    p->tp.prio > XNSCHED_TP_MAX_PRIO)
