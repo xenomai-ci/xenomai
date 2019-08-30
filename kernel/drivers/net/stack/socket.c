@@ -50,36 +50,27 @@ MODULE_PARM_DESC(socket_rtskbs, "Default number of realtime socket buffers in so
  *  internal socket functions                                           *
  ************************************************************************/
 
-int __rt_bare_socket_init(struct rtdm_fd *fd, unsigned short protocol,
-			unsigned int priority, unsigned int pool_size,
-			struct module *module)
+int rt_bare_socket_init(struct rtdm_fd *fd, unsigned short protocol,
+			unsigned int priority, unsigned int pool_size)
 {
     struct rtsocket *sock = rtdm_fd_to_private(fd);
     int err;
 
-    err = try_module_get(module);
-    if (!err)
-	return -EAFNOSUPPORT;
-
     err = rtskb_pool_init(&sock->skb_pool, pool_size, NULL, fd);
-    if (err < 0) {
-	module_put(module);
+    if (err < 0)
 	return err;
-    }
 
     sock->protocol = protocol;
     sock->priority = priority;
-    sock->owner = module;
 
     return err;
 }
-EXPORT_SYMBOL_GPL(__rt_bare_socket_init);
+EXPORT_SYMBOL_GPL(rt_bare_socket_init);
 
 /***
  *  rt_socket_init - initialises a new socket structure
  */
-int __rt_socket_init(struct rtdm_fd *fd, unsigned short protocol,
-		struct module *module)
+int rt_socket_init(struct rtdm_fd *fd, unsigned short protocol)
 {
     struct rtsocket *sock = rtdm_fd_to_private(fd);
     unsigned int    pool_size;
@@ -94,10 +85,10 @@ int __rt_socket_init(struct rtdm_fd *fd, unsigned short protocol,
     rtdm_lock_init(&sock->param_lock);
     rtdm_sem_init(&sock->pending_sem, 0);
 
-    pool_size = __rt_bare_socket_init(fd, protocol,
+    pool_size = rt_bare_socket_init(fd, protocol,
 				    RTSKB_PRIO_VALUE(SOCK_DEF_PRIO,
 						    RTSKB_DEF_RT_CHANNEL),
-				    socket_rtskbs, module);
+				    socket_rtskbs);
     sock->pool_size = pool_size;
     mutex_init(&sock->pool_nrt_lock);
 
@@ -112,7 +103,7 @@ int __rt_socket_init(struct rtdm_fd *fd, unsigned short protocol,
 
     return 0;
 }
-EXPORT_SYMBOL_GPL(__rt_socket_init);
+EXPORT_SYMBOL_GPL(rt_socket_init);
 
 
 /***
@@ -133,8 +124,6 @@ void rt_socket_cleanup(struct rtdm_fd *fd)
 	rtskb_pool_release(&sock->skb_pool);
 
     mutex_unlock(&sock->pool_nrt_lock);
-
-    module_put(sock->owner);
 }
 EXPORT_SYMBOL_GPL(rt_socket_cleanup);
 

@@ -526,8 +526,8 @@ void __init rt_icmp_init(void)
 {
     int skbs;
 
-    skbs = __rt_bare_socket_init(icmp_fd, IPPROTO_ICMP, RT_ICMP_PRIO,
-			    ICMP_REPLY_POOL_SIZE, NULL);
+    skbs = rt_bare_socket_init(icmp_fd, IPPROTO_ICMP, RT_ICMP_PRIO,
+			    ICMP_REPLY_POOL_SIZE);
     BUG_ON(skbs < 0);
     if (skbs < ICMP_REPLY_POOL_SIZE)
 	printk("RTnet: allocated only %d icmp rtskbs\n", skbs);
