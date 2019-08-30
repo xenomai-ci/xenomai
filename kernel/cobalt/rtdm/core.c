@@ -154,7 +154,7 @@ int __rtdm_dev_open(const char *path, int oflag)
 	 */
 	dev = __rtdm_get_namedev(path);
 	if (dev == NULL)
-		return -ENODEV;
+		return -EADV;
 
 	ufd = get_unused_fd_flags(oflag);
 	if (ufd < 0) {
@@ -266,7 +266,7 @@ int __rtdm_dev_ioctl_core(struct rtdm_fd *fd, unsigned int request,
 	struct rtdm_device_info dev_info;
 
 	if (fd->magic != RTDM_FD_MAGIC || request != RTIOC_DEVICE_INFO)
-		return -ENOSYS;
+		return -EADV;
 
 	drv = dev->driver;
 	dev_info.device_flags = drv->device_flags;

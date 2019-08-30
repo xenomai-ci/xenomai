@@ -51,9 +51,9 @@ static int enosys(void)
 	return -ENOSYS;
 }
 
-static int enodev(void)
+static int eadv(void)
 {
-	return -ENODEV;
+	return -EADV;
 }
 
 static void nop_close(struct rtdm_fd *fd)
@@ -81,14 +81,14 @@ static struct rtdm_fd *fetch_fd(struct cobalt_ppd *p, int ufd)
 
 #define assign_invalid_handler(__handler)				\
 	do								\
-		(__handler) = (typeof(__handler))enodev;		\
+		(__handler) = (typeof(__handler))eadv;			\
 	while (0)
 
-/* Calling this handler should beget ENODEV if not implemented. */
+/* Calling this handler should beget EADV if not implemented. */
 #define assign_invalid_default_handler(__handler)			\
 	do								\
 		if ((__handler) == NULL)				\
-			(__handler) = (typeof(__handler))enodev;	\
+			(__handler) = (typeof(__handler))eadv;		\
 	while (0)
 
 #define __assign_default_handler(__handler, __placeholder)		\
@@ -105,7 +105,7 @@ static struct rtdm_fd *fetch_fd(struct cobalt_ppd *p, int ufd)
 #define __nrt(__handler)	__handler ## _nrt
 
 /*
- * Install a placeholder returning ENODEV if none of the dual handlers
+ * Install a placeholder returning EADV if none of the dual handlers
  * are implemented, ENOSYS otherwise for NULL handlers to trigger the
  * adaptive switch.
  */
@@ -204,8 +204,14 @@ int rtdm_fd_register(struct rtdm_fd *fd, int ufd)
  * @param[in] ufd User-side file descriptor
  * @param[in] magic Magic word for lookup validation
  *
- * @return Pointer to the RTDM file descriptor matching @a ufd, or
- * ERR_PTR(-EBADF).
+ * @return Pointer to the RTDM file descriptor matching @a
+ * ufd. Otherwise:
+ *
+ * - ERR_PTR(-EADV) if the use-space handle is either invalid, or not
+ * managed by RTDM.
+ *
+ * - ERR_PTR(-EBADF) if the underlying device is being torned down at
+ * the time of the call.
  *
  * @note The file descriptor returned must be later released by a call
  * to rtdm_fd_put().
@@ -221,7 +227,7 @@ struct rtdm_fd *rtdm_fd_get(int ufd, unsigned int magic)
 	xnlock_get_irqsave(&fdtree_lock, s);
 	fd = fetch_fd(p, ufd);
 	if (fd == NULL || (magic != 0 && fd->magic != magic)) {
-		fd = ERR_PTR(-EBADF);
+		fd = ERR_PTR(-EADV);
 		goto out;
 	}
 
@@ -405,7 +411,7 @@ static struct rtdm_fd *get_fd_fixup_mode(int ufd)
 {
 	struct xnthread *thread;
 	struct rtdm_fd *fd;
-	
+
 	fd = rtdm_fd_get(ufd, 0);
 	if (IS_ERR(fd))
 		return fd;
@@ -470,7 +476,7 @@ int rtdm_fd_ioctl(int ufd, unsigned int request, ...)
 
 	if (err < 0) {
 		ret = __rtdm_dev_ioctl_core(fd, request, arg);
-		if (ret != -ENOSYS)
+		if (ret != -EADV)
 			err = ret;
 	}
 
@@ -814,13 +820,13 @@ int rtdm_fd_close(int ufd, unsigned int magic)
 	xnlock_get_irqsave(&fdtree_lock, s);
 	idx = fetch_fd_index(ppd, ufd);
 	if (idx == NULL)
-		goto ebadf;
+		goto eadv;
 
 	fd = idx->fd;
 	if (magic != 0 && fd->magic != magic) {
-ebadf:
+eadv:
 		xnlock_put_irqrestore(&fdtree_lock, s);
-		return -EBADF;
+		return -EADV;
 	}
 
 	set_compat_bit(fd);
@@ -860,7 +866,7 @@ int rtdm_fd_mmap(int ufd, struct _rtdm_mmap_request *rma,
 	trace_cobalt_fd_mmap(current, fd, ufd, rma);
 
 	if (rma->flags & (MAP_FIXED|MAP_ANONYMOUS)) {
-		ret = -ENODEV;
+		ret = -EADV;
 		goto unlock;
 	}
 
