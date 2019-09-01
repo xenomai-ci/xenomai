@@ -1,15 +1,16 @@
 language: c
-dist: xenial
+dist: bionic
 cache: ccache
 
 addons:
   apt:
     packages:
-      - gcc-aarch64-linux-gnu
+      - gcc-8
+      - gcc-8-aarch64-linux-gnu
       - libc6-dev-arm64-cross
-      - gcc-arm-linux-gnueabihf
+      - gcc-8-arm-linux-gnueabihf
       - libc6-dev-armhf-cross
-      - gcc-powerpc-linux-gnu
+      - gcc-6-powerpc-linux-gnu
       - libc6-dev-powerpc-cross
       - u-boot-tools
 
@@ -20,6 +21,10 @@ env:
     - CCACHE_MAXSIZE=400M
 
 install:
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800
+  - sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 800
+  - sudo update-alternatives --install /usr/bin/arm-linux-gnueabihf-gcc arm-linux-gnueabihf-gcc /usr/bin/arm-linux-gnueabihf-gcc-8 800
+  - sudo update-alternatives --install /usr/bin/powerpc-linux-gnu-gcc powerpc-linux-gnu-gcc /usr/bin/powerpc-linux-gnu-gcc-6 800
   - git clone --depth 1 --branch ${IPIPE_REV} ${IPIPE_KERNEL} ${KDIR}
 
 before_script:
@@ -46,6 +51,8 @@ before_script:
   - ln -s /usr/bin/ccache ~/ccache/arm-linux-gnueabihf-gcc
   - ln -s /usr/bin/ccache ~/ccache/powerpc-linux-gnu-gcc
   - export PATH=~/ccache:$PATH
+  - ${CROSS_COMPILE}gcc --version
+
   - pushd ${KDIR}
   - make -j $(nproc) ${KERNEL_DEFCONFIG}
 
