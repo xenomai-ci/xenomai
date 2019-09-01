@@ -139,6 +139,9 @@ void xnarch_switch_to(struct xnthread *out, struct xnthread *in)
 	(void)last;
 #else
 	switch_to(prev, next, last);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,19,0)
+	fpsimd_restore_current_state();
+#endif
 #endif
 }
 
