@@ -154,7 +154,7 @@ matrix:
   include:
     - env:
       - ARCH: arm
-        IPIPE_REV: ipipe-core-4.19.33-arm-2
+        IPIPE_REV: ipipe-core-4.19.55-arm-3
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-arm.git
         KERNEL_DEFCONFIG: multi_v7_defconfig
     - env:
@@ -167,6 +167,11 @@ matrix:
         IPIPE_REV: ipipe-4.4.y-cip
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe.git
         KERNEL_DEFCONFIG: multi_v7_defconfig
+    - env:
+      - ARCH: arm64
+        IPIPE_REV: ipipe-core-4.19.55-arm64-2
+        IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-arm64.git
+        KERNEL_DEFCONFIG: defconfig
     - env:
       - ARCH: arm64
         IPIPE_REV: ipipe-core-4.14.78-arm64-2
