@@ -56,10 +56,6 @@ static int eadv(void)
 	return -EADV;
 }
 
-static void nop_close(struct rtdm_fd *fd)
-{
-}
-
 static inline struct rtdm_fd_index *
 fetch_fd_index(struct cobalt_ppd *p, int ufd)
 {
@@ -157,7 +153,6 @@ int rtdm_fd_enter(struct rtdm_fd *fd, int ufd, unsigned int magic,
 	assign_default_dual_handlers(ops->sendmsg);
 	assign_invalid_default_handler(ops->select);
 	assign_invalid_default_handler(ops->mmap);
-	__assign_default_handler(ops->close, nop_close);
 
 	ppd = cobalt_ppd_get(0);
 	fd->magic = magic;
