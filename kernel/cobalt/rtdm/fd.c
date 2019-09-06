@@ -84,18 +84,15 @@ static struct rtdm_fd *fetch_fd(struct cobalt_ppd *p, int ufd)
 		(__handler) = (typeof(__handler))eadv;			\
 	while (0)
 
-/* Calling this handler should beget EADV if not implemented. */
-#define assign_invalid_default_handler(__handler)			\
-	do								\
-		if ((__handler) == NULL)				\
-			(__handler) = (typeof(__handler))eadv;		\
-	while (0)
-
 #define __assign_default_handler(__handler, __placeholder)		\
 	do								\
 		if ((__handler) == NULL)				\
 			(__handler) = (typeof(__handler))__placeholder;	\
 	while (0)
+
+/* Calling this handler should beget EADV if not implemented. */
+#define assign_invalid_default_handler(__handler)			\
+	__assign_default_handler(__handler, eadv)
 
 /* Calling this handler should beget ENOSYS if not implemented. */
 #define assign_default_handler(__handler)				\
