@@ -47,11 +47,9 @@ struct proc_dir_entry *rtcan_proc_root;
 static void rtcan_dev_get_ctrlmode_name(can_ctrlmode_t ctrlmode,
 					char* name, int max_len)
 {
-    *name = '\0';
-    if (ctrlmode & CAN_CTRLMODE_LISTENONLY)
-	strncat(name, "listen-only ", max_len);
-    if (ctrlmode & CAN_CTRLMODE_LOOPBACK)
-	strncat(name, "loopback ", max_len);
+    snprintf(name, max_len, "%s%s",
+	     ctrlmode & CAN_CTRLMODE_LISTENONLY ? "listen-only " : "",
+	     ctrlmode & CAN_CTRLMODE_LOOPBACK ? "loopback " : "");
 }
 
 static char *rtcan_state_names[] = {
