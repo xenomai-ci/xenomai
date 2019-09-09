@@ -38,7 +38,12 @@ build-indep-stamp: config.status
 	dh_testdir
 	touch build-indep-stamp
 
-config.status: configure-stamp
+config.status: bootstrap configure-stamp
+
+bootstrap:
+	dh_testdir
+	./scripts/bootstrap
+
 configure-stamp:
 	dh_testdir
 	./configure $(CONFIG_OPTS)
