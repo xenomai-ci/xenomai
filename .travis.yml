@@ -10,7 +10,7 @@ addons:
       - libc6-dev-arm64-cross
       - gcc-8-arm-linux-gnueabihf
       - libc6-dev-armhf-cross
-      - gcc-6-powerpc-linux-gnu
+      - gcc-8-powerpc-linux-gnu
       - libc6-dev-powerpc-cross
       - u-boot-tools
 
@@ -24,7 +24,7 @@ install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800
   - sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 800
   - sudo update-alternatives --install /usr/bin/arm-linux-gnueabihf-gcc arm-linux-gnueabihf-gcc /usr/bin/arm-linux-gnueabihf-gcc-8 800
-  - sudo update-alternatives --install /usr/bin/powerpc-linux-gnu-gcc powerpc-linux-gnu-gcc /usr/bin/powerpc-linux-gnu-gcc-6 800
+  - sudo update-alternatives --install /usr/bin/powerpc-linux-gnu-gcc powerpc-linux-gnu-gcc /usr/bin/powerpc-linux-gnu-gcc-8 800
   - git clone --depth 1 --branch ${IPIPE_REV} ${IPIPE_KERNEL} ${KDIR}
 
 before_script:
@@ -211,6 +211,6 @@ matrix:
         KERNEL_DEFCONFIG: x86_64_defconfig
     - env:
       - ARCH: powerpc
-        IPIPE_REV: ipipe-core-4.14.36-ppc32-1.1
+        IPIPE_REV: ipipe-core-4.19.55-ppc32-1
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-ppc32.git
         KERNEL_DEFCONFIG: mpc5200_defconfig
