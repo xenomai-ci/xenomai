@@ -9,7 +9,7 @@ Homepage: http://www.xenomai.org/
 Package: xenomai-runtime
 Section: devel
 Architecture: amd64 arm armeb armel armhf arm64 i386 powerpc powerpcspe
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, psmisc, netcat
 Suggests: xenomai-kernel-source
 Replaces: xenomai
 Conflicts: xenomai
