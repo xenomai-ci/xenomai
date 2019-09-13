@@ -380,7 +380,7 @@ static void unregister_driver(struct rtdm_driver *drv)
  * - -EAGAIN is returned if no registry slot is available (check/raise
  * CONFIG_XENO_OPT_REGISTRY_NRSLOTS).
  *
- * - -ENOSYS is returned if cobalt is disabled
+ * - -ENOSYS is returned if the real-time core is disabled.
  *
  * - -ENXIO is returned if no valid minor could be assigned
  *

@@ -956,16 +956,8 @@ enum rtdm_timer_mode {
 
 /** @} rtdm_timer */
 
-#ifndef DOXYGEN_CPP /* Avoid broken doxygen output */
-#define rtdm_timer_init(timer, handler, name)				\
-({									\
-	xntimer_init((timer), &nkclock, handler,			\
-		     NULL, XNTIMER_IGRAVITY);				\
-	xntimer_set_name((timer), (name));				\
-	0;								\
-})
-
-#endif /* !DOXYGEN_CPP */
+int rtdm_timer_init(rtdm_timer_t *timer, rtdm_timer_handler_t handler,
+		    const char *name);
 
 void rtdm_timer_destroy(rtdm_timer_t *timer);
 

@@ -114,6 +114,9 @@ int rtdm_task_init(rtdm_task_t *task, const char *name,
 	struct xnthread_init_attr iattr;
 	int err;
 
+	if (!realtime_core_enabled())
+		return -ENOSYS;
+
 	iattr.name = name;
 	iattr.flags = 0;
 	iattr.personality = &xenomai_personality;
@@ -500,7 +503,6 @@ EXPORT_SYMBOL_GPL(rtdm_task_busy_sleep);
  * @{
  */
 
-#ifdef DOXYGEN_CPP /* Only used for doxygen doc generation */
 /**
  * @brief Initialise a timer
  *
@@ -513,8 +515,17 @@ EXPORT_SYMBOL_GPL(rtdm_task_busy_sleep);
  * @coretags{task-unrestricted}
  */
 int rtdm_timer_init(rtdm_timer_t *timer, rtdm_timer_handler_t handler,
-		    const char *name);
-#endif /* DOXYGEN_CPP */
+		    const char *name)
+{
+	if (!realtime_core_enabled())
+		return -ENOSYS;
+
+	xntimer_init((timer), &nkclock, handler, NULL, XNTIMER_IGRAVITY);
+	xntimer_set_name((timer), (name));
+	return 0;
+}
+
+EXPORT_SYMBOL_GPL(rtdm_timer_init);
 
 /**
  * @brief Destroy a timer
@@ -747,8 +758,10 @@ EXPORT_SYMBOL_GPL(rtdm_event_init);
 void rtdm_event_destroy(rtdm_event_t *event)
 {
 	trace_cobalt_driver_event_destroy(event);
-	__rtdm_synch_flush(&event->synch_base, XNRMID);
-	xnselect_destroy(&event->select_block);
+	if (realtime_core_enabled()) {
+		__rtdm_synch_flush(&event->synch_base, XNRMID);
+		xnselect_destroy(&event->select_block);
+	}
 }
 EXPORT_SYMBOL_GPL(rtdm_event_destroy);
 
@@ -1031,8 +1044,10 @@ EXPORT_SYMBOL_GPL(rtdm_sem_init);
 void rtdm_sem_destroy(rtdm_sem_t *sem)
 {
 	trace_cobalt_driver_sem_destroy(sem);
-	__rtdm_synch_flush(&sem->synch_base, XNRMID);
-	xnselect_destroy(&sem->select_block);
+	if (realtime_core_enabled()) {
+		__rtdm_synch_flush(&sem->synch_base, XNRMID);
+		xnselect_destroy(&sem->select_block);
+	}
 }
 EXPORT_SYMBOL_GPL(rtdm_sem_destroy);
 
@@ -1261,7 +1276,8 @@ void rtdm_mutex_destroy(rtdm_mutex_t *mutex)
 {
 	trace_cobalt_driver_mutex_destroy(mutex);
 
-	__rtdm_synch_flush(&mutex->synch_base, XNRMID);
+	if (realtime_core_enabled())
+		__rtdm_synch_flush(&mutex->synch_base, XNRMID);
 }
 EXPORT_SYMBOL_GPL(rtdm_mutex_destroy);
 
@@ -1418,6 +1434,8 @@ EXPORT_SYMBOL_GPL(rtdm_mutex_timedlock);
  *
  * - -EBUSY is returned if the specified IRQ line is already in use.
  *
+ * - -ENOSYS is returned if the real-time core is disabled.
+ *
  * @coretags{secondary-only}
  */
 int rtdm_irq_request(rtdm_irq_t *irq_handle, unsigned int irq_no,
@@ -1425,6 +1443,9 @@ int rtdm_irq_request(rtdm_irq_t *irq_handle, unsigned int irq_no,
 		     const char *device_name, void *arg)
 {
 	int err;
+
+	if (!realtime_core_enabled())
+		return -ENOSYS;
 
 	if (!XENO_ASSERT(COBALT, xnsched_root_p()))
 		return -EPERM;
