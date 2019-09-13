@@ -564,8 +564,8 @@ int rtdm_gpiochip_scan_of(struct device_node *from, const char *compat,
 	struct rtdm_gpio_chip *rgc;
 	int ret = -ENODEV, _ret;
 
-	if (!realtime_core_enabled())
-		return 0;
+	if (!rtdm_available())
+		return -ENOSYS;
 
 	for (;;) {
 		np = of_find_compatible_node(np, NULL, compat);
@@ -621,9 +621,6 @@ EXPORT_SYMBOL_GPL(rtdm_gpiochip_scan_array_of);
 void rtdm_gpiochip_remove_of(int type)
 {
 	struct rtdm_gpio_chip *rgc, *n;
-
-	if (!realtime_core_enabled())
-		return;
 
 	mutex_lock(&chip_lock);
 
