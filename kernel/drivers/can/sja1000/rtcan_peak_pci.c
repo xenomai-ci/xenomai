@@ -354,16 +354,4 @@ static struct pci_driver rtcan_peak_pci_driver = {
 	.remove		= peak_pci_remove_one,
 };
 
-static int __init rtcan_peak_pci_init(void)
-{
-        return pci_register_driver(&rtcan_peak_pci_driver);
-}
-
-
-static void __exit rtcan_peak_pci_exit(void)
-{
-	pci_unregister_driver(&rtcan_peak_pci_driver);
-}
-
-module_init(rtcan_peak_pci_init);
-module_exit(rtcan_peak_pci_exit);
+module_pci_driver(rtcan_peak_pci_driver);

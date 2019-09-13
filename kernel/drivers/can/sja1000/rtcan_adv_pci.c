@@ -358,15 +358,4 @@ static struct pci_driver rtcan_adv_pci_driver = {
 	.remove = adv_pci_remove_one,
 };
 
-static int __init rtcan_adv_pci_init(void)
-{
-	return pci_register_driver(&rtcan_adv_pci_driver);
-}
-
-static void __exit rtcan_adv_pci_exit(void)
-{
-	pci_unregister_driver(&rtcan_adv_pci_driver);
-}
-
-module_init(rtcan_adv_pci_init);
-module_exit(rtcan_adv_pci_exit);
+module_pci_driver(rtcan_adv_pci_driver);
