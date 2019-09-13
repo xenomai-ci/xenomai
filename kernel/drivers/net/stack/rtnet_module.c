@@ -318,6 +318,9 @@ int __init rtnet_init(void)
 {
 	int err = 0;
 
+	if (!rtdm_available())
+		return -ENOSYS;
+
 	printk("\n*** RTnet for Xenomai v" XENO_VERSION_STRING " ***\n\n");
 	printk("RTnet: initialising real-time networking\n");
 
