@@ -1656,8 +1656,8 @@ static int __init rt_imx_uart_init(void)
 {
 	int ret;
 
-	if (!realtime_core_enabled())
-		return 0;
+	if (!rtdm_available())
+		return -ENODEV;
 
 	ret = platform_driver_register(&rt_imx_uart_driver);
 	if (ret) {
@@ -1670,8 +1670,7 @@ static int __init rt_imx_uart_init(void)
 
 static void __exit rt_imx_uart_exit(void)
 {
-	if (realtime_core_enabled())
-		platform_driver_unregister(&rt_imx_uart_driver);
+	platform_driver_unregister(&rt_imx_uart_driver);
 }
 
 module_init(rt_imx_uart_init);
