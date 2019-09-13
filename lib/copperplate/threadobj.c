@@ -1515,7 +1515,6 @@ static void finalize_thread(void *p) /* thobj->lock free */
 	thobj->magic = ~thobj->magic;
 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 	threadobj_set_current(p);
-	thobj->pid = 0;
 
 	if (thobj->wait_sobj)
 		__syncobj_cleanup_wait(thobj->wait_sobj, thobj);
