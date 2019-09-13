@@ -2426,6 +2426,21 @@ int rtdm_in_rt_context(void);
  */
 int rtdm_rt_capable(struct rtdm_fd *fd);
 
+/**
+ * Test if the real-time core is available
+ *
+ * @return True if the real-time is available, false if it is disabled or in
+ * error state.
+ *
+ * @note Drivers should query the core state during initialization if they
+ * perform hardware setup operations or interact with RTDM services such as
+ * locks prior to calling an RTDM service that has a built-in state check of
+ * the real-time core (e.g. rtdm_dev_register() or rtdm_task_init()).
+ *
+ * @coretags{unrestricted}
+ */
+bool rtdm_available(void);
+
 #endif /* DOXYGEN_CPP */
 
 /** @} Utility Services */

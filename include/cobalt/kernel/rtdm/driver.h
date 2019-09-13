@@ -1289,6 +1289,11 @@ static inline int rtdm_strncpy_from_user(struct rtdm_fd *fd,
 	return cobalt_strncpy_from_user(dst, src, count);
 }
 
+static inline bool rtdm_available(void)
+{
+	return realtime_core_enabled();
+}
+
 static inline int rtdm_rt_capable(struct rtdm_fd *fd)
 {
 	if (!XENO_ASSERT(COBALT, !xnsched_interrupt_p()))
