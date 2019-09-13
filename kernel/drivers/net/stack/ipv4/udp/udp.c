@@ -807,7 +807,8 @@ static struct rtdm_device udp_device = {
  */
 static int __init rt_udp_init(void)
 {
-	int i;
+	int i, err;
+
 	if ((auto_port_start < 0) ||
 	    (auto_port_start >= 0x10000 - RT_UDP_SOCKETS))
 		auto_port_start = 1024;
@@ -819,7 +820,10 @@ static int __init rt_udp_init(void)
 	for (i = 0; i < ARRAY_SIZE(port_hash); i++)
 		INIT_HLIST_HEAD(&port_hash[i]);
 
-	return rtdm_dev_register(&udp_device);
+	err = rtdm_dev_register(&udp_device);
+	if (err)
+		rt_inet_del_protocol(&udp_protocol);
+	return err;
 }
 
 /***
