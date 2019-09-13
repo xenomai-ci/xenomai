@@ -347,8 +347,7 @@ undo:
  *
  * - -EINVAL, if udd_device.device_flags contains invalid flags.
  *
- * - -ENXIO can be received if this service is called while the Cobalt
- * kernel is disabled.
+ * - -ENOSYS, if this service is called while the real-time core is disabled.
  *
  * @coretags{secondary-only}
  */
@@ -359,9 +358,6 @@ int udd_register_device(struct udd_device *udd)
 	struct rtdm_driver *drv = &ur->driver;
 	struct udd_memregion *rn;
 	int ret, n;
-
-	if (!realtime_core_enabled())
-		return -ENXIO;
 
 	if (udd->device_flags & RTDM_PROTOCOL_DEVICE)
 		return -EINVAL;
@@ -458,9 +454,6 @@ int udd_unregister_device(struct udd_device *udd)
 	struct udd_reserved *ur = &udd->__reserved;
 	struct udd_memregion *rn;
 	int n;
-
-	if (!realtime_core_enabled())
-		return -ENXIO;
 
 	rtdm_event_destroy(&ur->pulse);
 
