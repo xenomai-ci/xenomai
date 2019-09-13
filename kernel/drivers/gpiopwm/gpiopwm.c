@@ -272,9 +272,6 @@ static int __init __gpiopwm_init(void)
 {
 	int i, ret;
 
-	if (!realtime_core_enabled())
-		return -ENODEV;
-
 	for (i = 0; i < ARRAY_SIZE(device); i++) {
 		ret = rtdm_dev_register(device + i);
 		if (ret)

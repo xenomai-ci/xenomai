@@ -517,17 +517,11 @@ static struct rtdm_device device = {
 
 static int __init __timerbench_init(void)
 {
-	if (!realtime_core_enabled())
-		return 0;
-
 	return rtdm_dev_register(&device);
 }
 
 static void __timerbench_exit(void)
 {
-	if (!realtime_core_enabled())
-		return;
-
 	rtdm_dev_unregister(&device);
 }
 

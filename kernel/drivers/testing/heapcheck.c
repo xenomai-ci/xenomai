@@ -500,9 +500,6 @@ static struct rtdm_device heapcheck_device = {
 
 static int __init heapcheck_init(void)
 {
-	if (!realtime_core_enabled())
-		return -ENODEV;
-
 	return rtdm_dev_register(&heapcheck_device);
 }
 

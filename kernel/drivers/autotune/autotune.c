@@ -784,17 +784,11 @@ static struct rtdm_device device = {
 
 static int __init autotune_init(void)
 {
-	if (!realtime_core_enabled())
-		return 0;
-
 	return rtdm_dev_register(&device);
 }
 
 static void __exit autotune_exit(void)
 {
-	if (!realtime_core_enabled())
-		return;
-
 	rtdm_dev_unregister(&device);
 }
 

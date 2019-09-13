@@ -738,9 +738,6 @@ static struct rtdm_device device = {
 
 int __init __switchtest_init(void)
 {
-	if (!realtime_core_enabled())
-		return 0;
-
 	fp_features = fp_detect();
 
 	return rtdm_dev_register(&device);
@@ -748,9 +745,6 @@ int __init __switchtest_init(void)
 
 void __switchtest_exit(void)
 {
-	if (!realtime_core_enabled())
-		return;
-
 	rtdm_dev_unregister(&device);
 }
 
