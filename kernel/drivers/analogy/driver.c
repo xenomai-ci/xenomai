@@ -55,8 +55,8 @@ int a4l_lct_drv(char *pin, struct a4l_driver ** pio)
 
 int a4l_register_drv(struct a4l_driver * drv)
 {
-	if (!realtime_core_enabled())
-		return 0;
+	if (!rtdm_available())
+		return -ENOSYS;
 
 	__a4l_dbg(1, core_dbg, "board name=%s\n", drv->board_name);
 
@@ -69,9 +69,6 @@ int a4l_register_drv(struct a4l_driver * drv)
 
 int a4l_unregister_drv(struct a4l_driver * drv)
 {
-	if (!realtime_core_enabled())
-		return 0;
-
 	__a4l_dbg(1, core_dbg, "board name=%s\n", drv->board_name);
 
 	if (a4l_lct_drv(drv->board_name, NULL) == 0) {

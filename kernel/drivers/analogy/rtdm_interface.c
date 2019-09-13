@@ -274,8 +274,8 @@ static int __init a4l_init(void)
 {
 	int ret;
 
-	if (!realtime_core_enabled())
-		return 0;
+	if (!rtdm_available())
+		return -ENOSYS;
 
 	/* Initializes the devices */
 	a4l_init_devs();
@@ -299,9 +299,6 @@ out_a4l_init:
 
 static void __exit a4l_cleanup(void)
 {
-	if (!realtime_core_enabled())
-		return;
-
 	/* Removes Analogy proc files */
 	a4l_cleanup_proc();
 
