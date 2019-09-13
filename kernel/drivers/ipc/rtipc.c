@@ -493,8 +493,8 @@ int __init __rtipc_init(void)
 {
 	int ret, n;
 
-	if (!realtime_core_enabled())
-		return 0;
+	if (!rtdm_available())
+		return -ENOSYS;
 
 	for (n = 0; n < IPCPROTO_MAX; n++) {
 		if (protocols[n] && protocols[n]->proto_init) {
@@ -510,9 +510,6 @@ int __init __rtipc_init(void)
 void __exit __rtipc_exit(void)
 {
 	int n;
-
-	if (!realtime_core_enabled())
-		return;
 
 	rtdm_dev_unregister(&device);
 
