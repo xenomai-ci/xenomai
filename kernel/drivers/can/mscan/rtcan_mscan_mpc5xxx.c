@@ -374,6 +374,9 @@ static struct of_platform_driver mpc5xxx_can_driver = {
 
 static int __init mpc5xxx_can_init(void)
 {
+	if (!rtdm_available())
+		return -ENOSYS;
+
 	return of_register_platform_driver(&mpc5xxx_can_driver);
 }
 module_init(mpc5xxx_can_init);

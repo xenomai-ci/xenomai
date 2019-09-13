@@ -161,8 +161,8 @@ static int __init rtcan_isa_init(void)
 	int i, err;
 	int devices = 0;
 
-	if (!realtime_core_enabled())
-		return 0;
+	if (!rtdm_available())
+		return -ENOSYS;
 
 	for (i = 0; i < RTCAN_ISA_MAX_DEV && io[i] != 0; i++) {
 		err = rtcan_isa_init_one(i);
@@ -186,9 +186,6 @@ static void rtcan_isa_exit(void)
 {
 	int i;
 	struct rtcan_device *dev;
-
-	if (!realtime_core_enabled())
-		return;
 
 	for (i = 0; i < RTCAN_ISA_MAX_DEV; i++) {
 		dev = rtcan_isa_devs[i];

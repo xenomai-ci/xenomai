@@ -212,6 +212,9 @@ static int ixxat_pci_init_one(struct pci_dev *pdev,
     void __iomem *base_addr;
     struct rtcan_device *master_dev = NULL;
 
+    if (!rtdm_available())
+	return -ENODEV;
+
     if ((ret = pci_enable_device (pdev)))
 	goto failure;
 
@@ -296,17 +299,13 @@ static struct pci_driver rtcan_ixxat_pci_driver = {
 
 static int __init rtcan_ixxat_pci_init(void)
 {
-	if (!realtime_core_enabled())
-		return 0;
-
     return pci_register_driver(&rtcan_ixxat_pci_driver);
 }
 
 
 static void __exit rtcan_ixxat_pci_exit(void)
 {
-	if (realtime_core_enabled())
-		pci_unregister_driver(&rtcan_ixxat_pci_driver);
+	pci_unregister_driver(&rtcan_ixxat_pci_driver);
 }
 
 module_init(rtcan_ixxat_pci_init);

@@ -238,6 +238,9 @@ static int ems_pci_add_card(struct pci_dev *pdev,
 	int max_chan, conf_size, base_bar;
 	int err, i;
 
+	if (!rtdm_available())
+		return -ENODEV;
+
 	/* Enabling PCI device */
 	if (pci_enable_device(pdev) < 0) {
 		dev_err(&pdev->dev, "Enabling PCI device failed\n");
@@ -390,16 +393,12 @@ static struct pci_driver ems_pci_driver = {
 
 static int __init ems_pci_init(void)
 {
-	if (!realtime_core_enabled())
-		return 0;
-
 	return pci_register_driver(&ems_pci_driver);
 }
 
 static void __exit ems_pci_exit(void)
 {
-	if (realtime_core_enabled())
-		pci_unregister_driver(&ems_pci_driver);
+	pci_unregister_driver(&ems_pci_driver);
 }
 
 module_init(ems_pci_init);

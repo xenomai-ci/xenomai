@@ -284,6 +284,9 @@ static int peak_pci_init_one(struct pci_dev *pdev,
     u16 sub_sys_id;
     struct rtcan_device *master_dev = NULL;
 
+    if (!rtdm_available())
+	return -ENODEV;
+
     printk("%s: initializing device %04x:%04x\n",
 	   RTCAN_DRV_NAME,  pdev->vendor, pdev->device);
 
@@ -353,17 +356,13 @@ static struct pci_driver rtcan_peak_pci_driver = {
 
 static int __init rtcan_peak_pci_init(void)
 {
-	if (!realtime_core_enabled())
-		return 0;
-
         return pci_register_driver(&rtcan_peak_pci_driver);
 }
 
 
 static void __exit rtcan_peak_pci_exit(void)
 {
-	if (realtime_core_enabled())
-		pci_unregister_driver(&rtcan_peak_pci_driver);
+	pci_unregister_driver(&rtcan_peak_pci_driver);
 }
 
 module_init(rtcan_peak_pci_init);

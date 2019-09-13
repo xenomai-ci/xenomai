@@ -460,6 +460,9 @@ static int plx_pci_add_card(struct pci_dev *pdev,
 	u32 val;
 	void __iomem *addr;
 
+	if (!rtdm_available())
+		return -ENODEV;
+
 	ci = (struct plx_pci_card_info *)ent->driver_data;
 
 	if (pci_enable_device(pdev) < 0) {
@@ -596,16 +599,12 @@ static struct pci_driver plx_pci_driver = {
 
 static int __init plx_pci_init(void)
 {
-	if (!realtime_core_enabled())
-		return 0;
-
 	return pci_register_driver(&plx_pci_driver);
 }
 
 static void __exit plx_pci_exit(void)
 {
-	if (realtime_core_enabled())
-		pci_unregister_driver(&plx_pci_driver);
+	pci_unregister_driver(&plx_pci_driver);
 }
 
 module_init(plx_pci_init);
