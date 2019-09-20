@@ -55,21 +55,6 @@ static void check_inner(const char *fn, int line, const char *msg,
 	__status;							\
 })
 
-static void check_sleep_inner(const char *fn, int line,
-			      const char *msg, unsigned long long start)
-{
-	unsigned long long diff = timer_tsc2ns(timer_get_tsc() - start);
-
-	if (diff < 300 * NS_PER_MS) {
-		fprintf(stderr, "FAILED %s:%d: %s waited only %Ld.%06u ms\n",
-			fn, line, msg, diff / 1000000,
-			(unsigned)(diff % 1000000));
-		exit(EXIT_FAILURE);
-	}
-}
-#define check_sleep(msg, start) \
-	check_sleep_inner(__func__, __LINE__, msg, start)
-
 static const char *devname = "/dev/rtdm/rtdm0";
 static const char *devname2 = "/dev/rtdm/rtdm1";
 
@@ -166,7 +151,6 @@ static int test_handover(int fd)
 
 static int run_rtdm(struct smokey_test *t, int argc, char *const argv[])
 {
-	unsigned long long start;
 	int dev, dev2, status;
 
 	status = system("modprobe -q xeno_rtdmtest");
@@ -194,7 +178,6 @@ static int run_rtdm(struct smokey_test *t, int argc, char *const argv[])
 	smokey_trace("Defer close by pending reference");
 	check("ioctl", ioctl(dev, RTTST_RTIOC_RTDM_DEFER_CLOSE,
 			     RTTST_RTDM_DEFER_CLOSE_CONTEXT), 0);
-	start = timer_get_tsc();
 	check("close", close(dev), 0);
 	check("open", open(devname, O_RDWR), -EBUSY);
 	dev2 = check("open", open(devname2, O_RDWR), dev);
@@ -208,13 +191,11 @@ static int run_rtdm(struct smokey_test *t, int argc, char *const argv[])
 	check("close", close(dev), 0);
 	dev = check("open", open(devname, O_RDWR), dev);
 
-	smokey_trace("Deferred module unload");
+	smokey_trace("Disconnect on module unload");
 	check("ioctl", ioctl(dev, RTTST_RTIOC_RTDM_DEFER_CLOSE,
 			     RTTST_RTDM_DEFER_CLOSE_CONTEXT), 0);
-	start = timer_get_tsc();
 	check("close", close(dev), 0);
 	check("rmmod", system("rmmod xeno_rtdmtest"), 0);
-	check_sleep("rmmod", start);
 
 	return 0;
 }
