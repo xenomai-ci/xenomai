@@ -49,6 +49,14 @@ do {										\
 	  __item;						\
   })
 
+#define list_get_entry_init(__head, __type, __member)		\
+  ({								\
+	  __type *__item;					\
+	  __item = list_first_entry(__head, __type, __member);	\
+	  list_del_init(&__item->__member);			\
+	  __item;						\
+  })
+
 #ifndef list_next_entry
 #define list_next_entry(__item, __member)			\
 	list_entry((__item)->__member.next, typeof(*(__item)), __member)

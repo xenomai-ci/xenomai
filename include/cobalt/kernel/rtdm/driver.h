@@ -385,6 +385,7 @@ struct rtdm_device {
 		atomic_t refcount;
 		struct rtdm_fd_ops ops;
 		wait_queue_head_t putwq;
+		struct list_head openfd_list;
 	};
 };
 

@@ -51,6 +51,7 @@ static void close_timer_proc(rtdm_timer_t *timer)
 		       "rtdmtest: %s: close_counter is %lu, should be 1!\n",
 		       __FUNCTION__, ctx->close_counter);
 
+	ctx->close_deferral = RTTST_RTDM_NORMAL_CLOSE;
 	rtdm_fd_unlock(rtdm_private_to_fd(ctx));
 }
 
@@ -81,6 +82,7 @@ static void rtdm_basic_close(struct rtdm_fd *fd)
 			       __FUNCTION__, ctx->close_counter);
 			return;
 		}
+		rtdm_fd_unlock(fd);
 		break;
 	}
 

@@ -417,6 +417,7 @@ int rtdm_dev_register(struct rtdm_device *dev)
 	else
 		dev->ops.open = (typeof(dev->ops.open))enosys;
 
+	INIT_LIST_HEAD(&dev->openfd_list);
 	init_waitqueue_head(&dev->putwq);
 	dev->ops.close = __rtdm_dev_close; /* Interpose on driver's handler. */
 	atomic_set(&dev->refcount, 0);
@@ -524,8 +525,9 @@ EXPORT_SYMBOL_GPL(rtdm_dev_register);
 /**
  * @brief Unregister a RTDM device
  *
- * Removes the device from the RTDM namespace. This routine waits until
- * all connections to @a device have been closed prior to unregistering.
+ * Removes the device from the RTDM namespace. This routine first
+ * attempts to teardown all active connections to the @a device prior
+ * to unregistering.
  *
  * @param[in] dev Device descriptor.
  *
@@ -541,6 +543,9 @@ void rtdm_dev_unregister(struct rtdm_device *dev)
 
 	/* Lock out any further connection. */
 	dev->magic = ~RTDM_DEVICE_MAGIC;
+
+	/* Flush all fds from this device. */
+	rtdm_device_flush_fds(dev);
 
 	/* Then wait for the ongoing connections to finish. */
 	wait_event(dev->putwq,

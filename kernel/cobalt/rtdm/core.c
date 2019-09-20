@@ -54,7 +54,7 @@ void __rtdm_dev_close(struct rtdm_fd *fd)
 	struct rtdm_device *dev = context->device;
 	struct rtdm_driver *drv = dev->driver;
 
-	if (drv->ops.close)
+	if (!fd->stale && drv->ops.close)
 		drv->ops.close(fd);
 
 	cleanup_instance(dev, context);
@@ -174,7 +174,7 @@ int __rtdm_dev_open(const char *path, int oflag)
 
 	context->fd.minor = dev->minor;
 	context->fd.oflags = oflag;
-	
+
 	trace_cobalt_fd_open(current, &context->fd, ufd, oflag);
 
 	if (dev->ops.open) {
@@ -185,8 +185,7 @@ int __rtdm_dev_open(const char *path, int oflag)
 			goto fail_open;
 	}
 
-	trace_cobalt_fd_created(&context->fd, ufd);
-	ret = rtdm_fd_register(&context->fd, ufd);
+	ret = rtdm_device_new_fd(&context->fd, ufd, context->device);
 	if (ret < 0)
 		goto fail_open;
 
@@ -240,8 +239,7 @@ int __rtdm_dev_socket(int protocol_family, int socket_type,
 			goto fail_socket;
 	}
 
-	trace_cobalt_fd_created(&context->fd, ufd);
-	ret = rtdm_fd_register(&context->fd, ufd);
+	ret = rtdm_device_new_fd(&context->fd, ufd, context->device);
 	if (ret < 0)
 		goto fail_socket;
 

@@ -31,6 +31,7 @@ struct rtdm_fd;
 struct _rtdm_mmap_request;
 struct xnselector;
 struct cobalt_ppd;
+struct rtdm_device;
 
 /**
  * @file
@@ -304,7 +305,9 @@ struct rtdm_fd {
 #ifdef CONFIG_XENO_ARCH_SYS3264
 	int compat;
 #endif
+	bool stale;
 	struct list_head cleanup;
+	struct list_head next;	/* in dev->openfd_list */
 };
 
 #define RTDM_FD_MAGIC 0x52544446
@@ -394,6 +397,11 @@ int rtdm_fd_valid_p(int ufd);
 
 int rtdm_fd_select(int ufd, struct xnselector *selector,
 		   unsigned int type);
+
+int rtdm_device_new_fd(struct rtdm_fd *fd, int ufd,
+		struct rtdm_device *dev);
+
+void rtdm_device_flush_fds(struct rtdm_device *dev);
 
 void rtdm_fd_cleanup(struct cobalt_ppd *p);
 

@@ -160,7 +160,9 @@ int rtdm_fd_enter(struct rtdm_fd *fd, int ufd, unsigned int magic,
 	fd->owner = ppd;
 	fd->ufd = ufd;
 	fd->refs = 1;
+	fd->stale = false;
 	set_compat_bit(fd);
+	INIT_LIST_HEAD(&fd->next);
 
 	return 0;
 }
@@ -188,6 +190,24 @@ int rtdm_fd_register(struct rtdm_fd *fd, int ufd)
 	}
 
 	return ret;
+}
+
+int rtdm_device_new_fd(struct rtdm_fd *fd, int ufd,
+			struct rtdm_device *device)
+{
+	spl_t s;
+	int ret;
+
+	ret = rtdm_fd_register(fd, ufd);
+	if (ret < 0)
+		return ret;
+
+	trace_cobalt_fd_created(fd, ufd);
+	xnlock_get_irqsave(&fdtree_lock, s);
+	list_add(&fd->next, &device->openfd_list);
+	xnlock_put_irqrestore(&fdtree_lock, s);
+
+	return 0;
 }
 
 /**
@@ -220,6 +240,11 @@ struct rtdm_fd *rtdm_fd_get(int ufd, unsigned int magic)
 	fd = fetch_fd(p, ufd);
 	if (fd == NULL || (magic != 0 && fd->magic != magic)) {
 		fd = ERR_PTR(-EADV);
+		goto out;
+	}
+
+	if (fd->stale) {
+		fd = ERR_PTR(-EBADF);
 		goto out;
 	}
 
@@ -269,9 +294,13 @@ static void lostage_trigger_close(struct ipipe_work_header *work)
 
 static void __put_fd(struct rtdm_fd *fd, spl_t s)
 {
-	int destroy;
+	bool destroy;
 
+	XENO_WARN_ON(COBALT, fd->refs <= 0);
 	destroy = --fd->refs == 0;
+	if (destroy && !list_empty(&fd->next))
+		list_del_init(&fd->next);
+
 	xnlock_put_irqrestore(&fdtree_lock, s);
 
 	if (!destroy)
@@ -293,6 +322,29 @@ static void __put_fd(struct rtdm_fd *fd, spl_t s)
 
 		ipipe_post_work_root(&closework, work);
 	}
+}
+
+void rtdm_device_flush_fds(struct rtdm_device *dev)
+{
+	struct rtdm_driver *drv = dev->driver;
+	struct rtdm_fd *fd;
+	spl_t s;
+
+	xnlock_get_irqsave(&fdtree_lock, s);
+
+	while (!list_empty(&dev->openfd_list)) {
+		fd = list_get_entry_init(&dev->openfd_list, struct rtdm_fd, next);
+		fd->stale = true;
+		if (drv->ops.close) {
+			rtdm_fd_get_light(fd);
+			xnlock_put_irqrestore(&fdtree_lock, s);
+			drv->ops.close(fd);
+			rtdm_fd_put(fd);
+			xnlock_get_irqsave(&fdtree_lock, s);
+		}
+	}
+
+	xnlock_put_irqrestore(&fdtree_lock, s);
 }
 
 /**
@@ -359,8 +411,6 @@ void rtdm_fd_unlock(struct rtdm_fd *fd)
 	spl_t s;
 
 	xnlock_get_irqsave(&fdtree_lock, s);
-	/* Warn if fd was unreferenced. */
-	XENO_WARN_ON(COBALT, fd->refs <= 0);
 	__put_fd(fd, s);
 }
 EXPORT_SYMBOL_GPL(rtdm_fd_unlock);

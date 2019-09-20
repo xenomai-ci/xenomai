@@ -49,6 +49,12 @@ int __rtdm_dev_ioctl_core(struct rtdm_fd *fd,
 int __rtdm_mmap_from_fdop(struct rtdm_fd *fd, size_t len, off_t offset,
 			  int prot, int flags, void **pptr);
 
+/* nklock held, irqs off. */
+static inline void rtdm_fd_get_light(struct rtdm_fd *fd)
+{
+	++fd->refs;
+}
+
 int rtdm_init(void);
 
 void rtdm_cleanup(void);
