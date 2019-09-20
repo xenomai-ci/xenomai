@@ -276,7 +276,7 @@ int smokey_fork_exec(const char *path, const char *arg)
 	case -1:
 		error(1, errno, "fork/vfork");
 	case 0:
-		execl(path, arg, NULL);
+		execlp(path, arg, NULL);
 		error(1, errno, "execl %s", path);
 	default:
 		waitpid(pid, &wstatus, 0);
