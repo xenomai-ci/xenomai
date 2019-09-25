@@ -24,6 +24,9 @@ If the script is passed the -r option, real-time stress is added to the test,
 with the help of the "switchtest" test. But beware: the latency test figures are
 then no longer meaningful.
 
+For running test in a virtual machine use the --vm option. This option relaxes
+some of the timing thresholds.
+
 Any other option passed on the command line is passed to the latency test.
 
 Example:
@@ -37,6 +40,7 @@ EOF
 }
 
 keep_going=
+run_on_vm=
 rt_load=false
 
 while :; do
@@ -48,6 +52,11 @@ while :; do
 
 	-k)
 	    keep_going=--keep-going
+	    shift
+	    ;;
+
+	--vm)
+	    run_on_vm=--vm
 	    shift
 	    ;;
 
@@ -73,7 +82,7 @@ echo 0 > /proc/xenomai/latency || :
 
 testdir=@testdir@
 
-$testdir/smokey --run $keep_going
+$testdir/smokey --run $run_on_vm $keep_going
 $testdir/clocktest -D -T 30 -C CLOCK_HOST_REALTIME || $testdir/clocktest -T 30
 $testdir/switchtest -T 30
 
