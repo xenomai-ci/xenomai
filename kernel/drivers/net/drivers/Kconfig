@@ -124,9 +124,9 @@ config XENO_DRIVERS_NET_DRV_AT91_ETHER
     tristate "AT91RM9200 Board Ethernet Driver"
 
 config XENO_DRIVERS_NET_DRV_MACB
-    depends on XENO_DRIVERS_NET && ARCH_AT91
-    select AT91_PROGRAMMABLE_CLOCKS
-    tristate "MACB AT91SAM926x devices"
+    depends on XENO_DRIVERS_NET
+    select AT91_PROGRAMMABLE_CLOCKS if ARCH_AT91
+    tristate "Cadence MACB/GEM devices"
     ---help---
     Driver for internal MAC-controller on AT91SAM926x microcontrollers.
     Porting by Cristiano Mantovani and Stefano Banzi (Marposs SpA).

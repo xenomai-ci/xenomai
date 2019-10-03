@@ -679,7 +679,13 @@ static int gem_rx(struct macb *bp, int budget, nanosecs_abs_t *time_stamp)
 	unsigned int		entry;
 	struct rtskb		*skb;
 	struct macb_dma_desc	*desc;
-	int			count = 0;
+	int			count = 0, status;
+
+	status = macb_readl(bp, RSR);
+	macb_writel(bp, RSR, status);
+
+	if (bp->caps & MACB_CAPS_ISR_CLEAR_ON_WRITE)
+		macb_writel(bp, ISR, MACB_BIT(RCOMP));
 
 	while (count < budget) {
 		u32 addr, ctrl;
@@ -877,7 +883,7 @@ static int macb_interrupt(rtdm_irq_t *irq_handle)
 	struct rtnet_device *dev = dev_id;
 	struct macb *bp = rtnetdev_priv(dev);
 	unsigned received = 0;
-	u32 status;
+	u32 status, ctrl;
 
 	status = macb_readl(bp, ISR);
 
@@ -895,9 +901,10 @@ static int macb_interrupt(rtdm_irq_t *irq_handle)
 
 		rtdev_vdbg(bp->dev, "isr = 0x%08lx\n", (unsigned long)status);
 
-		if (status & MACB_RX_INT_FLAGS)
+		if (status & MACB_BIT(RCOMP)) {
 			received += bp->macbgem_ops.mog_rx(bp, 100 - received,
 							&time_stamp);
+		}
 
 		if (unlikely(status & (MACB_TX_ERR_FLAGS))) {
 			macb_writel(bp, IDR, MACB_TX_INT_FLAGS);
@@ -916,6 +923,15 @@ static int macb_interrupt(rtdm_irq_t *irq_handle)
 		 * Link change detection isn't possible with RMII, so we'll
 		 * add that if/when we get our hands on a full-blown MII PHY.
 		 */
+
+		if (status & MACB_BIT(RXUBR)) {
+			ctrl = macb_readl(bp, NCR);
+			macb_writel(bp, NCR, ctrl & ~MACB_BIT(RE));
+			macb_writel(bp, NCR, ctrl | MACB_BIT(RE));
+
+			if (bp->caps & MACB_CAPS_ISR_CLEAR_ON_WRITE)
+				macb_writel(bp, ISR, MACB_BIT(RXUBR));
+		}
 
 		if (status & MACB_BIT(ISR_ROVR)) {
 			/* We missed at least one packet */
@@ -1320,6 +1336,7 @@ static void macb_configure_caps(struct macb *bp)
 		if (GEM_BFEXT(IRQCOR, gem_readl(bp, DCFG1)) == 0)
 			bp->caps |= MACB_CAPS_ISR_CLEAR_ON_WRITE;
 	}
+	rtdev_vdbg(bp->dev, "Capabilities : %X\n", bp->caps);
 }
 
 static void macb_init_hw(struct macb *bp)
