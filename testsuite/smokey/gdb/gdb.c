@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <sys/cobalt.h>
 #include <sys/wait.h>
 #include <xeno_config.h>
 #include <boilerplate/libc.h>
@@ -198,6 +199,7 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 	pthread_attr_t attr;
 	char run_param[32];
 	cpu_set_t cpu_set;
+	int corectl_debug;
 	int err;
 
 	smokey_parse_args(t, argc, argv);
@@ -245,6 +247,11 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 	} else {
 		/* we are the gdb controller */
 
+		err = cobalt_corectl(_CC_COBALT_GET_DEBUG, &corectl_debug,
+				    sizeof(corectl_debug));
+		if (err)
+			error(1, -err, "cobalt_corectl");
+
 		signal(SIGCHLD, handle_sigchld);
 
 		err = pipe(pipe_in);
@@ -282,17 +289,24 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 			send_command("b breakpoint_target\n", 1);
 			send_command("r\n", 1);
 
-			smokey_trace("resume in primary");
-			send_command("c\n", 1);
-			eval_expression("primary_mode", "1");
-			send_command("c\n", 1);
+			if (corectl_debug & _CC_COBALT_DEBUG_SYNC_BP) {
+				smokey_trace("resume in primary");
+				send_command("c\n", 1);
+				eval_expression("primary_mode", "1");
+				send_command("c\n", 1);
 
-			smokey_trace("synchronous stop");
-			eval_expression("thread_loops==expected_loops", "1");
-			send_command("c\n", 1);
+				smokey_trace("synchronous stop");
+				eval_expression("thread_loops==expected_loops",
+						"1");
+				send_command("c\n", 1);
 
-			smokey_trace("synchronous continue");
-			eval_expression("thread_loops==expected_loops", "1");
+				smokey_trace("synchronous continue");
+				eval_expression("thread_loops==expected_loops",
+						"1");
+			} else {
+				smokey_trace("basic continue");
+				send_command("c\n", 1);
+			}
 
 			send_command("q\n", 0);
 			pause();
