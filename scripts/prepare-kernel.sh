@@ -371,6 +371,9 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 	version_major=`expr $version_stamp : '\([[0-9]]*\)' || true`
 	version_minor=`expr $version_stamp : '[[0-9]]*\.\([[0-9]*]*\)' || true`
 	revision_level=`expr $version_stamp : '[[0-9]]*\.[[0-9]*]*\.\([[0-9]*]*\)' || true`
+	if [ -z "$revision_level" ]; then
+	    revision_level=0
+	fi
 	version_string=`cat $xenomai_root/config/version-label`
 	sed -e "s,@VERSION_MAJOR@,$version_major,g" \
 	    -e "s,@VERSION_MINOR@,$version_minor,g" \
