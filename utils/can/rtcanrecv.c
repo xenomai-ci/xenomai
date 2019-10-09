@@ -64,7 +64,7 @@ static void cleanup(void)
 	ret = close(s);
 	s = -1;
 	if (ret) {
-	    fprintf(stderr, "close: %s\n", strerror(-ret));
+	    fprintf(stderr, "close: %s\n", strerror(errno));
 	}
 	exit(EXIT_SUCCESS);
     }
@@ -106,17 +106,17 @@ static void rt_task(void)
 	    ret = recvfrom(s, (void *)&frame, sizeof(can_frame_t), 0,
 				  (struct sockaddr *)&addr, &addrlen);
 	if (ret < 0) {
-	    switch (ret) {
-	    case -ETIMEDOUT:
+	    switch (errno) {
+	    case ETIMEDOUT:
 		if (verbose)
-		    printf("recv: timed out");
+		    printf("recv: timed out\n");
 		continue;
-	    case -EBADF:
+	    case EBADF:
 		if (verbose)
-		    printf("recv: aborted because socket was closed");
+		    printf("recv: aborted because socket was closed\n");
 		break;
 	    default:
-		fprintf(stderr, "recv: %s\n", strerror(-ret));
+		fprintf(stderr, "recv: %s\n", strerror(errno));
 	    }
 	    break;
 	}
@@ -235,7 +235,7 @@ int main(int argc, char **argv)
 
     ret = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (ret < 0) {
-	fprintf(stderr, "socket: %s\n", strerror(-ret));
+	fprintf(stderr, "socket: %s\n", strerror(errno));
 	return -1;
     }
     s = ret;
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
 
 	ret = ioctl(s, SIOCGIFINDEX, &ifr);
 	if (ret < 0) {
-	    fprintf(stderr, "ioctl GET_IFINDEX: %s\n", strerror(-ret));
+	    fprintf(stderr, "ioctl GET_IFINDEX: %s\n", strerror(errno));
 	    goto failure;
 	}
     }
@@ -264,7 +264,7 @@ int main(int argc, char **argv)
 	ret = setsockopt(s, SOL_CAN_RAW, CAN_RAW_ERR_FILTER,
 				&err_mask, sizeof(err_mask));
 	if (ret < 0) {
-	    fprintf(stderr, "setsockopt: %s\n", strerror(-ret));
+	    fprintf(stderr, "setsockopt: %s\n", strerror(errno));
 	    goto failure;
 	}
 	if (verbose)
@@ -276,7 +276,7 @@ int main(int argc, char **argv)
 				&recv_filter, filter_count *
 				sizeof(struct can_filter));
 	if (ret < 0) {
-	    fprintf(stderr, "setsockopt: %s\n", strerror(-ret));
+	    fprintf(stderr, "setsockopt: %s\n", strerror(errno));
 	    goto failure;
 	}
     }
@@ -286,7 +286,7 @@ int main(int argc, char **argv)
     ret = bind(s, (struct sockaddr *)&recv_addr,
 		      sizeof(struct sockaddr_can));
     if (ret < 0) {
-	fprintf(stderr, "bind: %s\n", strerror(-ret));
+	fprintf(stderr, "bind: %s\n", strerror(errno));
 	goto failure;
     }
 
@@ -295,7 +295,7 @@ int main(int argc, char **argv)
 	    printf("Timeout: %lld ns\n", (long long)timeout);
 	ret = ioctl(s, RTCAN_RTIOC_RCV_TIMEOUT, &timeout);
 	if (ret) {
-	    fprintf(stderr, "ioctl RCV_TIMEOUT: %s\n", strerror(-ret));
+	    fprintf(stderr, "ioctl RCV_TIMEOUT: %s\n", strerror(errno));
 	    goto failure;
 	}
     }
@@ -303,7 +303,7 @@ int main(int argc, char **argv)
     if (with_timestamp) {
 	ret = ioctl(s, RTCAN_RTIOC_TAKE_TIMESTAMP, RTCAN_TAKE_TIMESTAMPS);
 	if (ret) {
-	    fprintf(stderr, "ioctl TAKE_TIMESTAMP: %s\n", strerror(-ret));
+	    fprintf(stderr, "ioctl TAKE_TIMESTAMP: %s\n", strerror(errno));
 	    goto failure;
 	}
     }
