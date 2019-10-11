@@ -510,3 +510,5 @@ static void __exit heapcheck_exit(void)
 
 module_init(heapcheck_init);
 module_exit(heapcheck_exit);
+
+MODULE_LICENSE("GPL");
