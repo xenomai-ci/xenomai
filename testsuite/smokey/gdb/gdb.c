@@ -273,8 +273,8 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 
 			snprintf(run_param, sizeof(run_param), "--run=%d",
 				 t->__reserved.id);
-			execl("/usr/bin/gdb", "gdb", "--args",
-			      argv[0], run_param, "run_target", NULL);
+			execlp("gdb", "gdb", "--args",
+			      argv[0], run_param, "run_target", (char *)NULL);
 			_exit(ESRCH);
 
 		default:
