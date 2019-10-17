@@ -9,7 +9,7 @@ sketches the typical integration process of patches.
 Contribution Checklist
 ----------------------
 
-- use git to manage your changes [*recomended*]
+- use git to manage your changes [*recommended*]
 
 - follow Linux Kernel coding style [**required**]
     - see also [Linux kernel coding style](https://www.kernel.org/doc/html/latest/process/coding-style.html)
@@ -35,7 +35,7 @@ Contribution Checklist
     - to certify the "Developer's Certificate of Origin", see below
     - check with your employer when not working on your own!
 
-- indicate if you think a patch fixes a bug present in a stable branch as well [*recomended*]
+- indicate if you think a patch fixes a bug present in a stable branch as well [*recommended*]
     - add a note to the cover letter of the patch series
     - or add some remark after the "---" separator of the patch itself
 
@@ -52,7 +52,7 @@ Contribution Checklist
 
 - post follow-up version(s) if feedback requires this [**required**]
 
-- send reminder if nothing happened after about two weeks [*recomended*]
+- send reminder if nothing happened after about two weeks [*recommended*]
 
 
 Developer's Certificate of Origin 1.1
