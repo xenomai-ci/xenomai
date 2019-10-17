@@ -155,6 +155,8 @@ static int get_session_label(const char *optarg)
 	int ret;
 
 	session = strdup(optarg);
+	if (!session)
+		return -ENOMEM;
 	grpname = strrchr(session, '/');
 	if (grpname == NULL)
 		goto no_group;
@@ -163,8 +165,10 @@ static int get_session_label(const char *optarg)
 
 	if (isdigit(*grpname)) {
 		gid = (gid_t)strtol(grpname, &p, 10);
-		if (*p)
+		if (*p) {
+			free(session);
 			return -EINVAL;
+		}
 		errno = 0;
 		grp = getgrgid(gid);
 	} else {
@@ -175,6 +179,7 @@ static int get_session_label(const char *optarg)
 	if (grp == NULL) {
 		ret = errno ? -errno : -EINVAL;
 		warning("invalid group %s", grpname);
+		free(session);
 		return ret;
 	}
 
