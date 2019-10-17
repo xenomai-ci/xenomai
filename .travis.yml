@@ -162,7 +162,7 @@ matrix:
     - name: "ARM 4.19 release"
       env:
       - ARCH: arm
-        IPIPE_REV: ipipe-core-4.19.55-arm-3
+        IPIPE_REV: ipipe-core-4.19.55-arm-5
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-arm.git
         KERNEL_DEFCONFIG: multi_v7_defconfig
     - name: "ARM 4.14 release"
@@ -180,7 +180,7 @@ matrix:
     - name: "ARM64 4.19 release"
       env:
       - ARCH: arm64
-        IPIPE_REV: ipipe-core-4.19.55-arm64-2
+        IPIPE_REV: ipipe-core-4.19.55-arm64-4
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-arm64.git
         KERNEL_DEFCONFIG: defconfig
     - name: "ARM64 4.14 release"
