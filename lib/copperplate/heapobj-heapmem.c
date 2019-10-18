@@ -68,7 +68,12 @@ int __heapobj_init_private(struct heapobj *hobj, const char *name,
 int heapobj_init_array_private(struct heapobj *hobj, const char *name,
 			       size_t size, int elems)
 {
-	size_t log2 = sizeof(size) * CHAR_BIT - 1 -
+	size_t log2;
+
+	if (size == 0 || elems <= 0)
+		return __bt(-EINVAL);
+
+	log2 = sizeof(size) * CHAR_BIT - 1 -
 		xenomai_count_leading_zeros(size);
 
 	/*

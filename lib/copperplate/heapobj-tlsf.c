@@ -69,6 +69,9 @@ int heapobj_init_array_private(struct heapobj *hobj, const char *name,
 {
 	size_t poolsz;
 
+	if (size == 0 || elems <= 0)
+		return __bt(-EINVAL);
+
 	poolsz = (size + TLSF_BLOCK_ALIGN - 1) & ~(TLSF_BLOCK_ALIGN - 1);
 	poolsz *= elems;
 

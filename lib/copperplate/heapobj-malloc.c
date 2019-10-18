@@ -84,6 +84,9 @@ int __heapobj_init_private(struct heapobj *hobj, const char *name,
 int heapobj_init_array_private(struct heapobj *hobj, const char *name,
 			       size_t size, int elems)
 {
+	if (size == 0 || elems <= 0)
+		return __bt(-EINVAL);
+
 	return __bt(__heapobj_init_private(hobj, name, size * elems, NULL));
 }
 
