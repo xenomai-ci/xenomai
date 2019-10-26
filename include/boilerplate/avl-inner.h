@@ -104,26 +104,30 @@ static inline struct shavlh *
 shavlh_link(const struct shavl *const avl,
 	    const struct shavlh *const holder, unsigned int dir)
 {
-	return (void *)avl + holder->link[avl_type2index(dir)].offset;
+	ptrdiff_t offset = holder->link[avl_type2index(dir)].offset;
+	return offset ? (void *)avl + offset : NULL;
 }
 
 static inline void
 shavlh_set_link(struct shavl *const avl, struct shavlh *lhs,
 		int dir, struct shavlh *rhs)
 {
-	lhs->link[avl_type2index(dir)].offset = (void *)rhs - (void *)avl;
+	ptrdiff_t offset = rhs ? (void *)rhs - (void *)avl : 0;
+	lhs->link[avl_type2index(dir)].offset = offset;
 }
 
 static inline
 struct shavlh *shavl_end(const struct shavl *const avl, int dir)
 {
-	return (void *)avl + avl->end[avl_type2index(dir)].offset;
+	ptrdiff_t offset = avl->end[avl_type2index(dir)].offset;
+	return offset ? (void *)avl + offset : NULL;
 }
 
 static inline void
 shavl_set_end(struct shavl *const avl, int dir, struct shavlh *holder)
 {
-	avl->end[avl_type2index(dir)].offset = (void *)holder - (void *)avl;
+	ptrdiff_t offset = holder ? (void *)holder - (void *)avl : 0;
+	avl->end[avl_type2index(dir)].offset = offset;
 }
 
 #define shavl_count(avl)	((avl)->count)
