@@ -989,6 +989,10 @@ void *timerthread(void *param)
 	}
 
 out:
+#ifdef CONFIG_XENO_COBALT
+	if (pthread_setmode_np(PTHREAD_WARNSW, 0, NULL))
+		fatal("pthread_setmode_np()");
+#endif
 	if (par->mode == MODE_CYCLIC)
 		timer_delete(timer);
 
