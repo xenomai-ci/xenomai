@@ -144,37 +144,38 @@ script:
 
 matrix:
   include:
-    - env:
+    - name: "ARM 4.14 release"
+      env:
       - ARCH: arm
         IPIPE_REV: ipipe-core-4.14.110-arm-7
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-arm.git
         KERNEL_DEFCONFIG: multi_v7_defconfig
-    - env:
+    - name: "ARM 4.4-CIP head"
+      env:
       - ARCH: arm
-        IPIPE_REV: ipipe-4.4.y
+        IPIPE_REV: ipipe-4.4.y-cip
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe.git
         KERNEL_DEFCONFIG: multi_v7_defconfig
-    - env:
+    - name: "x86 4.14 release"
+      env:
       - ARCH: x86
-        IPIPE_REV: ipipe-x86-4.14.y
+        IPIPE_REV: ipipe-core-4.14.134-x86-8
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-x86.git
         KERNEL_DEFCONFIG: x86_64_defconfig
-    - env:
+    - name: "x86 4.4-CIP head"
+      env:
       - ARCH: x86
-        IPIPE_REV: ipipe-core-4.14.111-x86-3
-        IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-x86.git
-        KERNEL_DEFCONFIG: x86_64_defconfig
-    - env:
-      - ARCH: x86
-        IPIPE_REV: ipipe-4.4.y
+        IPIPE_REV: ipipe-4.4.y-cip
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe.git
         KERNEL_DEFCONFIG: x86_64_defconfig
-    - env:
+    - name: "x86 4.4-CIP release"
+      env:
       - ARCH: x86
-        IPIPE_REV: ipipe-core-4.4.176-x86-14
+        IPIPE_REV: ipipe-core-4.4.196-cip38-x86-19
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe.git
         KERNEL_DEFCONFIG: x86_64_defconfig
-    - env:
+    - name: "PowerPC 4.19 release"
+      env:
       - ARCH: powerpc
         IPIPE_REV: ipipe-core-4.14.36-ppc32-1.1
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-ppc32.git
