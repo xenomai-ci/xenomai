@@ -734,14 +734,12 @@ int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		xnlock_put_irqrestore(&nklock, s);
 	}
 
-	if (datagrams > 0 &&
-	    (ret == 0 || ret == -ETIMEDOUT || ret == -EWOULDBLOCK)) {
-		/* NOTE: SO_ERROR should be honored for other errors. */
-		rtdm_fd_put(fd);
-		return datagrams;
-	}
 fail:
 	rtdm_fd_put(fd);
+
+	if (datagrams > 0)
+		ret = datagrams;
+
 out:
 	trace_cobalt_fd_recvmmsg_status(current, fd, ufd, ret);
 
@@ -826,13 +824,11 @@ int __rtdm_fd_sendmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		datagrams++;
 	}
 
-	if (datagrams > 0 && (ret == 0 || ret == -EWOULDBLOCK)) {
-		/* NOTE: SO_ERROR should be honored for other errors. */
-		rtdm_fd_put(fd);
-		return datagrams;
-	}
-
 	rtdm_fd_put(fd);
+
+	if (datagrams > 0)
+		ret = datagrams;
+
 out:
 	trace_cobalt_fd_sendmmsg_status(current, fd, ufd, ret);
 
