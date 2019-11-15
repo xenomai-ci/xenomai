@@ -656,16 +656,13 @@ int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 	struct cobalt_recvmmsg_timer rq;
 	xntmode_t tmode = XN_RELATIVE;
 	struct timespec ts = { 0 };
-	int ret, datagrams = 0;
+	int ret = 0, datagrams = 0;
 	xnticks_t timeout = 0;
 	struct mmsghdr mmsg;
 	struct rtdm_fd *fd;
 	void __user *u_p;
 	ssize_t len;
 	spl_t s;
-	
-	if (vlen == 0)
-		return 0;
 
 	fd = rtdm_fd_get(ufd, 0);
 	if (IS_ERR(fd)) {
@@ -786,14 +783,11 @@ int __rtdm_fd_sendmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		       int (*get_mmsg)(struct mmsghdr *mmsg, void __user *u_mmsg),
 		       int (*put_mmsg)(void __user **u_mmsg_p, const struct mmsghdr *mmsg))
 {
-	int ret, datagrams = 0;
+	int ret = 0, datagrams = 0;
 	struct mmsghdr mmsg;
 	struct rtdm_fd *fd;
 	void __user *u_p;
 	ssize_t len;
-	
-	if (vlen == 0)
-		return 0;
 
 	fd = rtdm_fd_get(ufd, 0);
 	if (IS_ERR(fd)) {
