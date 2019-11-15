@@ -18,7 +18,10 @@ env:
     - CCACHE_MAXSIZE=400M
 
 install:
-  - git clone --depth 1 --branch ${IPIPE_REV} ${IPIPE_KERNEL} ${KDIR}
+  - REV=$(git ls-remote --tags ${IPIPE_KERNEL} | sed "s|.*[[:space:]]refs/tags/||" | grep "${IPIPE_REV}" | sort -r -n -t - -k 5 -k 6 | head -1)
+  - test -n "${REV}" || REV="${IPIPE_REV}"
+  - echo "Cloning branch/tag ${REV}"
+  - git clone --depth 1 --branch ${REV} ${IPIPE_KERNEL} ${KDIR}
 
 before_script:
   - case "${ARCH}" in
@@ -147,7 +150,7 @@ matrix:
     - name: "ARM 4.14 release"
       env:
       - ARCH: arm
-        IPIPE_REV: ipipe-core-4.14.110-arm-7
+        IPIPE_REV: ipipe-core-4.14..*-arm-.*
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-arm.git
         KERNEL_DEFCONFIG: multi_v7_defconfig
     - name: "ARM 4.4-CIP head"
@@ -159,7 +162,7 @@ matrix:
     - name: "x86 4.14 release"
       env:
       - ARCH: x86
-        IPIPE_REV: ipipe-core-4.14.134-x86-8
+        IPIPE_REV: ipipe-core-4.14..*-x86-.*
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-x86.git
         KERNEL_DEFCONFIG: x86_64_defconfig
     - name: "x86 4.4-CIP head"
@@ -171,12 +174,12 @@ matrix:
     - name: "x86 4.4-CIP release"
       env:
       - ARCH: x86
-        IPIPE_REV: ipipe-core-4.4.196-cip38-x86-19
+        IPIPE_REV: ipipe-core-4.4..*-cip.*-x86-.*
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe.git
         KERNEL_DEFCONFIG: x86_64_defconfig
-    - name: "PowerPC 4.19 release"
+    - name: "PowerPC 4.14 release"
       env:
       - ARCH: powerpc
-        IPIPE_REV: ipipe-core-4.14.36-ppc32-1.1
+        IPIPE_REV: ipipe-core-4.14..*-ppc32-.*
         IPIPE_KERNEL: https://gitlab.denx.de/Xenomai/ipipe-ppc32.git
         KERNEL_DEFCONFIG: mpc5200_defconfig
