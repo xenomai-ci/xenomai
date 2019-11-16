@@ -353,10 +353,10 @@ static int cobalt_parse_option(int optnum, const char *optarg)
 
 static void cobalt_help(void)
 {
-        fprintf(stderr, "--main-prio=<prio>		main thread priority\n");
-        fprintf(stderr, "--print-buffer-size=<bytes>	size of a print relay buffer (16k)\n");
-        fprintf(stderr, "--print-buffer-count=<num>	number of print relay buffers (4)\n");
-        fprintf(stderr, "--print-buffer-syncdelay=<ms>	max delay of output synchronization (100 ms)\n");
+	fprintf(stderr, "--main-prio=<prio>		main thread priority\n");
+	fprintf(stderr, "--print-buffer-size=<bytes>	size of a print relay buffer (16k)\n");
+	fprintf(stderr, "--print-buffer-count=<num>	number of print relay buffers (4)\n");
+	fprintf(stderr, "--print-sync-delay=<ms>	max delay of output synchronization (100 ms)\n");
 }
 
 static struct setup_descriptor cobalt_interface = {
