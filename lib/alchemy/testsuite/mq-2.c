@@ -8,11 +8,11 @@ static struct traceobj trobj;
 
 static int tseq[] = {
 	3, 4, 5, 6,
-	1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
+	1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
 	7,
 };
 
-#define NMESSAGES ((sizeof(messages) / sizeof(messages[0])) - 1)
+#define NMESSAGES (sizeof(messages) / sizeof(messages[0]))
 
 static int messages[] = {
 	0xfafafafa,
@@ -25,7 +25,6 @@ static int messages[] = {
 	0x78787878,
 	0xdededede,
 	0xbcbcbcbc,
-	0x0
 };
 
 RT_QUEUE q;
@@ -41,9 +40,9 @@ static void peer_task(void *arg)
 		traceobj_mark(&trobj, 1);
 		ret = rt_queue_read(&q, &msg, sizeof(msg), TM_NONBLOCK);
 		traceobj_assert(&trobj, ret == sizeof(msg));
-		traceobj_assert(&trobj, msg == messages[NMESSAGES - n]);
+		traceobj_assert(&trobj, msg == messages[NMESSAGES - n - 1]);
 		traceobj_mark(&trobj, 2);
-	} while (n++ < NMESSAGES);
+	} while (n++ < NMESSAGES - 1);
 
 	traceobj_exit(&trobj);
 }
@@ -56,7 +55,7 @@ static void main_task(void *arg)
 
 	traceobj_enter(&trobj);
 
-	ret = rt_queue_create(&q, "QUEUE", sizeof(messages), NMESSAGES, Q_PRIO);
+	ret = rt_queue_create(&q, "QUEUE", sizeof(messages), NMESSAGES - 1, Q_PRIO);
 	traceobj_check(&trobj, ret, 0);
 
 	traceobj_mark(&trobj, 3);
@@ -72,11 +71,11 @@ static void main_task(void *arg)
 	traceobj_mark(&trobj, 5);
 
 	n = 0;
-	do
-		ret = rt_queue_write(&q, &messages[n], sizeof(int), Q_URGENT);
-	while (n++ < NMESSAGES && ret >= 0);
+	do {
+		ret = rt_queue_write(&q, &messages[n], sizeof(int), Q_URGENT); /* LIFO */
+	} while (++n < NMESSAGES && ret >= 0);
 
-	traceobj_assert(&trobj, ret == -ENOMEM && n == NMESSAGES + 1);
+	traceobj_assert(&trobj, ret == -ENOMEM && n == NMESSAGES);
 
 	traceobj_mark(&trobj, 6);
 
