@@ -1111,7 +1111,21 @@ int heapobj_init(struct heapobj *hobj, const char *name, size_t size)
 int heapobj_init_array(struct heapobj *hobj, const char *name,
 		       size_t size, int elems)
 {
-	size = __align_to(size, SHEAPMEM_MIN_ALIGN);
+	int log2size;
+
+	if (size < SHEAPMEM_MIN_ALIGN) {
+		size = SHEAPMEM_MIN_ALIGN;
+	} else {
+		log2size = sizeof(size) * CHAR_BIT - 1 -
+			xenomai_count_leading_zeros(size);
+		if (log2size < SHEAPMEM_PAGE_SHIFT) {
+			if (size & (size - 1))
+				log2size++;
+			size = 1 << log2size;
+		} else
+			size = __align_to(size, SHEAPMEM_PAGE_SIZE);
+	}
+
 	return __bt(heapobj_init(hobj, name, size * elems));
 }
 
