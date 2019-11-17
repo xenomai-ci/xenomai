@@ -105,14 +105,14 @@ shavlh_link(const struct shavl *const avl,
 	    const struct shavlh *const holder, unsigned int dir)
 {
 	ptrdiff_t offset = holder->link[avl_type2index(dir)].offset;
-	return offset ? (void *)avl + offset : NULL;
+	return offset == (ptrdiff_t)-1 ? NULL : (void *)avl + offset;
 }
 
 static inline void
 shavlh_set_link(struct shavl *const avl, struct shavlh *lhs,
 		int dir, struct shavlh *rhs)
 {
-	ptrdiff_t offset = rhs ? (void *)rhs - (void *)avl : 0;
+	ptrdiff_t offset = rhs ? (void *)rhs - (void *)avl : (ptrdiff_t)-1;
 	lhs->link[avl_type2index(dir)].offset = offset;
 }
 
@@ -120,13 +120,13 @@ static inline
 struct shavlh *shavl_end(const struct shavl *const avl, int dir)
 {
 	ptrdiff_t offset = avl->end[avl_type2index(dir)].offset;
-	return offset ? (void *)avl + offset : NULL;
+	return offset == (ptrdiff_t)-1 ? NULL : (void *)avl + offset;
 }
 
 static inline void
 shavl_set_end(struct shavl *const avl, int dir, struct shavlh *holder)
 {
-	ptrdiff_t offset = holder ? (void *)holder - (void *)avl : 0;
+	ptrdiff_t offset = holder ? (void *)holder - (void *)avl : (ptrdiff_t)-1;
 	avl->end[avl_type2index(dir)].offset = offset;
 }
 
