@@ -443,10 +443,12 @@ int rt_task_create(RT_TASK *task, const char *name,
 	cta.stacksize = stksize;
 
 	ret = __bt(copperplate_create_thread(&cta, &tcb->thobj.ptid));
-	if (ret)
+	if (ret) {
 		delete_tcb(tcb);
-	else
+	} else {
+		tcb->self.thread = tcb->thobj.ptid;
 		task->thread = tcb->thobj.ptid;
+	}
 out:
 	CANCEL_RESTORE(svc);
 
