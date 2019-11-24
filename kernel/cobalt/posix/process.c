@@ -819,6 +819,7 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 		}
 		stop_debugged_process(thread);
 		xnlock_put_irqrestore(&nklock, s);
+		xnsched_run();
 	}
 #endif
 
@@ -1295,10 +1296,8 @@ static int handle_sigwake_event(struct task_struct *p)
 			cobalt_register_debugged_thread(thread);
 	}
 
-	if (xnthread_test_state(thread, XNRELAX)) {
-		xnlock_put_irqrestore(&nklock, s);
-		return KEVENT_PROPAGATE;
-	}
+	if (xnthread_test_state(thread, XNRELAX))
+		goto out;
 
 	/*
 	 * If kicking a shadow thread in primary mode, make sure Linux
@@ -1320,7 +1319,7 @@ static int handle_sigwake_event(struct task_struct *p)
 		xnthread_resume(thread, XNDBGSTOP);
 
 	__xnthread_kick(thread);
-
+out:
 	xnsched_run();
 
 	xnlock_put_irqrestore(&nklock, s);
