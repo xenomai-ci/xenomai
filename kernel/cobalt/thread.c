@@ -1012,16 +1012,16 @@ void xnthread_suspend(struct xnthread *thread, int mask,
 	 * We only care for threads that are not current, and for
 	 * XNSUSP, XNDELAY, XNDORMANT and XNHELD conditions, because:
 	 *
-	 * - There is no point in dealing with relaxed threads, since
-	 * personalities have to ask for primary mode switch when
-	 * processing any syscall which may block the caller
-	 * (i.e. __xn_exec_primary).
+	 * - There is no point in dealing with a relaxed thread which
+	 * is current, since personalities have to ask for primary
+	 * mode switch when processing any syscall which may block the
+	 * caller (i.e. __xn_exec_primary).
 	 *
 	 * - among all blocking bits (XNTHREAD_BLOCK_BITS), only
-	 * XNSUSP, XNDELAY and XNHELD may be applied by the current
-	 * thread to a non-current thread. XNPEND is always added by
-	 * the caller to its own state, XNMIGRATE and XNRELAX have
-	 * special semantics escaping this issue.
+	 * XNSUSP, XNDELAY, XNHELD and XNDBGSTOP may be applied by the
+	 * current thread to a non-current thread. XNPEND is always
+	 * added by the caller to its own state, XNMIGRATE, XNRELAX
+	 * and XNDBGSTOP have special semantics escaping this issue.
 	 *
 	 * We don't signal threads which are already in a dormant
 	 * state, since they are suspended by definition.
