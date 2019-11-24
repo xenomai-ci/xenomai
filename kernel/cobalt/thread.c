@@ -962,12 +962,15 @@ void xnthread_suspend(struct xnthread *thread, int mask,
 	 * opportunity for interrupt delivery right before switching
 	 * context, which shortens the uninterruptible code path.
 	 *
-	 * We have to shut irqs off before __xnsched_run() though: if
-	 * an interrupt could preempt us in ___xnsched_run() right
-	 * after the call to xnarch_escalate() but before we grab the
-	 * nklock, we would enter the critical section in
-	 * xnsched_run() while running in secondary mode, which would
-	 * defeat the purpose of xnarch_escalate().
+	 * We have to shut irqs off before calling __xnsched_run()
+	 * though: if an interrupt could preempt us right after
+	 * xnarch_escalate() is passed but before the nklock is
+	 * grabbed, we would enter the critical section in
+	 * ___xnsched_run() from the root domain, which would defeat
+	 * the purpose of escalating the request.
+	 *
+	 * NOTE: using __xnsched_run() for rescheduling allows us to
+	 * break the scheduler lock temporarily.
 	 */
 	if (likely(thread == sched->curr)) {
 		xnsched_set_resched(sched);
@@ -978,10 +981,13 @@ void xnthread_suspend(struct xnthread *thread, int mask,
 			return;
 		}
 		/*
-		 * If the thread is runnning on another CPU,
-		 * xnsched_run will trigger the IPI as required.
+		 * If the thread is runnning on a remote CPU,
+		 * xnsched_run() will trigger the IPI as required.  In
+		 * this case, sched refers to a remote runqueue, so
+		 * make sure to always kick the rescheduling procedure
+		 * for the local one.
 		 */
-		__xnsched_run(sched);
+		__xnsched_run(xnsched_current());
 		goto out;
 	}
 
