@@ -803,6 +803,11 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 	sched = xnsched_current();
 	thread = sched->curr;
 
+	trace_cobalt_thread_fault(d);
+
+	if (xnthread_test_state(thread, XNROOT))
+		return 0;
+
 #ifdef IPIPE_KEVT_USERINTRET
 	if (xnarch_fault_bp_p(d) && user_mode(d->regs)) {
 		spl_t s;
@@ -816,11 +821,6 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 		xnlock_put_irqrestore(&nklock, s);
 	}
 #endif
-
-	if (xnthread_test_state(thread, XNROOT))
-		return 0;
-
-	trace_cobalt_thread_fault(d);
 
 	if (xnarch_fault_fpu_p(d)) {
 #ifdef CONFIG_XENO_ARCH_FPU
