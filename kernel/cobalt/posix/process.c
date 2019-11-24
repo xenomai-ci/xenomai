@@ -812,11 +812,10 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 	if (xnarch_fault_bp_p(d) && user_mode(d->regs)) {
 		spl_t s;
 
+		XENO_WARN_ON(CORE, xnthread_test_state(thread, XNRELAX));
 		xnlock_get_irqsave(&nklock, s);
-		if (!xnthread_test_state(thread, XNRELAX)) {
-			xnthread_set_info(thread, XNCONTHI);
-			ipipe_enable_user_intret_notifier();
-		}
+		xnthread_set_info(thread, XNCONTHI);
+		ipipe_enable_user_intret_notifier();
 		stop_debugged_process(thread);
 		xnlock_put_irqrestore(&nklock, s);
 		xnsched_run();
