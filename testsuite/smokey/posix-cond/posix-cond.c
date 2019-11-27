@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <smokey/smokey.h>
 
 smokey_test_plugin(posix_cond,
@@ -41,6 +42,38 @@ static inline unsigned long long timer_tsc2ns(unsigned long long tsc)
 {
 	return clockobj_tsc_to_ns(tsc);
 }
+
+static void check_inner(const char *file, int line, const char *fn, const char *msg, int status, int expected)
+{
+	if (status == expected)
+		return;
+
+	fprintf(stderr, "FAILED %s %s: returned %d instead of %d - %s\n",
+		fn, msg, status, expected, strerror(-status));
+	exit(EXIT_FAILURE);
+}
+#define check(msg, status, expected) \
+	check_inner(__FILE__, __LINE__, __func__, msg, status, expected)
+
+#define check_unix(msg, status, expected)				\
+	({								\
+		int s = (status);					\
+		check_inner(__FILE__, __LINE__, __func__, msg, s < 0 ? -errno : s, expected); \
+	})
+
+static void check_sleep_inner(const char *fn,
+		       const char *prefix, unsigned long long start)
+{
+	unsigned long long diff = timer_tsc2ns(timer_get_tsc() - start);
+
+	if (diff < 10 * NS_PER_MS) {
+		fprintf(stderr, "%s waited %Ld.%03u us\n",
+			prefix, diff / 1000, (unsigned)(diff % 1000));
+		exit(EXIT_FAILURE);
+	}
+}
+#define check_sleep(prefix, start) \
+	check_sleep_inner(__func__, prefix, start)
 
 static int mutex_init(pthread_mutex_t *mutex, int type, int proto)
 {
@@ -120,12 +153,32 @@ static int thread_msleep(unsigned ms)
 	return -nanosleep(&ts, NULL);
 }
 
+struct thread_startup {
+	sem_t ready;
+	void *(*handler)(void *);
+	void *cookie;
+};
+
+static void *thread_trampoline(void *arg)
+{
+	struct thread_startup *startup = arg;
+
+	sem_post(&startup->ready);
+
+	return startup->handler(startup->cookie);
+}
+
 static int thread_spawn(pthread_t *thread, int prio,
 			void *(*handler)(void *cookie), void *cookie)
 {
+	struct thread_startup startup;
 	struct sched_param param;
 	pthread_attr_t tattr;
 	int err;
+
+	sem_init(&startup.ready, 0, 0);
+	startup.handler = handler;
+	startup.cookie = cookie;
 
 	pthread_attr_init(&tattr);
 	pthread_attr_setinheritsched(&tattr, PTHREAD_EXPLICIT_SCHED);
@@ -134,9 +187,12 @@ static int thread_spawn(pthread_t *thread, int prio,
 	pthread_attr_setschedparam(&tattr, &param);
 	pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_JOINABLE);
 
-	err = pthread_create(thread, &tattr, handler, cookie);
+	err = pthread_create(thread, &tattr, thread_trampoline, &startup);
+
+	check("wait startup", sem_wait(&startup.ready), 0);
 
 	pthread_attr_destroy(&tattr);
+	sem_destroy(&startup.ready);
 
 	return -err;
 }
@@ -144,38 +200,6 @@ static int thread_spawn(pthread_t *thread, int prio,
 #define thread_kill(thread, sig) (-__STD(pthread_kill(thread, sig)))
 #define thread_self() pthread_self()
 #define thread_join(thread) (-pthread_join(thread, NULL))
-
-static void check_inner(const char *file, int line, const char *fn, const char *msg, int status, int expected)
-{
-	if (status == expected)
-		return;
-
-	fprintf(stderr, "FAILED %s %s: returned %d instead of %d - %s\n",
-		fn, msg, status, expected, strerror(-status));
-	exit(EXIT_FAILURE);
-}
-#define check(msg, status, expected) \
-	check_inner(__FILE__, __LINE__, __func__, msg, status, expected)
-
-#define check_unix(msg, status, expected)				\
-	({								\
-		int s = (status);					\
-		check_inner(__FILE__, __LINE__, __func__, msg, s < 0 ? -errno : s, expected); \
-	})
-
-static void check_sleep_inner(const char *fn,
-		       const char *prefix, unsigned long long start)
-{
-	unsigned long long diff = timer_tsc2ns(timer_get_tsc() - start);
-
-	if (diff < 10 * NS_PER_MS) {
-		fprintf(stderr, "%s waited %Ld.%03u us\n",
-			prefix, diff / 1000, (unsigned)(diff % 1000));
-		exit(EXIT_FAILURE);
-	}
-}
-#define check_sleep(prefix, start) \
-	check_sleep_inner(__func__, prefix, start)
 
 struct cond_mutex {
 	pthread_mutex_t *mutex;
