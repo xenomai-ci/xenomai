@@ -449,7 +449,7 @@ static int heapcheck_ioctl(struct rtdm_fd *fd,
 	struct rttst_heap_stathdr sthdr;
 	struct rttst_heap_parms parms;
 	int ret;
-	
+
 	switch (request) {
 	case RTTST_RTIOC_HEAP_CHECK:
 		ret = rtdm_copy_from_user(fd, &parms, arg, sizeof(parms));
@@ -464,6 +464,7 @@ static int heapcheck_ioctl(struct rtdm_fd *fd,
 		ret = rtdm_copy_to_user(fd, arg, &parms, sizeof(parms));
 		break;
 	case RTTST_RTIOC_HEAP_STAT_COLLECT:
+		sthdr.buf = NULL;
 		ret = rtdm_copy_from_user(fd, &sthdr, arg, sizeof(sthdr));
 		if (ret)
 			return ret;
