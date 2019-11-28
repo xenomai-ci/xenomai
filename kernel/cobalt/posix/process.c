@@ -1055,8 +1055,9 @@ static void __handle_taskexit_event(struct task_struct *p)
 	if (xnthread_test_state(thread, XNSSTEP))
 		unregister_debugged_thread(thread);
 
-	xnthread_run_handler_stack(thread, exit_thread);
 	xnsched_run();
+
+	xnthread_run_handler_stack(thread, exit_thread);
 
 	if (xnthread_test_state(thread, XNUSER)) {
 		cobalt_umm_free(&cobalt_kernel_ppd.umm, thread->u_window);
