@@ -1144,10 +1144,11 @@ static void __handle_taskexit_event(struct task_struct *p)
 	if (xnthread_test_state(thread, XNSSTEP))
 		cobalt_unregister_debugged_thread(thread);
 
+	xnsched_run();
+
 	xnlock_put_irqrestore(&nklock, s);
 
 	xnthread_run_handler_stack(thread, exit_thread);
-	xnsched_run();
 
 	if (xnthread_test_state(thread, XNUSER)) {
 		cobalt_umm_free(&cobalt_kernel_ppd.umm, thread->u_window);
