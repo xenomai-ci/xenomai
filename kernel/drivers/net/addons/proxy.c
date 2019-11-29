@@ -218,8 +218,8 @@ static void rtnetproxy_recv(struct rtskb *rtskb)
 		return;
 	}
 
-	rtskb_queue_tail(&rx_queue, rtskb);
-	rtdm_nrtsig_pend(&rtnetproxy_rx_signal);
+	if (rtskb_queue_tail_check(&rx_queue, rtskb))
+		rtdm_nrtsig_pend(&rtnetproxy_rx_signal);
 }
 
 /* ************************************************************************

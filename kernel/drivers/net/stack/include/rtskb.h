@@ -437,6 +437,26 @@ static inline void rtskb_queue_tail(struct rtskb_queue *queue,
 }
 
 /***
+ *  rtskb_queue_tail_check - variant of rtskb_queue_tail
+ *          returning true on empty->non empty transition.
+ *  @queue: queue to use
+ *  @skb: buffer to queue
+ */
+static inline bool rtskb_queue_tail_check(struct rtskb_queue *queue,
+					  struct rtskb *skb)
+{
+	rtdm_lockctx_t context;
+	bool ret;
+
+	rtdm_lock_get_irqsave(&queue->lock, context);
+	ret = queue->first == NULL;
+	__rtskb_queue_tail(queue, skb);
+	rtdm_lock_put_irqrestore(&queue->lock, context);
+
+	return ret;
+}
+
+/***
  *  __rtskb_prio_queue_tail - insert a buffer at the prioritized queue tail
  *                            (w/o locks)
  *  @prioqueue: queue to use
