@@ -446,8 +446,12 @@ int set_quota_config(int cpu, union sched_config *config, size_t len)
 		}
 		list_del(&group->next);
 		xnlock_put_irqrestore(&nklock, s);
+		iq->tgid = tg->tgid;
+		iq->quota = tg->quota_percent;
+		iq->quota_peak = tg->quota_peak_percent;
+		iq->quota_sum = quota_sum;
 		xnfree(group);
-		break;
+		return 0;
 	case sched_quota_set:
 		xnlock_get_irqsave(&nklock, s);
 		sched = xnsched_struct(cpu);
