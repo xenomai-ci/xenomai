@@ -146,12 +146,15 @@ static inline struct rt_proc_call *rtpc_dequeue_pending_call(void)
 static inline void rtpc_queue_processed_call(struct rt_proc_call *call)
 {
 	rtdm_lockctx_t context;
+	bool trigger;
 
 	rtdm_lock_get_irqsave(&processed_calls_lock, context);
+	trigger = list_empty(&processed_calls);
 	list_add_tail(&call->list_entry, &processed_calls);
 	rtdm_lock_put_irqrestore(&processed_calls_lock, context);
 
-	rtdm_nrtsig_pend(&rtpc_nrt_signal);
+	if (trigger)
+		rtdm_nrtsig_pend(&rtpc_nrt_signal);
 }
 
 static inline struct rt_proc_call *rtpc_dequeue_processed_call(void)
