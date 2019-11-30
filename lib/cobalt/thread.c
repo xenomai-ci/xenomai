@@ -666,11 +666,36 @@ int pthread_setschedparam_ex(pthread_t thread,
 
 COBALT_IMPL(int, pthread_setschedprio, (pthread_t thread, int prio))
 {
-	struct sched_param_ex param_ex = {
-		.sched_priority = prio,
-	};
+	__u32 u_winoff, *u_winoff_ptr;
+	int ret, promoted;
 
-	return pthread_setschedparam_ex(thread, __SCHED_CURRENT, &param_ex);
+	/* See pthread_setschedparam_ex. */
+	if (cobalt_eager_setsched()) {
+		ret = __STD(pthread_setschedprio(thread, prio));
+		if (ret)
+			return ret;
+	}
+
+	/* only request promotion when this targets the current thread */
+	u_winoff_ptr = thread == pthread_self() ? &u_winoff : NULL;
+
+	ret = -XENOMAI_SYSCALL4(sc_cobalt_thread_setschedprio,
+				thread, prio, u_winoff_ptr, &promoted);
+
+	/*
+	 * If the kernel has no reference to the target thread. let glibc
+	 * handle the call.
+	 */
+	if (ret == ESRCH)
+		return __STD(pthread_setschedprio(thread, prio));
+
+	if (ret == 0 && promoted) {
+		cobalt_sigshadow_install_once();
+		cobalt_set_tsd(u_winoff);
+		cobalt_thread_harden();
+	}
+
+	return ret;
 }
 
 /**
