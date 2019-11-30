@@ -121,6 +121,7 @@
 #define sc_cobalt_recvmmsg			98
 #define sc_cobalt_sendmmsg			99
 #define sc_cobalt_clock_adjtime			100
+#define sc_cobalt_thread_setschedprio		101
 
 #define __NR_COBALT_SYSCALLS			128 /* Power of 2 */
 

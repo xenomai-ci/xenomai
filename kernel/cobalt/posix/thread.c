@@ -568,6 +568,43 @@ COBALT_SYSCALL(thread_getschedparam_ex, current,
 	return cobalt_copy_to_user(u_param, &param_ex, sizeof(param_ex));
 }
 
+int cobalt_thread_setschedprio(unsigned long pth,
+			       int prio,
+			       __u32 __user *u_winoff,
+			       int __user *u_promoted)
+{
+	struct sched_param_ex param_ex;
+	struct cobalt_thread *thread;
+	int ret, policy, promoted;
+
+	trace_cobalt_pthread_setschedprio(pth, prio);
+
+	thread = thread_lookup_or_shadow(pth, u_winoff, &promoted);
+	if (IS_ERR(thread))
+		return PTR_ERR(thread);
+
+	ret = __cobalt_thread_getschedparam_ex(thread, &policy, &param_ex);
+	if (ret)
+		return ret;
+
+	param_ex.sched_priority = prio;
+
+	ret = __cobalt_thread_setschedparam_ex(thread, policy, &param_ex);
+	if (ret)
+		return ret;
+
+	return cobalt_copy_to_user(u_promoted, &promoted, sizeof(promoted));
+}
+
+COBALT_SYSCALL(thread_setschedprio, conforming,
+	       (unsigned long pth,
+		int prio,
+		__u32 __user *u_winoff,
+		int __user *u_promoted))
+{
+	return cobalt_thread_setschedprio(pth, prio, u_winoff, u_promoted);
+}
+
 int __cobalt_thread_create(unsigned long pth, int policy,
 			   struct sched_param_ex *param_ex,
 			   int xid, __u32 __user *u_winoff)

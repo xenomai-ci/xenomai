@@ -45,6 +45,12 @@ COBALT_SYSCALL32emu_DECL(thread_getschedparam_ex,
 			  int __user *u_policy,
 			  struct compat_sched_param_ex __user *u_param));
 
+COBALT_SYSCALL32emu_DECL(thread_setschedprio,
+			 (compat_ulong_t pth,
+			  int prio,
+			  __u32 __user *u_winoff,
+			  int __user *u_promoted));
+
 COBALT_SYSCALL32emu_DECL(clock_getres,
 			 (clockid_t clock_id,
 			  struct compat_timespec __user *u_ts));

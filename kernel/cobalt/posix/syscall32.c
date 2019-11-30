@@ -88,6 +88,15 @@ COBALT_SYSCALL32emu(thread_getschedparam_ex, current,
 	return ret ?: sys32_put_param_ex(policy, u_param, &param_ex);
 }
 
+COBALT_SYSCALL32emu(thread_setschedprio, conforming,
+		    (compat_ulong_t pth,
+		     int prio,
+		     __u32 __user *u_winoff,
+		     int __user *u_promoted))
+{
+	return cobalt_thread_setschedprio(pth, prio, u_winoff, u_promoted);
+}
+
 static inline int sys32_fetch_timeout(struct timespec *ts,
 				      const void __user *u_ts)
 {

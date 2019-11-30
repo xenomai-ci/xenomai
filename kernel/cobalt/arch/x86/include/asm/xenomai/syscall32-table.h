@@ -27,6 +27,7 @@
 __COBALT_CALL32emu_THUNK(thread_create)
 __COBALT_CALL32emu_THUNK(thread_setschedparam_ex)
 __COBALT_CALL32emu_THUNK(thread_getschedparam_ex)
+__COBALT_CALL32emu_THUNK(thread_setschedprio)
 __COBALT_CALL32emu_THUNK(sem_open)
 __COBALT_CALL32x_THUNK(sem_open)
 __COBALT_CALL32emu_THUNK(sem_timedwait)

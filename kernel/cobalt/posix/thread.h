@@ -139,6 +139,11 @@ int __cobalt_thread_getschedparam_ex(struct cobalt_thread *thread,
 				     int *policy_r,
 				     struct sched_param_ex *param_ex);
 
+int cobalt_thread_setschedprio(unsigned long pth,
+			       int prio,
+			       __u32 __user *u_winoff,
+			       int __user *u_promoted);
+
 struct cobalt_thread *cobalt_thread_find(pid_t pid);
 
 struct cobalt_thread *cobalt_thread_find_local(pid_t pid);
@@ -180,6 +185,12 @@ COBALT_SYSCALL_DECL(thread_getschedparam_ex,
 		    (unsigned long pth,
 		     int __user *u_policy,
 		     struct sched_param_ex __user *u_param));
+
+COBALT_SYSCALL_DECL(thread_setschedprio,
+		    (unsigned long pth,
+		     int prio,
+		     __u32 __user *u_winoff,
+		     int __user *u_promoted));
 
 void cobalt_thread_map(struct xnthread *curr);
 

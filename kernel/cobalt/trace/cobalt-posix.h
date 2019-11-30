@@ -70,6 +70,7 @@
 		__cobalt_symbolic_syscall(thread_kill),			\
 		__cobalt_symbolic_syscall(thread_setschedparam_ex),	\
 		__cobalt_symbolic_syscall(thread_getschedparam_ex),	\
+		__cobalt_symbolic_syscall(thread_setschedprio),		\
 		__cobalt_symbolic_syscall(thread_getstat),		\
 		__cobalt_symbolic_syscall(sem_init),			\
 		__cobalt_symbolic_syscall(sem_destroy),			\
@@ -309,6 +310,20 @@ DEFINE_EVENT(cobalt_posix_schedparam, cobalt_pthread_getschedparam,
 	TP_PROTO(unsigned long pth, int policy,
 		 const struct sched_param_ex *param_ex),
 	TP_ARGS(pth, policy, param_ex)
+);
+
+TRACE_EVENT(cobalt_pthread_setschedprio,
+	TP_PROTO(unsigned long pth, int prio),
+	TP_ARGS(pth, prio),
+	TP_STRUCT__entry(
+		__field(unsigned long, pth)
+		__field(int, prio)
+	),
+	TP_fast_assign(
+		__entry->pth = pth;
+		__entry->prio = prio;
+	),
+	TP_printk("pth=%p prio=%d", (void *)__entry->pth, __entry->prio)
 );
 
 #define cobalt_print_thread_mode(__mode)			\
