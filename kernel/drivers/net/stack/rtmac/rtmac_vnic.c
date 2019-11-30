@@ -52,8 +52,8 @@ int rtmac_vnic_rx(struct rtskb *rtskb, u16 type)
 
 	rtskb->protocol = type;
 
-	rtskb_queue_tail(&rx_queue, rtskb);
-	rtdm_nrtsig_pend(&vnic_signal);
+	if (rtskb_queue_tail_check(&rx_queue, rtskb))
+		rtdm_nrtsig_pend(&vnic_signal);
 
 	return 0;
 }
