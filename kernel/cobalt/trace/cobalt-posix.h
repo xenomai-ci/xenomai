@@ -202,8 +202,7 @@ DECLARE_EVENT_CLASS(syscall_exit,
 			 {SCHED_QUOTA, "quota"},		\
 			 {SCHED_SPORADIC, "sporadic"},		\
 			 {SCHED_COBALT, "cobalt"},		\
-			 {SCHED_WEAK, "weak"},			\
-			 {__SCHED_CURRENT, "<current>"})
+			 {SCHED_WEAK, "weak"})
 
 const char *cobalt_trace_parse_sched_params(struct trace_seq *, int,
 					    struct sched_param_ex *);

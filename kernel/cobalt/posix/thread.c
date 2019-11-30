@@ -242,7 +242,6 @@ struct xnthread_personality *cobalt_thread_finalize(struct xnthread *zombie)
 int __cobalt_thread_setschedparam_ex(struct cobalt_thread *thread, int policy,
 				     const struct sched_param_ex *param_ex)
 {
-	struct xnthread *base_thread = &thread->threadbase;
 	struct xnsched_class *sched_class;
 	union xnsched_policy_param param;
 	xnticks_t tslice;
@@ -255,15 +254,6 @@ int __cobalt_thread_setschedparam_ex(struct cobalt_thread *thread, int policy,
 			       struct cobalt_thread)) {
 		ret = -ESRCH;
 		goto out;
-	}
-
-	if (policy == __SCHED_CURRENT) {
-		policy = base_thread->base_class->policy;
-		if (xnthread_base_priority(base_thread) == 0)
-			policy = SCHED_NORMAL;
-		else if (base_thread->base_class == &xnsched_class_rt &&
-			 xnthread_test_state(base_thread, XNRRB))
-			policy = SCHED_RR;
 	}
 
 	tslice = thread->threadbase.rrperiod;

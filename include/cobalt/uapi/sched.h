@@ -21,9 +21,6 @@
 #define SCHED_COBALT		42
 #define SCHED_WEAK		43
 
-/* for internal use */
-#define __SCHED_CURRENT		44
-
 #ifndef SCHED_SPORADIC
 #define SCHED_SPORADIC		10
 #define sched_ss_low_priority	sched_u.ss.__sched_low_priority
