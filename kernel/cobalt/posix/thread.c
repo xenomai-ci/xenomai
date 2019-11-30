@@ -463,31 +463,45 @@ static inline int pthread_setmode_np(int clrmask, int setmask, int *mode_r)
 	return 0;
 }
 
+static struct cobalt_thread *thread_lookup_or_shadow(unsigned long pth,
+						     __u32 __user *u_winoff,
+						     int *promoted_r)
+{
+	struct cobalt_local_hkey hkey;
+	struct cobalt_thread *thread;
+
+	*promoted_r = 0;
+
+	hkey.u_pth = pth;
+	hkey.mm = current->mm;
+
+	thread = thread_lookup(&hkey);
+	if (thread == NULL) {
+		if (u_winoff == NULL)
+			return ERR_PTR(-ESRCH);
+			
+		thread = cobalt_thread_shadow(&hkey, u_winoff);
+		if (!IS_ERR(thread))
+			*promoted_r = 1;
+	}
+
+	return thread;
+}
+
 int cobalt_thread_setschedparam_ex(unsigned long pth,
 				   int policy,
 				   const struct sched_param_ex *param_ex,
 				   __u32 __user *u_winoff,
 				   int __user *u_promoted)
 {
-	struct cobalt_local_hkey hkey;
 	struct cobalt_thread *thread;
-	int ret, promoted = 0;
+	int ret, promoted;
 
-	hkey.u_pth = pth;
-	hkey.mm = current->mm;
 	trace_cobalt_pthread_setschedparam(pth, policy, param_ex);
 
-	thread = thread_lookup(&hkey);
-	if (thread == NULL) {
-		if (u_winoff == NULL)
-			return -ESRCH;
-			
-		thread = cobalt_thread_shadow(&hkey, u_winoff);
-		if (IS_ERR(thread))
-			return PTR_ERR(thread);
-
-		promoted = 1;
-	}
+	thread = thread_lookup_or_shadow(pth, u_winoff, &promoted);
+	if (IS_ERR(thread))
+		return PTR_ERR(thread);
 
 	ret = __cobalt_thread_setschedparam_ex(thread, policy, param_ex);
 	if (ret)
