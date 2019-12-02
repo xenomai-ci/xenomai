@@ -68,18 +68,24 @@ static void __check_rt_schedparams(int expected_policy, int expected_prio,
 
 static void *thread_body(void *arg)
 {
-	struct cobalt_threadstat stats;
 	struct sched_param param;
+#ifdef CONFIG_XENO_LAZY_SETSCHED
+	struct cobalt_threadstat stats;
 	unsigned long long msw;
+#endif
 
 	thread_pid = syscall(SYS_gettid);
 
 	check_rt_schedparams(SCHED_FIFO, 1);
 	check_linux_schedparams(SCHED_FIFO, 1);
 
+	cobalt_thread_harden();
+
+#ifdef CONFIG_XENO_LAZY_SETSCHED
 	if (smokey_check_status(cobalt_thread_stat(thread_pid, &stats)))
 		pthread_exit((void *)(long)-EINVAL);
 	msw = stats.msw;
+#endif
 
 	param.sched_priority = 2;
 	if (smokey_check_status(pthread_setschedparam(pthread_self(),
@@ -88,9 +94,11 @@ static void *thread_body(void *arg)
 
 	check_rt_schedparams(SCHED_FIFO, 2);
 
+#ifdef CONFIG_XENO_LAZY_SETSCHED
 	if (smokey_check_status(cobalt_thread_stat(thread_pid, &stats)) ||
 	    !smokey_assert(stats.msw == msw))
 		pthread_exit((void *)(long)-EINVAL);
+#endif
 
 	check_linux_schedparams(SCHED_FIFO, 2);
 
