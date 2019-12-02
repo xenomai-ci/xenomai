@@ -158,22 +158,19 @@ static inline int mq_init(struct cobalt_mq *mq, const struct mq_attr *attr)
 
 static inline void mq_destroy(struct cobalt_mq *mq)
 {
-	int resched;
 	spl_t s;
 
 	xnlock_get_irqsave(&nklock, s);
-	resched = (xnsynch_destroy(&mq->receivers) == XNSYNCH_RESCHED);
-	resched = (xnsynch_destroy(&mq->senders) == XNSYNCH_RESCHED) || resched;
+	xnsynch_destroy(&mq->receivers);
+	xnsynch_destroy(&mq->senders);
 	list_del(&mq->link);
+	xnsched_run();
 	xnlock_put_irqrestore(&nklock, s);
-	xnselect_destroy(&mq->read_select);
-	xnselect_destroy(&mq->write_select);
+	xnselect_destroy(&mq->read_select); /* Reschedules. */
+	xnselect_destroy(&mq->write_select); /* Ditto. */
 	xnregistry_remove(mq->handle);
 	xnheap_vfree(mq->mem);
 	kfree(mq);
-
-	if (resched)
-		xnsched_run();
 }
 
 static int mq_unref_inner(struct cobalt_mq *mq, spl_t s)

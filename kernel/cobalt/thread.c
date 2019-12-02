@@ -1582,9 +1582,9 @@ check_self_cancel:
 	} else
 		__xnthread_kick(thread);
 out:
-	xnlock_put_irqrestore(&nklock, s);
-
 	xnsched_run();
+
+	xnlock_put_irqrestore(&nklock, s);
 }
 EXPORT_SYMBOL_GPL(xnthread_cancel);
 

@@ -409,7 +409,6 @@ static void xnselector_destroy_loop(void *cookie)
 	struct xnselect_binding *binding, *tmpb;
 	struct xnselector *selector, *tmps;
 	struct xnselect *fd;
-	int resched;
 	spl_t s;
 
 	xnlock_get_irqsave(&nklock, s);
@@ -430,12 +429,11 @@ static void xnselector_destroy_loop(void *cookie)
 			xnlock_get_irqsave(&nklock, s);
 		}
 	release:
-		resched = xnsynch_destroy(&selector->synchbase) == XNSYNCH_RESCHED;
+		xnsynch_destroy(&selector->synchbase);
+		xnsched_run();
 		xnlock_put_irqrestore(&nklock, s);
 
 		xnfree(selector);
-		if (resched)
-			xnsched_run();
 
 		xnlock_get_irqsave(&nklock, s);
 	}

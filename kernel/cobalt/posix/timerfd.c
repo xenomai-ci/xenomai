@@ -131,18 +131,15 @@ timerfd_select(struct rtdm_fd *fd, struct xnselector *selector,
 static void timerfd_close(struct rtdm_fd *fd)
 {
 	struct cobalt_tfd *tfd = container_of(fd, struct cobalt_tfd, fd);
-	int resched;
 	spl_t s;
 
 	xnlock_get_irqsave(&nklock, s);
 	xntimer_destroy(&tfd->timer);
-	resched = xnsynch_destroy(&tfd->readers) == XNSYNCH_RESCHED;
+	xnsynch_destroy(&tfd->readers);
+	xnsched_run();
 	xnlock_put_irqrestore(&nklock, s);
-	xnselect_destroy(&tfd->read_select);
+	xnselect_destroy(&tfd->read_select); /* Reschedules. */
 	xnfree(tfd);
-
-	if (resched)
-		xnsched_run();
 }
 
 static struct rtdm_fd_ops timerfd_ops = {
