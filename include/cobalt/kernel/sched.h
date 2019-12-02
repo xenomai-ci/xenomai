@@ -299,25 +299,8 @@ void __xnsched_run_handler(void);
 static inline int __xnsched_run(struct xnsched *sched)
 {
 	/*
-	 * NOTE: Since ___xnsched_run() won't run immediately if an
-	 * escalation to primary domain is needed, we won't use
-	 * critical scheduler information before we actually run in
-	 * primary mode; therefore we can first test the scheduler
-	 * status then escalate.
-	 *
-	 * Running in the primary domain means that no Linux-triggered
-	 * CPU migration may occur from that point either. Finally,
-	 * since migration is always a self-directed operation for
-	 * Xenomai threads, we can safely read the scheduler state
-	 * bits without holding the nklock.
-	 *
-	 * Said differently, if we race here because of a CPU
-	 * migration, it must have been Linux-triggered because we run
-	 * in secondary mode; in which case we will escalate to the
-	 * primary domain, then unwind the current call frame without
-	 * running the rescheduling procedure in
-	 * ___xnsched_run(). Therefore, the scheduler slot
-	 * (i.e. "sched") will be either valid, or unused.
+	 * Reschedule if XNSCHED is pending, but never over an IRQ
+	 * handler or in the middle of unlocked context switch.
 	 */
 	if (((sched->status|sched->lflags) &
 	     (XNINIRQ|XNINSW|XNRESCHED)) != XNRESCHED)
@@ -330,17 +313,19 @@ static inline int xnsched_run(void)
 {
 	struct xnsched *sched = xnsched_current();
 	/*
-	 * No rescheduling is possible, either if:
-	 *
-	 * - the current thread holds the scheduler lock
-	 * - an ISR context is active
-	 * - we are caught in the middle of an unlocked context switch.
+	 * sched->curr is shared locklessly with ___xnsched_run().
+	 * READ_ONCE() makes sure the compiler never uses load tearing
+	 * for reading this pointer piecemeal, so that multiple stores
+	 * occurring concurrently on remote CPUs never yield a
+	 * spurious merged value on the local one.
 	 */
-	smp_rmb();
-	if (unlikely(sched->curr->lock_count > 0))
-		return 0;
+	struct xnthread *curr = READ_ONCE(sched->curr);
 
-	return __xnsched_run(sched);
+	/*
+	 * If running over the root thread, hard irqs must be off
+	 * (asserted out of line in ___xnsched_run()).
+	 */
+	return curr->lock_count > 0 ? 0 : __xnsched_run(sched);
 }
 
 void xnsched_lock(void);

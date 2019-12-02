@@ -1051,8 +1051,12 @@ static inline void __deprecated rtdm_task_join_nrt(rtdm_task_t *task,
 static inline void rtdm_task_set_priority(rtdm_task_t *task, int priority)
 {
 	union xnsched_policy_param param = { .rt = { .prio = priority } };
+	spl_t s;
+
+	splhigh(s);
 	xnthread_set_schedparam(task, &xnsched_class_rt, &param);
 	xnsched_run();
+	splexit(s);
 }
 
 static inline int rtdm_task_set_period(rtdm_task_t *task,
@@ -1069,9 +1073,14 @@ static inline int rtdm_task_set_period(rtdm_task_t *task,
 
 static inline int rtdm_task_unblock(rtdm_task_t *task)
 {
-	int res = xnthread_unblock(task);
+	spl_t s;
+	int res;
 
+	splhigh(s);
+	res = xnthread_unblock(task);
 	xnsched_run();
+	splexit(s);
+
 	return res;
 }
 

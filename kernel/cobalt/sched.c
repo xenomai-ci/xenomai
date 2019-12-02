@@ -324,10 +324,12 @@ struct xnsched *xnsched_finish_unlocked_switch(struct xnsched *sched)
 void xnsched_lock(void)
 {
 	struct xnsched *sched = xnsched_current();
-	struct xnthread *curr = sched->curr;
+	/* See comments in xnsched_run(), ___xnsched_run(). */
+	struct xnthread *curr = READ_ONCE(sched->curr);
 
 	if (sched->lflags & XNINIRQ)
 		return;
+
 	/*
 	 * CAUTION: The fast xnthread_current() accessor carries the
 	 * relevant lock nesting count only if current runs in primary
@@ -346,14 +348,17 @@ EXPORT_SYMBOL_GPL(xnsched_lock);
 void xnsched_unlock(void)
 {
 	struct xnsched *sched = xnsched_current();
-	struct xnthread *curr = sched->curr;
+	struct xnthread *curr = READ_ONCE(sched->curr);
+
+	XENO_WARN_ON_ONCE(COBALT, (curr->state & XNROOT) &&
+			  !hard_irqs_disabled());
 
 	if (sched->lflags & XNINIRQ)
 		return;
-	
+
 	if (!XENO_ASSERT(COBALT, curr->lock_count > 0))
 		return;
-	
+
 	if (--curr->lock_count == 0) {
 		xnthread_clear_localinfo(curr, XNLBALERT);
 		xnsched_run();
@@ -811,6 +816,8 @@ int ___xnsched_run(struct xnsched *sched)
 	int switched, shadow;
 	spl_t s;
 
+	XENO_WARN_ON_ONCE(COBALT, !hard_irqs_disabled() && ipipe_root_p);
+
 	if (xnarch_escalate())
 		return 0;
 
@@ -849,7 +856,14 @@ reschedule:
 	if (xnthread_test_state(next, XNROOT))
 		xnsched_reset_watchdog(sched);
 
-	sched->curr = next;
+	/*
+	 * sched->curr is shared locklessly with xnsched_run() and
+	 * xnsched_lock(). WRITE_ONCE() makes sure sched->curr is
+	 * written atomically so that these routines always observe
+	 * consistent values by preventing the compiler from using
+	 * store tearing.
+	 */
+	WRITE_ONCE(sched->curr, next);
 	shadow = 1;
 
 	if (xnthread_test_state(prev, XNROOT)) {
