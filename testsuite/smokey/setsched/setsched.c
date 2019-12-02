@@ -102,6 +102,27 @@ static void *thread_body(void *arg)
 
 	check_linux_schedparams(SCHED_FIFO, 2);
 
+	cobalt_thread_harden();
+
+#ifdef CONFIG_XENO_LAZY_SETSCHED
+	if (smokey_check_status(cobalt_thread_stat(thread_pid, &stats)))
+		pthread_exit((void *)(long)-EINVAL);
+	msw = stats.msw;
+#endif
+
+	if (smokey_check_status(pthread_setschedprio(pthread_self(), 3)))
+		pthread_exit((void *)(long)-EINVAL);
+
+	check_rt_schedparams(SCHED_FIFO, 3);
+
+#ifdef CONFIG_XENO_LAZY_SETSCHED
+	if (smokey_check_status(cobalt_thread_stat(thread_pid, &stats)) ||
+	    !smokey_assert(stats.msw == msw))
+		pthread_exit((void *)(long)-EINVAL);
+#endif
+
+	check_linux_schedparams(SCHED_FIFO, 3);
+
 	return (void *)0L;
 }
 
