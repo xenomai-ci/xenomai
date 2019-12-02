@@ -57,27 +57,32 @@ static struct tap_device_t {
 
 void rtcap_rx_hook(struct rtskb *rtskb)
 {
+	bool			trigger = false;
+
 	if ((rtskb->cap_comp_skb = rtskb_pool_dequeue(&cap_pool)) == 0) {
 		tap_device[rtskb->rtdev->ifindex].tap_dev_stats.rx_dropped++;
 		return;
 	}
 
-	if (cap_queue.first == NULL)
+	if (cap_queue.first == NULL) {
 		cap_queue.first = rtskb;
-	else
+		trigger = true;
+	} else
 		cap_queue.last->cap_next = rtskb;
 	cap_queue.last = rtskb;
 	rtskb->cap_next = NULL;
 
 	rtskb->cap_flags |= RTSKB_CAP_SHARED;
 
-	rtdm_nrtsig_pend(&cap_signal);
+	if (trigger)
+		rtdm_nrtsig_pend(&cap_signal);
 }
 
 int rtcap_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
 {
 	struct tap_device_t *tap_dev = &tap_device[rtskb->rtdev->ifindex];
 	rtdm_lockctx_t context;
+	bool trigger = false;
 
 	if ((rtskb->cap_comp_skb = rtskb_pool_dequeue(&cap_pool)) == 0) {
 		tap_dev->tap_dev_stats.rx_dropped++;
@@ -93,15 +98,17 @@ int rtcap_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
 
 	rtdm_lock_get_irqsave(&rtcap_lock, context);
 
-	if (cap_queue.first == NULL)
+	if (cap_queue.first == NULL) {
 		cap_queue.first = rtskb;
-	else
+		trigger = true;
+	} else
 		cap_queue.last->cap_next = rtskb;
 	cap_queue.last = rtskb;
 
 	rtdm_lock_put_irqrestore(&rtcap_lock, context);
 
-	rtdm_nrtsig_pend(&cap_signal);
+	if (trigger)
+		rtdm_nrtsig_pend(&cap_signal);
 
 	return tap_dev->orig_xmit(rtskb, rtdev);
 }
