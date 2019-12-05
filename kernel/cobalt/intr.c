@@ -671,12 +671,12 @@ done:
 out:
 	switch_from_irqstats(sched, prev);
 
+	trace_cobalt_irq_exit(irq);
+
 	if (--sched->inesting == 0) {
 		sched->lflags &= ~XNINIRQ;
 		xnsched_run();
 	}
-
-	trace_cobalt_irq_exit(irq);
 }
 
 int __init xnintr_mount(void)
