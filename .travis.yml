@@ -18,7 +18,7 @@ env:
     - CCACHE_MAXSIZE=400M
 
 install:
-  - REV=$(git ls-remote --tags ${IPIPE_KERNEL} | sed "s|.*[[:space:]]refs/tags/||" | grep "${IPIPE_REV}" | sort -r -n -t - -k 5 -k 6 | head -1)
+  - REV=$(git ls-remote --tags --refs ${IPIPE_KERNEL} | sed "s|.*[[:space:]]refs/tags/||" | grep "${IPIPE_REV}" | sort -r -n -t - -k 5 -k 6 | head -1)
   - test -n "${REV}" || REV="${IPIPE_REV}"
   - echo "Cloning branch/tag ${REV}"
   - git clone --depth 1 --branch ${REV} ${IPIPE_KERNEL} ${KDIR}
