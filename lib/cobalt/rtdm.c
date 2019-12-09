@@ -145,11 +145,11 @@ static int do_ioctl(int fd, unsigned int request, void *arg)
 COBALT_IMPL(int, fcntl, (int fd, int cmd, ...))
 {
 	va_list ap;
-	int arg;
+	long arg;
 	int ret;
 
 	va_start(ap, cmd);
-	arg = va_arg(ap, int);
+	arg = va_arg(ap, long);
 	va_end(ap);
 
 	ret = XENOMAI_SYSCALL3(sc_cobalt_fcntl, fd, cmd, arg);

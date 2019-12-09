@@ -221,10 +221,10 @@ __weak
 int __real_fcntl(int fd, int cmd, ...)
 {
 	va_list ap;
-	int arg;
+	long arg;
 
 	va_start(ap, cmd);
-	arg = va_arg(ap, int);
+	arg = va_arg(ap, long);
 	va_end(ap);
 
 	return fcntl(fd, cmd, arg);
