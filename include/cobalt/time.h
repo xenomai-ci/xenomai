@@ -30,6 +30,8 @@
 extern "C" {
 #endif
 
+struct timex;
+
 COBALT_DECL(int, clock_getres(clockid_t clock_id,
 			      struct timespec *tp));
 
