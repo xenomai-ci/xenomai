@@ -793,7 +793,6 @@ COBALT_IMPL(int, puts, (const char *s))
 	}
 }
 
-#undef fputc
 COBALT_IMPL(int, fputc, (int c, FILE *stream))
 {
 	if (!cobalt_is_relaxed())
@@ -804,7 +803,6 @@ COBALT_IMPL(int, fputc, (int c, FILE *stream))
 	}
 }
 
-#undef putchar
 COBALT_IMPL(int, putchar, (int c))
 {
 	if (!cobalt_is_relaxed())

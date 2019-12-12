@@ -73,7 +73,7 @@ static inline int __real_putchar(int c)
 int __wrap_putchar(int c);
 int __cobalt_putchar(int c);
 #undef putchar
-#define putchar __wrap_putchar
+#define putchar putchar
 #endif
 
 #ifndef fputc
@@ -86,7 +86,7 @@ static inline int __real_fputc(int c, FILE *stream)
 int __wrap_fputc(int c, FILE *stream);
 int __cobalt_fputc(int c, FILE *stream);
 #undef fputc
-#define fputc __wrap_fputc
+#define fputc fputc
 #endif
 
 COBALT_DECL(size_t,
