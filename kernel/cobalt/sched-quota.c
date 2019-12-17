@@ -560,8 +560,10 @@ void xnsched_quota_set_limit(struct xnsched_quota_group *tg,
 			     int quota_percent, int quota_peak_percent,
 			     int *quota_sum_r)
 {
-	struct xnsched_quota *qs = &tg->sched->quota;
+	struct xnsched *sched = tg->sched;
+	struct xnsched_quota *qs = &sched->quota;
 	xnticks_t old_quota_ns = tg->quota_ns;
+	struct xnthread *thread, *tmp, *curr;
 	xnticks_t now, elapsed, consumed;
 
 	atomic_only();
@@ -584,7 +586,9 @@ void xnsched_quota_set_limit(struct xnsched_quota_group *tg,
 	tg->quota_percent = quota_percent;
 	tg->quota_peak_percent = quota_peak_percent;
 
-	if (group_is_active(tg)) {
+	curr = sched->curr;
+	if (curr->quota == tg &&
+	    xnthread_test_state(curr, XNREADY|XNTHREAD_BLOCK_BITS) == 0) {
 		now = xnclock_read_monotonic(&nkclock);
 
 		elapsed = now - tg->run_start_ns;
@@ -611,11 +615,19 @@ void xnsched_quota_set_limit(struct xnsched_quota_group *tg,
 
 	*quota_sum_r = quota_sum_all(qs);
 
+	if (tg->run_budget_ns > 0) {
+		list_for_each_entry_safe_reverse(thread, tmp, &tg->expired,
+						 quota_expired) {
+			list_del_init(&thread->quota_expired);
+			xnsched_addq(&sched->rt.runnable, thread);
+		}
+	}
+
 	/*
 	 * Apply the new budget immediately, in case a member of this
 	 * group is currently running.
 	 */
-	xnsched_set_resched(tg->sched);
+	xnsched_set_resched(sched);
 	xnsched_run();
 }
 EXPORT_SYMBOL_GPL(xnsched_quota_set_limit);
