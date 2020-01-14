@@ -150,7 +150,7 @@ static int spi_master_ioctl_rt(struct rtdm_fd *fd,
 	struct rtdm_spi_remote_slave *slave = fd_to_slave(fd);
 	struct rtdm_spi_master *master = slave->master;
 	struct rtdm_spi_config config;
-	int ret;
+	int ret, len;
 
 	switch (request) {
 	case SPI_RTIOC_SET_CONFIG:
@@ -173,6 +173,19 @@ static int spi_master_ioctl_rt(struct rtdm_fd *fd,
 			ret = do_chip_select(slave);
 			if (ret == 0) {
 				ret = master->ops->transfer_iobufs(slave);
+				do_chip_deselect(slave);
+			}
+			rtdm_mutex_unlock(&master->bus_lock);
+		}
+		break;
+	case SPI_RTIOC_TRANSFER_N:
+		ret = -EINVAL;
+		if (master->ops->transfer_iobufs_n) {
+			len = (int)arg;
+			rtdm_mutex_lock(&master->bus_lock);
+			ret = do_chip_select(slave);
+			if (ret == 0) {
+				ret = master->ops->transfer_iobufs_n(slave, len);
 				do_chip_deselect(slave);
 			}
 			rtdm_mutex_unlock(&master->bus_lock);

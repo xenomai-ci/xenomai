@@ -39,6 +39,7 @@ struct rtdm_spi_master_ops {
 			   struct vm_area_struct *vma);
 	void (*mmap_release)(struct rtdm_spi_remote_slave *slave);
 	int (*transfer_iobufs)(struct rtdm_spi_remote_slave *slave);
+	int (*transfer_iobufs_n)(struct rtdm_spi_remote_slave *slave, int len);
 	ssize_t (*write)(struct rtdm_spi_remote_slave *slave,
 			 const void *tx, size_t len);
 	ssize_t (*read)(struct rtdm_spi_remote_slave *slave,

@@ -37,5 +37,6 @@ struct rtdm_spi_iobufs {
 #define SPI_RTIOC_GET_CONFIG		_IOR(RTDM_CLASS_SPI, 1, struct rtdm_spi_config)
 #define SPI_RTIOC_SET_IOBUFS		_IOR(RTDM_CLASS_SPI, 2, struct rtdm_spi_iobufs)
 #define SPI_RTIOC_TRANSFER		_IO(RTDM_CLASS_SPI, 3)
+#define SPI_RTIOC_TRANSFER_N		_IOR(RTDM_CLASS_SPI, 4, int)
 
 #endif /* !_RTDM_UAPI_SPI_H */
