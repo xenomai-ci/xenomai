@@ -355,6 +355,24 @@ static int sun6i_transfer_iobufs(struct rtdm_spi_remote_slave *slave)
 	return do_transfer_irq(slave);
 }
 
+static int sun6i_transfer_iobufs_n(struct rtdm_spi_remote_slave *slave,
+				   int len)
+{
+	struct spi_master_sun6i *spim = to_master_sun6i(slave);
+	struct spi_slave_sun6i *sun6i = to_slave_sun6i(slave);
+
+	if ((sun6i->io_len == 0) ||
+		(len <= 0) || (len > (sun6i->io_len / 2)))
+		return -EINVAL;
+
+	spim->tx_len = len;
+	spim->rx_len = len;
+	spim->tx_buf = sun6i->io_virt + sun6i->io_len / 2;
+	spim->rx_buf = sun6i->io_virt;
+
+	return do_transfer_irq(slave);
+}
+
 static ssize_t sun6i_read(struct rtdm_spi_remote_slave *slave,
 			  void *rx, size_t len)
 {
@@ -480,6 +498,7 @@ static struct rtdm_spi_master_ops sun6i_master_ops = {
 	.mmap_iobufs = sun6i_mmap_iobufs,
 	.mmap_release = sun6i_mmap_release,
 	.transfer_iobufs = sun6i_transfer_iobufs,
+	.transfer_iobufs_n = sun6i_transfer_iobufs_n,
 	.write = sun6i_write,
 	.read = sun6i_read,
 	.attach_slave = sun6i_attach_slave,

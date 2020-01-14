@@ -318,6 +318,24 @@ static int bcm2835_transfer_iobufs(struct rtdm_spi_remote_slave *slave)
 	return do_transfer_irq(slave);
 }
 
+static int bcm2835_transfer_iobufs_n(struct rtdm_spi_remote_slave *slave,
+				     int len)
+{
+	struct spi_master_bcm2835 *spim = to_master_bcm2835(slave);
+	struct spi_slave_bcm2835 *bcm = to_slave_bcm2835(slave);
+
+	if ((bcm->io_len == 0) ||
+		(len <= 0) || (len > (bcm->io_len / 2)))
+		return -EINVAL;
+
+	spim->tx_len = len;
+	spim->rx_len = len;
+	spim->tx_buf = bcm->io_virt + bcm->io_len / 2;
+	spim->rx_buf = bcm->io_virt;
+
+	return do_transfer_irq(slave);
+}
+
 static ssize_t bcm2835_read(struct rtdm_spi_remote_slave *slave,
 			    void *rx, size_t len)
 {
@@ -549,6 +567,7 @@ static struct rtdm_spi_master_ops bcm2835_master_ops = {
 	.mmap_iobufs = bcm2835_mmap_iobufs,
 	.mmap_release = bcm2835_mmap_release,
 	.transfer_iobufs = bcm2835_transfer_iobufs,
+	.transfer_iobufs_n = bcm2835_transfer_iobufs_n,
 	.write = bcm2835_write,
 	.read = bcm2835_read,
 	.attach_slave = bcm2835_attach_slave,
