@@ -240,8 +240,8 @@ static ssize_t spi_master_read_rt(struct rtdm_fd *fd,
 		do_chip_deselect(slave);
 	}
 	rtdm_mutex_unlock(&master->bus_lock);
-	if (ret == 0)
-		ret = rtdm_safe_copy_to_user(fd, u_buf, rx, len);
+	if (ret > 0)
+		ret = rtdm_safe_copy_to_user(fd, u_buf, rx, ret);
 	
 	xnfree(rx);
 	
