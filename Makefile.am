@@ -50,4 +50,12 @@ install-user: install
 
 install-exec-local: udev-rules
 
+uninstall-local:
+if XENO_COBALT
+	cd $(srcdir)/kernel/cobalt/udev ; \
+	for f in *.rules ; do \
+	    $(RM) $(DESTDIR)$(sysconfdir)/udev/rules.d/$$f ; \
+	done
+endif
+
 .PHONY: FORCE
