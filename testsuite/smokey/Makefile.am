@@ -51,6 +51,7 @@ DIST_SUBDIRS = 		\
 	cpu-affinity	\
 	dlopen		\
 	fpu-stress	\
+	gdb		\
 	iddp		\
 	leaks		\
 	memory-coreheap	\
