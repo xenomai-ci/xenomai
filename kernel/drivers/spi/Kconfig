@@ -22,6 +22,16 @@ config XENO_DRIVERS_SPI_SUN6I
 	Enables support for the SPI controller available from
 	Allwinner's A31, H3 SoCs.
 
+config XENO_DRIVERS_SPI_OMAP2_MCSPI_RT
+	tristate "McSPI rt-driver for OMAP"
+	depends on HAS_DMA
+	depends on ARCH_OMAP2PLUS || COMPILE_TEST
+	select XENO_DRIVERS_SPI
+	help
+
+	SPI real-time master controller for OMAP24XX and later Multichannel SPI
+	(McSPI) modules.
+
 config XENO_DRIVERS_SPI_DEBUG
        depends on XENO_DRIVERS_SPI
        bool "Enable SPI core debugging features"

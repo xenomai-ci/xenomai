@@ -143,6 +143,7 @@ before_script:
   - ./scripts/config -e XENO_DRIVERS_GPIOPWM
   - ./scripts/config -e XENO_DRIVERS_SPI_BCM2835
   - ./scripts/config -e XENO_DRIVERS_SPI_SUN6I
+  - ./scripts/config -e XENO_DRIVERS_SPI_OMAP2_MCSPI_RT
   - ./scripts/config -e XENO_DRIVERS_SPI_DEBUG
 
   - popd
