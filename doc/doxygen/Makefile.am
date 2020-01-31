@@ -20,7 +20,7 @@ html/xeno3prm latex/xeno3prm: FORCE
 	$(DOXYGEN) $(@F)-$(@D).conf
 
 %.pdf: latex/%
-	$(MAKE) -C $< refman.pdf > /dev/null
+	$(MAKE) -C $< refman.pdf
 	mv $</refman.pdf $@
 
 distclean-local:
