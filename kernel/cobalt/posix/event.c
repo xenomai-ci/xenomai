@@ -153,7 +153,7 @@ int __cobalt_event_wait(struct cobalt_event_shadow __user *u_event,
 
 	state->flags |= COBALT_EVENT_PENDED;
 	rbits = state->value & bits;
-	testval = mode & COBALT_EVENT_ANY ? rbits : state->value;
+	testval = mode & COBALT_EVENT_ANY ? rbits : bits;
 	if (rbits && rbits == testval)
 		goto done;
 
