@@ -850,8 +850,12 @@ int xnregistry_remove(xnhandle_t handle)
 			 * Leave the update of the object queues to
 			 * the work callback if it has been kicked.
 			 */
-			if (object->pnode)
-				goto unlock_and_exit;
+			if (object->pnode) {
+				xnlock_put_irqrestore(&nklock, s);
+				if (ipipe_root_p)
+					flush_work(&registry_proc_work);
+				return 0;
+			}
 		}
 #endif /* CONFIG_XENO_OPT_VFILE */
 
