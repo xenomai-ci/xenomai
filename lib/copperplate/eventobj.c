@@ -217,7 +217,7 @@ int eventobj_wait(struct eventobj *evobj,
 	}
 
 	waitval = evobj->core.value & bits;
-	testval = mode & EVOBJ_ANY ? waitval : evobj->core.value;
+	testval = mode & EVOBJ_ANY ? waitval : bits;
 
 	if (waitval && waitval == testval) {
 		*bits_r = waitval;
