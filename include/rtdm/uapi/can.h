@@ -466,9 +466,9 @@ struct can_ifreq {
  * @anchor CANIOCTLs @name IOCTLs
  * CAN device IOCTLs
  *
- * @deprecated Passing <TT>struct ifreq<TT> as a request descriptor
+ * @deprecated Passing \c struct \c ifreq as a request descriptor
  * for CAN IOCTLs is still accepted for backward compatibility,
- * however it is recommended to switch to <TT>struct can_ifreq<TT> at
+ * however it is recommended to switch to \c struct \c can_ifreq at
  * the first opportunity.
  *
  * @{ */

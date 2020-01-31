@@ -503,8 +503,6 @@ static inline void xntimer_dequeue(struct xntimer *timer,
 	timer->status |= XNTIMER_DEQUEUED;
 }
 
-/** @} */
-
 unsigned long long xntimer_get_overruns(struct xntimer *timer, xnticks_t now);
 
 #ifdef CONFIG_SMP

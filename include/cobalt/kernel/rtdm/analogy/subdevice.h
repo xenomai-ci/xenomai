@@ -89,8 +89,6 @@ struct a4l_subdevice {
 		  /**< Private data */
 };
 
-/*! @} subdevice */
-
 /* --- Subdevice related functions and macros --- */
 
 struct a4l_channel *a4l_get_chfeat(struct a4l_subdevice * sb, int idx);

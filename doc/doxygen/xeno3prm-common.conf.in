@@ -131,9 +131,9 @@ TAB_SIZE               = 8
 # You can put \n's in the value part of an alias to insert newlines.
 
 ALIASES                = \
- 		       "coretags{1}=@par Tags\n@ref cobalt-core-tags \"\1\""	\
- 		       "apitags{1}=@par Tags\n@ref api-tags \"\1\""	\
-		       "sideeffect=@par Side effects\n"
+ 		       "coretags{1}=@par Tags^^@ref cobalt-core-tags \"\1\""	\
+ 		       "apitags{1}=@par Tags^^@ref api-tags \"\1\""	\
+		       "sideeffect=@par Side effects^^"
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources 
 # only. Doxygen will then generate output that is more tailored for C. 
@@ -316,7 +316,7 @@ WARNINGS               = YES
 # for undocumented members. If EXTRACT_ALL is set to YES then this flag will 
 # automatically be disabled.
 
-WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_UNDOCUMENTED   = NO
 
 # If WARN_IF_DOC_ERROR is set to YES, doxygen will generate warnings for 
 # potential errors in the documentation, such as not documenting some 
@@ -709,11 +709,6 @@ ALLEXTERNALS           = NO
 # be listed.
 
 EXTERNAL_GROUPS        = YES
-
-# The PERL_PATH should be the absolute path and name of the perl script 
-# interpreter (i.e. the result of `which perl').
-
-PERL_PATH              = /usr/bin/perl
 
 #---------------------------------------------------------------------------
 # Configuration options related to the dot tool   
