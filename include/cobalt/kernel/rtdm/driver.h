@@ -210,7 +210,7 @@ static inline struct rtdm_device *rtdm_fd_device(struct rtdm_fd *fd)
  * This descriptor details the profile information associated to a
  * RTDM class of device managed by a driver.
  *
- * @anchor rtdm_profile_info @name RTDM profile information descriptor
+ * @anchor rtdm_profile_info
  */
 struct rtdm_profile_info {
 	/** Device class name */
@@ -218,7 +218,7 @@ struct rtdm_profile_info {
 	/** Device class ID, see @ref RTDM_CLASS_xxx */
 	int class_id;
 	/** Device sub-class, see RTDM_SUBCLASS_xxx definition in the
-	 *  @ref rtdm_profiles "Device Profiles" */
+	    @ref rtdm_profiles "Device Profiles" */
 	int subclass_id;
 	/** Supported device profile version */
 	int version;
@@ -388,8 +388,6 @@ struct rtdm_device {
 		struct list_head openfd_list;
 	};
 };
-
-/** @} devregister */
 
 /* --- device registration --- */
 

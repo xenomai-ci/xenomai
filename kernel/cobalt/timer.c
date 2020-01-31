@@ -601,6 +601,9 @@ void xntimer_release_ipi(void)
  *
  * @param timer The address of a valid timer descriptor.
  *
+ * @param waiter The thread for which the overrun count is being
+ * collected.
+ *
  * @param now current date (as
  * xnclock_read_raw(xntimer_clock(timer)))
  *

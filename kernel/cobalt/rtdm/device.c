@@ -646,4 +646,4 @@ void rtdm_cleanup(void)
 	 */
 }
 
-/*@}*/
+/** @} */

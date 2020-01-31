@@ -22,7 +22,7 @@
 
 #include <cobalt/kernel/clock.h>
 
-/*
+/**
  * @ingroup cobalt_core_thread
  * @defgroup cobalt_core_stat Thread runtime statistics
  * @{
