@@ -447,7 +447,7 @@ LATEX_BATCHMODE=YES
 LATEX_MODE=batch
 AC_MSG_CHECKING(for LaTeX mode)
 AC_ARG_ENABLE(verbose-latex,
-	AS_HELP_STRING([--enable-nonstop-latex], [Use LaTeX non-stop mode]),
+	AS_HELP_STRING([--enable-verbose-latex], [Disable LaTeX non-stop mode]),
 	[case "$enableval" in
 	y | yes)
 	   LATEX_BATCHMODE=NO
