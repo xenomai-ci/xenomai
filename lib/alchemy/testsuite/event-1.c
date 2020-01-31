@@ -63,11 +63,20 @@ static void foreground_task(void *arg)
 
 int main(int argc, char *const argv[])
 {
+	unsigned int flags;
 	int ret;
 
 	traceobj_init(&trobj, argv[0], 0);
 
 	ret = rt_event_create(&event, "EVENT", 0, EV_FIFO);
+	traceobj_check(&trobj, ret, 0);
+
+	ret = rt_event_signal(&event, 0x3);
+	traceobj_check(&trobj, ret, 0);
+	ret = rt_event_wait(&event, 0x1, &flags, EV_ALL, TM_NONBLOCK);
+	traceobj_check(&trobj, ret, 0);
+	traceobj_assert(&trobj, flags == 0x1);
+	ret = rt_event_clear(&event, 0x3, NULL);
 	traceobj_check(&trobj, ret, 0);
 
 	ret = rt_task_create(&t_bgnd, "BGND", 0,  20, 0);
