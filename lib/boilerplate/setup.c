@@ -178,7 +178,7 @@ static int collect_cpu_affinity(const char *cpu_list)
 	s = n = strdup(cpu_list);
 	while ((range = strtok_r(n, ",", &range_p)) != NULL) {
 		if (*range == '\0')
-			continue;
+			goto next;
 		end = -1;
 		if (range[strlen(range)-1] == '-')
 			end = nr_cpus - 1;
@@ -203,6 +203,7 @@ static int collect_cpu_affinity(const char *cpu_list)
 		}
 		for (cpu = start; cpu <= end; cpu++)
 			CPU_SET(cpu, &__base_setup_data.cpu_affinity);
+	next:
 		n = NULL;
 	}
 
