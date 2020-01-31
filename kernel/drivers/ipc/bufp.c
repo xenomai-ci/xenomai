@@ -43,8 +43,10 @@ struct bufp_socket {
 
 	off_t rdoff;
 	off_t rdrsvd;
+	int rdsem;
 	off_t wroff;
 	off_t wrrsvd;
+	int wrsem;
 	size_t fillsz;
 	rtdm_event_t i_event;
 	rtdm_event_t o_event;
@@ -188,6 +190,7 @@ redo:
 		rdoff = sk->rdoff;
 		sk->rdoff = (rdoff + len) % sk->bufsz;
 		sk->rdrsvd += len;
+		sk->rdsem++;
 		rbytes = ret = len;
 
 		do {
@@ -213,14 +216,17 @@ redo:
 			rdoff = (rdoff + n) % sk->bufsz;
 		} while (rbytes > 0);
 
+		if (--sk->rdsem > 0)
+			goto out;
+
 		resched = 0;
-		if (sk->fillsz == sk->bufsz) /* -> writable */
+		if (sk->fillsz == sk->bufsz) /* -> becomes writable */
 			resched |= xnselect_signal(&sk->priv->send_block, POLLOUT);
 
-		sk->rdrsvd -= len;
-		sk->fillsz -= len;
+		sk->fillsz -= sk->rdrsvd;
+		sk->rdrsvd = 0;
 
-		if (sk->fillsz == 0) /* -> non-readable */
+		if (sk->fillsz == 0) /* -> becomes non-readable */
 			resched |= xnselect_signal(&sk->priv->recv_block, 0);
 
 		/*
@@ -431,6 +437,7 @@ static ssize_t __bufp_writebuf(struct bufp_socket *rsk,
 		wroff = rsk->wroff;
 		rsk->wroff = (wroff + len) % rsk->bufsz;
 		rsk->wrrsvd += len;
+		rsk->wrsem++;
 		wbytes = ret = len;
 
 		do {
@@ -459,14 +466,17 @@ static ssize_t __bufp_writebuf(struct bufp_socket *rsk,
 			wroff = (wroff + n) % rsk->bufsz;
 		} while (wbytes > 0);
 
-		rsk->fillsz += len;
-		rsk->wrrsvd -= len;
+		if (--rsk->wrsem > 0)
+			goto out;
 
 		resched = 0;
-		if (rsk->fillsz == len) /* -> readable */
+		if (rsk->fillsz == 0) /* -> becomes readable */
 			resched |= xnselect_signal(&rsk->priv->recv_block, POLLIN);
 
-		if (rsk->fillsz == rsk->bufsz) /* non-writable */
+		rsk->fillsz += rsk->wrrsvd;
+		rsk->wrrsvd = 0;
+
+		if (rsk->fillsz == rsk->bufsz) /* becomes non-writable */
 			resched |= xnselect_signal(&rsk->priv->send_block, 0);
 		/*
 		 * Wake up all threads pending on the input wait
