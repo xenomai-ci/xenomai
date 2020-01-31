@@ -55,8 +55,9 @@ void xnregistry_cleanup(void);
 
 #ifdef CONFIG_XENO_OPT_VFILE
 
-#define XNOBJECT_PNODE_RESERVED1 ((struct xnvfile *)1)
-#define XNOBJECT_PNODE_RESERVED2 ((struct xnvfile *)2)
+#define XNOBJECT_EXPORT_SCHEDULED  ((struct xnvfile *)1L)
+#define XNOBJECT_EXPORT_INPROGRESS ((struct xnvfile *)2L)
+#define XNOBJECT_EXPORT_ABORTED    ((struct xnvfile *)3L)
 
 struct xnptree {
 	const char *dirname;
