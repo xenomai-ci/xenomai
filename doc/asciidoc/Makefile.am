@@ -106,9 +106,13 @@ $(tmpdir)/%.txt: %.adoc Makefile plaintext.conf plaintext.xsl
 
 html/asciidoc-icons:
 	$(RM) -R asciidoc-icons
-	@test -d /usr/share/doc/asciidoc/images/ && \
-	cp -a /usr/share/doc/asciidoc/images/icons/ html/asciidoc-icons || \
-	cp -a /usr/share/asciidoc/images/icons/ html/asciidoc-icons
+	@if test -d /usr/share/doc/asciidoc/images/; then \
+		cp -a /usr/share/doc/asciidoc/images/icons/ html/asciidoc-icons; \
+	elif test -d /usr/share/asciidoc/images/icons/; then \
+		cp -a /usr/share/asciidoc/images/icons/ html/asciidoc-icons; \
+	else \
+		cp -a /etc/asciidoc/images/icons/ html/asciidoc-icons; \
+	fi
 
 html/asciidoc-icons/callouts: html/asciidoc-icons
 
