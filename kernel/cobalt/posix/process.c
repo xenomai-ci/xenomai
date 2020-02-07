@@ -1041,6 +1041,7 @@ static void __handle_taskexit_event(struct task_struct *p)
 {
 	struct cobalt_ppd *sys_ppd;
 	struct xnthread *thread;
+	spl_t s;
 
 	/*
 	 * We are called for both kernel and user shadows over the
@@ -1055,7 +1056,9 @@ static void __handle_taskexit_event(struct task_struct *p)
 	if (xnthread_test_state(thread, XNSSTEP))
 		unregister_debugged_thread(thread);
 
+	splhigh(s);
 	xnsched_run();
+	splexit(s);
 
 	xnthread_run_handler_stack(thread, exit_thread);
 
