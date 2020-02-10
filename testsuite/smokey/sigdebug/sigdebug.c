@@ -292,6 +292,7 @@ static int run_sigdebug(struct smokey_test *t, int argc, char *const argv[])
 	err = sem_destroy(&send_signal);
 	check_no_error("sem_destroy", err);
 
+	close(tmp_fd);
 	if (wd) {
 		fprintf(wd, "%d", wdog_delay);
 		fclose(wd);
