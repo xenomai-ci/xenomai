@@ -703,9 +703,9 @@ static int rt_imx_uart_set_config(struct rt_imx_uart_ctx *ctx,
 		uint64_t tdiv64;
 
 		if (ctx->config.data_bits == RTSER_8_BITS)
-			ucr2 = UCR2_WS | UCR2_IRTS;
+			ucr2 = UCR2_WS | UCR2_SRST | UCR2_IRTS;
 		else
-			ucr2 = UCR2_IRTS;
+			ucr2 = UCR2_SRST | UCR2_IRTS;
 
 		if (ctx->config.handshake == RTSER_RTSCTS_HAND) {
 			if (port->have_rtscts) {
