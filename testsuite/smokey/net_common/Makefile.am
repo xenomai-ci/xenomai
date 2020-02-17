@@ -1,4 +1,5 @@
-bin_PROGRAMS = smokey_net_server
+testdir = @XENO_TEST_DIR@
+test_PROGRAMS = smokey_net_server
 
 noinst_LIBRARIES = libnet_common.a
 noinst_HEADERS = \
