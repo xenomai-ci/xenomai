@@ -301,7 +301,7 @@ int rt_udp_socket(struct rtdm_fd *fd)
 			break;
 	index = ffz(port_bitmap[i]);
 	set_bit(index, &port_bitmap[i]);
-	index += i * 32;
+	index += i * BITS_PER_LONG;
 	sock->prot.inet.reg_index = index;
 	sock->prot.inet.sport = index + auto_port_start;
 
