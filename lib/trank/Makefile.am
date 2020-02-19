@@ -3,6 +3,10 @@ lib_LTLIBRARIES = libtrank.la
 
 libtrank_la_LDFLAGS = @XENO_LIB_LDFLAGS@ -version-info 0:0:0
 
+libtrank_la_LIBADD =						\
+	@XENO_CORE_LDADD@					\
+	$(top_builddir)/lib/alchemy/libalchemy.la
+
 libtrank_la_SOURCES =	\
 	init.c		\
 	internal.c	\

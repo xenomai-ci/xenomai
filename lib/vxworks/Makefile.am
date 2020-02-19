@@ -2,6 +2,10 @@ lib_LTLIBRARIES = libvxworks.la
 
 libvxworks_la_LDFLAGS = @XENO_LIB_LDFLAGS@ -version-info 0:0:0
 
+libvxworks_la_LIBADD =						\
+	@XENO_CORE_LDADD@					\
+	$(top_builddir)/lib/copperplate/libcopperplate.la
+
 libvxworks_la_SOURCES = \
 	init.c		\
 	errnoLib.c	\

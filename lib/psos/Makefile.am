@@ -2,6 +2,10 @@ lib_LTLIBRARIES = libpsos.la
 
 libpsos_la_LDFLAGS = @XENO_LIB_LDFLAGS@ -version-info 0:0:0
 
+libpsos_la_LIBADD =						\
+	@XENO_CORE_LDADD@					\
+	$(top_builddir)/lib/copperplate/libcopperplate.la
+
 libpsos_la_SOURCES =	\
 	init.c		\
 	internal.h	\

@@ -2,6 +2,10 @@ lib_LTLIBRARIES = libalchemy.la
 
 libalchemy_la_LDFLAGS = @XENO_LIB_LDFLAGS@ -version-info 0:0:0
 
+libalchemy_la_LIBADD =						\
+	@XENO_CORE_LDADD@					\
+	$(top_builddir)/lib/copperplate/libcopperplate.la
+
 libalchemy_la_SOURCES =	\
 	init.c		\
 	internal.c	\
