@@ -49,6 +49,14 @@ config XENO_DRIVERS_GPIO_XILINX
 	Enables support for the GPIO controller available from
 	Xilinx's softcore IP.
 
+config XENO_DRIVERS_GPIO_OMAP
+	depends on ARCH_OMAP2PLUS || ARCH_OMAP
+	tristate "Support for OMAP GPIOs"
+	help
+
+	Enables support for the GPIO controller available from
+	OMAP family SOC.
+
 config XENO_DRIVERS_GPIO_DEBUG
        bool "Enable GPIO core debugging features"
 

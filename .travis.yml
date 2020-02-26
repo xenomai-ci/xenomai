@@ -139,6 +139,7 @@ before_script:
   - ./scripts/config -e XENO_DRIVERS_GPIO_SUN8I_H3
   - ./scripts/config -e XENO_DRIVERS_GPIO_ZYNQ7000
   - ./scripts/config -e XENO_DRIVERS_GPIO_XILINX
+  - ./scripts/config -e XENO_DRIVERS_GPIO_OMAP
   - ./scripts/config -e XENO_DRIVERS_GPIO_DEBUG
   - ./scripts/config -e XENO_DRIVERS_GPIOPWM
   - ./scripts/config -e XENO_DRIVERS_SPI_BCM2835
