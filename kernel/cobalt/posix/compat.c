@@ -313,13 +313,39 @@ EXPORT_SYMBOL_GPL(sys32_get_sigevent);
 
 int sys32_get_sigset(sigset_t *set, const compat_sigset_t *u_cset)
 {
-	return get_compat_sigset(set, u_cset);
+#ifdef __BIG_ENDIAN
+	compat_sigset_t v;
+
+	if (cobalt_copy_from_user(&v, u_cset, sizeof(compat_sigset_t)))
+		return -EFAULT;
+	switch (_NSIG_WORDS) {
+	case 4: set->sig[3] = v.sig[6] | (((long)v.sig[7]) << 32 );
+	case 3: set->sig[2] = v.sig[4] | (((long)v.sig[5]) << 32 );
+	case 2: set->sig[1] = v.sig[2] | (((long)v.sig[3]) << 32 );
+	case 1: set->sig[0] = v.sig[0] | (((long)v.sig[1]) << 32 );
+	}
+#else
+	if (cobalt_copy_from_user(set, u_cset, sizeof(compat_sigset_t)))
+		return -EFAULT;
+#endif
+	return 0;
 }
 EXPORT_SYMBOL_GPL(sys32_get_sigset);
 
 int sys32_put_sigset(compat_sigset_t *u_cset, const sigset_t *set)
 {
-	return put_compat_sigset(u_cset, set, sizeof(*u_cset));
+#ifdef __BIG_ENDIAN
+	compat_sigset_t v;
+	switch (_NSIG_WORDS) {
+	case 4: v.sig[7] = (set->sig[3] >> 32); v.sig[6] = set->sig[3];
+	case 3: v.sig[5] = (set->sig[2] >> 32); v.sig[4] = set->sig[2];
+	case 2: v.sig[3] = (set->sig[1] >> 32); v.sig[2] = set->sig[1];
+	case 1: v.sig[1] = (set->sig[0] >> 32); v.sig[0] = set->sig[0];
+	}
+	return cobalt_copy_to_user(u_cset, &v, sizeof(*u_cset)) ? -EFAULT : 0;
+#else
+	return cobalt_copy_to_user(u_cset, set, sizeof(*u_cset)) ? -EFAULT : 0;
+#endif
 }
 EXPORT_SYMBOL_GPL(sys32_put_sigset);
 
