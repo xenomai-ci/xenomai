@@ -31,8 +31,10 @@ extern "C" {
 COBALT_DECL(void *, mmap(void *addr, size_t length, int prot, int flags,
 			 int fd, off_t offset));
 
+#if defined(_LARGEFILE64_SOURCE) || defined(_GNU_SOURCE)
 COBALT_DECL(void *, mmap64(void *addr, size_t length, int prot, int flags,
 			   int fd, off64_t offset));
+#endif
 
 #ifdef __cplusplus
 }
