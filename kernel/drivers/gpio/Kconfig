@@ -34,7 +34,7 @@ config XENO_DRIVERS_GPIO_SUN8I_H3
 	SoC, as found on the NanoPI boards.
 
 config XENO_DRIVERS_GPIO_ZYNQ7000
-	depends on ARCH_ZYNQ
+	depends on ARCH_ZYNQ || ARCH_ZYNQMP
 	tristate "Support for Zynq7000 GPIOs"
 	help
 
@@ -42,7 +42,7 @@ config XENO_DRIVERS_GPIO_ZYNQ7000
 	Xilinx's Zynq7000 SoC.
 
 config XENO_DRIVERS_GPIO_XILINX
-	depends on ARCH_ZYNQ
+	depends on ARCH_ZYNQ || ARCH_ZYNQMP
 	tristate "Support for Xilinx GPIOs"
 	help
 
