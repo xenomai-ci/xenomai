@@ -1,5 +1,5 @@
 
-SUBDIRS = latency smokey
+SUBDIRS = latency smokey gpiobench
 
 if XENO_COBALT
 SUBDIRS += 		\
@@ -13,6 +13,7 @@ endif
 DIST_SUBDIRS =		\
 	clocktest	\
 	gpiotest	\
+	gpiobench   \
 	latency		\
 	smokey		\
 	spitest		\

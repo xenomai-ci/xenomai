@@ -1,0 +1,70 @@
+// ** The above line should force tbl to be a preprocessor **
+// Man page for gpiobench
+//
+// Copyright (C) 2020 song chen <chensong@tj.kylinos.cn>
+//
+// You may distribute under the terms of the GNU General Public
+// License as specified in the file COPYING that comes with the
+// Xenomai distribution.
+//
+//
+GPIOBENCH(1)
+==========
+:doctype: manpage
+:revdate: 2020/08/03
+:man source: Xenomai
+:man version: {xenover}
+:man manual: Xenomai Manual
+
+NAME
+-----
+gpiobench - Xenomai gpio latency benchmark
+
+SYNOPSIS
+---------
+// The general command line
+*gpiobench* [ options ]
+
+DESCRIPTION
+------------
+*gpiobench* is part of the Xenomai test suite. It is a gpio latency
+benchmark program.  The system must run a suitable Xenomai enabled kernel with
+the respective module (xeno_timerbench).
+
+OPTIONS
+--------
+*gpiobench* accepts the following options:
+
+*-h <histogram-size>*::
+default = 100, increase if your last bucket is full
+
+*-l <num-of-loops>*::
+default=1000, number of loops to run the test
+
+*-q <quiet>*::
+print only a summary on exit
+
+*-m <test-mode>*::
+0 = loopback (default), 1 = react
+
+*-c <pin-controller>*::
+name of pin controller
+
+*-o <output-pin>*::
+number of gpio pin as output
+
+*-i <interrupt-pin>*::
+number of gpin pin as interrupt
+
+*-p <priority>*::
+default = 99, task priority
+
+*-b <bracktrace>*::
+default = 1000, send break trace command when latency > breaktrace
+
+
+
+AUTHOR
+-------
+*gpiobench* was written by song chen. This man page
+was written by song chen.
