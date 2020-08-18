@@ -749,8 +749,7 @@ int xnheap_init(struct xnheap *heap, void *membase, size_t size)
 	xnlock_init(&heap->lock);
 
 	nrpages = size >> XNHEAP_PAGE_SHIFT;
-	heap->pagemap = kzalloc(sizeof(struct xnheap_pgentry) * nrpages,
-				GFP_KERNEL);
+	heap->pagemap = vzalloc(sizeof(struct xnheap_pgentry) * nrpages);
 	if (heap->pagemap == NULL)
 		return -ENOMEM;
 
@@ -804,7 +803,7 @@ void xnheap_destroy(struct xnheap *heap)
 	nrheaps--;
 	xnvfile_touch_tag(&vfile_tag);
 	xnlock_put_irqrestore(&nklock, s);
-	kfree(heap->pagemap);
+	vfree(heap->pagemap);
 }
 EXPORT_SYMBOL_GPL(xnheap_destroy);
 
