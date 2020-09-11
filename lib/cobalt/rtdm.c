@@ -23,6 +23,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/mman.h>
 #include <rtdm/rtdm.h>
@@ -92,6 +93,37 @@ COBALT_IMPL(int, open64, (const char *path, int oflag, ...))
 	}
 
 	return do_open(path, oflag | O_LARGEFILE, mode);
+}
+
+COBALT_IMPL(int, __open_2, (const char *path, int oflag))
+{
+	/* __open_2() from glibc adds a runtime precondition test for the 'oflag'
+	 * parameter to the functionality of open(). It may be used when the macro
+	 * _FORTIFY_SOURCE is defined when compiling the application code.
+	 */
+	if (__OPEN_NEEDS_MODE(oflag)) {
+		const char *msg =
+			"invalid open call: O_CREAT or O_TMPFILE without mode\n";
+		ssize_t n = __STD(write(STDERR_FILENO, msg, strlen(msg)));
+		(void)n;
+		abort();
+	}
+
+	return do_open(path, oflag, 0);
+}
+
+COBALT_IMPL(int, __open64_2, (const char *path, int oflag))
+{
+	/* just like __open_2() and open64() */
+	if (__OPEN_NEEDS_MODE(oflag)) {
+		const char *msg =
+			"invalid open64 call: O_CREAT or O_TMPFILE without mode\n";
+		ssize_t n = __STD(write(STDERR_FILENO, msg, strlen(msg)));
+		(void)n;
+		abort();
+	}
+
+	return do_open(path, oflag | O_LARGEFILE, 0);
 }
 
 COBALT_IMPL(int, socket, (int protocol_family, int socket_type, int protocol))

@@ -205,6 +205,18 @@ int __real_open64(const char *path, int oflag, ...)
 }
 #endif
 
+#if __USE_FORTIFY_LEVEL > 0
+__weak int __real___open_2(const char *path, int oflag)
+{
+	return __open_2(path, oflag);
+}
+
+__weak int __real___open64_2(const char *path, int oflag)
+{
+	return __open64_2(path, oflag);
+}
+#endif // __USE_FORTIFY_LEVEL > 0
+
 __weak
 int __real_socket(int protocol_family, int socket_type, int protocol)
 {

@@ -54,6 +54,8 @@
 --wrap mq_notify
 --wrap open
 --wrap open64
+--wrap __open_2
+--wrap __open64_2
 --wrap socket
 --wrap close
 --wrap ioctl
