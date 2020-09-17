@@ -502,7 +502,7 @@ COBALT_SYSCALL(sem_broadcast_np, current,
 	int ret;
 
 	handle = cobalt_get_handle_from_user(&u_sem->handle);
-	trace_cobalt_psem_broadcast(u_sem->handle);
+	trace_cobalt_psem_broadcast(handle);
 
 	xnlock_get_irqsave(&nklock, s);
 
