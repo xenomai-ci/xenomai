@@ -172,7 +172,7 @@ COBALT_SYSCALL32emu(clock_settime, current,
 }
 
 COBALT_SYSCALL32emu(clock_adjtime, current,
-		    (clockid_t clock_id, struct compat_timex __user *u_tx))
+		    (clockid_t clock_id, struct old_timex32 __user *u_tx))
 {
 	struct timex tx;
 	int ret;

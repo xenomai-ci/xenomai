@@ -105,9 +105,9 @@ int sys32_put_timeval(struct compat_timeval __user *ctv,
 		      const struct timeval *tv);
 
 int sys32_get_timex(struct timex *tx,
-		    const struct compat_timex __user *ctx);
+		    const struct old_timex32 __user *ctx);
 
-int sys32_put_timex(struct compat_timex __user *ctx,
+int sys32_put_timex(struct old_timex32 __user *ctx,
 		    const struct timex *tx);
 
 ssize_t sys32_get_fdset(fd_set *fds, const compat_fd_set __user *cfds,

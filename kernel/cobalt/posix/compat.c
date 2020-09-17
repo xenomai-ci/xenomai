@@ -81,7 +81,7 @@ int sys32_put_timeval(struct compat_timeval __user *ctv,
 EXPORT_SYMBOL_GPL(sys32_put_timeval);
 
 int sys32_get_timex(struct timex *tx,
-		    const struct compat_timex __user *ctx)
+		    const struct old_timex32 __user *ctx)
 {
 	memset(tx, 0, sizeof(*tx));
 
@@ -112,7 +112,7 @@ int sys32_get_timex(struct timex *tx,
 }
 EXPORT_SYMBOL_GPL(sys32_get_timex);
 
-int sys32_put_timex(struct compat_timex __user *ctx,
+int sys32_put_timex(struct old_timex32 __user *ctx,
 		    const struct timex *tx)
 {
 	if (!access_wok(ctx, sizeof(*ctx)) ||
