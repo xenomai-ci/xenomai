@@ -1,5 +1,5 @@
 
-ccflags-y += -Ikernel
+ccflags-y += -I$(srctree)/kernel
 
 obj-$(CONFIG_XENOMAI) += xenomai.o
 

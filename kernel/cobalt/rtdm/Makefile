@@ -7,4 +7,4 @@ xenomai-y :=	core.o		\
 		fd.o		\
 		wrappers.o
 
-ccflags-y += -I$(src)/.. -Ikernel
+ccflags-y += -I$(srctree)/$(src)/.. -I$(srctree)/kernel

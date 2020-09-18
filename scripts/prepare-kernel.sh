@@ -387,7 +387,7 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 test "x$CONFIG_XENO_REVISION_LEVEL" = "x" && CONFIG_XENO_REVISION_LEVEL=0
 
     if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$linux_arch/Makefile; then
-	p="KBUILD_CFLAGS += -Iarch/\$(SRCARCH)/xenomai/include -Iinclude/xenomai"
+	p="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
 	(echo; echo $p) | patch_append arch/$linux_arch/Makefile
 	p="core-\$(CONFIG_XENOMAI)	+= arch/$linux_arch/xenomai/"
 	echo $p | patch_append arch/$linux_arch/Makefile

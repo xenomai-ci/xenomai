@@ -1,5 +1,5 @@
 
-ccflags-y += -Idrivers/xenomai/analogy
+ccflags-y += -I$(srctree)/drivers/xenomai/analogy
 
 obj-$(CONFIG_XENO_DRIVERS_ANALOGY_NI_MITE) += analogy_ni_mite.o
 obj-$(CONFIG_XENO_DRIVERS_ANALOGY_NI_TIO) += analogy_ni_tio.o

@@ -1,5 +1,5 @@
 
-ccflags-y += -Idrivers/xenomai/analogy
+ccflags-y += -I$(srctree)/drivers/xenomai/analogy
 
 obj-$(CONFIG_XENO_DRIVERS_ANALOGY_FAKE) += analogy_fake.o
 

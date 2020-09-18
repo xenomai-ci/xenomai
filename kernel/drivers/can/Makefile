@@ -1,5 +1,5 @@
 
-ccflags-y += -Idrivers/xenomai/can
+ccflags-y += -I$(srctree)/drivers/xenomai/can
 
 obj-$(CONFIG_XENO_DRIVERS_CAN) += xeno_can.o mscan/ sja1000/
 obj-$(CONFIG_XENO_DRIVERS_CAN_FLEXCAN) += xeno_can_flexcan.o

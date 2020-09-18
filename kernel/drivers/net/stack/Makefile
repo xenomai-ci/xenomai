@@ -1,4 +1,4 @@
-ccflags-y += -Idrivers/xenomai/net/stack/include -Ikernel/
+ccflags-y += -I$(srctree)/drivers/xenomai/net/stack/include -I$(srctree)/kernel/
 
 obj-$(CONFIG_XENO_DRIVERS_NET_RTIPV4) += ipv4/
 

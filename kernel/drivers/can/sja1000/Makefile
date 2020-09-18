@@ -1,4 +1,4 @@
-ccflags-y += -Idrivers/xenomai/can -Idrivers/xenomai/can/sja1000
+ccflags-y += -I$(srctree)/drivers/xenomai/can -I$(srctree)/drivers/xenomai/can/sja1000
 
 obj-$(CONFIG_XENO_DRIVERS_CAN_SJA1000) += xeno_can_sja1000.o
 obj-$(CONFIG_XENO_DRIVERS_CAN_SJA1000_PEAK_PCI) += xeno_can_peak_pci.o
