@@ -42,6 +42,8 @@ libcobalt_la_CPPFLAGS =			\
 	-I$(top_srcdir)/include/cobalt	\
 	-I$(top_srcdir)/include
 
+libmodechk_la_LIBADD = libcobalt.la
+
 libmodechk_la_SOURCES =	\
 	malloc.c	\
 	malloc-nowrap.c
