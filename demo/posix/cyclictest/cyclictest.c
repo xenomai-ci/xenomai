@@ -1817,7 +1817,6 @@ void *fifothread(void *param)
 }
 
 #ifdef CONFIG_XENO_COBALT
-#include <cobalt/uapi/syscall.h>
 
 static const char *reason_str[] = {
 	[SIGDEBUG_UNDEFINED] = "received SIGDEBUG for unknown reason",
