@@ -110,8 +110,8 @@ smokey_LDFLAGS=$(wrappers) @XENO_AUTOINIT_LDFLAGS@ $(undef_list)
 
 smokey_LDADD = 					\
 	$(plugin_list)				\
-	../../lib/smokey/libsmokey.la		\
-	../../lib/copperplate/libcopperplate.la	\
+	../../lib/smokey/libsmokey@CORE@.la		\
+	../../lib/copperplate/libcopperplate@CORE@.la	\
 	@XENO_CORE_LDADD@			\
 	 @XENO_USER_LDADD@			\
 	-lpthread -lrt

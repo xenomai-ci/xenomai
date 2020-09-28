@@ -20,8 +20,8 @@ rtcanconfig_LDADD = \
 rtcanrecv_SOURCES = rtcanrecv.c
 
 rtcanrecv_LDADD = \
-	../../lib/alchemy/libalchemy.la \
-	../../lib/copperplate/libcopperplate.la \
+	../../lib/alchemy/libalchemy@CORE@.la \
+	../../lib/copperplate/libcopperplate@CORE@.la \
 	@XENO_CORE_LDADD@		\
 	@XENO_USER_LDADD@		\
 	-lpthread -lrt
@@ -29,8 +29,8 @@ rtcanrecv_LDADD = \
 rtcansend_SOURCES = rtcansend.c
 
 rtcansend_LDADD = \
-	../../lib/alchemy/libalchemy.la \
-	../../lib/copperplate/libcopperplate.la \
+	../../lib/alchemy/libalchemy@CORE@.la \
+	../../lib/copperplate/libcopperplate@CORE@.la \
 	@XENO_CORE_LDADD@		\
 	@XENO_USER_LDADD@		\
 	-lpthread -lrt

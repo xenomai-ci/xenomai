@@ -1,12 +1,12 @@
-lib_LTLIBRARIES = libalchemy.la
+lib_LTLIBRARIES = libalchemy@CORE@.la
 
-libalchemy_la_LDFLAGS = @XENO_LIB_LDFLAGS@ -version-info 0:0:0
+libalchemy@CORE@_la_LDFLAGS = @XENO_LIB_LDFLAGS@ -version-info 0:0:0
 
-libalchemy_la_LIBADD =						\
+libalchemy@CORE@_la_LIBADD =						\
 	@XENO_CORE_LDADD@					\
-	$(top_builddir)/lib/copperplate/libcopperplate.la
+	$(top_builddir)/lib/copperplate/libcopperplate@CORE@.la
 
-libalchemy_la_SOURCES =	\
+libalchemy@CORE@_la_SOURCES =	\
 	init.c		\
 	internal.c	\
 	internal.h	\
@@ -33,12 +33,12 @@ libalchemy_la_SOURCES =	\
 	timer.h
 
 if XENO_COBALT
-libalchemy_la_SOURCES +=	\
+libalchemy@CORE@_la_SOURCES +=	\
 	pipe.c			\
 	pipe.h
 endif
 
-libalchemy_la_CPPFLAGS =				\
+libalchemy@CORE@_la_CPPFLAGS =				\
 	@XENO_USER_CFLAGS@				\
 	-I$(top_srcdir)/include				\
 	-I$(top_srcdir)/lib
@@ -48,6 +48,6 @@ EXTRA_DIST = testsuite
 SPARSE = sparse
 
 sparse:
-	@for i in $(libalchemy_la_SOURCES); do \
+	@for i in $(libalchemy@CORE@_la_SOURCES); do \
 		$(SPARSE) $(CHECKFLAGS) $(srcdir)/$$i; \
 	done

@@ -859,6 +859,22 @@ dnl in-tree executables which require POSIX symbol wrapping.
    AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ["$modechk_wrappers $cobalt_wrappers"])
 fi
 
+dnl Multi-library support.
+AC_MSG_CHECKING([whether to enable soname suffix for libraries])
+AC_ARG_ENABLE([so-suffix],
+   [AS_HELP_STRING([--enable-so-suffix],
+      [enable soname suffix (for Mercury only)])],
+   [enable_so_suffix=$enableval],
+   [enable_so_suffix="no"])
+AC_MSG_RESULT(${enable_so_suffix})
+if test "$enable_so_suffix" = "yes"; then
+   if test "$rtcore_type" != mercury; then
+      AC_MSG_ERROR([soname suffix is only allowed for Mercury core])
+   else
+      CORE="_$rtcore_type"
+   fi
+fi
+
 dnl
 dnl Build the Makefiles
 dnl
@@ -898,6 +914,7 @@ AC_SUBST(XENO_TEST_DIR)
 AC_SUBST(XENO_DEMO_DIR)
 AC_SUBST(XENO_BUILD_COMPILER)
 AC_SUBST(XENO_BUILD_ARGS)
+AC_SUBST(CORE)
 
 AC_CONFIG_FILES([ \
 	Makefile \

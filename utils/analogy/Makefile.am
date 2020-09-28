@@ -42,8 +42,8 @@ cmd_read_SOURCES = cmd_read.c
 cmd_read_LDADD = \
 	@XENO_AUTOINIT_LDFLAGS@		\
 	../../lib/analogy/libanalogy.la \
-	../../lib/alchemy/libalchemy.la \
-	../../lib/copperplate/libcopperplate.la \
+	../../lib/alchemy/libalchemy@CORE@.la \
+	../../lib/copperplate/libcopperplate@CORE@.la \
 	@XENO_CORE_LDADD@		\
 	@XENO_USER_LDADD@		\
 	-lrt -lpthread -lm
@@ -52,8 +52,8 @@ cmd_write_SOURCES = cmd_write.c
 cmd_write_LDADD = \
 	@XENO_AUTOINIT_LDFLAGS@		\
 	../../lib/analogy/libanalogy.la \
-	../../lib/alchemy/libalchemy.la \
-	../../lib/copperplate/libcopperplate.la \
+	../../lib/alchemy/libalchemy@CORE@.la \
+	../../lib/copperplate/libcopperplate@CORE@.la \
 	@XENO_CORE_LDADD@		\
 	@XENO_USER_LDADD@		\
 	-lrt -lpthread -lm

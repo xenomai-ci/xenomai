@@ -9,7 +9,7 @@ CPPFLAGS = 			\
 LDFLAGS = $(XENO_POSIX_WRAPPERS)
 
 LDADD = 			\
-	../libcopperplate.la	\
+	../libcopperplate@CORE@.la	\
 	@XENO_CORE_LDADD@	\
 	@XENO_USER_LDADD@	\
 	-lpthread -lrt

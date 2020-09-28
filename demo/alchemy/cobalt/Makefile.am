@@ -11,8 +11,8 @@ cppflags = 			\
 ldadd = 					\
 	@XENO_AUTOINIT_LDFLAGS@			\
 	$(XENO_POSIX_WRAPPERS)			\
-	../../../lib/alchemy/libalchemy.la 	\
-	../../../lib/copperplate/libcopperplate.la \
+	../../../lib/alchemy/libalchemy@CORE@.la 	\
+	../../../lib/copperplate/libcopperplate@CORE@.la \
 	@XENO_CORE_LDADD@			\
 	@XENO_USER_LDADD@			\
 	-lrt -lpthread -lm

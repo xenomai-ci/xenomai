@@ -8,6 +8,7 @@ datarootdir="@datarootdir@"
 datadir="@datadir@"
 pkgdatadir="${datadir}/@PACKAGE@"
 includedir="@includedir@"
+core="@CORE@"
 
 XENO_VERSION="@PACKAGE_VERSION@"
 XENO_PREFIX="${staging}${prefix}"
@@ -264,8 +265,8 @@ if test x$do_ldflags = xy; then
 		# --[no-]mode-check does.
 		;;
 	    vxworks|psos|alchemy|smokey)
-		copperplate="-lcopperplate"
-		ldflags="$ldflags -l$skin"
+		copperplate="-lcopperplate$core"
+		ldflags="$ldflags -l$skin$core"
 		if [ -r ${XENO_LIBRARY_DIR}/${skin}.wrappers ]; then
 		    ldflags=" `dump_wrappers ${skin}.wrappers` $ldflags"
 		fi

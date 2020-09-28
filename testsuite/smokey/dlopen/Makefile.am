@@ -11,8 +11,8 @@ libalchemy_test_la_LIBADD =					\
 	@XENO_CORE_LDADD@					\
 	@XENO_USER_LDADD@					\
 	../../../lib/boilerplate/init/libbootstrap-pic.la	\
-	../../../lib/alchemy/libalchemy.la			\
-	../../../lib/copperplate/libcopperplate.la
+	../../../lib/alchemy/libalchemy@CORE@.la			\
+	../../../lib/copperplate/libcopperplate@CORE@.la
 
 libalchemy_test_la_SOURCES = libalchemy-test.c
 
@@ -29,7 +29,7 @@ libposix_test_la_LIBADD =					\
 	@XENO_CORE_LDADD@					\
 	@XENO_USER_LDADD@					\
 	../../../lib/boilerplate/init/libbootstrap-pic.la	\
-	../../../lib/copperplate/libcopperplate.la
+	../../../lib/copperplate/libcopperplate@CORE@.la
 
 libposix_test_la_SOURCES = libposix-test.c
 

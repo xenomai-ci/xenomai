@@ -8,6 +8,7 @@ datarootdir="@datarootdir@"
 datadir="@datadir@"
 pkgdatadir="${datadir}/@PACKAGE@"
 includedir="@includedir@"
+core="@CORE@"
 
 XENO_VERSION="@PACKAGE_VERSION@"
 XENO_PREFIX="${staging}${prefix}"
@@ -195,8 +196,8 @@ if test x$do_ldflags = xy; then
 	    posix|rtdm)
 		;;
 	    vxworks|psos|alchemy|smokey)
-		copperplate="-lcopperplate"
-		ldflags="-l$skin $ldflags"
+		copperplate="-lcopperplate$core"
+		ldflags="-l$skin$core $ldflags"
 		;;
 	    *)
 		echo "unknown API: $skin" 1>&2

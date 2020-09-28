@@ -9,7 +9,7 @@ hdb_CPPFLAGS = 			\
 hdb_LDFLAGS = @XENO_AUTOINIT_LDFLAGS@
 
 hdb_LDADD =					\
-	../../lib/copperplate/libcopperplate.la	\
+	../../lib/copperplate/libcopperplate@CORE@.la	\
 	@XENO_CORE_LDADD@			\
 	@XENO_USER_LDADD@			\
 	-lpthread -lrt

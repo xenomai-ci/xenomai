@@ -11,8 +11,8 @@ cppflags = 				\
 	-I$(top_srcdir)/include
 
 ldadd = 					\
-	../../lib/alchemy/libalchemy.la		\
-	../../lib/copperplate/libcopperplate.la	\
+	../../lib/alchemy/libalchemy@CORE@.la		\
+	../../lib/copperplate/libcopperplate@CORE@.la	\
 	@XENO_CORE_LDADD@ 			\
 	@XENO_USER_LDADD@			\
 	-lpthread -lrt -lm
