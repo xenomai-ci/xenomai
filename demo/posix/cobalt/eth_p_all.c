@@ -40,7 +40,6 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 #include <netinet/ether.h>
-#include <boilerplate/ancillaries.h>
 
 char buffer[10*1024];
 int sock;
@@ -73,7 +72,7 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		struct ifreq ifr;
 
-		namecpy(ifr.ifr_name, argv[1]);
+		snprintf(ifr.ifr_name, IFNAMSIZ, "%s", argv[1]);
 		if (ioctl(sock, SIOCGIFINDEX, &ifr) < 0) {
 			perror("cannot get interface index");
 			close(sock);
