@@ -153,6 +153,8 @@ static int vfile_snapshot_open(struct inode *inode, struct file *file)
 	struct seq_file *seq;
 	caddr_t data;
 
+	WARN_ON_ONCE(file->private_data != NULL);
+
 	if ((file->f_mode & FMODE_WRITE) != 0 && ops->store == NULL)
 		return -EACCES;
 
@@ -244,14 +246,10 @@ redo:
 		it->endfn = vfile_snapshot_free;
 	}
 
-	ret = seq_open(file, &vfile_snapshot_ops);
-	if (ret)
-		goto fail;
-
 	it->nrdata = 0;
 	data = it->databuf;
 	if (data == NULL)
-		goto finish;
+		goto done;
 
 	/*
 	 * Take a snapshot of the vfile contents, redo if the revision
@@ -260,12 +258,14 @@ redo:
 	for (;;) {
 		ret = vfile->entry.lockops->get(&vfile->entry);
 		if (ret)
-			break;
+			goto fail;
 		if (vfile->tag->rev != revtag)
 			goto redo;
 		ret = ops->next(it, data);
 		vfile->entry.lockops->put(&vfile->entry);
-		if (ret <= 0)
+		if (ret < 0)
+			goto fail;
+		if (ret == 0)
 			break;
 		if (ret != VFILE_SEQ_SKIP) {
 			data += vfile->datasz;
@@ -273,22 +273,24 @@ redo:
 		}
 	}
 
-	if (ret < 0) {
-		seq_release(inode, file);
-	fail:
-		if (it->databuf)
-			it->endfn(it, it->databuf);
-		kfree(it);
-		return ret;
-	}
+done:
+	ret = seq_open(file, &vfile_snapshot_ops);
+	if (ret)
+		goto fail;
 
-finish:
 	seq = file->private_data;
 	it->seq = seq;
 	seq->private = it;
 	xnvfile_nref(vfile)++;
 
 	return 0;
+
+fail:
+	if (it->databuf)
+		it->endfn(it, it->databuf);
+	kfree(it);
+
+	return ret;
 }
 
 static int vfile_snapshot_release(struct inode *inode, struct file *file)
