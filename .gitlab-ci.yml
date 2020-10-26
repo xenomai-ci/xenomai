@@ -56,14 +56,12 @@ variables:
       export CONFIGURE_OPTS="--enable-dlopen-libs --enable-lazy-setsched"
       ;;
       esac
-    - mkdir ~/ccache
-    - ln -s /usr/bin/ccache ~/ccache/aarch64-linux-gnu-gcc
-    - ln -s /usr/bin/ccache ~/ccache/arm-linux-gnueabihf-gcc
-    - ln -s /usr/bin/ccache ~/ccache/powerpc-linux-gnu-gcc
-    - export PATH=~/ccache:$PATH
+    - ln -s /usr/lib/ccache/${CROSS_COMPILE}gcc-8 /usr/lib/ccache/${CROSS_COMPILE}gcc
+    - export PATH=/usr/lib/ccache:$PATH
     - ${CROSS_COMPILE}gcc --version
 
   script:
+    - export CCACHE_DIR=$(pwd)/.ccache
     - pushd ${KDIR}
     - make -j $(nproc) ${KERNEL_DEFCONFIG}
     # Generic settings
@@ -162,7 +160,10 @@ variables:
     - ./configure --enable-smp ${CONFIGURE_OPTS}
     - make -j $(nproc)
     - ccache -s
-
+  cache:
+    key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+    paths:
+      - .ccache
 
 arm-4.19-release:
   extends: .build
