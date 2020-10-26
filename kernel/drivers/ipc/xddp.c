@@ -867,7 +867,7 @@ static int __xddp_setsockopt(struct xddp_socket *sk,
 	if (sopt.level == SOL_SOCKET) {
 		switch (sopt.optname) {
 
-		case SO_RCVTIMEO:
+		case SO_RCVTIMEO_OLD:
 			ret = rtipc_get_timeval(fd, &tv, sopt.optval, sopt.optlen);
 			if (ret)
 				return ret;
@@ -976,7 +976,7 @@ static int __xddp_getsockopt(struct xddp_socket *sk,
 	if (sopt.level == SOL_SOCKET) {
 		switch (sopt.optname) {
 
-		case SO_RCVTIMEO:
+		case SO_RCVTIMEO_OLD:
 			rtipc_ns_to_timeval(&tv, sk->timeout);
 			ret = rtipc_put_timeval(fd, sopt.optval, &tv, len);
 			if (ret)

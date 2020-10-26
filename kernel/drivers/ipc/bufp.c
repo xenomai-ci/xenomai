@@ -830,14 +830,14 @@ static int __bufp_setsockopt(struct bufp_socket *sk,
 	if (sopt.level == SOL_SOCKET) {
 		switch (sopt.optname) {
 
-		case SO_RCVTIMEO:
+		case SO_RCVTIMEO_OLD:
 			ret = rtipc_get_timeval(fd, &tv, sopt.optval, sopt.optlen);
 			if (ret)
 				return ret;
 			sk->rx_timeout = rtipc_timeval_to_ns(&tv);
 			break;
 
-		case SO_SNDTIMEO:
+		case SO_SNDTIMEO_OLD:
 			ret = rtipc_get_timeval(fd, &tv, sopt.optval, sopt.optlen);
 			if (ret)
 				return ret;
@@ -922,14 +922,14 @@ static int __bufp_getsockopt(struct bufp_socket *sk,
 	if (sopt.level == SOL_SOCKET) {
 		switch (sopt.optname) {
 
-		case SO_RCVTIMEO:
+		case SO_RCVTIMEO_OLD:
 			rtipc_ns_to_timeval(&tv, sk->rx_timeout);
 			ret = rtipc_put_timeval(fd, sopt.optval, &tv, len);
 			if (ret)
 				return ret;
 			break;
 
-		case SO_SNDTIMEO:
+		case SO_SNDTIMEO_OLD:
 			rtipc_ns_to_timeval(&tv, sk->tx_timeout);
 			ret = rtipc_put_timeval(fd, sopt.optval, &tv, len);
 			if (ret)

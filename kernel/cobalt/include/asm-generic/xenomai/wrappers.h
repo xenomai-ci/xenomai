@@ -158,6 +158,8 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,1,0)
 #define old_timex32		compat_timex
+#define SO_RCVTIMEO_OLD		SO_RCVTIMEO
+#define SO_SNDTIMEO_OLD		SO_SNDTIMEO
 #endif
 
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
