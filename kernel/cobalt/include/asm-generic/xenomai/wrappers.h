@@ -162,4 +162,8 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #define SO_SNDTIMEO_OLD		SO_SNDTIMEO
 #endif
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+#define mmiowb()		do { } while (0)
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
