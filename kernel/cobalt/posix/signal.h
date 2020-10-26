@@ -49,7 +49,7 @@ void cobalt_copy_siginfo(int code,
 	case SI_QUEUE:
 	case SI_MESGQ:
 		dst->si_value = src->si_value;
-		/* falldown wanted. */
+		/* fallthrough */
 	case SI_USER:
 		dst->si_pid = src->si_pid;
 		dst->si_uid = src->si_uid;

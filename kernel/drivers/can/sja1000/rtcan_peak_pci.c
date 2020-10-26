@@ -142,6 +142,7 @@ static void rtcan_peak_pci_del_chan(struct rtcan_device *dev,
 	printk("Removing %s %s device %s\n",
 	       peak_pci_board_name, dev->ctrl_name, dev->name);
 	rtcan_sja1000_unregister(dev);
+	/* fallthrough */
     case 5:
 	pita_icr_high = readw(board->conf_addr + PITA_ICR + 2);
 	if (board->channel == CHANNEL_SLAVE) {
@@ -150,13 +151,17 @@ static void rtcan_peak_pci_del_chan(struct rtcan_device *dev,
 	    pita_icr_high &= ~0x0002;
 	}
 	writew(pita_icr_high, board->conf_addr + PITA_ICR + 2);
+	/* fallthrough */
     case 4:
 	iounmap((void *)board->base_addr);
+	/* fallthrough */
     case 3:
 	if (board->channel != CHANNEL_SLAVE)
 	    iounmap((void *)board->conf_addr);
+	/* fallthrough */
     case 2:
 	rtcan_dev_free(dev);
+	/* fallthrough */
     case 1:
 	break;
     }

@@ -126,6 +126,7 @@ e1000_set_phy_type(struct e1000_hw *hw)
             hw->phy_type = e1000_phy_igp;
             break;
         }
+        /* fallthrough */
     case IGP03E1000_E_PHY_ID:
         hw->phy_type = e1000_phy_igp_3;
         break;
@@ -139,7 +140,7 @@ e1000_set_phy_type(struct e1000_hw *hw)
             hw->phy_type = e1000_phy_gg82563;
             break;
         }
-        /* Fall Through */
+        /* fallthrough */
     default:
         /* Should never have loaded on this device */
         hw->phy_type = e1000_phy_undefined;
@@ -5869,6 +5870,7 @@ e1000_rar_set(struct e1000_hw *hw,
     case e1000_80003es2lan:
         if (hw->leave_av_bit_off == TRUE)
             break;
+        /* fallthrough */
     default:
         /* Indicate to hardware the Address is Valid. */
         rar_high |= E1000_RAH_AV;

@@ -915,6 +915,7 @@ static int iddp_ioctl(struct rtdm_fd *fd,
 	COMPAT_CASE(_RTIOC_BIND):
 		if (rtdm_in_rt_context())
 			return -ENOSYS;	/* Try downgrading to NRT */
+		/* fallthrough */
 	default:
 		ret = __iddp_ioctl(fd, request, arg);
 	}

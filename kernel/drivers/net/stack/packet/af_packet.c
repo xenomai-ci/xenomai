@@ -331,6 +331,7 @@ static ssize_t rt_packet_recvmsg(struct rtdm_fd *fd, struct user_msghdr *u_msg,
 		switch (ret) {
 		default:
 			ret = -EBADF; /* socket has been closed */
+			/* fallthrough */
 		case -EWOULDBLOCK:
 		case -ETIMEDOUT:
 		case -EINTR:

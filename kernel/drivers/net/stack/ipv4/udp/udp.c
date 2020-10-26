@@ -427,6 +427,7 @@ ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *u_msg,
 		switch (ret) {
 		default:
 			ret = -EBADF; /* socket has been closed */
+			/* fallthrough */
 		case -EWOULDBLOCK:
 		case -ETIMEDOUT:
 		case -EINTR:

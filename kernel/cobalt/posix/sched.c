@@ -58,6 +58,7 @@ cobalt_sched_policy_param(union xnsched_policy_param *param,
 		 * levels. Otherwise, SCHED_NORMAL is scheduled by
 		 * xnsched_class_rt at priority level #0.
 		 */
+		/* fallthrough */
 	case SCHED_WEAK:
 #ifdef CONFIG_XENO_OPT_SCHED_WEAK
 		if (prio < XNSCHED_WEAK_MIN_PRIO ||
@@ -75,7 +76,7 @@ cobalt_sched_policy_param(union xnsched_policy_param *param,
 		tslice = ts2ns(&param_ex->sched_rr_quantum);
 		if (tslice == XN_INFINITE && tslice_r)
 			tslice = *tslice_r;
-		/* falldown wanted */
+		/* fallthrough */
 	case SCHED_FIFO:
 		if (prio < XNSCHED_FIFO_MIN_PRIO ||
 		    prio > XNSCHED_FIFO_MAX_PRIO)
@@ -248,7 +249,7 @@ int set_tp_config(int cpu, union sched_config *config, size_t len)
 	case sched_tp_install:
 		if (config->tp.nr_windows > 0)
 			break;
-		/* Fallback wanted. */
+		/* fallthrough */
 	case sched_tp_uninstall:
 		gps = NULL;
 		goto set_schedule;
