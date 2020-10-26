@@ -1062,6 +1062,11 @@ static void usage(FILE *fd, const char *progname)
 	fprintf(fd, "\n\n");
 }
 
+void application_usage(void)
+{
+	usage(stdout, get_program_name());
+}
+
 static sigjmp_buf jump;
 
 static void illegal_instruction(int sig)
