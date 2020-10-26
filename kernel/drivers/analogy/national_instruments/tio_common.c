@@ -1666,6 +1666,7 @@ static int ni_tio_input_cmd(struct ni_gpct *counter, struct a4l_cmd_desc *cmd)
 	case TRIG_EXT:
 		a4l_mite_dma_arm(counter->mite_chan);
 		retval = ni_tio_arm(counter, 1, cmd->start_arg);
+		break;
 	case TRIG_OTHER:
 		a4l_mite_dma_arm(counter->mite_chan);
 		break;
