@@ -205,6 +205,14 @@ arm64-4.14-release:
     IPIPE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm64.git
     KERNEL_DEFCONFIG: defconfig
 
+x86-5.4-head:
+  extends: .build
+  variables:
+    ARCH: x86
+    IPIPE_REV: ipipe-x86-5.4.y
+    IPIPE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-x86.git
+    KERNEL_DEFCONFIG: x86_64_defconfig
+
 x86-4.19-cip-head:
   extends: .build
   variables:
