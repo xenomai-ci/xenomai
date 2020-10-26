@@ -1762,7 +1762,7 @@ static int rt_tcp_setsockopt(struct rtdm_fd *fd, struct tcp_socket *ts,
 	    */
 		return 0;
 
-	case SO_SNDTIMEO:
+	case SO_SNDTIMEO_OLD:
 		if (optlen < sizeof(tv))
 			return -EINVAL;
 		if (rtdm_copy_from_user(fd, &tv, optval, sizeof(tv)))

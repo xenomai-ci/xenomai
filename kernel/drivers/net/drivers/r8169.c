@@ -69,7 +69,6 @@ RTL8169_VERSION "2.2"	<2004/08/09>
  */
 
 #include <linux/module.h>
-#include <linux/pci-aspm.h>
 #include <linux/pci.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
@@ -78,6 +77,10 @@ RTL8169_VERSION "2.2"	<2004/08/09>
 
 #include <linux/timer.h>
 #include <linux/init.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
+#include <linux/pci-aspm.h>
+#endif
 
 #include <rtnet_port.h>	/*** RTnet ***/
 

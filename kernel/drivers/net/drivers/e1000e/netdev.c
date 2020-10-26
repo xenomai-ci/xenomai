@@ -53,6 +53,10 @@
 #include <linux/aer.h>
 #include <linux/prefetch.h>
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
+#include <linux/pci-aspm.h>
+#endif
+
 #include "e1000.h"
 
 #define RT_E1000E_NUM_RXD	64
