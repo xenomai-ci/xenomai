@@ -3,8 +3,6 @@
 /**
    @file    dictionary.h
    @author  N. Devillard
-   @date    Sep 2007
-   @version $Revision: 1.12 $
    @brief   Implements a dictionary for string variables.
 
    This module implements a simple dictionary object, i.e. a list
@@ -13,18 +11,11 @@
 */
 /*--------------------------------------------------------------------------*/
 
-/*
-	$Id: dictionary.h,v 1.12 2007-11-23 21:37:00 ndevilla Exp $
-	$Author: ndevilla $
-	$Date: 2007-11-23 21:37:00 $
-	$Revision: 1.12 $
-*/
-
 #ifndef _DICTIONARY_H_
 #define _DICTIONARY_H_
 
 /*---------------------------------------------------------------------------
-   								Includes
+                                Includes
  ---------------------------------------------------------------------------*/
 
 #include <stdio.h>
@@ -32,14 +23,18 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*---------------------------------------------------------------------------
-   								New types
+                                New types
  ---------------------------------------------------------------------------*/
 
 
 /*-------------------------------------------------------------------------*/
 /**
-  @brief	Dictionary object
+  @brief    Dictionary object
 
   This object contains a list of string/string associations. Each
   association is identified by a unique string key. Looking up values
@@ -48,16 +43,16 @@
  */
 /*-------------------------------------------------------------------------*/
 typedef struct _dictionary_ {
-	int				n ;		/** Number of entries in dictionary */
-	int				size ;	/** Storage size */
-	char 		**	val ;	/** List of string values */
-	char 		**  key ;	/** List of string keys */
-	unsigned	 *	hash ;	/** List of hash values for keys */
+    int             n ;     /** Number of entries in dictionary */
+    ssize_t         size ;  /** Storage size */
+    char        **  val ;   /** List of string values */
+    char        **  key ;   /** List of string keys */
+    unsigned     *  hash ;  /** List of hash values for keys */
 } dictionary ;
 
 
 /*---------------------------------------------------------------------------
-  							Function prototypes
+                            Function prototypes
  ---------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------*/
@@ -85,7 +80,7 @@ unsigned dictionary_hash(const char * key);
   dictionary, give size=0.
  */
 /*--------------------------------------------------------------------------*/
-dictionary * dictionary_new(int size);
+dictionary * dictionary_new(size_t size);
 
 /*-------------------------------------------------------------------------*/
 /**
@@ -112,7 +107,7 @@ void dictionary_del(dictionary * vd);
   dictionary object, you should not try to free it or modify it.
  */
 /*--------------------------------------------------------------------------*/
-const char * dictionary_get(dictionary * d, const char * key, const char * def);
+const char * dictionary_get(const dictionary * d, const char * key, const char * def);
 
 
 /*-------------------------------------------------------------------------*/
@@ -161,7 +156,7 @@ void dictionary_unset(dictionary * d, const char * key);
 /**
   @brief    Dump a dictionary to an opened file pointer.
   @param    d   Dictionary to dump
-  @param    out   Opened file pointer.
+  @param    f   Opened file pointer.
   @return   void
 
   Dumps a dictionary onto an opened file pointer. Key pairs are printed out
@@ -169,6 +164,10 @@ void dictionary_unset(dictionary * d, const char * key);
   output file pointers.
  */
 /*--------------------------------------------------------------------------*/
-void dictionary_dump(dictionary * d, FILE * out);
+void dictionary_dump(const dictionary * d, FILE * out);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
