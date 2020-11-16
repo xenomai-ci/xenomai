@@ -19,6 +19,7 @@
 #define _LIB_COBALT_INTERNAL_H
 
 #include <limits.h>
+#include <stdbool.h>
 #include <boilerplate/ancillaries.h>
 #include <cobalt/sys/cobalt.h>
 #include "current.h"
@@ -86,10 +87,6 @@ int cobalt_xlate_schedparam(int policy,
 			    struct sched_param *param);
 int cobalt_init(void);
 
-struct cobalt_featinfo;
-
-void cobalt_arch_check_features(struct cobalt_featinfo *finfo);
-
 extern struct sigaction __cobalt_orig_sigdebug;
 
 extern int __cobalt_std_fifo_minpri,
@@ -97,5 +94,36 @@ extern int __cobalt_std_fifo_minpri,
 
 extern int __cobalt_std_rr_minpri,
 	   __cobalt_std_rr_maxpri;
+
+extern unsigned int cobalt_features;
+
+struct cobalt_featinfo;
+
+/**
+ * Arch specific feature initialization
+ *
+ * @param finfo
+ */
+void cobalt_arch_check_features(struct cobalt_featinfo *finfo);
+
+/**
+ * Initialize the feature handling.
+ *
+ * @param f Feature info that will be cached for future feature checks
+ */
+void cobalt_features_init(struct cobalt_featinfo *f);
+
+/**
+ * Check if a given set of features is available / provided by the kernel
+ *
+ * @param feat_mask A bit mask of features to check availability for. See
+ * __xn_feat_* macros for a list of defined features
+ *
+ * @return true if all features are available, false otherwise
+ */
+static inline bool cobalt_features_available(unsigned int feat_mask)
+{
+	return (cobalt_features & feat_mask) == feat_mask;
+}
 
 #endif /* _LIB_COBALT_INTERNAL_H */

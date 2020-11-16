@@ -565,3 +565,13 @@ void cobalt_assert_nrt(void)
 	if (cobalt_should_warn())
 		pthread_kill(pthread_self(), SIGDEBUG);
 }
+
+unsigned int cobalt_features;
+
+void cobalt_features_init(struct cobalt_featinfo *f)
+{
+	cobalt_features = f->feat_all;
+
+	/* Trigger arch specific feature initialization */
+	cobalt_arch_check_features(f);
+}
