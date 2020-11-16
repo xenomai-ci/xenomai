@@ -25,7 +25,7 @@
 #include <asm/xenomai/uapi/fptest.h>
 #include "internal.h"
 
-void cobalt_check_features(struct cobalt_featinfo *finfo)
+void cobalt_arch_check_features(struct cobalt_featinfo *finfo)
 {
 #if defined(__i386__) && defined(CONFIG_XENO_X86_VSYSCALL)
 	size_t n = confstr(_CS_GNU_LIBPTHREAD_VERSION, NULL, 0);

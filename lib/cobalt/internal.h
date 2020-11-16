@@ -88,7 +88,7 @@ int cobalt_init(void);
 
 struct cobalt_featinfo;
 
-void cobalt_check_features(struct cobalt_featinfo *finfo);
+void cobalt_arch_check_features(struct cobalt_featinfo *finfo);
 
 extern struct sigaction __cobalt_orig_sigdebug;
 

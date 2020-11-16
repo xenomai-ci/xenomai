@@ -177,7 +177,7 @@ static void low_init(void)
 		early_panic("mlockall: %s", strerror(errno));
 
 	trace_me("memory locked");
-	cobalt_check_features(f);
+	cobalt_arch_check_features(f);
 	cobalt_init_umm(f->vdso_offset);
 	trace_me("memory heaps mapped");
 	cobalt_init_current_keys();

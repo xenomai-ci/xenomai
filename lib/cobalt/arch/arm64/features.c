@@ -37,7 +37,7 @@ struct __xn_full_tscinfo __xn_tscinfo = {
 	},
 };
 
-void cobalt_check_features(struct cobalt_featinfo *finfo)
+void cobalt_arch_check_features(struct cobalt_featinfo *finfo)
 {
 	unsigned long phys_addr;
 	unsigned page_size;

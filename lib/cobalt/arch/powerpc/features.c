@@ -19,6 +19,6 @@
 #include <asm/xenomai/syscall.h>
 #include "internal.h"
 
-void cobalt_check_features(struct cobalt_featinfo *finfo)
+void cobalt_arch_check_features(struct cobalt_featinfo *finfo)
 {
 }
