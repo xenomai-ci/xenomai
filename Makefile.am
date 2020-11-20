@@ -29,7 +29,7 @@ dist-hook:
 	rm -fr `find $(distdir) -name '.svn' -o -name CVS  -o -name '.#*' \
 		-o -name '*~' -o -name autom4te.cache`
 
-udev-rules:
+install-udev-rules:
 if XENO_COBALT
 	if test -r $(DESTDIR)/$(sysconfdir)/udev/udev.rules ; then \
 	    for f in $(srcdir)/kernel/cobalt/udev/*.rules ; do \
@@ -45,10 +45,19 @@ if XENO_COBALT
 	fi
 endif
 
+uninstall-udev-rules:
+if XENO_COBALT
+	cd $(srcdir)/kernel/cobalt/udev && for f in *.rules; do \
+	    rm -f $(DESTDIR)/$(sysconfdir)/udev/rules.d/$$f ; \
+	done
+endif
+
 # legacy alias
 install-user: install
 
-install-exec-local: udev-rules
+install-exec-local: install-udev-rules
+
+uninstall-local: uninstall-udev-rules
 
 uninstall-local:
 if XENO_COBALT
