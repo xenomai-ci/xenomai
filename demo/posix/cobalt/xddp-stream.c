@@ -244,7 +244,7 @@ int main(int argc, char **argv)
 	if (errno)
 		fail("pthread_create");
 
-	sigwait(&set, &sig);
+	__STD(sigwait(&set, &sig));
 	pthread_cancel(rt);
 	pthread_cancel(nrt);
 	pthread_join(rt, NULL);

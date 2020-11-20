@@ -317,7 +317,7 @@ int main(int argc, char **argv)
 	if (errno)
 		fail("pthread_create");
 
-	sigwait(&set, &sig);
+	__STD(sigwait(&set, &sig));
 	pthread_cancel(rt1);
 	pthread_cancel(rt2);
 	pthread_cancel(nrt);
