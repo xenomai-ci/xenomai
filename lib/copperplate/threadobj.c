@@ -1022,7 +1022,7 @@ static int request_setschedparam(struct threadobj *thobj, int policy,
 #ifdef CONFIG_XENO_PSHARED
 	struct remote_request *rq;
 
-	if (unlikely(!threadobj_local_p(thobj))) {
+	if (!threadobj_local_p(thobj)) {
 		rq = xnmalloc(sizeof(*rq));
 		if (rq == NULL)
 			return -ENOMEM;
@@ -1065,7 +1065,7 @@ static int request_cancel(struct threadobj *thobj) /* thobj->lock held, dropped.
 	struct remote_request *rq;
 	int ret;
 
-	if (unlikely(!threadobj_local_p(thobj))) {
+	if (!threadobj_local_p(thobj)) {
 		threadobj_unlock(thobj);
 		rq = xnmalloc(sizeof(*rq));
 		if (rq == NULL)

@@ -76,7 +76,7 @@ void debug_init(void);
 #define __bt(__exp)						\
 	({							\
 		typeof(__exp) __ret = (__exp);			\
-		if (unlikely(__ret < 0))			\
+		if (__ret < 0)					\
 			backtrace_log((int)__ret, __FUNCTION__,	\
 				      __FILE__, __LINE__);	\
 		__ret;						\
@@ -85,7 +85,7 @@ void debug_init(void);
 #define __bterrno(__exp)					\
 	({							\
 		typeof(__exp) __ret = (__exp);			\
-		if (unlikely(__ret < 0))			\
+		if (__ret < 0)					\
 			backtrace_log(-errno, __FUNCTION__,	\
 				      __FILE__, __LINE__);	\
 		__ret;						\

@@ -240,7 +240,7 @@ static int __attribute__((cold))
 
 static inline int cobalt_mutex_autoinit(union cobalt_mutex_union *umutex)
 {
-	if (unlikely(umutex->shadow_mutex.magic != COBALT_MUTEX_MAGIC))
+	if (umutex->shadow_mutex.magic != COBALT_MUTEX_MAGIC)
 		return cobalt_mutex_doautoinit(umutex);
 	return 0;
 }
@@ -273,7 +273,7 @@ COBALT_IMPL(int, pthread_mutex_destroy, (pthread_mutex_t *mutex))
 		&((union cobalt_mutex_union *)mutex)->shadow_mutex;
 	int err;
 
-	if (unlikely(_mutex->magic != COBALT_MUTEX_MAGIC))
+	if (_mutex->magic != COBALT_MUTEX_MAGIC)
 		return (cobalt_mutex_autoinit_type(mutex) < 0) ? EINVAL : 0;
 
 	err = XENOMAI_SYSCALL1(sc_cobalt_mutex_destroy, _mutex);

@@ -167,7 +167,7 @@ static int __attribute__((cold))
 
 static inline int cobalt_cond_autoinit(union cobalt_cond_union *ucond)
 {
-	if (unlikely(ucond->shadow_cond.magic != COBALT_COND_MAGIC))
+	if (ucond->shadow_cond.magic != COBALT_COND_MAGIC)
 		return cobalt_cond_doautoinit(ucond);
 	return 0;
 }
@@ -201,7 +201,7 @@ COBALT_IMPL(int, pthread_cond_destroy, (pthread_cond_t *cond))
 	struct cobalt_cond_shadow *_cond =
 		&((union cobalt_cond_union *)cond)->shadow_cond;
 
-	if (unlikely(_cond->magic != COBALT_COND_MAGIC))
+	if (_cond->magic != COBALT_COND_MAGIC)
 		return (cobalt_cond_autoinit_type(cond) < 0) ? EINVAL : 0;
 
 	return -XENOMAI_SYSCALL1( sc_cobalt_cond_destroy, _cond);
