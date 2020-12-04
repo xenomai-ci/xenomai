@@ -71,7 +71,7 @@ int xnsynch_fast_acquire(atomic_t *fastlock, xnhandle_t new_ownerh)
 static inline
 int xnsynch_fast_release(atomic_t *fastlock, xnhandle_t cur_ownerh)
 {
-	return atomic_cmpxchg(fastlock, cur_ownerh, XN_NO_HANDLE)
+	return (xnhandle_t)atomic_cmpxchg(fastlock, cur_ownerh, XN_NO_HANDLE)
 		== cur_ownerh;
 }
 
