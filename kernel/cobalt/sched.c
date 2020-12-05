@@ -345,34 +345,6 @@ struct xnthread *xnsched_pick_next(struct xnsched *sched)
 #endif /* CONFIG_XENO_OPT_SCHED_CLASSES */
 }
 
-#ifdef CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH
-
-struct xnsched *xnsched_finish_unlocked_switch(struct xnsched *sched)
-{
-	struct xnthread *last;
-	spl_t s;
-
-	xnlock_get_irqsave(&nklock, s);
-
-#ifdef CONFIG_SMP
-	/* If current thread migrated while suspended */
-	sched = xnsched_current();
-#endif /* CONFIG_SMP */
-
-	last = sched->last;
-	sched->status &= ~XNINSW;
-
-	/* Detect a thread which has migrated. */
-	if (last->sched != sched) {
-		xnsched_putback(last);
-		xnthread_clear_state(last, XNMIGRATE);
-	}
-
-	return sched;
-}
-
-#endif /* CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH */
-
 void xnsched_lock(void)
 {
 	struct xnsched *sched = xnsched_current();
@@ -628,17 +600,8 @@ void xnsched_migrate(struct xnthread *thread, struct xnsched *sched)
 {
 	xnsched_set_resched(thread->sched);
 	migrate_thread(thread, sched);
-
-#ifdef CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH
-	/*
-	 * Mark the thread in flight, xnsched_finish_unlocked_switch()
-	 * will put the thread on the remote runqueue.
-	 */
-	xnthread_set_state(thread, XNMIGRATE);
-#else
 	/* Move thread to the remote run queue. */
 	xnsched_putback(thread);
-#endif
 }
 
 /*
@@ -840,18 +803,6 @@ struct xnthread *xnsched_rt_pick(struct xnsched *sched)
 
 #endif /* !CONFIG_XENO_OPT_SCALABLE_SCHED */
 
-static inline void switch_context(struct xnsched *sched,
-				  struct xnthread *prev, struct xnthread *next)
-{
-#ifdef CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH
-	sched->last = prev;
-	sched->status |= XNINSW;
-	xnlock_clear_irqon(&nklock);
-#endif
-
-	xnarch_switch_to(prev, next);
-}
-
 /**
  * @fn int xnsched_run(void)
  * @brief The rescheduling procedure.
@@ -920,14 +871,8 @@ static inline int test_resched(struct xnsched *sched)
 
 static inline void enter_root(struct xnthread *root)
 {
-	struct xnarchtcb *rootcb __maybe_unused = xnthread_archtcb(root);
-
 #ifdef CONFIG_XENO_OPT_WATCHDOG
 	xntimer_stop(&root->sched->wdtimer);
-#endif
-#ifdef CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH
-	if (rootcb->core.mm == NULL)
-		set_ti_thread_flag(rootcb->core.tip, TIF_MMSWITCH_INT);
 #endif
 }
 
@@ -984,7 +929,7 @@ int ___xnsched_run(struct xnsched *sched)
 	 * "current" for disambiguating.
 	 */
 	xntrace_pid(task_pid_nr(current), xnthread_current_priority(curr));
-reschedule:
+
 	if (xnthread_test_state(curr, XNUSER))
 		do_lazy_user_work(curr);
 
@@ -1030,8 +975,7 @@ reschedule:
 
 	xnstat_exectime_switch(sched, &next->stat.account);
 	xnstat_counter_inc(&next->stat.csw);
-
-	switch_context(sched, prev, next);
+	xnarch_switch_to(prev, next);
 
 	/*
 	 * Test whether we transitioned from primary mode to secondary
@@ -1043,7 +987,7 @@ reschedule:
 		goto shadow_epilogue;
 
 	switched = 1;
-	sched = xnsched_finish_unlocked_switch(sched);
+	sched = xnsched_current();
 	/*
 	 * Re-read the currently running thread, this is needed
 	 * because of relaxed/hardened transitions.
@@ -1052,10 +996,6 @@ reschedule:
 	xnthread_switch_fpu(sched);
 	xntrace_pid(task_pid_nr(current), xnthread_current_priority(curr));
 out:
-	if (switched &&
-	    xnsched_maybe_resched_after_unlocked_switch(sched))
-		goto reschedule;
-
 	xnlock_put_irqrestore(&nklock, s);
 
 	return switched;

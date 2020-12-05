@@ -94,9 +94,6 @@ struct xnsched {
 	struct xntimer rrbtimer;
 	/*!< Root thread control block. */
 	struct xnthread rootcb;
-#ifdef CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH
-	struct xnthread *last;
-#endif
 #ifdef CONFIG_XENO_ARCH_FPU
 	/*!< Thread owning the current FPU context. */
 	struct xnthread *fpuholder;
@@ -350,37 +347,6 @@ static inline int xnsched_primary_p(void)
 {
 	return !xnsched_unblockable_p();
 }
-
-#ifdef CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH
-
-struct xnsched *xnsched_finish_unlocked_switch(struct xnsched *sched);
-
-#define xnsched_resched_after_unlocked_switch() xnsched_run()
-
-static inline
-int xnsched_maybe_resched_after_unlocked_switch(struct xnsched *sched)
-{
-	return sched->status & XNRESCHED;
-}
-
-#else /* !CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH */
-
-static inline struct xnsched *
-xnsched_finish_unlocked_switch(struct xnsched *sched)
-{
-	XENO_BUG_ON(COBALT, !hard_irqs_disabled());
-	return xnsched_current();
-}
-
-static inline void xnsched_resched_after_unlocked_switch(void) { }
-
-static inline int
-xnsched_maybe_resched_after_unlocked_switch(struct xnsched *sched)
-{
-	return 0;
-}
-
-#endif /* !CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH */
 
 bool xnsched_set_effective_priority(struct xnthread *thread,
 				    int prio);

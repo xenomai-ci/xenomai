@@ -37,7 +37,6 @@
 #define XNZOMBIE  0x00000020 /**< Zombie thread in deletion process */
 #define XNMAPPED  0x00000040 /**< Thread is mapped to a linux task */
 #define XNRELAX   0x00000080 /**< Relaxed shadow thread (blocking bit) */
-#define XNMIGRATE 0x00000100 /**< Thread is currently migrating to another CPU. */
 #define XNHELD    0x00000200 /**< Thread is held to process emergency. */
 #define XNBOOST   0x00000400 /**< PI/PP boost undergoing */
 #define XNSSTEP   0x00000800 /**< Single-stepped by debugger */

@@ -406,22 +406,6 @@ void xnthread_prepare_wait(struct xnthread_wait_context *wc)
 }
 EXPORT_SYMBOL_GPL(xnthread_prepare_wait);
 
-static inline int moving_target(struct xnsched *sched, struct xnthread *thread)
-{
-	int ret = 0;
-#ifdef CONFIG_IPIPE_WANT_PREEMPTIBLE_SWITCH
-	/*
-	 * When deleting a thread in the course of a context switch or
-	 * in flight to another CPU with nklock unlocked on a distant
-	 * CPU, do nothing, this case will be caught in
-	 * xnsched_finish_unlocked_switch.
-	 */
-	ret = (sched->status & XNINSW) ||
-		xnthread_test_state(thread, XNMIGRATE);
-#endif
-	return ret;
-}
-
 #ifdef CONFIG_XENO_ARCH_FPU
 
 static inline void giveup_fpu(struct xnsched *sched,
@@ -494,10 +478,6 @@ static inline void cleanup_tcb(struct xnthread *curr) /* nklock held, irqs off *
 	release_all_ownerships(curr);
 
 	giveup_fpu(sched, curr);
-
-	if (moving_target(sched, curr))
-		return;
-
 	xnsched_forget(curr);
 	xnthread_deregister(curr);
 }
@@ -1954,11 +1934,10 @@ int xnthread_harden(void)
 	}
 
 	/* "current" is now running into the Xenomai domain. */
-	sched = xnsched_finish_unlocked_switch(thread->sched);
+	sched = xnsched_current();
 	xnthread_switch_fpu(sched);
 
 	xnlock_clear_irqon(&nklock);
-	xnsched_resched_after_unlocked_switch();
 	xnthread_test_cancel();
 
 	trace_cobalt_shadow_hardened(thread);
