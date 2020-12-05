@@ -330,8 +330,6 @@ static inline xnticks_t xnclock_read_realtime(struct xnclock *clock)
 unsigned long long xnclock_divrem_billion(unsigned long long value,
 					  unsigned long *rem);
 
-xnticks_t xnclock_get_host_time(void);
-
 #ifdef CONFIG_XENO_OPT_VFILE
 
 void xnclock_init_proc(void);

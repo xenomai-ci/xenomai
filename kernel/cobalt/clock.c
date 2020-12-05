@@ -348,12 +348,6 @@ void xnclock_adjust(struct xnclock *clock, xnsticks_t delta)
 }
 EXPORT_SYMBOL_GPL(xnclock_adjust);
 
-xnticks_t xnclock_get_host_time(void)
-{
-	return ktime_to_ns(ktime_get_real());
-}
-EXPORT_SYMBOL_GPL(xnclock_get_host_time);
-
 xnticks_t xnclock_core_read_monotonic(void)
 {
 	return xnclock_core_ticks_to_ns(xnclock_core_read_raw());

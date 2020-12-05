@@ -853,7 +853,7 @@ int xntimer_grab_hardware(void)
 #endif /* CONFIG_XENO_OPT_STATS_IRQS */
 
 	nkclock.wallclock_offset =
-		xnclock_get_host_time() - xnclock_read_monotonic(&nkclock);
+		ktime_to_ns(ktime_get_real()) - xnclock_read_monotonic(&nkclock);
 
 	ret = xntimer_setup_ipi();
 	if (ret)
