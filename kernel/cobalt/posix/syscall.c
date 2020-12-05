@@ -262,7 +262,7 @@ static COBALT_SYSCALL(serialdbg, current,
 			n = sizeof(buf);
 		if (cobalt_copy_from_user(buf, u_msg, n))
 			return -EFAULT;
-		__ipipe_serial_debug("%.*s", n, buf);
+		raw_printk("%.*s", n, buf);
 		u_msg += n;
 		len -= n;
 	}
