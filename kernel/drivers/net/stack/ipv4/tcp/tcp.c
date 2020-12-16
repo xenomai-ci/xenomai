@@ -2137,17 +2137,12 @@ static ssize_t rt_tcp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 			      int msg_flags)
 {
 	struct iovec iov_fast[RTDM_IOV_FASTMAX], *iov;
-	struct user_msghdr _msg;
 	ssize_t ret;
 	size_t len;
 	void *buf;
 
 	if (msg_flags)
 		return -EOPNOTSUPP;
-
-	msg = rtnet_get_arg(fd, &_msg, msg, sizeof(*msg));
-	if (IS_ERR(msg))
-		return PTR_ERR(msg);
 
 	/* loop over all vectors to be implemented */
 	if (msg->msg_iovlen != 1)
@@ -2175,16 +2170,11 @@ static ssize_t rt_tcp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg,
 			      int msg_flags)
 {
 	struct iovec iov_fast[RTDM_IOV_FASTMAX], *iov;
-	struct user_msghdr _msg;
 	ssize_t ret;
 	size_t len;
 
 	if (msg_flags)
 		return -EOPNOTSUPP;
-
-	msg = rtnet_get_arg(fd, &_msg, msg, sizeof(*msg));
-	if (IS_ERR(msg))
-		return PTR_ERR(msg);
 
 	/* loop over all vectors to be implemented */
 	if (msg->msg_iovlen != 1)
