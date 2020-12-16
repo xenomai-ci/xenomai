@@ -227,7 +227,7 @@ void xnarch_switch_to(struct xnthread *out, struct xnthread *in)
 		if (!copy_fpregs_to_fpstate(prev_fpu))
 			prev_fpu->last_cpu = -1;
 		else
-			prev_fpu->last_cpu = smp_processor_id();
+			prev_fpu->last_cpu = raw_smp_processor_id();
 	}
 #endif
 
@@ -288,7 +288,7 @@ void xnarch_switch_to(struct xnthread *out, struct xnthread *in)
 		 * PF_KTHREAD, i.e including kernel threads.
 		 */
 		struct fpu *fpu = &current->thread.fpu;
-		int cpu = smp_processor_id();
+		int cpu = raw_smp_processor_id();
 
 		if (!fpregs_state_valid(fpu, cpu)) {
 			copy_kernel_to_fpregs(&fpu->state);
@@ -513,7 +513,7 @@ void xnarch_leave_root(struct xnthread *root)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
 	switch_fpu_finish(&current->thread.fpu);
 #else
-	switch_fpu_finish(&current->thread.fpu, smp_processor_id());
+	switch_fpu_finish(&current->thread.fpu, raw_smp_processor_id());
 #endif
 #else
 	/* mark current thread as not owning the FPU anymore */

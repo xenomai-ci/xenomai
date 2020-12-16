@@ -78,7 +78,7 @@ static inline union vfp_state *get_fpu_owner(void)
 		return NULL;
 #endif
 
-	cpu = ipipe_processor_id();
+	cpu = raw_smp_processor_id();
 	vfp_owner = vfp_current_hw_state[cpu];
 	if (!vfp_owner)
 		return NULL;
@@ -214,8 +214,8 @@ void xnarch_leave_root(struct xnthread *root)
 void xnarch_switch_fpu(struct xnthread *from, struct xnthread *to)
 {
 	union vfp_state *const from_fpup = from ? from->tcb.fpup : NULL;
-	unsigned cpu = ipipe_processor_id();
-	
+	unsigned cpu = raw_smp_processor_id();
+
 	if (xnthread_test_state(to, XNROOT) == 0) {
 		union vfp_state *const to_fpup = to->tcb.fpup;
 		unsigned fpexc = do_enable_vfp();
@@ -252,7 +252,7 @@ void xnarch_switch_fpu(struct xnthread *from, struct xnthread *to)
 			do_vfp_fmxr(FPEXC, fpen & ~XNARCH_VFP_ANY_EXC);
 			if (from_fpup == current_task_fpup)
 				return;
-			
+
 			__asm_vfp_save(from_fpup, fpen);
 			do_vfp_fmxr(FPEXC, fpdis);
 		}
@@ -260,7 +260,7 @@ void xnarch_switch_fpu(struct xnthread *from, struct xnthread *to)
 	}
 }
 
-int xnarch_handle_fpu_fault(struct xnthread *from, 
+int xnarch_handle_fpu_fault(struct xnthread *from,
 			struct xnthread *to, struct ipipe_trap_data *d)
 {
 	if (xnthread_test_state(to, XNFPU))

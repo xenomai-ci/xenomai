@@ -577,7 +577,7 @@ int xnlock_dbg_release(struct xnlock *lock,
 	int cpu;
 
 	lock_time = xnclock_read_raw(&nkclock) - lock->lock_date;
-	cpu = ipipe_processor_id();
+	cpu = raw_smp_processor_id();
 	stats = &per_cpu(xnlock_stats, cpu);
 
 	if (lock->file == NULL) {

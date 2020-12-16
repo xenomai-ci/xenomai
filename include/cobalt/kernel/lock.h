@@ -175,7 +175,7 @@ static inline void xnlock_init (struct xnlock *lock)
 
 static inline int ____xnlock_get(struct xnlock *lock /*, */ XNLOCK_DBG_CONTEXT_ARGS)
 {
-	int cpu = ipipe_processor_id();
+	int cpu = raw_smp_processor_id();
 	unsigned long long start;
 
 	if (lock->owner == cpu)
@@ -242,7 +242,7 @@ static inline void __xnlock_put_irqrestore(struct xnlock *lock, spl_t flags
 static inline int xnlock_is_owner(struct xnlock *lock)
 {
 	if (__locking_active__)
-		return lock->owner == ipipe_processor_id();
+		return lock->owner == raw_smp_processor_id();
 
 	return 1;
 }

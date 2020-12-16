@@ -90,7 +90,7 @@ void xnarch_switch_fpu(struct xnthread *from, struct xnthread *to)
 	fpsimd_save_state(from_fpup);
 
 	fpsimd_load_state(to_fpup);
-	to_fpup->cpu = ipipe_processor_id();
+	to_fpup->cpu = raw_smp_processor_id();
 }
 
 void xnarch_init_shadow_tcb(struct xnthread *thread)
