@@ -386,7 +386,7 @@ int rt_udp_ioctl(struct rtdm_fd *fd, unsigned int request, void __user *arg)
 /***
  *  rt_udp_recvmsg
  */
-ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *u_msg,
+ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 		       int msg_flags)
 {
 	struct rtsocket *sock = rtdm_fd_to_private(fd);
@@ -400,13 +400,8 @@ ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *u_msg,
 	struct sockaddr_in sin;
 	nanosecs_rel_t timeout = sock->timeout;
 	int ret, flags;
-	struct user_msghdr _msg, *msg;
 	socklen_t namelen;
 	struct iovec iov_fast[RTDM_IOV_FASTMAX], *iov;
-
-	msg = rtnet_get_arg(fd, &_msg, u_msg, sizeof(_msg));
-	if (IS_ERR(msg))
-		return PTR_ERR(msg);
 
 	if (msg->msg_iovlen < 0)
 		return -EINVAL;
@@ -451,7 +446,7 @@ ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *u_msg,
 			goto fail;
 
 		namelen = sizeof(sin);
-		ret = rtnet_put_arg(fd, &u_msg->msg_namelen, &namelen,
+		ret = rtnet_put_arg(fd, &msg->msg_namelen, &namelen,
 				    sizeof(namelen));
 		if (ret)
 			goto fail;
@@ -495,7 +490,7 @@ ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *u_msg,
 		flags |= MSG_TRUNC;
 
 	if (flags != msg->msg_flags) {
-		ret = rtnet_put_arg(fd, &u_msg->msg_flags, &flags,
+		ret = rtnet_put_arg(fd, &msg->msg_flags, &flags,
 				    sizeof(flags));
 		if (ret)
 			goto fail;
@@ -589,7 +584,6 @@ ssize_t rt_udp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg,
 	u16 dport;
 	int err;
 	rtdm_lockctx_t context;
-	struct user_msghdr _msg;
 	struct iovec iov_fast[RTDM_IOV_FASTMAX], *iov;
 
 	if (msg_flags & MSG_OOB) /* Mirror BSD error message compatibility */
@@ -597,10 +591,6 @@ ssize_t rt_udp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg,
 
 	if (msg_flags & ~(MSG_DONTROUTE | MSG_DONTWAIT))
 		return -EINVAL;
-
-	msg = rtnet_get_arg(fd, &_msg, msg, sizeof(*msg));
-	if (IS_ERR(msg))
-		return PTR_ERR(msg);
 
 	if (msg->msg_iovlen < 0)
 		return -EINVAL;
