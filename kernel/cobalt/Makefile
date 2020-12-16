@@ -6,7 +6,6 @@ xenomai-y :=	apc.o		\
 		clock.o		\
 		heap.o		\
 		init.o		\
-		intr.o		\
 		lock.o		\
 		registry.o	\
 		sched-idle.o	\
