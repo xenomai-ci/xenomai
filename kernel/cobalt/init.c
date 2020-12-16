@@ -18,14 +18,12 @@
  */
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/ipipe_tickdev.h>
 #include <xenomai/version.h>
+#include <pipeline/machine.h>
 #include <cobalt/kernel/sched.h>
-#include <cobalt/kernel/clock.h>
 #include <cobalt/kernel/timer.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/intr.h>
-#include <cobalt/kernel/apc.h>
 #include <cobalt/kernel/ppd.h>
 #include <cobalt/kernel/pipe.h>
 #include <cobalt/kernel/select.h>
@@ -46,12 +44,6 @@
  * Cobalt provides an implementation of the POSIX and RTDM interfaces
  * based on a set of generic RTOS building blocks.
  */
-
-static unsigned long timerfreq_arg;
-module_param_named(timerfreq, timerfreq_arg, ulong, 0444);
-
-static unsigned long clockfreq_arg;
-module_param_named(clockfreq, clockfreq_arg, ulong, 0444);
 
 #ifdef CONFIG_SMP
 static unsigned long supported_cpus_arg = -1;
@@ -84,12 +76,6 @@ EXPORT_SYMBOL_GPL(cobalt_kernel_ppd);
 #define boot_debug_notice "[DEBUG]"
 #else
 #define boot_debug_notice ""
-#endif
-
-#ifdef CONFIG_IPIPE_TRACE
-#define boot_lat_trace_notice "[LTRACE]"
-#else
-#define boot_lat_trace_notice ""
 #endif
 
 #ifdef CONFIG_ENABLE_DEFAULT_TRACERS
@@ -134,103 +120,6 @@ static void sys_shutdown(void)
 	xnheap_vfree(membase);
 }
 
-static int __init mach_setup(void)
-{
-	struct ipipe_sysinfo sysinfo;
-	int ret, virq;
-
-	ret = ipipe_select_timers(&xnsched_realtime_cpus);
-	if (ret < 0)
-		return ret;
-
-	ipipe_get_sysinfo(&sysinfo);
-
-	if (timerfreq_arg == 0)
-		timerfreq_arg = sysinfo.sys_hrtimer_freq;
-
-	if (clockfreq_arg == 0)
-		clockfreq_arg = sysinfo.sys_hrclock_freq;
-
-	if (clockfreq_arg == 0) {
-		printk(XENO_ERR "null clock frequency? Aborting.\n");
-		return -ENODEV;
-	}
-
-	cobalt_pipeline.timer_freq = timerfreq_arg;
-	cobalt_pipeline.clock_freq = clockfreq_arg;
-
-	if (cobalt_machine.init) {
-		ret = cobalt_machine.init();
-		if (ret)
-			return ret;
-	}
-
-	ipipe_register_head(&xnsched_realtime_domain, "Xenomai");
-
-	ret = -EBUSY;
-	virq = ipipe_alloc_virq();
-	if (virq == 0)
-		goto fail_apc;
-
-	cobalt_pipeline.apc_virq = virq;
-
-	ipipe_request_irq(ipipe_root_domain,
-			  cobalt_pipeline.apc_virq,
-			  apc_dispatch,
-			  NULL, NULL);
-
-	virq = ipipe_alloc_virq();
-	if (virq == 0)
-		goto fail_escalate;
-
-	cobalt_pipeline.escalate_virq = virq;
-
-	ipipe_request_irq(&xnsched_realtime_domain,
-			  cobalt_pipeline.escalate_virq,
-			  (ipipe_irq_handler_t)__xnsched_run_handler,
-			  NULL, NULL);
-
-	ret = xnclock_init(cobalt_pipeline.clock_freq);
-	if (ret)
-		goto fail_clock;
-
-	return 0;
-
-fail_clock:
-	ipipe_free_irq(&xnsched_realtime_domain,
-		       cobalt_pipeline.escalate_virq);
-	ipipe_free_virq(cobalt_pipeline.escalate_virq);
-fail_escalate:
-	ipipe_free_irq(ipipe_root_domain,
-		       cobalt_pipeline.apc_virq);
-	ipipe_free_virq(cobalt_pipeline.apc_virq);
-fail_apc:
-	ipipe_unregister_head(&xnsched_realtime_domain);
-
-	if (cobalt_machine.cleanup)
-		cobalt_machine.cleanup();
-
-	return ret;
-}
-
-static inline int __init mach_late_setup(void)
-{
-	if (cobalt_machine.late_init)
-		return cobalt_machine.late_init();
-
-	return 0;
-}
-
-static __init void mach_cleanup(void)
-{
-	ipipe_unregister_head(&xnsched_realtime_domain);
-	ipipe_free_irq(&xnsched_realtime_domain,
-		       cobalt_pipeline.escalate_virq);
-	ipipe_free_virq(cobalt_pipeline.escalate_virq);
-	ipipe_timers_release();
-	xnclock_cleanup();
-}
-
 static struct {
 	const char *label;
 	enum cobalt_run_states state;
@@ -239,7 +128,7 @@ static struct {
 	{ "stopped", COBALT_STATE_STOPPED },
 	{ "enabled", COBALT_STATE_WARMUP },
 };
-	
+
 static void __init setup_init_state(void)
 {
 	static char warn_bad_state[] __initdata =
@@ -321,7 +210,7 @@ static int __init xenomai_init(void)
 	if (ret)
 		goto fail;
 
-	ret = mach_setup();
+	ret = pipeline_init();
 	if (ret)
 		goto cleanup_proc;
 
@@ -339,7 +228,7 @@ static int __init xenomai_init(void)
 	if (ret)
 		goto cleanup_select;
 
-	ret = mach_late_setup();
+	ret = pipeline_late_init();
 	if (ret)
 		goto cleanup_sys;
 
@@ -371,7 +260,7 @@ cleanup_select:
 cleanup_pipe:
 	xnpipe_umount();
 cleanup_mach:
-	mach_cleanup();
+	pipeline_cleanup();
 cleanup_proc:
 	xnprocfs_cleanup_tree();
 fail:

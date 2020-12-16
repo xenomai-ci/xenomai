@@ -1,4 +1,4 @@
-obj-$(CONFIG_XENOMAI) += xenomai.o rtdm/ posix/
+obj-$(CONFIG_XENOMAI) += pipeline/ xenomai.o rtdm/ posix/
 
 xenomai-y :=	apc.o		\
 		arith.o 	\
