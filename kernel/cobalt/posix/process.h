@@ -149,6 +149,10 @@ void cobalt_del_resource(struct cobalt_resnode *node)
 	list_del(&node->next);
 }
 
+void cobalt_remove_process(struct cobalt_process *process);
+
+void cobalt_signal_yield(void);
+
 extern struct xnthread_personality *cobalt_personalities[];
 
 extern struct xnthread_personality cobalt_personality;

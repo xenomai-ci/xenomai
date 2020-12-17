@@ -110,4 +110,6 @@ COBALT_SYSCALL_DECL(sigqueue,
 
 int cobalt_signal_init(void);
 
+void cobalt_signal_cleanup(void);
+
 #endif /* !_COBALT_POSIX_SIGNAL_H */

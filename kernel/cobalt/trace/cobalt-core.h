@@ -377,20 +377,20 @@ TRACE_EVENT(cobalt_thread_resume,
 );
 
 TRACE_EVENT(cobalt_thread_fault,
-	TP_PROTO(struct ipipe_trap_data *td),
-	TP_ARGS(td),
+	TP_PROTO(unsigned long ip, unsigned int type),
+	TP_ARGS(ip, type),
 
 	TP_STRUCT__entry(
-		__field(void *,	ip)
+		__field(unsigned long, ip)
 		__field(unsigned int, type)
 	),
 
 	TP_fast_assign(
-		__entry->ip = (void *)xnarch_fault_pc(td);
-		__entry->type = xnarch_fault_trap(td);
+		__entry->ip = ip;
+		__entry->type = type;
 	),
 
-	TP_printk("ip=%p type=%x",
+	TP_printk("ip=%#lx type=%#x",
 		  __entry->ip, __entry->type)
 );
 

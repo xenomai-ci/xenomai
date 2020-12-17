@@ -614,3 +614,8 @@ __init int cobalt_signal_init(void)
 
 	return 0;
 }
+
+__init void cobalt_signal_cleanup(void)
+{
+	xnheap_vfree(sigpending_mem);
+}

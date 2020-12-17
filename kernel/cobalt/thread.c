@@ -38,6 +38,7 @@
 #include <cobalt/kernel/select.h>
 #include <cobalt/kernel/lock.h>
 #include <cobalt/kernel/thread.h>
+#include <pipeline/kevents.h>
 #include <trace/events/cobalt-core.h>
 #include "debug.h"
 
@@ -2502,7 +2503,6 @@ static inline void init_kthread_info(struct xnthread *thread)
  */
 int xnthread_map(struct xnthread *thread, struct completion *done)
 {
-	struct task_struct *p = current;
 	int ret;
 	spl_t s;
 
@@ -2521,7 +2521,7 @@ int xnthread_map(struct xnthread *thread, struct completion *done)
 	xnthread_set_state(thread, XNMAPPED);
 	xndebug_shadow_init(thread);
 	xnthread_run_handler(thread, map_thread);
-	ipipe_enable_notifier(p);
+	pipeline_enable_kevents();
 
 	/*
 	 * CAUTION: Soon after xnthread_init() has returned,
