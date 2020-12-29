@@ -60,7 +60,7 @@ int sys32_put_timespec(struct compat_timespec __user *u_cts,
 }
 EXPORT_SYMBOL_GPL(sys32_put_timespec);
 
-int sys32_get_itimerspec(struct itimerspec *its,
+int sys32_get_itimerspec(struct itimerspec64 *its,
 			 const struct compat_itimerspec __user *cits)
 {
 	int ret = sys32_get_timespec(&its->it_value, &cits->it_value);
@@ -70,7 +70,7 @@ int sys32_get_itimerspec(struct itimerspec *its,
 EXPORT_SYMBOL_GPL(sys32_get_itimerspec);
 
 int sys32_put_itimerspec(struct compat_itimerspec __user *cits,
-			 const struct itimerspec *its)
+			 const struct itimerspec64 *its)
 {
 	int ret = sys32_put_timespec(&cits->it_value, &its->it_value);
 

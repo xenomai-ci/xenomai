@@ -22,21 +22,21 @@
 #include <xenomai/posix/syscall.h>
 
 int __cobalt_timerfd_settime(int fd, int flags,
-			     const struct itimerspec *new_value,
-			     struct itimerspec *old_value);
+			     const struct itimerspec64 *new_value,
+			     struct itimerspec64 *old_value);
 
 int __cobalt_timerfd_gettime(int fd,
-			     struct itimerspec *value);
+			     struct itimerspec64 *value);
 
 COBALT_SYSCALL_DECL(timerfd_create,
 		    (int clockid, int flags));
 
 COBALT_SYSCALL_DECL(timerfd_settime,
 		    (int fd, int flags,
-		     const struct itimerspec __user *new_value,
-		     struct itimerspec __user *old_value));
+		     const struct __user_old_itimerspec __user *new_value,
+		     struct __user_old_itimerspec __user *old_value));
 
 COBALT_SYSCALL_DECL(timerfd_gettime,
-		    (int fd, struct itimerspec __user *curr_value));
+		    (int fd, struct __user_old_itimerspec __user *curr_value));
 
 #endif /* TIMERFD_H */
