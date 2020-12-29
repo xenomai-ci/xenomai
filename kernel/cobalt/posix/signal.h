@@ -59,7 +59,7 @@ void cobalt_copy_siginfo(int code,
 int __cobalt_sigwait(sigset_t *set);
 
 int __cobalt_sigtimedwait(sigset_t *set,
-			  const struct timespec *timeout,
+			  const struct timespec64 *timeout,
 			  void __user *u_si,
 			  bool compat);
 
@@ -94,7 +94,7 @@ COBALT_SYSCALL_DECL(sigwait,
 COBALT_SYSCALL_DECL(sigtimedwait,
 		    (const sigset_t __user *u_set,
 		     struct siginfo __user *u_si,
-		     const struct timespec __user *u_timeout));
+		     const struct __user_old_timespec __user *u_timeout));
 
 COBALT_SYSCALL_DECL(sigwaitinfo,
 		    (const sigset_t __user *u_set,

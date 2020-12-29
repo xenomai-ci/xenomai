@@ -54,7 +54,7 @@ struct xnclock {
 		xnticks_t (*read_raw)(struct xnclock *clock);
 		xnticks_t (*read_monotonic)(struct xnclock *clock);
 		int (*set_time)(struct xnclock *clock,
-				const struct timespec *ts);
+				const struct timespec64 *ts);
 		xnsticks_t (*ns_to_ticks)(struct xnclock *clock,
 					  xnsticks_t ns);
 		xnsticks_t (*ticks_to_ns)(struct xnclock *clock,
@@ -211,7 +211,7 @@ static inline xnticks_t xnclock_read_monotonic(struct xnclock *clock)
 }
 
 static inline int xnclock_set_time(struct xnclock *clock,
-				   const struct timespec *ts)
+				   const struct timespec64 *ts)
 {
 	if (likely(clock == &nkclock))
 		return -EINVAL;
@@ -264,7 +264,7 @@ static inline xnticks_t xnclock_read_monotonic(struct xnclock *clock)
 }
 
 static inline int xnclock_set_time(struct xnclock *clock,
-				   const struct timespec *ts)
+				   const struct timespec64 *ts)
 {
 	/*
 	 * There is no way to change the core clock's idea of time.

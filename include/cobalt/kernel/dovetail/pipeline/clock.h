@@ -8,7 +8,7 @@
 #include <cobalt/uapi/kernel/types.h>
 #include <cobalt/kernel/assert.h>
 
-struct timespec;
+struct timespec64;
 
 static inline u64 pipeline_read_cycle_counter(void)
 {
@@ -49,7 +49,7 @@ static inline const char *pipeline_clock_name(void)
 	return "?";
 }
 
-static inline int pipeline_get_host_time(struct timespec *tp)
+static inline int pipeline_get_host_time(struct timespec64 *tp)
 {
 	/* Convert ktime_get_real_fast_ns() to timespec. */
 	TODO();

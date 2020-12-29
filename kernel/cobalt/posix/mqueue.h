@@ -37,14 +37,14 @@ int __cobalt_mq_getattr(mqd_t uqd, struct mq_attr *attr);
 
 int __cobalt_mq_timedsend(mqd_t uqd, const void __user *u_buf, size_t len,
 			  unsigned int prio, const void __user *u_ts,
-			  int (*fetch_timeout)(struct timespec *ts,
+			  int (*fetch_timeout)(struct timespec64 *ts,
 					       const void __user *u_ts));
 
 int __cobalt_mq_timedreceive(mqd_t uqd, void __user *u_buf,
 			     ssize_t *lenp,
 			     unsigned int __user *u_prio,
 			     const void __user *u_ts,
-			     int (*fetch_timeout)(struct timespec *ts,
+			     int (*fetch_timeout)(struct timespec64 *ts,
 						  const void __user *u_ts));
 
 int __cobalt_mq_notify(mqd_t fd, const struct sigevent *evp);
@@ -61,12 +61,12 @@ COBALT_SYSCALL_DECL(mq_getattr, (mqd_t uqd, struct mq_attr __user *u_attr));
 
 COBALT_SYSCALL_DECL(mq_timedsend,
 		    (mqd_t uqd, const void __user *u_buf, size_t len,
-		     unsigned int prio, const struct timespec __user *u_ts));
+		     unsigned int prio, const struct __user_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(mq_timedreceive,
 		    (mqd_t uqd, void __user *u_buf, ssize_t __user *u_len,
 		     unsigned int __user *u_prio,
-		     const struct timespec __user *u_ts));
+		     const struct __user_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(mq_notify,
 		    (mqd_t fd, const struct sigevent *__user evp));

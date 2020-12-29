@@ -105,7 +105,7 @@ COBALT_SYSCALL32x_DECL(mq_timedreceive,
 		       (mqd_t uqd, void __user *u_buf,
 			compat_ssize_t __user *u_len,
 			unsigned int __user *u_prio,
-			const struct timespec __user *u_ts));
+			const struct __user_old_timespec __user *u_ts));
 
 COBALT_SYSCALL32emu_DECL(mq_notify,
 			 (mqd_t fd, const struct compat_sigevent *__user u_cev));

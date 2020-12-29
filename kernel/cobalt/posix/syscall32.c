@@ -97,7 +97,7 @@ COBALT_SYSCALL32emu(thread_setschedprio, conforming,
 	return cobalt_thread_setschedprio(pth, prio, u_winoff, u_promoted);
 }
 
-static inline int sys32_fetch_timeout(struct timespec *ts,
+static inline int sys32_fetch_timeout(struct timespec64 *ts,
 				      const void __user *u_ts)
 {
 	return u_ts == NULL ? -EFAULT :
@@ -133,7 +133,7 @@ COBALT_SYSCALL32emu(clock_getres, current,
 		    (clockid_t clock_id,
 		     struct compat_timespec __user *u_ts))
 {
-	struct timespec ts;
+	struct timespec64 ts;
 	int ret;
 
 	ret = __cobalt_clock_getres(clock_id, &ts);
@@ -147,7 +147,7 @@ COBALT_SYSCALL32emu(clock_gettime, current,
 		    (clockid_t clock_id,
 		     struct compat_timespec __user *u_ts))
 {
-	struct timespec ts;
+	struct timespec64 ts;
 	int ret;
 
 	ret = __cobalt_clock_gettime(clock_id, &ts);
@@ -161,7 +161,7 @@ COBALT_SYSCALL32emu(clock_settime, current,
 		    (clockid_t clock_id,
 		     const struct compat_timespec __user *u_ts))
 {
-	struct timespec ts;
+	struct timespec64 ts;
 	int ret;
 
 	ret = sys32_get_timespec(&ts, u_ts);
@@ -193,7 +193,7 @@ COBALT_SYSCALL32emu(clock_nanosleep, nonrestartable,
 		     const struct compat_timespec __user *u_rqt,
 		     struct compat_timespec __user *u_rmt))
 {
-	struct timespec rqt, rmt, *rmtp = NULL;
+	struct timespec64 rqt, rmt, *rmtp = NULL;
 	int ret;
 
 	if (u_rmt)
@@ -289,12 +289,10 @@ COBALT_SYSCALL32emu(mq_timedreceive, primary,
 	return ret ?: cobalt_copy_to_user(u_len, &clen, sizeof(*u_len));
 }
 
-static inline int mq_fetch_timeout(struct timespec *ts,
+static inline int mq_fetch_timeout(struct timespec64 *ts,
 				   const void __user *u_ts)
 {
-	return u_ts == NULL ? -EFAULT :
-		cobalt_copy_from_user(ts, u_ts, sizeof(*ts));
-
+	return u_ts == NULL ? -EFAULT : cobalt_get_u_timespec(ts, u_ts);
 }
 
 COBALT_SYSCALL32emu(mq_notify, primary,
@@ -610,7 +608,7 @@ COBALT_SYSCALL32emu(sigtimedwait, nonrestartable,
 		     struct compat_siginfo __user *u_si,
 		     const struct compat_timespec __user *u_timeout))
 {
-	struct timespec timeout;
+	struct timespec64 timeout;
 	sigset_t set;
 	int ret;
 
@@ -663,7 +661,7 @@ COBALT_SYSCALL32emu(monitor_wait, nonrestartable,
 		     int event, const struct compat_timespec __user *u_ts,
 		     int __user *u_ret))
 {
-	struct timespec ts, *tsp = NULL;
+	struct timespec64 ts, *tsp = NULL;
 	int ret;
 
 	if (u_ts) {
@@ -682,7 +680,7 @@ COBALT_SYSCALL32emu(event_wait, primary,
 		     unsigned int __user *u_bits_r,
 		     int mode, const struct compat_timespec __user *u_ts))
 {
-	struct timespec ts, *tsp = NULL;
+	struct timespec64 ts, *tsp = NULL;
 	int ret;
 
 	if (u_ts) {
@@ -810,7 +808,7 @@ COBALT_SYSCALL32emu(recvmsg, handover,
 	return sys32_put_msghdr(umsg, &m) ?: ret;
 }
 
-static int get_timespec32(struct timespec *ts,
+static int get_timespec32(struct timespec64 *ts,
 			  const void __user *u_ts)
 {
 	return sys32_get_timespec(ts, u_ts);
@@ -924,7 +922,7 @@ COBALT_SYSCALL32x(mq_timedreceive, primary,
 		  (mqd_t uqd, void __user *u_buf,
 		   compat_ssize_t __user *u_len,
 		   unsigned int __user *u_prio,
-		   const struct timespec __user *u_ts))
+		   const struct __user_old_timespec __user *u_ts))
 {
 	compat_ssize_t clen;
 	ssize_t len;

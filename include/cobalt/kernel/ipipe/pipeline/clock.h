@@ -7,7 +7,7 @@
 
 #include <linux/ipipe_tickdev.h>
 
-struct timespec;
+struct timespec64;
 
 static inline u64 pipeline_read_cycle_counter(void)
 {
@@ -31,7 +31,7 @@ static inline const char *pipeline_clock_name(void)
 	return ipipe_clock_name();
 }
 
-int pipeline_get_host_time(struct timespec *tp);
+int pipeline_get_host_time(struct timespec64 *tp);
 
 void pipeline_update_clock_freq(unsigned long long freq);
 

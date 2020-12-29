@@ -650,11 +650,11 @@ int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		       unsigned int flags, void __user *u_timeout,
 		       int (*get_mmsg)(struct mmsghdr *mmsg, void __user *u_mmsg),
 		       int (*put_mmsg)(void __user **u_mmsg_p, const struct mmsghdr *mmsg),
-		       int (*get_timespec)(struct timespec *ts, const void __user *u_ts))
+		       int (*get_timespec)(struct timespec64 *ts, const void __user *u_ts))
 {
 	struct cobalt_recvmmsg_timer rq;
 	xntmode_t tmode = XN_RELATIVE;
-	struct timespec ts = { 0 };
+	struct timespec64 ts = { 0 };
 	int ret = 0, datagrams = 0;
 	xnticks_t timeout = 0;
 	struct mmsghdr mmsg;

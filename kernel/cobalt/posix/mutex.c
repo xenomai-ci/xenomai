@@ -71,7 +71,7 @@ static int cobalt_mutex_init_inner(struct cobalt_mutex_shadow *shadow,
 /* must be called with nklock locked, interrupts off. */
 int __cobalt_mutex_acquire_unchecked(struct xnthread *cur,
 				     struct cobalt_mutex *mutex,
-				     const struct timespec *ts)
+				     const struct timespec64 *ts)
 {
 	int ret;
 
@@ -134,11 +134,11 @@ int cobalt_mutex_release(struct xnthread *curr,
 
 int __cobalt_mutex_timedlock_break(struct cobalt_mutex_shadow __user *u_mx,
 				   const void __user *u_ts,
-				   int (*fetch_timeout)(struct timespec *ts,
+				   int (*fetch_timeout)(struct timespec64 *ts,
 							const void __user *u_ts))
 {
 	struct xnthread *curr = xnthread_current();
-	struct timespec ts, *tsp = NULL;
+	struct timespec64 ts, *tsp = NULL;
 	struct cobalt_mutex *mutex;
 	xnhandle_t handle;
 	spl_t s;
@@ -346,16 +346,15 @@ COBALT_SYSCALL(mutex_lock, primary,
 	return __cobalt_mutex_timedlock_break(u_mx, NULL, NULL);
 }
 
-static inline int mutex_fetch_timeout(struct timespec *ts,
+static inline int mutex_fetch_timeout(struct timespec64 *ts,
 				      const void __user *u_ts)
 {
-	return u_ts == NULL ? -EFAULT :
-		cobalt_copy_from_user(ts, u_ts, sizeof(*ts));
+	return u_ts == NULL ? -EFAULT : cobalt_get_u_timespec(ts, u_ts);
 }
 
 COBALT_SYSCALL(mutex_timedlock, primary,
 	       (struct cobalt_mutex_shadow __user *u_mx,
-		const struct timespec __user *u_ts))
+		const struct __user_old_timespec __user *u_ts))
 {
 	return __cobalt_mutex_timedlock_break(u_mx, u_ts, mutex_fetch_timeout);
 }

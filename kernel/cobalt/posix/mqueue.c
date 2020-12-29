@@ -471,13 +471,13 @@ mq_tryrcv(struct cobalt_mqd *mqd, size_t len)
 static struct cobalt_msg *
 mq_timedsend_inner(struct cobalt_mqd *mqd,
 		   size_t len, const void __user *u_ts,
-		   int (*fetch_timeout)(struct timespec *ts,
+		   int (*fetch_timeout)(struct timespec64 *ts,
 					const void __user *u_ts))
 {
 	struct cobalt_mqwait_context mwc;
 	struct cobalt_msg *msg;
 	struct cobalt_mq *mq;
-	struct timespec ts;
+	struct timespec64 ts;
 	xntmode_t tmode;
 	xnticks_t to;
 	spl_t s;
@@ -600,13 +600,13 @@ static struct cobalt_msg *
 mq_timedrcv_inner(struct cobalt_mqd *mqd,
 		  size_t len,
 		  const void __user *u_ts,
-		  int (*fetch_timeout)(struct timespec *ts,
+		  int (*fetch_timeout)(struct timespec64 *ts,
 				       const void __user *u_ts))
 {
 	struct cobalt_mqwait_context mwc;
 	struct cobalt_msg *msg;
 	struct cobalt_mq *mq;
-	struct timespec ts;
+	struct timespec64 ts;
 	xntmode_t tmode;
 	xnticks_t to;
 	spl_t s;
@@ -883,16 +883,15 @@ COBALT_SYSCALL(mq_getattr, current,
 	return cobalt_copy_to_user(u_attr, &attr, sizeof(attr));
 }
 
-static inline int mq_fetch_timeout(struct timespec *ts,
+static inline int mq_fetch_timeout(struct timespec64 *ts,
 				   const void __user *u_ts)
 {
-	return u_ts == NULL ? -EFAULT :
-		cobalt_copy_from_user(ts, u_ts, sizeof(*ts));
+	return u_ts == NULL ? -EFAULT : cobalt_get_u_timespec(ts, u_ts);
 }
 
 int __cobalt_mq_timedsend(mqd_t uqd, const void __user *u_buf, size_t len,
 			  unsigned int prio, const void __user *u_ts,
-			  int (*fetch_timeout)(struct timespec *ts,
+			  int (*fetch_timeout)(struct timespec64 *ts,
 					       const void __user *u_ts))
 {
 	struct cobalt_msg *msg;
@@ -936,7 +935,7 @@ out:
 
 COBALT_SYSCALL(mq_timedsend, primary,
 	       (mqd_t uqd, const void __user *u_buf, size_t len,
-		unsigned int prio, const struct timespec __user *u_ts))
+		unsigned int prio, const struct __user_old_timespec __user *u_ts))
 {
 	return __cobalt_mq_timedsend(uqd, u_buf, len, prio,
 				     u_ts, u_ts ? mq_fetch_timeout : NULL);
@@ -946,7 +945,7 @@ int __cobalt_mq_timedreceive(mqd_t uqd, void __user *u_buf,
 			     ssize_t *lenp,
 			     unsigned int __user *u_prio,
 			     const void __user *u_ts,
-			     int (*fetch_timeout)(struct timespec *ts,
+			     int (*fetch_timeout)(struct timespec64 *ts,
 						  const void __user *u_ts))
 {
 	struct cobalt_mqd *mqd;
@@ -997,7 +996,7 @@ COBALT_SYSCALL(mq_timedreceive, primary,
 	       (mqd_t uqd, void __user *u_buf,
 		ssize_t __user *u_len,
 		unsigned int __user *u_prio,
-		const struct timespec __user *u_ts))
+		const struct __user_old_timespec __user *u_ts))
 {
 	ssize_t len;
 	int ret;

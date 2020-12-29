@@ -39,7 +39,7 @@ struct cobalt_monitor {
 };
 
 int __cobalt_monitor_wait(struct cobalt_monitor_shadow __user *u_mon,
-			  int event, const struct timespec *ts,
+			  int event, const struct timespec64 *ts,
 			  int __user *u_ret);
 
 COBALT_SYSCALL_DECL(monitor_init,
@@ -58,7 +58,7 @@ COBALT_SYSCALL_DECL(monitor_exit,
 
 COBALT_SYSCALL_DECL(monitor_wait,
 		    (struct cobalt_monitor_shadow __user *u_monsh,
-		     int event, const struct timespec __user *u_ts,
+		     int event, const struct __user_old_timespec __user *u_ts,
 		     int __user *u_ret));
 
 COBALT_SYSCALL_DECL(monitor_destroy,

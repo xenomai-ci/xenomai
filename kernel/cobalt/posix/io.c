@@ -93,10 +93,10 @@ COBALT_SYSCALL(recvmsg, handover,
 	return cobalt_copy_to_user(umsg, &m, sizeof(*umsg)) ?: ret;
 }
 
-static int get_timespec(struct timespec *ts,
+static int get_timespec(struct timespec64 *ts,
 			const void __user *u_ts)
 {
-	return cobalt_copy_from_user(ts, u_ts, sizeof(*ts));
+	return cobalt_get_u_timespec(ts, u_ts);
 }
 
 static int get_mmsg(struct mmsghdr *mmsg, void __user *u_mmsg)
@@ -114,7 +114,7 @@ static int put_mmsg(void __user **u_mmsg_p, const struct mmsghdr *mmsg)
 
 COBALT_SYSCALL(recvmmsg, primary,
 	       (int fd, struct mmsghdr __user *u_msgvec, unsigned int vlen,
-		unsigned int flags, struct timespec *u_timeout))
+		unsigned int flags, struct __user_old_timespec __user *u_timeout))
 {
 	return __rtdm_fd_recvmmsg(fd, u_msgvec, vlen, flags, u_timeout,
 				  get_mmsg, put_mmsg, get_timespec);
