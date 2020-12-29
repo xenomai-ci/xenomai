@@ -39,10 +39,10 @@ struct cobalt_extension {
 		(*timer_init)(struct cobalt_extref *reftimer, /* nklocked, IRQs off. */
 			      const struct sigevent *__restrict__ evp);
 		int (*timer_settime)(struct cobalt_extref *reftimer, /* nklocked, IRQs off. */
-				     const struct itimerspec *__restrict__ value,
+				     const struct itimerspec64 *__restrict__ value,
 				     int flags);
 		int (*timer_gettime)(struct cobalt_extref *reftimer, /* nklocked, IRQs off. */
-				     struct itimerspec *__restrict__ value);
+				     struct itimerspec64 *__restrict__ value);
 		int (*timer_delete)(struct cobalt_extref *reftimer); /* nklocked, IRQs off. */
 		int (*timer_cleanup)(struct cobalt_extref *reftimer); /* nklocked, IRQs off. */
 		int (*signal_deliver)(struct cobalt_extref *refthread,

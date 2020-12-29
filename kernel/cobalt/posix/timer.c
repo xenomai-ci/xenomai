@@ -261,7 +261,7 @@ out:
 }
 
 void __cobalt_timer_getval(struct xntimer *__restrict__ timer,
-			   struct itimerspec *__restrict__ value)
+			   struct itimerspec64 *__restrict__ value)
 {
 	ns2ts(&value->it_interval, xntimer_interval(timer));
 
@@ -275,7 +275,7 @@ void __cobalt_timer_getval(struct xntimer *__restrict__ timer,
 
 static inline void
 timer_gettimeout(struct cobalt_timer *__restrict__ timer,
-		 struct itimerspec *__restrict__ value)
+		 struct itimerspec64 *__restrict__ value)
 {
 	int ret = 0;
 
@@ -287,7 +287,7 @@ timer_gettimeout(struct cobalt_timer *__restrict__ timer,
 }
 
 int __cobalt_timer_setval(struct xntimer *__restrict__ timer, int clock_flag,
-			  const struct itimerspec *__restrict__ value)
+			  const struct itimerspec64 *__restrict__ value)
 {
 	xnticks_t start, period;
 
@@ -312,7 +312,7 @@ int __cobalt_timer_setval(struct xntimer *__restrict__ timer, int clock_flag,
 }
 
 static inline int timer_set(struct cobalt_timer *timer, int flags,
-			    const struct itimerspec *__restrict__ value)
+			    const struct itimerspec64 *__restrict__ value)
 {				/* nklocked, IRQs off. */
 	struct cobalt_thread *thread;
 	int ret = 0;
@@ -362,8 +362,8 @@ timer_deliver_late(struct cobalt_process *cc, timer_t timerid)
 }
 
 int __cobalt_timer_settime(timer_t timerid, int flags,
-			   const struct itimerspec *__restrict__ value,
-			   struct itimerspec *__restrict__ ovalue)
+			   const struct itimerspec64 *__restrict__ value,
+			   struct itimerspec64 *__restrict__ ovalue)
 {
 	struct cobalt_timer *timer;
 	struct cobalt_process *cc;
@@ -402,7 +402,7 @@ out:
 	return ret;
 }
 
-int __cobalt_timer_gettime(timer_t timerid, struct itimerspec *value)
+int __cobalt_timer_gettime(timer_t timerid, struct itimerspec64 *value)
 {
 	struct cobalt_timer *timer;
 	struct cobalt_process *cc;
@@ -471,23 +471,23 @@ COBALT_SYSCALL(timer_create, current,
 
 COBALT_SYSCALL(timer_settime, primary,
 	       (timer_t tm, int flags,
-		const struct itimerspec __user *u_newval,
-		struct itimerspec __user *u_oldval))
+		const struct __user_old_itimerspec __user *u_newval,
+		struct __user_old_itimerspec __user *u_oldval))
 {
-	struct itimerspec newv, oldv, *oldvp = &oldv;
+	struct itimerspec64 newv, oldv, *oldvp = &oldv;
 	int ret;
 
 	if (u_oldval == NULL)
 		oldvp = NULL;
 
-	if (cobalt_copy_from_user(&newv, u_newval, sizeof(newv)))
+	if (cobalt_get_u_itimerspec(&newv, u_newval))
 		return -EFAULT;
 
 	ret = __cobalt_timer_settime(tm, flags, &newv, oldvp);
 	if (ret)
 		return ret;
 
-	if (oldvp && cobalt_copy_to_user(u_oldval, oldvp, sizeof(oldv))) {
+	if (oldvp && cobalt_put_u_itimerspec(u_oldval, oldvp)) {
 		__cobalt_timer_settime(tm, flags, oldvp, NULL);
 		return -EFAULT;
 	}
@@ -496,16 +496,16 @@ COBALT_SYSCALL(timer_settime, primary,
 }
 
 COBALT_SYSCALL(timer_gettime, current,
-	       (timer_t tm, struct itimerspec __user *u_val))
+	       (timer_t tm, struct __user_old_itimerspec __user *u_val))
 {
-	struct itimerspec val;
+	struct itimerspec64 val;
 	int ret;
 
 	ret = __cobalt_timer_gettime(tm, &val);
 	if (ret)
 		return ret;
 
-	return cobalt_copy_to_user(u_val, &val, sizeof(val));
+	return cobalt_put_u_itimerspec(u_val, &val);
 }
 
 COBALT_SYSCALL(timer_getoverrun, current, (timer_t timerid))

@@ -51,20 +51,20 @@ cobalt_timer_by_id(struct cobalt_process *p, timer_t timer_id);
 void cobalt_timer_handler(struct xntimer *xntimer);
 
 void __cobalt_timer_getval(struct xntimer *__restrict__ timer, 
-			   struct itimerspec *__restrict__ value);
+			   struct itimerspec64 *__restrict__ value);
 
 int __cobalt_timer_setval(struct xntimer *__restrict__ timer, int clock_flag, 
-			  const struct itimerspec *__restrict__ value);
+			  const struct itimerspec64 *__restrict__ value);
 
 int __cobalt_timer_create(clockid_t clock,
 			  const struct sigevent *sev,
 			  timer_t __user *u_tm);
 
 int __cobalt_timer_settime(timer_t timerid, int flags,
-			   const struct itimerspec *__restrict__ value,
-			   struct itimerspec *__restrict__ ovalue);
+			   const struct itimerspec64 *__restrict__ value,
+			   struct itimerspec64 *__restrict__ ovalue);
 
-int __cobalt_timer_gettime(timer_t timerid, struct itimerspec *value);
+int __cobalt_timer_gettime(timer_t timerid, struct itimerspec64 *value);
 
 COBALT_SYSCALL_DECL(timer_create,
 		    (clockid_t clock,
@@ -75,11 +75,11 @@ COBALT_SYSCALL_DECL(timer_delete, (timer_t tm));
 
 COBALT_SYSCALL_DECL(timer_settime,
 		    (timer_t tm, int flags,
-		     const struct itimerspec __user *u_newval,
-		     struct itimerspec __user *u_oldval));
+		     const struct __user_old_itimerspec __user *u_newval,
+		     struct __user_old_itimerspec __user *u_oldval));
 
 COBALT_SYSCALL_DECL(timer_gettime,
-		    (timer_t tm, struct itimerspec __user *u_val));
+		    (timer_t tm, struct __user_old_itimerspec __user *u_val));
 
 COBALT_SYSCALL_DECL(timer_getoverrun, (timer_t tm));
 

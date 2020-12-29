@@ -514,7 +514,7 @@ COBALT_SYSCALL32emu(timer_settime, primary,
 		     const struct compat_itimerspec __user *u_newval,
 		     struct compat_itimerspec __user *u_oldval))
 {
-	struct itimerspec newv, oldv, *oldvp = &oldv;
+	struct itimerspec64 newv, oldv, *oldvp = &oldv;
 	int ret;
 
 	if (u_oldval == NULL)
@@ -540,7 +540,7 @@ COBALT_SYSCALL32emu(timer_settime, primary,
 COBALT_SYSCALL32emu(timer_gettime, current,
 		    (timer_t tm, struct compat_itimerspec __user *u_val))
 {
-	struct itimerspec val;
+	struct itimerspec64 val;
 	int ret;
 
 	ret = __cobalt_timer_gettime(tm, &val);
@@ -553,7 +553,7 @@ COBALT_SYSCALL32emu(timerfd_settime, primary,
 		     const struct compat_itimerspec __user *new_value,
 		     struct compat_itimerspec __user *old_value))
 {
-	struct itimerspec ovalue, value;
+	struct itimerspec64 ovalue, value;
 	int ret;
 
 	ret = sys32_get_itimerspec(&value, new_value);
@@ -577,7 +577,7 @@ COBALT_SYSCALL32emu(timerfd_settime, primary,
 COBALT_SYSCALL32emu(timerfd_gettime, current,
 		    (int fd, struct compat_itimerspec __user *curr_value))
 {
-	struct itimerspec value;
+	struct itimerspec64 value;
 	int ret;
 
 	ret = __cobalt_timerfd_gettime(fd, &value);

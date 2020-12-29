@@ -86,7 +86,7 @@ static inline int cobalt_strncpy_from_user(char *dst, const char __user *src,
 
 /*
  * NOTE: those copy helpers won't work in compat mode: use
- * sys32_get_timespec(), sys32_put_timespec() instead.
+ * sys32_get_*(), sys32_put_*() instead.
  */
 
 static inline int cobalt_get_u_timespec(struct timespec64 *dst,
@@ -98,6 +98,19 @@ static inline int cobalt_get_u_timespec(struct timespec64 *dst,
 static inline int cobalt_put_u_timespec(
 	struct __user_old_timespec __user *dst,
 	const struct timespec64 *src)
+{
+	return cobalt_copy_to_user(dst, src, sizeof(*dst));
+}
+
+static inline int cobalt_get_u_itimerspec(struct itimerspec64 *dst,
+			const struct __user_old_itimerspec __user *src)
+{
+	return cobalt_copy_from_user(dst, src, sizeof(*dst));
+}
+
+static inline int cobalt_put_u_itimerspec(
+	struct __user_old_itimerspec __user *dst,
+	const struct itimerspec64 *src)
 {
 	return cobalt_copy_to_user(dst, src, sizeof(*dst));
 }
@@ -135,6 +148,38 @@ static inline int cobalt_put_u_timespec(
 		return ret;
 
 	return 0;
+}
+
+static inline int cobalt_get_u_itimerspec(struct itimerspec64 *dst,
+			const struct __user_old_itimerspec __user *src)
+{
+	struct __user_old_itimerspec u_its;
+	int ret;
+
+	ret = cobalt_copy_from_user(&u_its, src, sizeof(u_its));
+	if (ret)
+		return ret;
+
+	dst->it_interval.tv_sec = u_its.it_interval.tv_sec;
+	dst->it_interval.tv_nsec = u_its.it_interval.tv_nsec;
+	dst->it_value.tv_sec = u_its.it_value.tv_sec;
+	dst->it_value.tv_nsec = u_its.it_value.tv_nsec;
+
+	return 0;
+}
+
+static inline int cobalt_put_u_itimerspec(
+	struct __user_old_itimerspec __user *dst,
+	const struct itimerspec64 *src)
+{
+	struct __user_old_itimerspec u_its;
+
+	u_its.it_interval.tv_sec = src->it_interval.tv_sec;
+	u_its.it_interval.tv_nsec = src->it_interval.tv_nsec;
+	u_its.it_value.tv_sec = src->it_value.tv_sec;
+	u_its.it_value.tv_nsec = src->it_value.tv_nsec;
+
+	return cobalt_copy_to_user(dst, &u_its, sizeof(*dst));
 }
 
 #endif

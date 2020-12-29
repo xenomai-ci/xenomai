@@ -92,11 +92,11 @@ int sys32_get_timespec(struct timespec64 *ts,
 int sys32_put_timespec(struct compat_timespec __user *cts,
 		       const struct timespec64 *ts);
 
-int sys32_get_itimerspec(struct itimerspec *its,
+int sys32_get_itimerspec(struct itimerspec64 *its,
 			 const struct compat_itimerspec __user *cits);
 
 int sys32_put_itimerspec(struct compat_itimerspec __user *cits,
-			 const struct itimerspec *its);
+			 const struct itimerspec64 *its);
 
 int sys32_get_timeval(struct __kernel_old_timeval *tv,
 		      const struct compat_timeval __user *ctv);

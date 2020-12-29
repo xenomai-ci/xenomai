@@ -67,4 +67,9 @@ struct __user_old_timespec {
 	long  tv_nsec;
 };
 
+struct __user_old_itimerspec {
+	struct __user_old_timespec it_interval;
+	struct __user_old_timespec it_value;
+};
+
 #endif /* !_COBALT_UAPI_KERNEL_TYPES_H */
