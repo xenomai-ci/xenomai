@@ -26,6 +26,7 @@
 #include <asm/xenomai/wrappers.h>
 #include <asm/xenomai/machine.h>
 #include <cobalt/uapi/asm-generic/syscall.h>
+#include <cobalt/uapi/kernel/types.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
 #define access_rok(addr, size)	access_ok((addr), (size))
@@ -80,6 +81,63 @@ static inline int cobalt_strncpy_from_user(char *dst, const char __user *src,
 
 	return __xn_strncpy_from_user(dst, src, count);
 }
+
+#if __BITS_PER_LONG == 64
+
+/*
+ * NOTE: those copy helpers won't work in compat mode: use
+ * sys32_get_timespec(), sys32_put_timespec() instead.
+ */
+
+static inline int cobalt_get_u_timespec(struct timespec64 *dst,
+			const struct __user_old_timespec __user *src)
+{
+	return cobalt_copy_from_user(dst, src, sizeof(*dst));
+}
+
+static inline int cobalt_put_u_timespec(
+	struct __user_old_timespec __user *dst,
+	const struct timespec64 *src)
+{
+	return cobalt_copy_to_user(dst, src, sizeof(*dst));
+}
+
+#else /* __BITS_PER_LONG == 32 */
+
+static inline int cobalt_get_u_timespec(struct timespec64 *dst,
+			const struct __user_old_timespec __user *src)
+{
+	struct __user_old_timespec u_ts;
+	int ret;
+
+	ret = cobalt_copy_from_user(&u_ts, src, sizeof(u_ts));
+	if (ret)
+		return ret;
+
+	dst->tv_sec = u_ts.tv_sec;
+	dst->tv_nsec = u_ts.tv_nsec;
+
+	return 0;
+}
+
+static inline int cobalt_put_u_timespec(
+	struct __user_old_timespec __user *dst,
+	const struct timespec64 *src)
+{
+	struct __user_old_timespec u_ts;
+	int ret;
+
+	u_ts.tv_sec = src->tv_sec;
+	u_ts.tv_nsec = src->tv_nsec;
+
+	ret = cobalt_copy_to_user(dst, &u_ts, sizeof(*dst));
+	if (ret)
+		return ret;
+
+	return 0;
+}
+
+#endif
 
 /* 32bit syscall emulation */
 #define __COBALT_COMPAT_BIT	0x1

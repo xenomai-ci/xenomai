@@ -267,7 +267,7 @@ out:
 	return ret;
 }
 
-static inline int sem_fetch_timeout(struct timespec *ts,
+static inline int sem_fetch_timeout(struct timespec64 *ts,
 				    const void __user *u_ts)
 {
 	return u_ts == NULL ? -EFAULT :
@@ -276,10 +276,10 @@ static inline int sem_fetch_timeout(struct timespec *ts,
 
 int __cobalt_sem_timedwait(struct cobalt_sem_shadow __user *u_sem,
 			   const void __user *u_ts,
-			   int (*fetch_timeout)(struct timespec *ts,
+			   int (*fetch_timeout)(struct timespec64 *ts,
 						const void __user *u_ts))
 {
-	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
+	struct timespec64 ts = { .tv_sec = 0, .tv_nsec = 0 };
 	int pull_ts = 1, ret, info;
 	struct cobalt_sem *sem;
 	xnhandle_t handle;
@@ -434,7 +434,7 @@ COBALT_SYSCALL(sem_wait, primary,
 
 COBALT_SYSCALL(sem_timedwait, primary,
 	       (struct cobalt_sem_shadow __user *u_sem,
-		struct timespec __user *u_ts))
+		struct __user_old_timespec __user *u_ts))
 {
 	return __cobalt_sem_timedwait(u_sem, u_ts, sem_fetch_timeout);
 }

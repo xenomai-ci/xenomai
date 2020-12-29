@@ -22,23 +22,41 @@
 #include <asm/xenomai/syscall.h>
 #include <xenomai/posix/mqueue.h>
 
-int sys32_get_timespec(struct timespec *ts,
-		       const struct compat_timespec __user *cts)
+int sys32_get_timespec(struct timespec64 *ts,
+		       const struct compat_timespec __user *u_cts)
 {
-	return (cts == NULL ||
-		!access_rok(cts, sizeof(*cts)) ||
-		__xn_get_user(ts->tv_sec, &cts->tv_sec) ||
-		__xn_get_user(ts->tv_nsec, &cts->tv_nsec)) ? -EFAULT : 0;
+	struct compat_timespec cts;
+
+	if (u_cts == NULL || !access_rok(u_cts, sizeof(*u_cts)))
+		return -EFAULT;
+
+	if (__xn_get_user(cts.tv_sec, &u_cts->tv_sec) ||
+		__xn_get_user(cts.tv_nsec, &u_cts->tv_nsec))
+		return -EFAULT;
+
+	ts->tv_sec = cts.tv_sec;
+	ts->tv_nsec = cts.tv_nsec;
+
+	return 0;
 }
 EXPORT_SYMBOL_GPL(sys32_get_timespec);
 
-int sys32_put_timespec(struct compat_timespec __user *cts,
-		       const struct timespec *ts)
+int sys32_put_timespec(struct compat_timespec __user *u_cts,
+		       const struct timespec64 *ts)
 {
-	return (cts == NULL ||
-		!access_wok(cts, sizeof(*cts)) ||
-		__xn_put_user(ts->tv_sec, &cts->tv_sec) ||
-		__xn_put_user(ts->tv_nsec, &cts->tv_nsec)) ? -EFAULT : 0;
+	struct compat_timespec cts;
+
+	if (u_cts == NULL || !access_wok(u_cts, sizeof(*u_cts)))
+		return -EFAULT;
+
+	cts.tv_sec = ts->tv_sec;
+	cts.tv_nsec = ts->tv_nsec;
+
+	if (__xn_put_user(cts.tv_sec, &u_cts->tv_sec) ||
+	    __xn_put_user(cts.tv_nsec, &u_cts->tv_nsec))
+		return -EFAULT;
+
+	return 0;
 }
 EXPORT_SYMBOL_GPL(sys32_put_timespec);
 
@@ -478,7 +496,7 @@ int sys32_get_iovec(struct iovec *iov,
 	const struct compat_iovec __user *p;
 	struct compat_iovec ciov;
 	int ret, n;
-	
+
 	for (n = 0, p = u_ciov; n < ciovlen; n++, p++) {
 		ret = cobalt_copy_from_user(&ciov, p, sizeof(ciov));
 		if (ret)
@@ -498,7 +516,7 @@ int sys32_put_iovec(struct compat_iovec __user *u_ciov,
 	struct compat_iovec __user *p;
 	struct compat_iovec ciov;
 	int ret, n;
-	
+
 	for (n = 0, p = u_ciov; n < iovlen; n++, p++) {
 		ciov.iov_base = ptr_to_compat(iov[n].iov_base);
 		ciov.iov_len = iov[n].iov_len;

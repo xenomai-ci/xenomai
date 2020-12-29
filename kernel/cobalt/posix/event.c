@@ -104,7 +104,7 @@ COBALT_SYSCALL(event_init, current,
 int __cobalt_event_wait(struct cobalt_event_shadow __user *u_event,
 			unsigned int bits,
 			unsigned int __user *u_bits_r,
-			int mode, const struct timespec *ts)
+			int mode, const struct timespec64 *ts)
 {
 	unsigned int rbits = 0, testval;
 	xnticks_t timeout = XN_INFINITE;
@@ -193,14 +193,14 @@ COBALT_SYSCALL(event_wait, primary,
 	       (struct cobalt_event_shadow __user *u_event,
 		unsigned int bits,
 		unsigned int __user *u_bits_r,
-		int mode, const struct timespec __user *u_ts))
+		int mode, const struct __user_old_timespec __user *u_ts))
 {
-	struct timespec ts, *tsp = NULL;
+	struct timespec64 ts, *tsp = NULL;
 	int ret;
 
 	if (u_ts) {
 		tsp = &ts;
-		ret = cobalt_copy_from_user(&ts, u_ts, sizeof(ts));
+		ret = cobalt_get_u_timespec(&ts, u_ts);
 		if (ret)
 			return ret;
 	}

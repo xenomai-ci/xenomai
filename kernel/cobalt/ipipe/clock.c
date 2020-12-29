@@ -67,7 +67,7 @@ EXPORT_SYMBOL_GPL(xnclock_core_ticks_to_ns);
 EXPORT_SYMBOL_GPL(xnclock_core_ticks_to_ns_rounded);
 EXPORT_SYMBOL_GPL(xnclock_core_ns_to_ticks);
 
-int pipeline_get_host_time(struct timespec *tp)
+int pipeline_get_host_time(struct timespec64 *tp)
 {
 #ifdef CONFIG_IPIPE_HAVE_HOSTRT
 	struct xnvdso_hostrt_data *hostrt_data;

@@ -37,12 +37,12 @@ struct cobalt_mutex {
 
 int __cobalt_mutex_timedlock_break(struct cobalt_mutex_shadow __user *u_mx,
 				   const void __user *u_ts,
-				   int (*fetch_timeout)(struct timespec *ts,
+				   int (*fetch_timeout)(struct timespec64 *ts,
 							const void __user *u_ts));
 
 int __cobalt_mutex_acquire_unchecked(struct xnthread *cur,
 				     struct cobalt_mutex *mutex,
-				     const struct timespec *ts);
+				     const struct timespec64 *ts);
 
 COBALT_SYSCALL_DECL(mutex_check_init,
 		    (struct cobalt_mutex_shadow __user *u_mx));
@@ -62,7 +62,7 @@ COBALT_SYSCALL_DECL(mutex_lock,
 
 COBALT_SYSCALL_DECL(mutex_timedlock,
 		    (struct cobalt_mutex_shadow __user *u_mx,
-		     const struct timespec __user *u_ts));
+		     const struct __user_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(mutex_unlock,
 		    (struct cobalt_mutex_shadow __user *u_mx));

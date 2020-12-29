@@ -57,4 +57,14 @@ static inline xnhandle_t xnhandle_get_id(xnhandle_t handle)
 	return handle & ~XN_HANDLE_TRANSIENT_MASK;
 }
 
+/*
+ * Our representation of time at the kernel<->user interface boundary
+ * at the moment, until we have fully transitioned to a y2038-safe
+ * implementation in libcobalt.
+ */
+struct __user_old_timespec {
+	long  tv_sec;
+	long  tv_nsec;
+};
+
 #endif /* !_COBALT_UAPI_KERNEL_TYPES_H */

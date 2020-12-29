@@ -18,6 +18,8 @@
 #ifndef _COBALT_UAPI_SCHED_H
 #define _COBALT_UAPI_SCHED_H
 
+#include <cobalt/uapi/kernel/types.h>
+
 #define SCHED_COBALT		42
 #define SCHED_WEAK		43
 
@@ -31,15 +33,15 @@
 
 struct __sched_ss_param {
 	int __sched_low_priority;
-	struct timespec __sched_repl_period;
-	struct timespec __sched_init_budget;
+	struct __user_old_timespec __sched_repl_period;
+	struct __user_old_timespec __sched_init_budget;
 	int __sched_max_repl;
 };
 
 #define sched_rr_quantum	sched_u.rr.__sched_rr_quantum
 
 struct __sched_rr_param {
-	struct timespec __sched_rr_quantum;
+	struct __user_old_timespec __sched_rr_quantum;
 };
 
 #ifndef SCHED_TP
@@ -52,8 +54,8 @@ struct __sched_tp_param {
 };
 
 struct sched_tp_window {
-	struct timespec offset;
-	struct timespec duration;
+	struct __user_old_timespec offset;
+	struct __user_old_timespec duration;
 	int ptid;
 };
 

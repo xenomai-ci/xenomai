@@ -65,7 +65,7 @@ __cobalt_sem_open(struct cobalt_sem_shadow __user *usm,
 
 int __cobalt_sem_timedwait(struct cobalt_sem_shadow __user *u_sem,
 			   const void __user *u_ts,
-			   int (*fetch_timeout)(struct timespec *ts,
+			   int (*fetch_timeout)(struct timespec64 *ts,
 						const void __user *u_ts));
 
 int __cobalt_sem_destroy(xnhandle_t handle);
@@ -91,7 +91,7 @@ COBALT_SYSCALL_DECL(sem_wait,
 
 COBALT_SYSCALL_DECL(sem_timedwait,
 		    (struct cobalt_sem_shadow __user *u_sem,
-		     struct timespec __user *u_ts));
+		     struct __user_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(sem_trywait,
 		    (struct cobalt_sem_shadow __user *u_sem));

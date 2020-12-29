@@ -86,11 +86,11 @@ struct compat_rtdm_mmap_request {
 	int flags;
 };
 
-int sys32_get_timespec(struct timespec *ts,
+int sys32_get_timespec(struct timespec64 *ts,
 		       const struct compat_timespec __user *cts);
 
 int sys32_put_timespec(struct compat_timespec __user *cts,
-		       const struct timespec *ts);
+		       const struct timespec64 *ts);
 
 int sys32_get_itimerspec(struct itimerspec *its,
 			 const struct compat_itimerspec __user *cits);
