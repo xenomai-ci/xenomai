@@ -166,7 +166,7 @@ int __cobalt_clock_settime(clockid_t clock_id, const struct timespec64 *ts)
 	return 0;
 }
 
-int __cobalt_clock_adjtime(clockid_t clock_id, struct timex *tx)
+int __cobalt_clock_adjtime(clockid_t clock_id, struct __kernel_timex *tx)
 {
 	int _ret, ret = 0;
 
@@ -199,9 +199,9 @@ COBALT_SYSCALL(clock_settime, current,
 }
 
 COBALT_SYSCALL(clock_adjtime, current,
-	       (clockid_t clock_id, struct timex __user *u_tx))
+	       (clockid_t clock_id, struct __user_old_timex __user *u_tx))
 {
-	struct timex tx;
+	struct __kernel_timex tx;
 	int ret;
 
 	if (cobalt_copy_from_user(&tx, u_tx, sizeof(tx)))

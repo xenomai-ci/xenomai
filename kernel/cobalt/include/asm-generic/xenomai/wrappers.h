@@ -152,6 +152,10 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #error "Xenomai/cobalt requires Linux kernel 3.10 or above"
 #endif /* < 3.10 */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,0,0)
+#define __kernel_timex		timex
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,1,0)
 #define old_timex32		compat_timex
 #define SO_RCVTIMEO_OLD		SO_RCVTIMEO

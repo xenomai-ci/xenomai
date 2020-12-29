@@ -98,10 +98,20 @@ int sys32_put_timeval(struct compat_timeval __user *ctv,
 }
 EXPORT_SYMBOL_GPL(sys32_put_timeval);
 
-int sys32_get_timex(struct timex *tx,
+int sys32_get_timex(struct __kernel_timex *tx,
 		    const struct old_timex32 __user *ctx)
 {
+	struct __kernel_old_timeval time;
+	int ret;
+
 	memset(tx, 0, sizeof(*tx));
+
+	ret = sys32_get_timeval(&time, &ctx->time);
+	if (ret)
+		return ret;
+
+	tx->time.tv_sec = time.tv_sec;
+	tx->time.tv_usec = time.tv_usec;
 
 	if (!access_rok(ctx, sizeof(*ctx)) ||
 	    __xn_get_user(tx->modes, &ctx->modes) ||
@@ -113,8 +123,6 @@ int sys32_get_timex(struct timex *tx,
 	    __xn_get_user(tx->constant, &ctx->constant) ||
 	    __xn_get_user(tx->precision, &ctx->precision) ||
 	    __xn_get_user(tx->tolerance, &ctx->tolerance) ||
-	    __xn_get_user(tx->time.tv_sec, &ctx->time.tv_sec) ||
-	    __xn_get_user(tx->time.tv_usec, &ctx->time.tv_usec) ||
 	    __xn_get_user(tx->tick, &ctx->tick) ||
 	    __xn_get_user(tx->ppsfreq, &ctx->ppsfreq) ||
 	    __xn_get_user(tx->jitter, &ctx->jitter) ||
@@ -131,8 +139,18 @@ int sys32_get_timex(struct timex *tx,
 EXPORT_SYMBOL_GPL(sys32_get_timex);
 
 int sys32_put_timex(struct old_timex32 __user *ctx,
-		    const struct timex *tx)
+		    const struct __kernel_timex *tx)
 {
+	struct __kernel_old_timeval time;
+	int ret;
+
+	time.tv_sec = tx->time.tv_sec;
+	time.tv_usec = tx->time.tv_usec;
+
+	ret = sys32_put_timeval(&ctx->time, &time);
+	if (ret)
+		return ret;
+
 	if (!access_wok(ctx, sizeof(*ctx)) ||
 	    __xn_put_user(tx->modes, &ctx->modes) ||
 	    __xn_put_user(tx->offset, &ctx->offset) ||
@@ -143,8 +161,6 @@ int sys32_put_timex(struct old_timex32 __user *ctx,
 	    __xn_put_user(tx->constant, &ctx->constant) ||
 	    __xn_put_user(tx->precision, &ctx->precision) ||
 	    __xn_put_user(tx->tolerance, &ctx->tolerance) ||
-	    __xn_put_user(tx->time.tv_sec, &ctx->time.tv_sec) ||
-	    __xn_put_user(tx->time.tv_usec, &ctx->time.tv_usec) ||
 	    __xn_put_user(tx->tick, &ctx->tick) ||
 	    __xn_put_user(tx->ppsfreq, &ctx->ppsfreq) ||
 	    __xn_put_user(tx->jitter, &ctx->jitter) ||

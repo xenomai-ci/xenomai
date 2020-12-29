@@ -764,12 +764,12 @@ DEFINE_EVENT(cobalt_clock_timespec, cobalt_clock_settime,
 );
 
 TRACE_EVENT(cobalt_clock_adjtime,
-	TP_PROTO(clockid_t clk_id, struct timex *tx),
+	TP_PROTO(clockid_t clk_id, struct __kernel_timex *tx),
 	TP_ARGS(clk_id, tx),
 
 	TP_STRUCT__entry(
 		__field(clockid_t, clk_id)
-		__field(struct timex *, tx)
+		__field(struct __kernel_timex *, tx)
 	),
 
 	TP_fast_assign(

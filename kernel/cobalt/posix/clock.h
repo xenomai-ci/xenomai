@@ -104,7 +104,7 @@ int __cobalt_clock_settime(clockid_t clock_id,
 			   const struct timespec64 *ts);
 
 int __cobalt_clock_adjtime(clockid_t clock_id,
-			   struct timex *tx);
+			   struct __kernel_timex *tx);
 
 int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 			     const struct timespec64 *rqt,
@@ -120,7 +120,7 @@ COBALT_SYSCALL_DECL(clock_settime,
 		    (clockid_t clock_id, const struct __user_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(clock_adjtime,
-		    (clockid_t clock_id, struct timex __user *u_tx));
+		    (clockid_t clock_id, struct __user_old_timex __user *u_tx));
 
 COBALT_SYSCALL_DECL(clock_nanosleep,
 		    (clockid_t clock_id, int flags,
