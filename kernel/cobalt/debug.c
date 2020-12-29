@@ -239,7 +239,7 @@ void xndebug_trace_relax(int nr, unsigned long *backtrace,
 
 	memset(&spot, 0, sizeof(spot));
 	mm = get_task_mm(current);
-	down_read(&mm->mmap_sem);
+	mmap_read_lock(mm);
 
 	for (n = 0, depth = 0; n < nr; n++) {
 		pc = backtrace[n];
@@ -278,7 +278,7 @@ void xndebug_trace_relax(int nr, unsigned long *backtrace,
 		depth++;
 	}
 
-	up_read(&mm->mmap_sem);
+	mmap_read_unlock(mm);
 	mmput(mm);
 	free_page((unsigned long)tmp);
 
