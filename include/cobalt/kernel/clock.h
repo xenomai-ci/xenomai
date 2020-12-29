@@ -24,6 +24,7 @@
 #include <cobalt/kernel/list.h>
 #include <cobalt/kernel/vfile.h>
 #include <cobalt/uapi/kernel/types.h>
+#include <asm/xenomai/wrappers.h>
 
 /**
  * @addtogroup cobalt_core_clock
@@ -32,7 +33,7 @@
 
 struct xnsched;
 struct xntimerdata;
-struct timex;
+struct __kernel_timex;
 
 struct xnclock_gravity {
 	unsigned long irq;
@@ -67,7 +68,7 @@ struct xnclock {
 					    struct xnsched *sched);
 #endif
 		int (*adjust_time)(struct xnclock *clock,
-				   struct timex *tx);
+				   struct __kernel_timex *tx);
 		int (*set_gravity)(struct xnclock *clock,
 				   const struct xnclock_gravity *p);
 		void (*reset_gravity)(struct xnclock *clock);
@@ -275,7 +276,7 @@ static inline int xnclock_set_time(struct xnclock *clock,
 #endif /* !CONFIG_XENO_OPT_EXTCLOCK */
 
 static inline int xnclock_adjust_time(struct xnclock *clock,
-				      struct timex *tx)
+				      struct __kernel_timex *tx)
 {
 	if (clock->ops.adjust_time == NULL)
 		return -EOPNOTSUPP;
