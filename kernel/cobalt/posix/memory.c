@@ -320,10 +320,11 @@ int cobalt_umm_init(struct cobalt_umm *umm, u32 size,
 
 	secondary_mode_only();
 
+	/* We don't support CPUs with VIVT caches and the like. */
+	BUG_ON(xnarch_cache_aliasing());
+
 	size = PAGE_ALIGN(size);
-	basemem = __vmalloc(size, GFP_KERNEL|__GFP_ZERO,
-			    xnarch_cache_aliasing() ?
-			    pgprot_noncached(PAGE_KERNEL) : PAGE_KERNEL);
+	basemem = vmalloc_kernel(size, __GFP_ZERO);
 	if (basemem == NULL)
 		return -ENOMEM;
 
