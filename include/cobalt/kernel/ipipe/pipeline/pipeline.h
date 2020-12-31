@@ -10,6 +10,7 @@
 #endif
 
 #include <pipeline/machine.h>
+#include <asm/xenomai/features.h>
 
 #define xnsched_realtime_domain  cobalt_pipeline.domain
 
@@ -73,6 +74,11 @@ static inline void pipeline_free_resched_ipi(void)
 static inline void pipeline_prepare_panic(void)
 {
 	ipipe_prepare_panic();
+}
+
+static inline void pipeline_collect_features(struct cobalt_featinfo *f)
+{
+	f->clock_freq = cobalt_pipeline.clock_freq;
 }
 
 #endif /* !_COBALT_KERNEL_IPIPE_PIPELINE_H */
