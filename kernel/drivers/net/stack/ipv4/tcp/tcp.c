@@ -34,6 +34,7 @@
 #include <rtskb.h>
 #include <rtdev.h>
 #include <rtnet_port.h>
+#include <rtnet_checksum.h>
 #include <ipv4/tcp.h>
 #include <ipv4/ip_sock.h>
 #include <ipv4/ip_output.h>
@@ -637,10 +638,10 @@ static void rt_tcp_build_header(struct tcp_socket *ts, struct rtskb *skb,
 	th->urg_ptr = 0;
 
 	/* compute checksum */
-	wcheck = csum_partial(th, tcphdrlen, 0);
+	wcheck = rtnet_csum(th, tcphdrlen, 0);
 
 	if (skb->len - tcphdrlen - iphdrlen) {
-		wcheck = csum_partial(skb->data + tcphdrlen + iphdrlen,
+		wcheck = rtnet_csum(skb->data + tcphdrlen + iphdrlen,
 				      skb->len - tcphdrlen - iphdrlen, wcheck);
 	}
 
@@ -831,7 +832,7 @@ static struct rtsocket *rt_tcp_dest_socket(struct rtskb *skb)
 	u32 data_len;
 
 	if (tcp_v4_check(skb->len, saddr, daddr,
-			 csum_partial(skb->data, skb->len, 0))) {
+			 rtnet_csum(skb->data, skb->len, 0))) {
 		rtdm_printk("rttcp: invalid TCP packet checksum, dropped\n");
 		return NULL; /* Invalid checksum, drop the packet */
 	}

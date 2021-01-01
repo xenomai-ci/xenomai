@@ -23,7 +23,7 @@
 
 #include <linux/moduleparam.h>
 #include <linux/slab.h>
-#include <net/checksum.h>
+#include <rtnet_checksum.h>
 
 #include <rtdev.h>
 #include <rtnet_internal.h>
@@ -69,8 +69,7 @@ unsigned int rtskb_copy_and_csum_bits(const struct rtskb *skb, int offset,
 	if ((copy = skb->len - offset) > 0) {
 		if (copy > len)
 			copy = len;
-		csum = csum_partial_copy_nocheck(skb->data + offset, to, copy,
-						 csum);
+		csum = rtnet_csum_copy(skb->data + offset, to, copy, csum);
 		if ((len -= copy) == 0)
 			return csum;
 		offset += copy;

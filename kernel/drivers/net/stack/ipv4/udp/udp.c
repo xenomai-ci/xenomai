@@ -29,11 +29,11 @@
 #include <linux/err.h>
 #include <linux/udp.h>
 #include <linux/tcp.h>
-#include <net/checksum.h>
 #include <linux/list.h>
 
 #include <rtskb.h>
 #include <rtnet_internal.h>
+#include <rtnet_checksum.h>
 #include <rtnet_port.h>
 #include <rtnet_iovec.h>
 #include <rtnet_socket.h>
@@ -548,12 +548,12 @@ static int rt_udp_getfrag(const void *p, unsigned char *to, unsigned int offset,
 
 	/* Checksum of the complete data part of the UDP message: */
 	ufh->wcheck =
-		csum_partial(to + sizeof(struct udphdr),
-			     fraglen - sizeof(struct udphdr), ufh->wcheck);
+		rtnet_csum(to + sizeof(struct udphdr),
+			   fraglen - sizeof(struct udphdr), ufh->wcheck);
 
 	/* Checksum of the udp header: */
-	ufh->wcheck = csum_partial((unsigned char *)ufh, sizeof(struct udphdr),
-				   ufh->wcheck);
+	ufh->wcheck = rtnet_csum((unsigned char *)ufh, sizeof(struct udphdr),
+				 ufh->wcheck);
 
 	ufh->uh.check =
 		csum_tcpudp_magic(ufh->saddr, ufh->daddr, ntohs(ufh->uh.len),
