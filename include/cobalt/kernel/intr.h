@@ -21,6 +21,7 @@
 
 #include <linux/spinlock.h>
 #include <cobalt/kernel/stat.h>
+#include <pipeline/irq.h>
 
 /**
  * @addtogroup cobalt_core_irq
@@ -99,15 +100,9 @@ struct xnintr_iterator {
     struct xnintr *prev;	/** Previously visited xnintr object (internal use). */
 };
 
-int xnintr_mount(void);
-
 void xnintr_core_clock_handler(void);
 
 void xnintr_host_tick(struct xnsched *sched);
-
-void xnintr_init_proc(void);
-
-void xnintr_cleanup_proc(void);
 
     /* Public interface. */
 
