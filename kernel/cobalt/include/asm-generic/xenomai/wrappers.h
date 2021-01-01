@@ -203,4 +203,15 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,9,0)
+#define net_csum_copy(__src, __dst, __len, __csum)	\
+	csum_partial_copy_nocheck(__src, __dst, __len, __csum)
+#else
+#define net_csum_copy(__src, __dst, __len, __csum)			\
+	({								\
+		memcpy(__dst, __src, __len);				\
+		csum_partial(__dst, __len, (__force __wsum)__csum);	\
+	})
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */

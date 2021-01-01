@@ -142,9 +142,9 @@ static int rt_icmp_glue_reply_bits(const void *p, unsigned char *to,
 	if (offset != 0)
 		return -EMSGSIZE;
 
-	csum = csum_partial_copy_nocheck((void *)&icmp_param->head, to,
-					 icmp_param->head_len,
-					 icmp_param->csum);
+	csum = net_csum_copy((void *)&icmp_param->head, to,
+			     icmp_param->head_len,
+			     icmp_param->csum);
 
 	csum = rtskb_copy_and_csum_bits(icmp_param->data.skb,
 					icmp_param->offset,
@@ -259,13 +259,13 @@ static int rt_icmp_glue_request_bits(const void *p, unsigned char *to,
 			    __FUNCTION__);
 		return -1;);
 
-	csum = csum_partial_copy_nocheck((void *)&icmp_param->head, to,
-					 icmp_param->head_len,
-					 icmp_param->csum);
+	csum = net_csum_copy((void *)&icmp_param->head, to,
+			     icmp_param->head_len,
+			     icmp_param->csum);
 
-	csum = csum_partial_copy_nocheck(icmp_param->data.buf,
-					 to + icmp_param->head_len,
-					 fraglen - icmp_param->head_len, csum);
+	csum = net_csum_copy(icmp_param->data.buf,
+			     to + icmp_param->head_len,
+			     fraglen - icmp_param->head_len, csum);
 
 	icmph = (struct icmphdr *)to;
 
