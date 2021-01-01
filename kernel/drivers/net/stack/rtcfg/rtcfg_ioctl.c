@@ -22,6 +22,7 @@
  *
  */
 
+#include <linux/fs.h>
 #include <linux/file.h>
 #include <linux/vmalloc.h>
 
@@ -196,6 +197,40 @@ void cleanup_cmd_detach(void *priv_data)
 		kfree_rtskb(cmd->args.detach.stage2_chain);
 }
 
+static int load_cfg_file(struct rtcfg_file *cfgfile, struct rtcfg_cmd *cmd)
+{
+	size_t file_size = 0;
+	struct file *filp;
+	loff_t i_size;
+	int ret;
+
+	filp = filp_open(cfgfile->name, O_RDONLY, 0);
+	if (IS_ERR(filp))
+		return PTR_ERR(filp);
+
+	i_size = i_size_read(file_inode(filp));
+	if (i_size <= 0) {
+		/* allocate buffer even for empty files */
+		cfgfile->buffer = vmalloc(1);
+	} else {
+		cfgfile->buffer = NULL; /* Leave allocation to the kernel. */
+		ret = read_file_from_kernel(filp, &cfgfile->buffer,
+					i_size_read(file_inode(filp)),
+					&file_size, READING_UNKNOWN);
+		if (ret < 0) {
+			fput(filp);
+			return ret;
+		}
+	}
+
+	fput(filp);
+	cfgfile->size = file_size;
+
+	/* dispatch again, this time with new file attached */
+	return rtpc_dispatch_call(rtcfg_event_handler, 0, cmd,
+				sizeof(*cmd), NULL, cleanup_cmd_add);
+}
+
 int rtcfg_ioctl_add(struct rtnet_device *rtdev, struct rtcfg_cmd *cmd)
 {
 	struct rtcfg_connection *conn_buf;
@@ -264,46 +299,11 @@ int rtcfg_ioctl_add(struct rtnet_device *rtdev, struct rtcfg_cmd *cmd)
 
 	/* load file if missing */
 	if (ret > 0) {
-		struct file *filp;
-		mm_segment_t oldfs;
-
-		filp = filp_open(file->name, O_RDONLY, 0);
-		if (IS_ERR(filp)) {
+		ret = load_cfg_file(file, cmd);
+		if (ret) {
 			rtcfg_unlockwr_proc(cmd->internal.data.ifindex);
-			ret = PTR_ERR(filp);
 			goto err;
 		}
-
-		file->size = filp->f_path.dentry->d_inode->i_size;
-
-		/* allocate buffer even for empty files */
-		file->buffer = vmalloc((file->size) ? file->size : 1);
-		if (file->buffer == NULL) {
-			rtcfg_unlockwr_proc(cmd->internal.data.ifindex);
-			fput(filp);
-			ret = -ENOMEM;
-			goto err;
-		}
-
-		oldfs = get_fs();
-		set_fs(KERNEL_DS);
-		filp->f_pos = 0;
-
-		ret = filp->f_op->read(filp, file->buffer, file->size,
-				       &filp->f_pos);
-
-		set_fs(oldfs);
-		fput(filp);
-
-		if (ret != (int)file->size) {
-			rtcfg_unlockwr_proc(cmd->internal.data.ifindex);
-			ret = -EIO;
-			goto err;
-		}
-
-		/* dispatch again, this time with new file attached */
-		ret = rtpc_dispatch_call(rtcfg_event_handler, 0, cmd,
-					 sizeof(*cmd), NULL, cleanup_cmd_add);
 	}
 
 	return ret;

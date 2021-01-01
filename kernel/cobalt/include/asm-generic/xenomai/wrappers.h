@@ -216,4 +216,19 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,9,0)
+#define read_file_from_kernel(__file, __buf, __buf_size, __file_size, __id) \
+	({								\
+		loff_t ___file_size;					\
+		int __ret;						\
+		__ret = kernel_read_file(__file, __buf, &___file_size,	\
+				__buf_size, __id);			\
+		(*__file_size) = ___file_size;				\
+		__ret;							\
+	})
+#else
+#define read_file_from_kernel(__file, __buf, __buf_size, __file_size, __id) \
+	kernel_read_file(__file, 0, __buf, __buf_size, __file_size, __id)
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
