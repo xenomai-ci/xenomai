@@ -313,8 +313,17 @@ static int rt_icmp_send_request(u32 daddr, struct icmp_bxm *icmp_param)
 int rt_icmp_send_echo(u32 daddr, u16 id, u16 sequence, size_t msg_size)
 {
 	struct icmp_bxm icmp_param;
-	unsigned char pattern_buf[msg_size];
+	unsigned char *pattern_buf;
 	off_t pos;
+	int ret;
+
+	/*
+	 * This is ping, exec time is not that critical, so
+	 * rtdm_malloc() is ok for the purpose of echoing.
+	 */
+	pattern_buf = rtdm_malloc(msg_size);
+	if (pattern_buf == NULL)
+		return -ENOMEM;
 
 	/* first purge any potentially pending ICMP fragments */
 	rt_ip_frag_invalidate_socket(icmp_socket);
@@ -343,7 +352,10 @@ int rt_icmp_send_echo(u32 daddr, u16 id, u16 sequence, size_t msg_size)
 	}
 	icmp_param.data.buf = pattern_buf;
 
-	return rt_icmp_send_request(daddr, &icmp_param);
+	ret = rt_icmp_send_request(daddr, &icmp_param);
+	rtdm_free(pattern_buf);
+
+	return ret;
 }
 
 /***
