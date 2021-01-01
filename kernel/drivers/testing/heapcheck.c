@@ -59,19 +59,19 @@ static inline void breathe(int loops)
 		rtdm_task_sleep(300000ULL);
 }
 
-static inline void do_swap(void *left, void *right, const size_t size)
+static inline void do_swap(void *left, void *right)
 {
-	char trans[size];
+	char trans[sizeof(struct chunk)];
 
-	memcpy(trans, left, size);
-	memcpy(left, right, size);
-	memcpy(right, trans, size);
+	memcpy(trans, left, sizeof(struct chunk));
+	memcpy(left, right, sizeof(struct chunk));
+	memcpy(right, trans, sizeof(struct chunk));
 }
 
-static void random_shuffle(void *vbase, size_t nmemb, const size_t size)
+static void random_shuffle(void *vbase, size_t nmemb)
 {
 	struct {
-		char x[size];
+		char x[sizeof(struct chunk)];
 	} __attribute__((packed)) *base = vbase;
 	unsigned int j, k;
 
@@ -79,7 +79,7 @@ static void random_shuffle(void *vbase, size_t nmemb, const size_t size)
 		k = (unsigned int)(prandom_u32() % nmemb) + 1;
 		if (j == k)
 			continue;
-		do_swap(&base[j - 1], &base[k - 1], size);
+		do_swap(&base[j - 1], &base[k - 1]);
 	}
 }
 
@@ -259,7 +259,7 @@ static int test_seq(size_t heap_size, size_t block_size, int flags)
 	}
 	
 	if (flags & RTTST_HEAPCHECK_SHUFFLE)
-		random_shuffle(chunks, nrblocks, sizeof(*chunks));
+		random_shuffle(chunks, nrblocks);
 
 	/*
 	 * Release all blocks.
