@@ -2452,9 +2452,9 @@ static inline void wakeup_parent(struct completion *done)
 
 static inline void init_kthread_info(struct xnthread *thread)
 {
-	struct ipipe_threadinfo *p;
+	struct cobalt_threadinfo *p;
 
-	p = ipipe_current_threadinfo();
+	p = pipeline_current();
 	p->thread = thread;
 	p->process = NULL;
 }

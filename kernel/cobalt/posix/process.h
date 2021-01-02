@@ -20,6 +20,7 @@
 
 #include <linux/list.h>
 #include <linux/bitmap.h>
+#include <pipeline/thread.h>
 #include <cobalt/kernel/ppd.h>
 
 #define KEVENT_PROPAGATE   0
@@ -94,13 +95,13 @@ extern struct cobalt_resources cobalt_global_resources;
 
 static inline struct cobalt_process *cobalt_current_process(void)
 {
-	return ipipe_current_threadinfo()->process;
+	return pipeline_current()->process;
 }
 
 static inline struct cobalt_process *
 cobalt_set_process(struct cobalt_process *process)
 {
-	struct ipipe_threadinfo *p = ipipe_current_threadinfo();
+	struct cobalt_threadinfo *p = pipeline_current();
 	struct cobalt_process *old;
 
 	old = p->process;

@@ -462,7 +462,7 @@ EXPORT_SYMBOL_GPL(cobalt_unregister_personality);
 struct xnthread_personality *
 cobalt_push_personality(int xid)
 {
-	struct ipipe_threadinfo *p = ipipe_current_threadinfo();
+	struct cobalt_threadinfo *p = pipeline_current();
 	struct xnthread_personality *prev, *next;
 	struct xnthread *thread = p->thread;
 
@@ -503,7 +503,7 @@ EXPORT_SYMBOL_GPL(cobalt_push_personality);
  */
 void cobalt_pop_personality(struct xnthread_personality *prev)
 {
-	struct ipipe_threadinfo *p = ipipe_current_threadinfo();
+	struct cobalt_threadinfo *p = pipeline_current();
 	struct xnthread *thread = p->thread;
 
 	secondary_mode_only();

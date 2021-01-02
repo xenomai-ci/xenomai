@@ -832,16 +832,16 @@ static inline int get_mayday_prot(void)
 
 void pipeline_attach_current(struct xnthread *thread)
 {
-	struct ipipe_threadinfo *p;
+	struct cobalt_threadinfo *p;
 
-	p = ipipe_current_threadinfo();
+	p = pipeline_current();
 	p->thread = thread;
 	p->process = cobalt_search_process(current->mm);
 }
 
 static void detach_current(void)
 {
-	struct ipipe_threadinfo *p = ipipe_current_threadinfo();
+	struct cobalt_threadinfo *p = pipeline_current();
 	p->thread = NULL;
 	p->process = NULL;
 }

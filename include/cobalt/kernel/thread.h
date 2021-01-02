@@ -22,6 +22,7 @@
 #include <linux/wait.h>
 #include <linux/sched.h>
 #include <linux/sched/rt.h>
+#include <pipeline/thread.h>
 #include <cobalt/kernel/list.h>
 #include <cobalt/kernel/stat.h>
 #include <cobalt/kernel/timer.h>
@@ -372,7 +373,7 @@ void __xnthread_discard(struct xnthread *thread);
  */
 static inline struct xnthread *xnthread_current(void)
 {
-	return ipipe_current_threadinfo()->thread;
+	return pipeline_current()->thread;
 }
 
 /**
@@ -388,7 +389,7 @@ static inline struct xnthread *xnthread_current(void)
  */
 static inline struct xnthread *xnthread_from_task(struct task_struct *p)
 {
-	return ipipe_task_threadinfo(p)->thread;
+	return pipeline_thread_from_task(p);
 }
 
 /**
