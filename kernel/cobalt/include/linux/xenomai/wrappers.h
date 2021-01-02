@@ -21,12 +21,14 @@
 
 #include <linux/version.h>
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 20, 0)
+#include <linux/signal.h>
+typedef siginfo_t kernel_siginfo_t;
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
 #include <linux/sched.h>
 #include <linux/sched/rt.h>
-
-#define cobalt_set_task_state(tsk, state_value)	\
-	set_task_state(tsk, state_value)
 #else
 #include <linux/sched.h>
 #include <linux/sched/signal.h>
@@ -35,22 +37,8 @@
 #include <linux/sched/debug.h>
 #include <linux/sched/task_stack.h>
 #include <uapi/linux/sched/types.h>
-/*
- * The co-kernel can still do this sanely for a thread which is
- * currently active on the head stage.
- */
-#define cobalt_set_task_state(tsk, state_value)	\
-		smp_store_mb((tsk)->state, (state_value))
 #endif
 
-#include <linux/ipipe.h>
-
-#ifndef ipipe_root_nr_syscalls
-#define ipipe_root_nr_syscalls(ti)	NR_syscalls
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 20, 0)
-typedef siginfo_t kernel_siginfo_t;
-#endif
+#include <pipeline/wrappers.h>
 
 #endif /* !_COBALT_LINUX_WRAPPERS_H */
