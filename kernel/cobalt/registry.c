@@ -852,7 +852,7 @@ int xnregistry_remove(xnhandle_t handle)
 			 */
 			if (object->pnode) {
 				xnlock_put_irqrestore(&nklock, s);
-				if (ipipe_root_p)
+				if (is_secondary_domain())
 					flush_work(&registry_proc_work);
 				return 0;
 			}

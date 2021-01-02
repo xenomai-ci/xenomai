@@ -912,7 +912,8 @@ int ___xnsched_run(struct xnsched *sched)
 	int switched, shadow;
 	spl_t s;
 
-	XENO_WARN_ON_ONCE(COBALT, !hard_irqs_disabled() && ipipe_root_p);
+	XENO_WARN_ON_ONCE(COBALT,
+			  !hard_irqs_disabled() && is_secondary_domain());
 
 	if (xnarch_escalate())
 		return 0;
@@ -983,7 +984,7 @@ int ___xnsched_run(struct xnsched *sched)
 	 * In such a case, we are running over the regular schedule()
 	 * tail code, so we have to skip our tail code.
 	 */
-	if (shadow && ipipe_root_p)
+	if (shadow && is_secondary_domain())
 		goto shadow_epilogue;
 
 	switched = 1;

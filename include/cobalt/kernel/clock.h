@@ -19,7 +19,7 @@
 #ifndef _COBALT_KERNEL_CLOCK_H
 #define _COBALT_KERNEL_CLOCK_H
 
-#include <linux/ipipe.h>
+#include <pipeline/pipeline.h>
 #include <cobalt/kernel/list.h>
 #include <cobalt/kernel/vfile.h>
 #include <cobalt/uapi/kernel/types.h>

@@ -2107,7 +2107,7 @@ void xnthread_relax(int notify, int reason)
 	 * Basic sanity check after an expected transition to secondary
 	 * mode.
 	 */
-	XENO_WARN(COBALT, !ipipe_root_p,
+	XENO_WARN(COBALT, is_primary_domain(),
 		  "xnthread_relax() failed for thread %s[%d]",
 		  thread->name, xnthread_host_pid(thread));
 

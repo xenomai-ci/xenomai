@@ -1316,7 +1316,7 @@ static inline int rtdm_rt_capable(struct rtdm_fd *fd)
 
 static inline int rtdm_in_rt_context(void)
 {
-	return (ipipe_current_domain != ipipe_root_domain);
+	return is_primary_domain();
 }
 
 #define RTDM_IOV_FASTMAX  16

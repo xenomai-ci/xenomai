@@ -306,7 +306,7 @@ static void __put_fd(struct rtdm_fd *fd, spl_t s)
 	if (!destroy)
 		return;
 
-	if (ipipe_root_p)
+	if (is_secondary_domain())
 		fd->ops->close(fd);
 	else {
 		struct lostage_trigger_close closework = {
@@ -470,7 +470,7 @@ static struct rtdm_fd *get_fd_fixup_mode(int ufd)
 	 * the syscall from secondary mode.
 	 */
 	thread = xnthread_current();
-	if (unlikely(ipipe_root_p)) {
+	if (unlikely(is_secondary_domain())) {
 		if (thread == NULL ||
 		    xnthread_test_localinfo(thread, XNDESCENT))
 			return fd;
@@ -508,7 +508,7 @@ int rtdm_fd_ioctl(int ufd, unsigned int request, ...)
 
 	trace_cobalt_fd_ioctl(current, fd, ufd, request);
 
-	if (ipipe_root_p)
+	if (is_secondary_domain())
 		err = fd->ops->ioctl_nrt(fd, request, arg);
 	else
 		err = fd->ops->ioctl_rt(fd, request, arg);
@@ -547,7 +547,7 @@ rtdm_fd_read(int ufd, void __user *buf, size_t size)
 
 	trace_cobalt_fd_read(current, fd, ufd, size);
 
-	if (ipipe_root_p)
+	if (is_secondary_domain())
 		ret = fd->ops->read_nrt(fd, buf, size);
 	else
 		ret = fd->ops->read_rt(fd, buf, size);
@@ -580,7 +580,7 @@ ssize_t rtdm_fd_write(int ufd, const void __user *buf, size_t size)
 
 	trace_cobalt_fd_write(current, fd, ufd, size);
 
-	if (ipipe_root_p)
+	if (is_secondary_domain())
 		ret = fd->ops->write_nrt(fd, buf, size);
 	else
 		ret = fd->ops->write_rt(fd, buf, size);
@@ -616,7 +616,7 @@ ssize_t rtdm_fd_recvmsg(int ufd, struct user_msghdr *msg, int flags)
 	if (fd->oflags & O_NONBLOCK)
 		flags |= MSG_DONTWAIT;
 
-	if (ipipe_root_p)
+	if (is_secondary_domain())
 		ret = fd->ops->recvmsg_nrt(fd, msg, flags);
 	else
 		ret = fd->ops->recvmsg_rt(fd, msg, flags);
@@ -761,7 +761,7 @@ ssize_t rtdm_fd_sendmsg(int ufd, const struct user_msghdr *msg, int flags)
 	if (fd->oflags & O_NONBLOCK)
 		flags |= MSG_DONTWAIT;
 
-	if (ipipe_root_p)
+	if (is_secondary_domain())
 		ret = fd->ops->sendmsg_nrt(fd, msg, flags);
 	else
 		ret = fd->ops->sendmsg_rt(fd, msg, flags);

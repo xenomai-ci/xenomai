@@ -1630,7 +1630,7 @@ void rtdm_schedule_nrt_work(struct work_struct *lostage_work)
 		.lostage_work = lostage_work,
 	};
 
-	if (ipipe_root_p)
+	if (is_secondary_domain())
 		schedule_work(lostage_work);
 	else
 		ipipe_post_work_root(&ipipe_work, work);

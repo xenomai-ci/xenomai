@@ -112,7 +112,7 @@ static COBALT_SYSCALL(migrate, current, (int domain))
 {
 	struct xnthread *thread = xnthread_current();
 
-	if (ipipe_root_p) {
+	if (is_secondary_domain()) {
 		if (domain == COBALT_PRIMARY) {
 			if (thread == NULL)
 				return -EPERM;
@@ -129,7 +129,7 @@ static COBALT_SYSCALL(migrate, current, (int domain))
 		return 0;
 	}
 
-	/* ipipe_current_domain != ipipe_root_domain */
+	/* We are running on the head stage, apply relax request. */
 	if (domain == COBALT_SECONDARY) {
 		xnthread_relax(0, 0);
 		return 1;
@@ -779,7 +779,7 @@ ret_handled:
 
 int ipipe_syscall_hook(struct ipipe_domain *ipd, struct pt_regs *regs)
 {
-	if (unlikely(ipipe_root_p))
+	if (unlikely(is_secondary_domain()))
 		return handle_root_syscall(ipd, regs);
 
 	return handle_head_syscall(ipd, regs);
