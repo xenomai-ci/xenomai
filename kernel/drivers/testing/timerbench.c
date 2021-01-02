@@ -19,7 +19,7 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/semaphore.h>
-#include <linux/ipipe_trace.h>
+#include <cobalt/kernel/trace.h>
 #include <cobalt/kernel/arith.h>
 #include <rtdm/testing.h>
 #include <rtdm/driver.h>
@@ -78,13 +78,13 @@ static void eval_inner_loop(struct rt_tmbench_context *ctx, __s32 dt)
 		ctx->curr.min = dt;
 	ctx->curr.avg += dt;
 
-#ifdef CONFIG_IPIPE_TRACE
-	if (ctx->freeze_max && (dt > ctx->result.overall.max) && !ctx->warmup) {
-		ipipe_trace_frozen_reset();
-		ipipe_trace_freeze(dt);
+	if (xntrace_enabled() &&
+		ctx->freeze_max &&
+		(dt > ctx->result.overall.max) &&
+		!ctx->warmup) {
+		xntrace_user_freeze(dt, false);
 		ctx->result.overall.max = dt;
 	}
-#endif /* CONFIG_IPIPE_TRACE */
 
 	ctx->date += ctx->period;
 
