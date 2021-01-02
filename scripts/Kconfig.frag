@@ -1,8 +1,8 @@
 menuconfig XENOMAI
 	depends on X86_TSC || !X86
 	bool "Xenomai/cobalt"
-	select IPIPE
-	select IPIPE_WANT_APIREV_2
+	select IPIPE if HAVE_IPIPE_SUPPORT
+	select IPIPE_WANT_APIREV_2 if IPIPE
 	default y
 	help
 	  Xenomai's Cobalt core is a real-time extension to the Linux
@@ -28,10 +28,6 @@ if APM || CPU_FREQ || ACPI_PROCESSOR || INTEL_IDLE
 comment "WARNING! At least one of APM, CPU frequency scaling, ACPI 'processor'"
 comment "or CPU idle features is enabled. Any of these options may"
 comment "cause troubles with Xenomai. You should disable them."
-endif
-
-if !GENERIC_CLOCKEVENTS
-comment "NOTE: Xenomai 3.x requires CONFIG_GENERIC_CLOCKEVENTS"
 endif
 
 config XENO_VERSION_MAJOR
