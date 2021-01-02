@@ -20,6 +20,7 @@
 #define _COBALT_KERNEL_CLOCK_H
 
 #include <pipeline/pipeline.h>
+#include <pipeline/clock.h>
 #include <cobalt/kernel/list.h>
 #include <cobalt/kernel/vfile.h>
 #include <cobalt/uapi/kernel/types.h>
@@ -31,6 +32,7 @@
 
 struct xnsched;
 struct xntimerdata;
+struct timex;
 
 struct xnclock_gravity {
 	unsigned long irq;
@@ -128,9 +130,7 @@ xnticks_t xnclock_core_read_monotonic(void);
 
 static inline xnticks_t xnclock_core_read_raw(void)
 {
-	unsigned long long t;
-	ipipe_read_tsc(t);
-	return t;
+	return pipeline_read_cycle_counter();
 }
 
 /* We use the Linux defaults */

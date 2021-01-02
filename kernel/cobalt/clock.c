@@ -18,7 +18,6 @@
  */
 #include <linux/percpu.h>
 #include <linux/errno.h>
-#include <linux/ipipe_tickdev.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/timer.h>
 #include <cobalt/kernel/clock.h>
@@ -222,7 +221,7 @@ void xnclock_core_local_shot(struct xnsched *sched)
 
 	xntrace_tick((unsigned)delay);
 
-	ipipe_timer_set(delay);
+	pipeline_set_timer_shot(delay);
 }
 
 #ifdef CONFIG_SMP
@@ -507,7 +506,7 @@ void print_core_clock_status(struct xnclock *clock,
 #endif /* CONFIG_XENO_OPT_WATCHDOG */
 
 	xnvfile_printf(it, "%8s: timer=%s, clock=%s\n",
-		       "devices", ipipe_timer_name(), ipipe_clock_name());
+		       "devices", pipeline_timer_name(), pipeline_clock_name());
 	xnvfile_printf(it, "%8s: %s\n", "watchdog", wd_status);
 	xnvfile_printf(it, "%8s: %Lu\n", "setup",
 		       xnclock_ticks_to_ns(&nkclock, nktimerlat));
