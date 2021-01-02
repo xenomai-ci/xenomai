@@ -228,7 +228,7 @@ void xnclock_core_local_shot(struct xnsched *sched)
 #ifdef CONFIG_SMP
 void xnclock_core_remote_shot(struct xnsched *sched)
 {
-	ipipe_send_ipi(IPIPE_HRTIMER_IPI, *cpumask_of(xnsched_cpu(sched)));
+	pipeline_send_timer_ipi(cpumask_of(xnsched_cpu(sched)));
 }
 #endif
 

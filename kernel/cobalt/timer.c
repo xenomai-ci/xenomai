@@ -578,15 +578,12 @@ EXPORT_SYMBOL_GPL(__xntimer_set_affinity);
 
 int xntimer_setup_ipi(void)
 {
-	return ipipe_request_irq(&xnsched_realtime_domain,
-				 IPIPE_HRTIMER_IPI,
-				 (ipipe_irq_handler_t)xnintr_core_clock_handler,
-				 NULL, NULL);
+	return pipeline_request_timer_ipi(xnintr_core_clock_handler);
 }
 
 void xntimer_release_ipi(void)
 {
-	ipipe_free_irq(&xnsched_realtime_domain, IPIPE_HRTIMER_IPI);
+	pipeline_free_timer_ipi();
 }
 
 #endif /* CONFIG_SMP */

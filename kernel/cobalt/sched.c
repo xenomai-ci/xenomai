@@ -235,10 +235,7 @@ void xnsched_init_all(void)
 	}
 
 #ifdef CONFIG_SMP
-	ipipe_request_irq(&xnsched_realtime_domain,
-			  IPIPE_RESCHEDULE_IPI,
-			  (ipipe_irq_handler_t)__xnsched_run_handler,
-			  NULL, NULL);
+	pipeline_request_resched_ipi(__xnsched_run_handler);
 #endif
 }
 
@@ -261,7 +258,7 @@ void xnsched_destroy_all(void)
 	spl_t s;
 
 #ifdef CONFIG_SMP
-	ipipe_free_irq(&xnsched_realtime_domain, IPIPE_RESCHEDULE_IPI);
+	pipeline_free_resched_ipi();
 #endif
 
 	xnlock_get_irqsave(&nklock, s);
@@ -860,7 +857,7 @@ static inline int test_resched(struct xnsched *sched)
 	/* Send resched IPI to remote CPU(s). */
 	if (unlikely(!cpumask_empty(&sched->resched))) {
 		smp_mb();
-		ipipe_send_ipi(IPIPE_RESCHEDULE_IPI, sched->resched);
+		pipeline_send_resched_ipi(&sched->resched);
 		cpumask_clear(&sched->resched);
 	}
 #endif
@@ -1280,7 +1277,7 @@ static int vfile_schedstat_next(struct xnvfile_snapshot_iterator *it,
 
 scan_irqs:
 #ifdef CONFIG_XENO_OPT_STATS_IRQS
-	if (priv->irq >= IPIPE_NR_IRQS)
+	if (priv->irq >= PIPELINE_NR_IRQS)
 		return 0;	/* All done. */
 
 	ret = xnintr_query_next(priv->irq, &priv->intr_it, p->name);

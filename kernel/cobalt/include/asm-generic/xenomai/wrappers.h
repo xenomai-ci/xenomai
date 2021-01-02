@@ -20,10 +20,6 @@
 
 #include <linux/xenomai/wrappers.h>
 
-#ifdef CONFIG_IPIPE_LEGACY
-#error "CONFIG_IPIPE_LEGACY must be switched off"
-#endif
-
 #define COBALT_BACKPORT(__sym) __cobalt_backport_ ##__sym
 
 /*
