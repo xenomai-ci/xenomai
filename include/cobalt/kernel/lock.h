@@ -20,49 +20,16 @@
 #ifndef _COBALT_KERNEL_LOCK_H
 #define _COBALT_KERNEL_LOCK_H
 
-#include <linux/ipipe.h>
+#include <pipeline/lock.h>
 #include <linux/percpu.h>
 #include <cobalt/kernel/assert.h>
+#include <pipeline/pipeline.h>
 
 /**
  * @addtogroup cobalt_core_lock
  *
  * @{
  */
-typedef unsigned long spl_t;
-
-/**
- * Hard disable interrupts on the local processor, saving previous state.
- *
- * @param[out] x An unsigned long integer context variable
- */
-#define splhigh(x)  ((x) = ipipe_test_and_stall_head() & 1)
-#ifdef CONFIG_SMP
-/**
- * Restore the saved hard interrupt state on the local processor.
- *
- * @param[in] x The context variable previously updated by splhigh()
- */
-#define splexit(x)  ipipe_restore_head(x & 1)
-#else /* !CONFIG_SMP */
-#define splexit(x)  ipipe_restore_head(x)
-#endif /* !CONFIG_SMP */
-/**
- * Hard disable interrupts on the local processor.
- */
-#define splmax()    ipipe_stall_head()
-/**
- * Hard enable interrupts on the local processor.
- */
-#define splnone()   ipipe_unstall_head()
-/**
- * Test hard interrupt state on the local processor.
- *
- * @return Zero if the local processor currently accepts interrupts,
- * non-zero otherwise.
- */
-#define spltest()   ipipe_test_head()
-
 #ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
 
 struct xnlock {
@@ -208,13 +175,6 @@ int ___xnlock_get(struct xnlock *lock /*, */ XNLOCK_DBG_CONTEXT_ARGS);
 
 void ___xnlock_put(struct xnlock *lock /*, */ XNLOCK_DBG_CONTEXT_ARGS);
 #endif /* out of line xnlock */
-
-#ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
-/* Disable UP-over-SMP kernel optimization in debug mode. */
-#define __locking_active__  1
-#else
-#define __locking_active__  ipipe_smp_p
-#endif
 
 static inline spl_t
 __xnlock_get_irqsave(struct xnlock *lock /*, */ XNLOCK_DBG_CONTEXT_ARGS)

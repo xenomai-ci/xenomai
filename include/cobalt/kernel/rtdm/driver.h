@@ -32,6 +32,7 @@
 #include <linux/cdev.h>
 #include <linux/wait.h>
 #include <linux/notifier.h>
+#include <pipeline/lock.h>
 #include <xenomai/version.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/sched.h>
@@ -541,13 +542,13 @@ rtdm_execute_atomically(void) { }
 /**
  * Static lock initialisation
  */
-#define RTDM_LOCK_UNLOCKED(__name)	IPIPE_SPIN_LOCK_UNLOCKED
+#define RTDM_LOCK_UNLOCKED(__name)	PIPELINE_SPIN_LOCK_UNLOCKED(__name)
 
 #define DEFINE_RTDM_LOCK(__name)		\
 	rtdm_lock_t __name = RTDM_LOCK_UNLOCKED(__name)
 
 /** Lock variable */
-typedef ipipe_spinlock_t rtdm_lock_t;
+typedef pipeline_spinlock_t rtdm_lock_t;
 
 /** Variable to save the context while holding a lock */
 typedef unsigned long rtdm_lockctx_t;
@@ -606,7 +607,7 @@ static inline rtdm_lockctx_t __rtdm_lock_get_irqsave(rtdm_lock_t *lock)
 {
 	rtdm_lockctx_t context;
 
-	context = ipipe_test_and_stall_head();
+	splhigh(context);
 	raw_spin_lock(lock);
 	xnsched_lock();
 
@@ -626,7 +627,7 @@ void rtdm_lock_put_irqrestore(rtdm_lock_t *lock, rtdm_lockctx_t context)
 {
 	raw_spin_unlock(lock);
 	xnsched_unlock();
-	ipipe_restore_head(context);
+	splexit(context);
 }
 
 /**
