@@ -18,6 +18,8 @@ module_param_named(timerfreq, timerfreq_arg, ulong, 0444);
 static unsigned long clockfreq_arg;
 module_param_named(clockfreq, clockfreq_arg, ulong, 0444);
 
+void apc_dispatch(unsigned int virq, void *arg);
+
 int __init pipeline_init(void)
 {
 	struct ipipe_sysinfo sysinfo;

@@ -1,7 +1,6 @@
 obj-$(CONFIG_XENOMAI) += pipeline/ xenomai.o rtdm/ posix/
 
-xenomai-y :=	apc.o		\
-		arith.o 	\
+xenomai-y :=	arith.o 	\
 		bufd.o		\
 		clock.o		\
 		heap.o		\

@@ -18,6 +18,7 @@
  */
 #include <linux/spinlock.h>
 #include <linux/ipipe.h>
+#include <asm/xenomai/machine.h>
 #include <cobalt/kernel/apc.h>
 
 /**
@@ -156,5 +157,46 @@ void xnapc_free(int apc)
 	smp_mb__after_atomic();
 }
 EXPORT_SYMBOL_GPL(xnapc_free);
+
+void __xnapc_schedule(int apc)
+{
+	unsigned long *p = &raw_cpu_ptr(&cobalt_machine_cpudata)->apc_pending;
+
+	if (!__test_and_set_bit(apc, p))
+		ipipe_post_irq_root(cobalt_pipeline.apc_virq);
+}
+EXPORT_SYMBOL_GPL(__xnapc_schedule);
+
+/**
+ * @fn static inline int xnapc_schedule(int apc)
+ *
+ * @brief Schedule an APC invocation.
+ *
+ * This service marks the APC as pending for the Linux domain, so that
+ * its handler will be called as soon as possible, when the Linux
+ * domain gets back in control.
+ *
+ * When posted from the Linux domain, the APC handler is fired as soon
+ * as the interrupt mask is explicitly cleared by some kernel
+ * code. When posted from the Xenomai domain, the APC handler is
+ * fired as soon as the Linux domain is resumed, i.e. after Xenomai has
+ * completed all its pending duties.
+ *
+ * @param apc The APC id. to schedule.
+ *
+ * This service can be called from:
+ *
+ * - Any domain context, albeit the usual calling place is from the
+ * Xenomai domain.
+ */
+void xnapc_schedule(int apc)
+{
+	unsigned long flags;
+
+	flags = ipipe_test_and_stall_head() & 1;
+	__xnapc_schedule(apc);
+	ipipe_restore_head(flags);
+}
+EXPORT_SYMBOL_GPL(xnapc_schedule);
 
 /** @} */
