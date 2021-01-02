@@ -587,7 +587,7 @@ int xnlock_dbg_release(struct xnlock *lock,
 	}
 
 	if (unlikely(lock->owner != cpu)) {
-		ipipe_prepare_panic();
+		pipeline_prepare_panic();
 		printk(XENO_ERR "lock %p already unlocked on CPU #%d\n"
 				"          last owner = %s:%u (%s(), CPU #%d)\n",
 		       lock, cpu, lock->file, lock->line, lock->function,

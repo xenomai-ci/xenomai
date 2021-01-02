@@ -70,4 +70,9 @@ static inline void pipeline_send_timer_ipi(const struct cpumask *dest)
 
 #endif
 
+static inline void pipeline_prepare_panic(void)
+{
+	ipipe_prepare_panic();
+}
+
 #endif /* !_COBALT_KERNEL_IPIPE_PIPELINE_H */
