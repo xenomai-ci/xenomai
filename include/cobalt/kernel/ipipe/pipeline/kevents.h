@@ -7,6 +7,9 @@
 #ifndef _COBALT_KERNEL_IPIPE_KEVENTS_H
 #define _COBALT_KERNEL_IPIPE_KEVENTS_H
 
+#define KEVENT_PROPAGATE   0
+#define KEVENT_STOP        1
+
 struct cobalt_process;
 struct cobalt_thread;
 

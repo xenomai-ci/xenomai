@@ -18,7 +18,6 @@
  */
 #include <linux/types.h>
 #include <linux/err.h>
-#include <linux/ipipe.h>
 #include <linux/sched.h>
 #include <linux/kconfig.h>
 #include <linux/unistd.h>
@@ -26,6 +25,7 @@
 #include <cobalt/kernel/tree.h>
 #include <cobalt/kernel/vdso.h>
 #include <cobalt/kernel/init.h>
+#include <pipeline/kevents.h>
 #include <asm/syscall.h>
 #include "internal.h"
 #include "thread.h"
@@ -475,7 +475,7 @@ static inline int allowed_syscall(struct cobalt_process *process,
 	return cap_raised(current_cap(), CAP_SYS_NICE);
 }
 
-static int handle_head_syscall(struct ipipe_domain *ipd, struct pt_regs *regs)
+int handle_head_syscall(bool caller_is_relaxed, struct pt_regs *regs)
 {
 	struct cobalt_process *process;
 	int switched, sigs, sysflags;
@@ -553,7 +553,7 @@ restart:
 		/*
 		 * The syscall must run from the Linux domain.
 		 */
-		if (ipd == &xnsched_realtime_domain) {
+		if (!caller_is_relaxed) {
 			/*
 			 * Request originates from the Xenomai domain:
 			 * relax the caller then invoke the syscall
@@ -578,7 +578,7 @@ restart:
 		 * hand it over to our secondary-mode dispatcher.
 		 * Otherwise, invoke the syscall handler immediately.
 		 */
-		if (ipd != &xnsched_realtime_domain)
+		if (caller_is_relaxed)
 			return KEVENT_PROPAGATE;
 	}
 
@@ -667,7 +667,7 @@ bad_syscall:
 	return KEVENT_STOP;
 }
 
-static int handle_root_syscall(struct ipipe_domain *ipd, struct pt_regs *regs)
+int handle_root_syscall(struct pt_regs *regs)
 {
 	int sysflags, switched, sigs;
 	struct xnthread *thread;
@@ -775,24 +775,6 @@ ret_handled:
 	trace_cobalt_root_sysexit(__xn_reg_rval(regs));
 
 	return KEVENT_STOP;
-}
-
-int ipipe_syscall_hook(struct ipipe_domain *ipd, struct pt_regs *regs)
-{
-	if (unlikely(is_secondary_domain()))
-		return handle_root_syscall(ipd, regs);
-
-	return handle_head_syscall(ipd, regs);
-}
-
-int ipipe_fastcall_hook(struct pt_regs *regs)
-{
-	int ret;
-
-	ret = handle_head_syscall(&xnsched_realtime_domain, regs);
-	XENO_BUG_ON(COBALT, ret == KEVENT_PROPAGATE);
-
-	return ret;
 }
 
 long cobalt_restart_syscall_placeholder(struct restart_block *param)

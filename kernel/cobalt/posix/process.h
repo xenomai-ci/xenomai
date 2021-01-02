@@ -23,9 +23,6 @@
 #include <pipeline/thread.h>
 #include <cobalt/kernel/ppd.h>
 
-#define KEVENT_PROPAGATE   0
-#define KEVENT_STOP        1
-
 #define NR_PERSONALITIES  4
 #if BITS_PER_LONG < NR_PERSONALITIES
 #error "NR_PERSONALITIES overflows internal bitmap"

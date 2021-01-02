@@ -20,6 +20,8 @@
 
 #include <cobalt/uapi/syscall.h>
 
+struct pt_regs;
+
 /* Regular (native) syscall handler implementation. */
 #define COBALT_SYSCALL(__name, __mode, __args)	\
 	long CoBaLt_ ## __name __args
@@ -29,5 +31,10 @@
 	long CoBaLt_ ## __name __args
 
 #include <asm/xenomai/syscall32.h>
+
+int handle_head_syscall(bool caller_is_relaxed,
+			struct pt_regs *regs);
+
+int handle_root_syscall(struct pt_regs *regs);
 
 #endif /* !_COBALT_POSIX_SYSCALL_H */

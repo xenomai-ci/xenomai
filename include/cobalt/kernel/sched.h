@@ -233,8 +233,6 @@ static inline void xnsched_set_self_resched(struct xnsched *sched)
 	sched->status |= XNRESCHED;
 }
 
-#define xnsched_realtime_domain  cobalt_pipeline.domain
-
 /* Set resched flag for the given scheduler. */
 #ifdef CONFIG_SMP
 
