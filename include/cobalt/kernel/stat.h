@@ -37,8 +37,6 @@ typedef struct xnstat_exectime {
 
 } xnstat_exectime_t;
 
-#define xnstat_percpu_data	raw_cpu_ptr(nktimer.stats)
-
 /* Return current date which can be passed to other xnstat services for
    immediate or lazy accounting. */
 #define xnstat_exectime_now() xnclock_core_read_raw()
@@ -114,7 +112,6 @@ static inline void xnstat_counter_set(xnstat_counter_t *c, unsigned long value)
 typedef struct xnstat_exectime {
 } xnstat_exectime_t;
 
-#define xnstat_percpu_data					NULL
 #define xnstat_exectime_now()					({ 0; })
 #define xnstat_exectime_update(sched, date)			do { } while (0)
 #define xnstat_exectime_set_current(sched, new_account)		({ (void)sched; NULL; })

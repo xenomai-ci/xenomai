@@ -133,7 +133,6 @@ void xnintr_affinity(struct xnintr *intr,
 		     cpumask_t cpumask);
 
 #ifdef CONFIG_XENO_OPT_STATS_IRQS
-extern struct xnintr nktimer;
 
 int xnintr_query_init(struct xnintr_iterator *iterator);
 

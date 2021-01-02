@@ -20,6 +20,7 @@
 #include <linux/module.h>
 #include <xenomai/version.h>
 #include <pipeline/machine.h>
+#include <pipeline/tick.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/timer.h>
 #include <cobalt/kernel/heap.h>
@@ -112,7 +113,7 @@ static void sys_shutdown(void)
 {
 	void *membase;
 
-	xntimer_release_hardware();
+	pipeline_uninstall_tick_proxy();
 	xnsched_destroy_all();
 	xnregistry_cleanup();
 	membase = xnheap_get_membase(&cobalt_heap);
@@ -168,7 +169,7 @@ static __init int sys_init(void)
 	 * not enable the core timer.
 	 */
 	if (realtime_core_state() == COBALT_STATE_WARMUP) {
-		ret = xntimer_grab_hardware();
+		ret = pipeline_install_tick_proxy();
 		if (ret) {
 			sys_shutdown();
 			return ret;

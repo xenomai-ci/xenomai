@@ -143,7 +143,7 @@ static inline xnstat_exectime_t *switch_core_irqstats(struct xnsched *sched)
 	struct xnirqstat *statp;
 	xnstat_exectime_t *prev;
 
-	statp = xnstat_percpu_data;
+	statp = raw_cpu_ptr(nktimer.stats);
 	prev = xnstat_exectime_switch(sched, &statp->account);
 	xnstat_counter_inc(&statp->hits);
 
