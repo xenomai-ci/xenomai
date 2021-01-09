@@ -210,10 +210,6 @@ config XENO_OPT_TIMER_RBTREE
 
 endchoice
 
-config XENO_OPT_HOSTRT
-       depends on IPIPE_HAVE_HOSTRT
-       def_bool y
-
 config XENO_OPT_PIPE
 	bool
 

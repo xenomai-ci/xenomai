@@ -25,21 +25,25 @@
 #include <asm/processor.h>
 #include <cobalt/uapi/kernel/vdso.h>
 
+extern struct xnvdso *nkvdso;
+
 /*
  * Define the available feature set here. We have a single feature
- * defined for now.
+ * defined for now, only in the I-pipe case.
  */
-#ifdef CONFIG_XENO_OPT_HOSTRT
-#define XNVDSO_FEATURES XNVDSO_FEAT_HOST_REALTIME
-#else
-#define XNVDSO_FEATURES 0
-#endif /* CONFIG_XENO_OPT_HOSTRT */
+#ifdef CONFIG_IPIPE_HAVE_HOSTRT
 
-extern struct xnvdso *nkvdso;
+#define XNVDSO_FEATURES XNVDSO_FEAT_HOST_REALTIME
 
 static inline struct xnvdso_hostrt_data *get_hostrt_data(void)
 {
 	return &nkvdso->hostrt_data;
 }
+
+#else
+
+#define XNVDSO_FEATURES 0
+
+#endif
 
 #endif /* _COBALT_KERNEL_VDSO_H */

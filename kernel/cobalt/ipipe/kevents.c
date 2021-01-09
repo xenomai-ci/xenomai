@@ -378,7 +378,7 @@ void ipipe_migration_hook(struct task_struct *p) /* hw IRQs off */
 	xnsched_run();
 }
 
-#ifdef CONFIG_XENO_OPT_HOSTRT
+#ifdef CONFIG_IPIPE_HAVE_HOSTRT
 
 static IPIPE_DEFINE_SPINLOCK(__hostrtlock);
 
@@ -418,7 +418,7 @@ static inline void init_hostrt(void)
 	nkvdso->hostrt_data.live = 0;
 }
 
-#else /* !CONFIG_XENO_OPT_HOSTRT */
+#else /* !CONFIG_IPIPE_HAVE_HOSTRT */
 
 struct ipipe_hostrt_data;
 
@@ -429,7 +429,7 @@ static inline int handle_hostrt_event(struct ipipe_hostrt_data *hostrt)
 
 static inline void init_hostrt(void) { }
 
-#endif /* !CONFIG_XENO_OPT_HOSTRT */
+#endif /* !CONFIG_IPIPE_HAVE_HOSTRT */
 
 static void __handle_taskexit_event(struct task_struct *p)
 {
@@ -757,12 +757,14 @@ int ipipe_kevent_hook(int kevent, void *data)
 	case IPIPE_KEVT_CLEANUP:
 		ret = handle_cleanup_event(data);
 		break;
-	case IPIPE_KEVT_HOSTRT:
-		ret = handle_hostrt_event(data);
-		break;
 	case IPIPE_KEVT_SETAFFINITY:
 		ret = handle_setaffinity_event(data);
 		break;
+#ifdef CONFIG_IPIPE_HAVE_HOSTRT
+	case IPIPE_KEVT_HOSTRT:
+		ret = handle_hostrt_event(data);
+		break;
+#endif
 #ifdef IPIPE_KEVT_CLOCKFREQ
 	case IPIPE_KEVT_CLOCKFREQ:
 		ret = handle_clockfreq_event(data);

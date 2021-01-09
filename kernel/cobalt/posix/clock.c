@@ -31,7 +31,7 @@ DECLARE_BITMAP(cobalt_clock_extids, COBALT_MAX_EXTCLOCKS);
 
 static int do_clock_host_realtime(struct timespec *tp)
 {
-#ifdef CONFIG_XENO_OPT_HOSTRT
+#ifdef CONFIG_IPIPE_HAVE_HOSTRT
 	struct xnvdso_hostrt_data *hostrt_data;
 	u64 now, base, mask, cycle_delta;
 	__u32 mult, shift;
@@ -78,7 +78,7 @@ static int do_clock_host_realtime(struct timespec *tp)
 	tp->tv_nsec = rem;
 
 	return 0;
-#else /* CONFIG_XENO_OPT_HOSTRT */
+#else
 	return -EINVAL;
 #endif
 }
