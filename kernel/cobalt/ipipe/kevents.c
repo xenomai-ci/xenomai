@@ -853,7 +853,7 @@ int pipeline_trap_kevents(void)
 {
 	init_hostrt();
 	ipipe_set_hooks(ipipe_root_domain, IPIPE_SYSCALL|IPIPE_KEVENT);
-	ipipe_set_hooks(&xnsched_realtime_domain, IPIPE_SYSCALL|IPIPE_TRAP);
+	ipipe_set_hooks(&xnsched_primary_domain, IPIPE_SYSCALL|IPIPE_TRAP);
 
 	return 0;
 }

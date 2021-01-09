@@ -464,7 +464,7 @@ static inline bool cobalt_owns_irq(int irq)
 {
 	ipipe_irq_handler_t h;
 
-	h = __ipipe_irq_handler(&xnsched_realtime_domain, irq);
+	h = __ipipe_irq_handler(&xnsched_primary_domain, irq);
 
 	return h == xnintr_vec_handler ||
 		h == xnintr_edge_vec_handler ||
@@ -507,7 +507,7 @@ static inline int xnintr_irq_attach(struct xnintr *intr)
 		}
 		vec->unhandled = 0;
 
-		ret = ipipe_request_irq(&xnsched_realtime_domain,
+		ret = ipipe_request_irq(&xnsched_primary_domain,
 					intr->irq, handler, intr,
 					(ipipe_irq_ackfn_t)intr->iack);
 		if (ret)
@@ -540,7 +540,7 @@ static inline void xnintr_irq_detach(struct xnintr *intr)
 
 			/* Release the IRQ line if this was the last user */
 			if (vec->handlers == NULL)
-				ipipe_free_irq(&xnsched_realtime_domain, intr->irq);
+				ipipe_free_irq(&xnsched_primary_domain, intr->irq);
 
 			return;
 		}
@@ -564,7 +564,7 @@ static inline bool cobalt_owns_irq(int irq)
 {
 	ipipe_irq_handler_t h;
 
-	h = __ipipe_irq_handler(&xnsched_realtime_domain, irq);
+	h = __ipipe_irq_handler(&xnsched_primary_domain, irq);
 
 	return h == xnintr_irq_handler;
 }
@@ -572,7 +572,7 @@ static inline bool cobalt_owns_irq(int irq)
 static inline struct xnintr *xnintr_vec_first(unsigned int irq)
 {
 	return cobalt_owns_irq(irq) ?
-		__ipipe_irq_cookie(&xnsched_realtime_domain, irq) : NULL;
+		__ipipe_irq_cookie(&xnsched_primary_domain, irq) : NULL;
 }
 
 static inline struct xnintr *xnintr_vec_next(struct xnintr *prev)
@@ -582,7 +582,7 @@ static inline struct xnintr *xnintr_vec_next(struct xnintr *prev)
 
 static inline int xnintr_irq_attach(struct xnintr *intr)
 {
-	return ipipe_request_irq(&xnsched_realtime_domain,
+	return ipipe_request_irq(&xnsched_primary_domain,
 				 intr->irq, xnintr_irq_handler, intr,
 				 (ipipe_irq_ackfn_t)intr->iack);
 }
@@ -592,7 +592,7 @@ static inline void xnintr_irq_detach(struct xnintr *intr)
 	int irq = intr->irq;
 
 	xnlock_get(&vectors[irq].lock);
-	ipipe_free_irq(&xnsched_realtime_domain, irq);
+	ipipe_free_irq(&xnsched_primary_domain, irq);
 	xnlock_put(&vectors[irq].lock);
 
 	sync_stat_references(intr);
@@ -630,7 +630,7 @@ static void xnintr_irq_handler(unsigned int irq, void *cookie)
 	 * interrupt service routine, so the scheduler pointer will
 	 * remain valid throughout this function.
 	 */
-	intr = __ipipe_irq_cookie(&xnsched_realtime_domain, irq);
+	intr = __ipipe_irq_cookie(&xnsched_primary_domain, irq);
 	if (unlikely(intr == NULL))
 		goto done;
 #else
@@ -1162,14 +1162,14 @@ static int irq_vfile_show(struct xnvfile_regular_iterator *it,
 		xnvfile_printf(it, "        CPU%d", cpu);
 
 	for (irq = 0; irq < IPIPE_NR_IRQS; irq++) {
-		if (__ipipe_irq_handler(&xnsched_realtime_domain, irq) == NULL)
+		if (__ipipe_irq_handler(&xnsched_primary_domain, irq) == NULL)
 			continue;
 
 		xnvfile_printf(it, "\n%5d:", irq);
 
 		for_each_realtime_cpu(cpu) {
 			xnvfile_printf(it, "%12lu",
-				       __ipipe_cpudata_irq_hits(&xnsched_realtime_domain, cpu,
+				       __ipipe_cpudata_irq_hits(&xnsched_primary_domain, cpu,
 								irq));
 		}
 

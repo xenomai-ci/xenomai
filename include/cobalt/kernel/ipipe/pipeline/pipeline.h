@@ -12,7 +12,7 @@
 #include <pipeline/machine.h>
 #include <asm/xenomai/features.h>
 
-#define xnsched_realtime_domain  cobalt_pipeline.domain
+#define xnsched_primary_domain  cobalt_pipeline.domain
 
 #define PIPELINE_NR_IRQS  IPIPE_NR_IRQS
 
