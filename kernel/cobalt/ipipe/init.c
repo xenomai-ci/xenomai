@@ -30,7 +30,7 @@ int __init pipeline_init(void)
 			return ret;
 	}
 
-	ipipe_register_head(&xnsched_realtime_domain, "Xenomai");
+	ipipe_register_head(&xnsched_primary_domain, "Xenomai");
 
 	virq = ipipe_alloc_virq();
 	if (virq == 0)
@@ -38,7 +38,7 @@ int __init pipeline_init(void)
 
 	cobalt_pipeline.escalate_virq = virq;
 
-	ipipe_request_irq(&xnsched_realtime_domain,
+	ipipe_request_irq(&xnsched_primary_domain,
 			  cobalt_pipeline.escalate_virq,
 			  (ipipe_irq_handler_t)__xnsched_run_handler,
 			  NULL, NULL);
@@ -50,11 +50,11 @@ int __init pipeline_init(void)
 	return 0;
 
 fail_clock:
-	ipipe_free_irq(&xnsched_realtime_domain,
+	ipipe_free_irq(&xnsched_primary_domain,
 		       cobalt_pipeline.escalate_virq);
 	ipipe_free_virq(cobalt_pipeline.escalate_virq);
 fail_escalate:
-	ipipe_unregister_head(&xnsched_realtime_domain);
+	ipipe_unregister_head(&xnsched_primary_domain);
 
 	if (cobalt_machine.cleanup)
 		cobalt_machine.cleanup();
@@ -72,8 +72,8 @@ int __init pipeline_late_init(void)
 
 __init void pipeline_cleanup(void)
 {
-	ipipe_unregister_head(&xnsched_realtime_domain);
-	ipipe_free_irq(&xnsched_realtime_domain,
+	ipipe_unregister_head(&xnsched_primary_domain);
+	ipipe_free_irq(&xnsched_primary_domain,
 		       cobalt_pipeline.escalate_virq);
 	ipipe_free_virq(cobalt_pipeline.escalate_virq);
 	ipipe_timers_release();

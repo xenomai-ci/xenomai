@@ -15,7 +15,7 @@ int ipipe_syscall_hook(struct ipipe_domain *ipd, struct pt_regs *regs)
 	if (unlikely(is_secondary_domain()))
 		return handle_root_syscall(regs);
 
-	return handle_head_syscall(ipd != &xnsched_realtime_domain, regs);
+	return handle_head_syscall(ipd != &xnsched_primary_domain, regs);
 }
 
 int ipipe_fastcall_hook(struct pt_regs *regs)
