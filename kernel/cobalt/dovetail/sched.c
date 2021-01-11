@@ -36,7 +36,7 @@ void pipeline_init_shadow_tcb(struct xnthread *thread)
 	/*
 	 * Initialize the alternate scheduling control block.
 	 */
-	TODO();
+	dovetail_init_altsched(&xnthread_archtcb(thread)->altsched);
 
 	trace_cobalt_shadow_map(thread);
 }
@@ -46,7 +46,7 @@ void pipeline_init_root_tcb(struct xnthread *thread)
 	/*
 	 * Initialize the alternate scheduling control block.
 	 */
-	TODO();
+	dovetail_init_altsched(&xnthread_archtcb(thread)->altsched);
 }
 
 int pipeline_leave_inband(void)
