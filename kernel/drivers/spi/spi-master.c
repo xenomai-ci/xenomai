@@ -181,7 +181,7 @@ static int spi_master_ioctl_rt(struct rtdm_fd *fd,
 	case SPI_RTIOC_TRANSFER_N:
 		ret = -EINVAL;
 		if (master->ops->transfer_iobufs_n) {
-			len = (int)arg;
+			len = (long)arg;
 			rtdm_mutex_lock(&master->bus_lock);
 			ret = do_chip_select(slave);
 			if (ret == 0) {
