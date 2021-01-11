@@ -14,9 +14,7 @@ struct timespec64;
 static inline u64 pipeline_read_cycle_counter(void)
 {
 	/* Read the raw cycle counter of the core clock. */
-	TODO();
-
-	return 0;
+	return  ktime_get_raw_fast_ns();
 }
 
 void pipeline_set_timer_shot(unsigned long cycles);
