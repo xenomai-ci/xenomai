@@ -20,7 +20,7 @@ int __init pipeline_init(void)
 	}
 
 	/* Enable the Xenomai out-of-band stage */
-	TODO();
+	enable_oob_stage("Xenomai");
 
 	ret = xnclock_init();
 	if (ret)
@@ -46,7 +46,7 @@ int __init pipeline_late_init(void)
 __init void pipeline_cleanup(void)
 {
 	/* Disable the Xenomai stage */
-	TODO();
+	disable_oob_stage();
 
 	xnclock_cleanup();
 }
