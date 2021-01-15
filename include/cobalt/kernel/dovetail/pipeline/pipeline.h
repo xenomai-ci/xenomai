@@ -8,8 +8,11 @@
 #include <linux/irq_pipeline.h>
 #include <cobalt/kernel/assert.h>
 #include <asm/xenomai/features.h>
+#include <pipeline/machine.h>
 
 typedef unsigned long spl_t;
+
+void xnintr_core_clock_handler(void);
 
 /*
  * We only keep the LSB when testing in SMP mode in order to strip off
@@ -30,18 +33,28 @@ typedef unsigned long spl_t;
 
 #ifdef CONFIG_SMP
 
+static irqreturn_t reschedule_interrupt_handler(int irq, void *dev_id)
+{
+
+	/* Will reschedule from irq_exit_pipeline. */
+
+	return IRQ_HANDLED;
+}
+
 static inline int pipeline_request_resched_ipi(void (*handler)(void))
 {
 	/* Trap the out-of-band rescheduling interrupt. */
-	TODO();
-
-	return 0;
+	return __request_percpu_irq(RESCHEDULE_OOB_IPI,
+			reschedule_interrupt_handler,
+			IRQF_OOB,
+			"Xenomai reschedule",
+			&cobalt_machine_cpudata);
 }
 
 static inline void pipeline_free_resched_ipi(void)
 {
 	/* Release the out-of-band rescheduling interrupt. */
-	TODO();
+	free_percpu_irq(RESCHEDULE_OOB_IPI, &cobalt_machine_cpudata);
 }
 
 static inline void pipeline_send_resched_ipi(const struct cpumask *dest)
@@ -50,21 +63,29 @@ static inline void pipeline_send_resched_ipi(const struct cpumask *dest)
 	 * Trigger the out-of-band rescheduling interrupt on remote
 	 * CPU(s).
 	 */
-	TODO();
+	irq_send_oob_ipi(RESCHEDULE_OOB_IPI, dest);
+}
+
+static irqreturn_t timer_ipi_interrupt_handler(int irq, void *dev_id)
+{
+	xnintr_core_clock_handler();
+
+	return IRQ_HANDLED;
 }
 
 static inline int pipeline_request_timer_ipi(void (*handler)(void))
 {
 	/* Trap the out-of-band timer interrupt. */
-	TODO();
-
-	return 0;
+	return __request_percpu_irq(TIMER_OOB_IPI,
+			timer_ipi_interrupt_handler,
+			IRQF_OOB, "Xenomai timer IPI",
+			&cobalt_machine_cpudata);
 }
 
 static inline void pipeline_free_timer_ipi(void)
 {
 	/* Release the out-of-band timer interrupt. */
-	TODO();
+	free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
 }
 
 static inline void pipeline_send_timer_ipi(const struct cpumask *dest)
@@ -72,7 +93,7 @@ static inline void pipeline_send_timer_ipi(const struct cpumask *dest)
 	/*
 	 * Trigger the out-of-band timer interrupt on remote CPU(s).
 	 */
-	TODO();
+	irq_send_oob_ipi(TIMER_OOB_IPI, dest);
 }
 
 #else  /* !CONFIG_SMP */
