@@ -97,10 +97,8 @@ void handle_oob_trap_entry(unsigned int trapnr, struct pt_regs *regs)
 
 	/*
 	 * Enable back tracing.
-	 *
-	 * trace_cobalt_thread_fault(xnarch_fault_pc(regs), trapnr);
 	 */
-	TODO();
+	trace_cobalt_thread_fault(xnarch_fault_pc(regs), trapnr);
 
 	if (xnthread_test_state(thread, XNROOT))
 		return;
