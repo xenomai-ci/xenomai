@@ -30,9 +30,11 @@ static int switch_slicing(struct threadobj *thobj, struct timespec *quantum)
 
 	if (quantum) {
 		policy = SCHED_RR;
-		param_ex.sched_rr_quantum = *quantum;
-	} else
+		param_ex.sched_rr_quantum.tv_sec = quantum->tv_sec;
+		param_ex.sched_rr_quantum.tv_nsec = quantum->tv_nsec;
+	} else {
 		policy = param_ex.sched_priority ? SCHED_FIFO : SCHED_OTHER;
+	}
 
 	return threadobj_set_schedparam(thobj, policy, &param_ex);
 }

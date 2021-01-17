@@ -192,7 +192,8 @@ static void *task_trampoline(void *arg)
 
 	if (task->mode & T_TSLICE) {
 		param_ex.sched_priority = threadobj_get_priority(&task->thobj);
-		param_ex.sched_rr_quantum = psos_rrperiod;
+		param_ex.sched_rr_quantum.tv_sec = psos_rrperiod.tv_sec;
+		param_ex.sched_rr_quantum.tv_nsec = psos_rrperiod.tv_nsec;
 		threadobj_set_schedparam(&task->thobj, SCHED_RR, &param_ex);
 	}
 
@@ -630,9 +631,11 @@ u_long t_mode(u_long mask, u_long newmask, u_long *oldmode_r)
 
 	if (task->mode & T_TSLICE) {
 		policy = SCHED_RR;
-		param_ex.sched_rr_quantum = psos_rrperiod;
-	} else
+		param_ex.sched_rr_quantum.tv_sec = psos_rrperiod.tv_sec;
+		param_ex.sched_rr_quantum.tv_nsec = psos_rrperiod.tv_nsec;
+	} else {
 		policy = param_ex.sched_priority ? SCHED_FIFO : SCHED_OTHER;
+	}
 
 	/* Working on self, so -EIDRM can't happen. */
 	threadobj_set_schedparam(&task->thobj, policy, &param_ex);
