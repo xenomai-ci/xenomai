@@ -1410,11 +1410,14 @@ int rt_task_slice(RT_TASK *task, RTIME quantum)
 
 	param_ex.sched_priority = threadobj_get_priority(&tcb->thobj);
 	if (quantum) {
+		struct timespec ts;
 		policy = SCHED_RR;
-		clockobj_ticks_to_timespec(&alchemy_clock, quantum,
-					   &param_ex.sched_rr_quantum);
-	} else
+		clockobj_ticks_to_timespec(&alchemy_clock, quantum, &ts);
+		param_ex.sched_rr_quantum.tv_sec = ts.tv_sec;
+		param_ex.sched_rr_quantum.tv_nsec = ts.tv_nsec;
+	} else {
 		policy = param_ex.sched_priority ? SCHED_FIFO : SCHED_OTHER;
+	}
 
 	ret = threadobj_set_schedparam(&tcb->thobj, policy, &param_ex);
 	switch (ret) {

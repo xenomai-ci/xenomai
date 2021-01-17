@@ -265,8 +265,10 @@ static void *task_trampoline(void *arg)
 
 	/* Turn on time slicing if RR globally enabled. */
 	if (wind_time_slice) {
-		clockobj_ticks_to_timespec(&wind_clock, wind_time_slice,
-					   &param_ex.sched_rr_quantum);
+		struct timespec ts;
+		clockobj_ticks_to_timespec(&wind_clock, wind_time_slice, &ts);
+		param_ex.sched_rr_quantum.tv_sec = ts.tv_sec;
+		param_ex.sched_rr_quantum.tv_nsec = ts.tv_nsec;
 		threadobj_lock(&task->thobj);
 		param_ex.sched_priority = threadobj_get_priority(&task->thobj);
 		threadobj_set_schedparam(&task->thobj, SCHED_RR, &param_ex);

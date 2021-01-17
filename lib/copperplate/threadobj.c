@@ -1741,7 +1741,8 @@ int threadobj_set_schedparam(struct threadobj *thobj, int policy,
 		ret = enable_rr_corespec(thobj, param_ex);
 		if (ret)
 			return __bt(ret);
-		thobj->tslice = param_ex->sched_rr_quantum;
+		thobj->tslice.tv_sec = param_ex->sched_rr_quantum.tv_sec;
+		thobj->tslice.tv_nsec = param_ex->sched_rr_quantum.tv_nsec;
 	} else if (thobj->policy == SCHED_RR) /* Switching off round-robin. */
 		disable_rr_corespec(thobj);
 
@@ -1761,8 +1762,10 @@ int threadobj_set_schedprio(struct threadobj *thobj, int priority)
 	param_ex.sched_priority = priority;
 	policy = thobj->policy;
 
-	if (policy == SCHED_RR)
-		param_ex.sched_rr_quantum = thobj->tslice;
+	if (policy == SCHED_RR) {
+		param_ex.sched_rr_quantum.tv_sec = thobj->tslice.tv_sec;
+		param_ex.sched_rr_quantum.tv_nsec = thobj->tslice.tv_nsec;
+	}
 
 	return threadobj_set_schedparam(thobj, policy, &param_ex);
 }
