@@ -109,7 +109,7 @@ static const char *smi_state_labels[] = {
 	"detect",
 	"enabled",
 };
-	
+
 static void setup_smi_state(void)
 {
 	static char warn_bad_state[] =
@@ -147,7 +147,7 @@ void mach_x86_smi_init(void)
 	 * Just register the used ports.
 	 */
 	dev = pci_get_class(PCI_CLASS_BRIDGE_ISA << 8, NULL);
-	if (dev == NULL || dev->bus->number || 
+	if (dev == NULL || dev->bus->number ||
 	    dev->devfn != DEVFN || dev->vendor != PCI_VENDOR_ID_INTEL) {
 		pci_dev_put(dev);
 		return;

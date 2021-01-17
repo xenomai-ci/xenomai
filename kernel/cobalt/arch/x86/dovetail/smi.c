@@ -1,0 +1,1 @@
+../ipipe/smi.c
