@@ -23,6 +23,7 @@
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/synch.h>
 #include <cobalt/kernel/select.h>
+#include <pipeline/sirq.h>
 
 /**
  * @ingroup cobalt_core
@@ -398,12 +399,12 @@ void xnselector_destroy(struct xnselector *selector)
 
 	xnlock_get_irqsave(&nklock, s);
 	list_add_tail(&selector->destroy_link, &selector_list);
-	ipipe_post_irq_root(deletion_virq);
+	pipeline_post_sirq(deletion_virq);
 	xnlock_put_irqrestore(&nklock, s);
 }
 EXPORT_SYMBOL_GPL(xnselector_destroy);
 
-static void xnselector_destroy_loop(unsigned int virq, void *arg)
+static irqreturn_t xnselector_destroy_loop(int virq, void *dev_id)
 {
 	struct xnselect_binding *binding, *tmpb;
 	struct xnselector *selector, *tmps;
@@ -438,25 +439,22 @@ static void xnselector_destroy_loop(unsigned int virq, void *arg)
 	}
 out:
 	xnlock_put_irqrestore(&nklock, s);
+
+	return IRQ_HANDLED;
 }
 
 int xnselect_mount(void)
 {
-	deletion_virq = ipipe_alloc_virq();
-	if (deletion_virq == 0)
-		return -EBUSY;
+	deletion_virq = pipeline_create_inband_sirq(xnselector_destroy_loop);
+	if (deletion_virq < 0)
+		return deletion_virq;
 
-	ipipe_request_irq(ipipe_root_domain,
-			deletion_virq,
-			xnselector_destroy_loop,
-			NULL, NULL);
 	return 0;
 }
 
 int xnselect_umount(void)
 {
-	ipipe_free_irq(ipipe_root_domain, deletion_virq);
-	ipipe_free_virq(deletion_virq);
+	pipeline_delete_inband_sirq(deletion_virq);
 	return 0;
 }
 
