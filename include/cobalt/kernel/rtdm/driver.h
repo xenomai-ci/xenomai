@@ -40,7 +40,6 @@
 #include <cobalt/kernel/synch.h>
 #include <cobalt/kernel/select.h>
 #include <cobalt/kernel/clock.h>
-#include <cobalt/kernel/apc.h>
 #include <cobalt/kernel/init.h>
 #include <cobalt/kernel/ancillaries.h>
 #include <cobalt/kernel/tree.h>

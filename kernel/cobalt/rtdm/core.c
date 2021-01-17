@@ -26,7 +26,6 @@
 #include <linux/anon_inodes.h>
 #include <cobalt/kernel/ppd.h>
 #include <cobalt/kernel/heap.h>
-#include <cobalt/kernel/apc.h>
 #include "rtdm/internal.h"
 #define CREATE_TRACE_POINTS
 #include <trace/events/cobalt-rtdm.h>

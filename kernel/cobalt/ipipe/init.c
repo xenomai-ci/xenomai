@@ -10,15 +10,12 @@
 #include <linux/ipipe_tickdev.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/clock.h>
-#include <cobalt/kernel/apc.h>
 
 static unsigned long timerfreq_arg;
 module_param_named(timerfreq, timerfreq_arg, ulong, 0444);
 
 static unsigned long clockfreq_arg;
 module_param_named(clockfreq, clockfreq_arg, ulong, 0444);
-
-void apc_dispatch(unsigned int virq, void *arg);
 
 int __init pipeline_init(void)
 {
@@ -53,18 +50,6 @@ int __init pipeline_init(void)
 
 	ipipe_register_head(&xnsched_realtime_domain, "Xenomai");
 
-	ret = -EBUSY;
-	virq = ipipe_alloc_virq();
-	if (virq == 0)
-		goto fail_apc;
-
-	cobalt_pipeline.apc_virq = virq;
-
-	ipipe_request_irq(ipipe_root_domain,
-			  cobalt_pipeline.apc_virq,
-			  apc_dispatch,
-			  NULL, NULL);
-
 	virq = ipipe_alloc_virq();
 	if (virq == 0)
 		goto fail_escalate;
@@ -87,10 +72,6 @@ fail_clock:
 		       cobalt_pipeline.escalate_virq);
 	ipipe_free_virq(cobalt_pipeline.escalate_virq);
 fail_escalate:
-	ipipe_free_irq(ipipe_root_domain,
-		       cobalt_pipeline.apc_virq);
-	ipipe_free_virq(cobalt_pipeline.apc_virq);
-fail_apc:
 	ipipe_unregister_head(&xnsched_realtime_domain);
 
 	if (cobalt_machine.cleanup)

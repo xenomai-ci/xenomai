@@ -18,7 +18,6 @@
  */
 #include <cobalt/kernel/lock.h>
 #include <cobalt/kernel/clock.h>
-#include <cobalt/kernel/apc.h>
 #include <cobalt/kernel/vfile.h>
 #include <cobalt/kernel/intr.h>
 #include <cobalt/kernel/heap.h>
@@ -174,45 +173,6 @@ static struct xnvfile_regular faults_vfile = {
 	.ops = &faults_vfile_ops,
 };
 
-static int apc_vfile_show(struct xnvfile_regular_iterator *it, void *data)
-{
-	int cpu, apc;
-
-	/* We assume the entire output fits in a single page. */
-
-	xnvfile_puts(it, "APC  ");
-
-	for_each_realtime_cpu(cpu)
-		xnvfile_printf(it, "        CPU%d", cpu);
-
-	for (apc = 0; apc < BITS_PER_LONG; apc++) {
-		if (!test_bit(apc, &cobalt_pipeline.apc_map))
-			continue; /* Not hooked. */
-
-		xnvfile_printf(it, "\n%3d: ", apc);
-
-		for_each_realtime_cpu(cpu)
-			xnvfile_printf(it, "%12lu",
-				       per_cpu(cobalt_machine_cpudata, cpu).apc_shots[apc]);
-
-		if (cobalt_pipeline.apc_table[apc].name)
-			xnvfile_printf(it, "    (%s)",
-				       cobalt_pipeline.apc_table[apc].name);
-	}
-
-	xnvfile_putc(it, '\n');
-
-	return 0;
-}
-
-static struct xnvfile_regular_ops apc_vfile_ops = {
-	.show = apc_vfile_show,
-};
-
-static struct xnvfile_regular apc_vfile = {
-	.ops = &apc_vfile_ops,
-};
-
 void xnprocfs_cleanup_tree(void)
 {
 #ifdef CONFIG_XENO_OPT_DEBUG
@@ -221,7 +181,6 @@ void xnprocfs_cleanup_tree(void)
 #endif
 	xnvfile_destroy_dir(&cobalt_debug_vfroot);
 #endif /* XENO_OPT_DEBUG */
-	xnvfile_destroy_regular(&apc_vfile);
 	xnvfile_destroy_regular(&faults_vfile);
 	xnvfile_destroy_regular(&version_vfile);
 	xnvfile_destroy_regular(&latency_vfile);
@@ -250,7 +209,6 @@ int __init xnprocfs_init_tree(void)
 	xnvfile_init_regular("latency", &latency_vfile, &cobalt_vfroot);
 	xnvfile_init_regular("version", &version_vfile, &cobalt_vfroot);
 	xnvfile_init_regular("faults", &faults_vfile, &cobalt_vfroot);
-	xnvfile_init_regular("apc", &apc_vfile, &cobalt_vfroot);
 #ifdef CONFIG_XENO_OPT_DEBUG
 	xnvfile_init_dir("debug", &cobalt_debug_vfroot, &cobalt_vfroot);
 #ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
