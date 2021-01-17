@@ -28,6 +28,7 @@
 #include <cobalt/kernel/registry.h>
 #include <cobalt/kernel/lock.h>
 #include <cobalt/kernel/ppd.h>
+#include <pipeline/inband_work.h>
 #include <trace/events/cobalt-rtdm.h>
 #include <rtdm/fd.h>
 #include "internal.h"
@@ -257,7 +258,7 @@ out:
 EXPORT_SYMBOL_GPL(rtdm_fd_get);
 
 struct lostage_trigger_close {
-	struct ipipe_work_header work; /* Must be first */
+	struct pipeline_inband_work inband_work; /* Must be first. */
 };
 
 static int fd_cleanup_thread(void *data)
@@ -287,7 +288,7 @@ static int fd_cleanup_thread(void *data)
 	return 0;
 }
 
-static void lostage_trigger_close(struct ipipe_work_header *work)
+static void lostage_trigger_close(struct pipeline_inband_work *inband_work)
 {
 	up(&rtdm_fd_cleanup_sem);
 }
@@ -310,17 +311,15 @@ static void __put_fd(struct rtdm_fd *fd, spl_t s)
 		fd->ops->close(fd);
 	else {
 		struct lostage_trigger_close closework = {
-			.work = {
-				.size = sizeof(closework),
-				.handler = lostage_trigger_close,
-			},
+			.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(closework,
+					lostage_trigger_close),
 		};
 
 		xnlock_get_irqsave(&fdtree_lock, s);
 		list_add_tail(&fd->cleanup, &rtdm_fd_cleanup_queue);
 		xnlock_put_irqrestore(&fdtree_lock, s);
 
-		ipipe_post_work_root(&closework, work);
+		pipeline_post_inband_work(&closework);
 	}
 }
 

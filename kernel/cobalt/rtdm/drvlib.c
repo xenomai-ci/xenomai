@@ -31,6 +31,7 @@
 #include <linux/anon_inodes.h>
 #include <rtdm/driver.h>
 #include <rtdm/compat.h>
+#include <pipeline/inband_work.h>
 #include "internal.h"
 #include <trace/events/cobalt-rtdm.h>
 
@@ -1568,16 +1569,16 @@ void rtdm_nrtsig_destroy(rtdm_nrtsig_t *nrt_sig);
 #endif /* DOXYGEN_CPP */
 
 struct nrtsig_work {
-	struct ipipe_work_header work;
+	struct pipeline_inband_work inband_work; /* Must be first. */
 	struct rtdm_nrtsig *nrtsig;
 };
 
-static void nrtsig_execute(struct ipipe_work_header *work)
+static void nrtsig_execute(struct pipeline_inband_work *inband_work)
 {
 	struct rtdm_nrtsig *nrtsig;
 	struct nrtsig_work *w;
 
-	w = container_of(work, typeof(*w), work);
+	w = container_of(inband_work, typeof(*w), inband_work);
 	nrtsig = w->nrtsig;
 	nrtsig->handler(nrtsig, nrtsig->arg);
 }
@@ -1592,26 +1593,24 @@ static void nrtsig_execute(struct ipipe_work_header *work)
 void rtdm_nrtsig_pend(rtdm_nrtsig_t *nrt_sig)
 {
 	struct nrtsig_work nrtsig_work = {
-		.work = {
-			.size = sizeof(nrtsig_work),
-			.handler = nrtsig_execute,
-		},
+		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(nrtsig_work,
+					nrtsig_execute),
 		.nrtsig = nrt_sig,
 	};
-	ipipe_post_work_root(&nrtsig_work, work);
+	pipeline_post_inband_work(&nrtsig_work);
 }
 EXPORT_SYMBOL_GPL(rtdm_nrtsig_pend);
 
 struct lostage_schedule_work {
-	struct ipipe_work_header work;
+	struct pipeline_inband_work inband_work; /* Must be first. */
 	struct work_struct *lostage_work;
 };
 
-static void lostage_schedule_work(struct ipipe_work_header *work)
+static void lostage_schedule_work(struct pipeline_inband_work *inband_work)
 {
 	struct lostage_schedule_work *w;
 
-	w = container_of(work, typeof(*w), work);
+	w = container_of(inband_work, typeof(*w), inband_work);
 	schedule_work(w->lostage_work);
 }
 
@@ -1622,18 +1621,17 @@ static void lostage_schedule_work(struct ipipe_work_header *work)
  */
 void rtdm_schedule_nrt_work(struct work_struct *lostage_work)
 {
-	struct lostage_schedule_work ipipe_work = {
-		.work = {
-			.size = sizeof(ipipe_work),
-			.handler = lostage_schedule_work,
-		},
+	struct lostage_schedule_work sched_work = {
+		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(sched_work,
+					lostage_schedule_work),
 		.lostage_work = lostage_work,
 	};
 
 	if (is_secondary_domain())
 		schedule_work(lostage_work);
 	else
-		ipipe_post_work_root(&ipipe_work, work);
+		pipeline_post_inband_work(&sched_work);
+
 }
 EXPORT_SYMBOL_GPL(rtdm_schedule_nrt_work);
 
