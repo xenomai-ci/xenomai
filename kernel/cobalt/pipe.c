@@ -32,7 +32,6 @@
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/pipe.h>
-#include <cobalt/kernel/apc.h>
 
 static int xnpipe_asyncsig = SIGIO;
 
@@ -47,7 +46,7 @@ static LIST_HEAD(xnpipe_sleepq);
 
 static LIST_HEAD(xnpipe_asyncq);
 
-int xnpipe_wakeup_apc;
+static int xnpipe_wakeup_virq;
 
 static struct class *xnpipe_class;
 
@@ -146,7 +145,7 @@ static inline void xnpipe_dequeue_all(struct xnpipe_state *state, int mask)
 	__sigpending;							\
 })
 
-static void xnpipe_wakeup_proc(void *cookie)
+static void xnpipe_wakeup_proc(unsigned int virq, void *arg)
 {
 	struct xnpipe_state *state;
 	unsigned long rbits;
@@ -224,7 +223,7 @@ out:
 
 static inline void xnpipe_schedule_request(void) /* hw IRQs off */
 {
-	__xnapc_schedule(xnpipe_wakeup_apc);
+	ipipe_post_irq_root(xnpipe_wakeup_virq);
 }
 
 static inline ssize_t xnpipe_flush_bufq(void (*fn)(void *buf, void *xstate),
@@ -1153,14 +1152,22 @@ int xnpipe_mount(void)
 
 	if (register_chrdev(XNPIPE_DEV_MAJOR, "rtpipe", &xnpipe_fops)) {
 		printk(XENO_ERR
-		       "unable to reserve major #%d for message pipe support\n",
+		       "unable to reserve major #%d for message pipes\n",
 		       XNPIPE_DEV_MAJOR);
 		return -EBUSY;
 	}
 
-	xnpipe_wakeup_apc =
-	    xnapc_alloc("pipe_wakeup", &xnpipe_wakeup_proc, NULL);
+	xnpipe_wakeup_virq = ipipe_alloc_virq();
+	if (xnpipe_wakeup_virq == 0) {
+		printk(XENO_ERR
+		       "unable to reserve synthetic IRQ for message pipes\n");
+		return -EBUSY;
+	}
 
+	ipipe_request_irq(ipipe_root_domain,
+			  xnpipe_wakeup_virq,
+			  xnpipe_wakeup_proc,
+			  NULL, NULL);
 	return 0;
 }
 
@@ -1168,7 +1175,10 @@ void xnpipe_umount(void)
 {
 	int i;
 
-	xnapc_free(xnpipe_wakeup_apc);
+	ipipe_free_irq(ipipe_root_domain,
+		       xnpipe_wakeup_virq);
+	ipipe_free_virq(xnpipe_wakeup_virq);
+
 	unregister_chrdev(XNPIPE_DEV_MAJOR, "rtpipe");
 
 	for (i = 0; i < XNPIPE_NDEVS; i++)
