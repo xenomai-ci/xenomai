@@ -18,6 +18,7 @@
  * 02111-1307, USA.
  */
 #include <linux/sched.h>
+#include <pipeline/tick.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/thread.h>
 #include <cobalt/kernel/timer.h>
@@ -63,8 +64,10 @@ int xntimer_heading_p(struct xntimer *timer)
 
 void xntimer_enqueue_and_program(struct xntimer *timer, xntimerq_t *q)
 {
+	struct xnsched *sched = xntimer_sched(timer);
+
 	xntimer_enqueue(timer, q);
-	if (xntimer_heading_p(timer)) {
+	if (pipeline_must_force_program_tick(sched) || xntimer_heading_p(timer)) {
 		struct xnsched *sched = xntimer_sched(timer);
 		struct xnclock *clock = xntimer_clock(timer);
 		if (sched != xnsched_current())
