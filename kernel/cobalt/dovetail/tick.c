@@ -14,6 +14,36 @@
 
 static DEFINE_PER_CPU(struct clock_proxy_device *, proxy_device);
 
+void pipeline_set_timer_shot(unsigned long cycles)
+{
+	struct clock_proxy_device *dev = __this_cpu_read(proxy_device);
+	struct clock_event_device *real_dev = dev->real_device;
+	int ret;
+	u64 sumcyc;
+	ktime_t t;
+
+	if (real_dev->features & CLOCK_EVT_FEAT_KTIME) {
+		t = ktime_add(cycles, xnclock_core_read_raw());
+		real_dev->set_next_ktime(t, real_dev);
+	} else {
+		if (cycles <= 0)
+			cycles = real_dev->min_delta_ns;
+		else {
+			cycles = min_t(int64_t, cycles,
+					real_dev->max_delta_ns);
+			cycles = max_t(int64_t, cycles,
+					real_dev->min_delta_ns);
+		}
+		sumcyc = ((u64)cycles * real_dev->mult) >> real_dev->shift;
+
+		ret = real_dev->set_next_event(sumcyc, real_dev);
+		if (ret) {
+			ret = real_dev->set_next_event(real_dev->min_delta_ticks,
+							real_dev);
+		}
+	}
+}
+
 static int proxy_set_next_ktime(ktime_t expires,
 				struct clock_event_device *proxy_dev)
 {
