@@ -14,6 +14,18 @@
 
 static DEFINE_PER_CPU(struct clock_proxy_device *, proxy_device);
 
+const char *pipeline_timer_name(void)
+{
+	struct clock_proxy_device *dev = __this_cpu_read(proxy_device);
+	struct clock_event_device *real_dev = dev->real_device;
+
+	/*
+	 * Return the name of the current clock event chip, which is
+	 * the real device controlled by the proxy tick device.
+	 */
+	return real_dev->name;
+}
+
 void pipeline_set_timer_shot(unsigned long delay) /* ns */
 {
 	struct clock_proxy_device *dev = __this_cpu_read(proxy_device);
