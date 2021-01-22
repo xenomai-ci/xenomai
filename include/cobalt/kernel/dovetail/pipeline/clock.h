@@ -19,17 +19,7 @@ static inline u64 pipeline_read_cycle_counter(void)
 	return 0;
 }
 
-static inline void pipeline_set_timer_shot(unsigned long cycles)
-{
-	/*
-	 * N/A. Revisit: xnclock_core_local_shot() should go to the
-	 * I-pipe section, we do things differently on Dovetail via
-	 * the proxy tick device. As a consequence,
-	 * pipeline_set_timer_shot() should not be part of the
-	 * pipeline interface.
-	 */
-	TODO();
-}
+void pipeline_set_timer_shot(unsigned long cycles);
 
 static inline const char *pipeline_timer_name(void)
 {

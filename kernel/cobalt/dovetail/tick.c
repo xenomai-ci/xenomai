@@ -14,6 +14,34 @@
 
 static DEFINE_PER_CPU(struct clock_proxy_device *, proxy_device);
 
+void pipeline_set_timer_shot(unsigned long delay) /* ns */
+{
+	struct clock_proxy_device *dev = __this_cpu_read(proxy_device);
+	struct clock_event_device *real_dev = dev->real_device;
+	u64 cycles;
+	ktime_t t;
+	int ret;
+
+	if (real_dev->features & CLOCK_EVT_FEAT_KTIME) {
+		t = ktime_add(delay, xnclock_core_read_raw());
+		real_dev->set_next_ktime(t, real_dev);
+	} else {
+		if (delay <= 0) {
+			delay = real_dev->min_delta_ns;
+		} else {
+			delay = min_t(int64_t, delay,
+				real_dev->max_delta_ns);
+			delay = max_t(int64_t, delay,
+				real_dev->min_delta_ns);
+		}
+		cycles = ((u64)delay * real_dev->mult) >> real_dev->shift;
+		ret = real_dev->set_next_event(cycles, real_dev);
+		if (ret)
+			real_dev->set_next_event(real_dev->min_delta_ticks,
+						real_dev);
+	}
+}
+
 static int proxy_set_next_ktime(ktime_t expires,
 				struct clock_event_device *proxy_dev)
 {
