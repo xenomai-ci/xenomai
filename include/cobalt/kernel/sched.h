@@ -48,6 +48,11 @@
 #define XNINIRQ		0x00004000	/* In IRQ handling context */
 #define XNHDEFER	0x00002000	/* Host tick deferred */
 
+/*
+ * Hardware timer is stopped.
+ */
+#define XNTSTOP		0x00000800
+
 struct xnsched_rt {
 	xnsched_queue_t runnable;	/*!< Runnable thread queue. */
 };
