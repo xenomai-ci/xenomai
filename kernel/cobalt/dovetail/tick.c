@@ -84,6 +84,11 @@ void xn_core_tick(struct clock_event_device *dummy) /* hard irqs off */
 	xnintr_core_clock_handler();
 }
 
+inline bool pipeline_must_force_program_tick(struct xnsched *sched)
+{
+	return sched->lflags & XNTSTOP;
+}
+
 static int proxy_set_oneshot_stopped(struct clock_event_device *proxy_dev)
 {
 	struct clock_event_device *real_dev;
@@ -105,6 +110,7 @@ static int proxy_set_oneshot_stopped(struct clock_event_device *proxy_dev)
 	xnlock_get_irqsave(&nklock, s);
 	sched = xnsched_current();
 	xntimer_stop(&sched->htimer);
+	sched->lflags |= XNTSTOP;
 
 	if (sched->lflags & XNIDLE) {
 		real_dev = dev->real_device;
