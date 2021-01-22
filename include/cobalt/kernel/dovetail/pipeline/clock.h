@@ -21,16 +21,7 @@ static inline u64 pipeline_read_cycle_counter(void)
 
 void pipeline_set_timer_shot(unsigned long cycles);
 
-static inline const char *pipeline_timer_name(void)
-{
-	/*
-	 * Return the name of the current clock event chip, which is
-	 * the real device controlled by the proxy tick device.
-	 */
-	TODO();
-
-	return "?";
-}
+const char *pipeline_timer_name(void);
 
 static inline const char *pipeline_clock_name(void)
 {
