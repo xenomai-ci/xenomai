@@ -149,36 +149,7 @@ static int __do_clock_host_realtime(struct timespec *ts)
 	return 0;
 }
 
-/**
- * Read the specified clock.
- *
- * This service returns, at the address @a tp the current value of the clock @a
- * clock_id. If @a clock_id is:
- * - CLOCK_REALTIME, the clock value represents the amount of time since the
- *   Epoch, with a precision of one system clock tick;
- * - CLOCK_MONOTONIC or CLOCK_MONOTONIC_RAW, the clock value is given
- *   by an architecture-dependent high resolution counter, with a
- *   precision independent from the system clock tick duration.
- * - CLOCK_HOST_REALTIME, the clock value as seen by the host, typically
- *   Linux. Resolution and precision depend on the host, but it is guaranteed
- *   that both, host and Cobalt, see the same information.
- *
- * @param clock_id clock identifier, either CLOCK_REALTIME, CLOCK_MONOTONIC,
- *        or CLOCK_HOST_REALTIME;
- *
- * @param tp the address where the value of the specified clock will be stored.
- *
- * @retval 0 on success;
- * @retval -1 with @a errno set if:
- * - EINVAL, @a clock_id is invalid.
- *
- * @see
- * <a href="http://www.opengroup.org/onlinepubs/000095399/functions/clock_gettime.html">
- * Specification.</a>
- *
- * @apitags{unrestricted}
- */
-COBALT_IMPL(int, clock_gettime, (clockid_t clock_id, struct timespec *tp))
+static int gettime_via_tsc(clockid_t clock_id, struct timespec *tp)
 {
 	unsigned long rem;
 	xnticks_t ns;
@@ -212,30 +183,98 @@ COBALT_IMPL(int, clock_gettime, (clockid_t clock_id, struct timespec *tp))
 	return 0;
 }
 
+static int gettime_via_vdso(clockid_t clock_id, struct timespec *tp)
+{
+	int ret;
+
+	switch (clock_id) {
+	case CLOCK_REALTIME:
+	case CLOCK_HOST_REALTIME:
+		ret = __cobalt_vdso_gettime(CLOCK_REALTIME, tp);
+		break;
+	case CLOCK_MONOTONIC:
+	case CLOCK_MONOTONIC_RAW:
+		ret = __cobalt_vdso_gettime(clock_id, tp);
+		break;
+	default:
+		ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_gettime, clock_id, tp);
+	}
+
+	if (ret) {
+		errno = ret;
+		return -1;
+	}
+
+	return 0;
+}
+
+/**
+ * Read the specified clock.
+ *
+ * This service returns, at the address @a tp the current value of the clock @a
+ * clock_id. If @a clock_id is:
+ * - CLOCK_REALTIME, the clock value represents the amount of time since the
+ *   Epoch, with a precision of one system clock tick;
+ * - CLOCK_MONOTONIC or CLOCK_MONOTONIC_RAW, the clock value is given
+ *   by an architecture-dependent high resolution counter, with a
+ *   precision independent from the system clock tick duration.
+ * - CLOCK_HOST_REALTIME, the clock value as seen by the host, typically
+ *   Linux. Resolution and precision depend on the host, but it is guaranteed
+ *   that both, host and Cobalt, see the same information.
+ *
+ * @param clock_id clock identifier, either CLOCK_REALTIME, CLOCK_MONOTONIC,
+ *        or CLOCK_HOST_REALTIME;
+ *
+ * @param tp the address where the value of the specified clock will be stored.
+ *
+ * @retval 0 on success;
+ * @retval -1 with @a errno set if:
+ * - EINVAL, @a clock_id is invalid.
+ *
+ * @see
+ * <a href="http://www.opengroup.org/onlinepubs/000095399/functions/clock_gettime.html">
+ * Specification.</a>
+ *
+ * @apitags{unrestricted}
+ */
+COBALT_IMPL(int, clock_gettime, (clockid_t clock_id, struct timespec *tp))
+{
+	if (cobalt_use_legacy_tsc())
+		return gettime_via_tsc(clock_id, tp);
+
+	return gettime_via_vdso(clock_id, tp);
+}
+
 /**
  * Set the specified clock.
  *
- * This allow setting the CLOCK_REALTIME clock.
+ * Set the CLOCK_REALTIME or Cobalt-specific clocks.
  *
- * @param clock_id the id of the clock to be set, only CLOCK_REALTIME is
- * supported.
+ * @param clock_id the id of the clock to be set. CLOCK_REALTIME,
+ * and Cobalt-specific clocks are supported.
  *
  * @param tp the address of a struct timespec specifying the new date.
  *
  * @retval 0 on success;
  * @retval -1 with @a errno set if:
- * - EINVAL, @a clock_id is not CLOCK_REALTIME;
+ * - EINVAL, @a clock_id is undefined;
  * - EINVAL, the date specified by @a tp is invalid.
  *
  * @see
  * <a href="http://www.opengroup.org/onlinepubs/000095399/functions/clock_settime.html">
  * Specification.</a>
  *
- * @apitags{unrestricted}
+ * @note Setting CLOCK_REALTIME may cause the caller to switch to
+ * secondary mode.
+ *
+ * @apitags{unrestricted, switch-secondary}
  */
 COBALT_IMPL(int, clock_settime, (clockid_t clock_id, const struct timespec *tp))
 {
 	int ret;
+
+	if (clock_id == CLOCK_REALTIME && !cobalt_use_legacy_tsc())
+		return __STD(clock_settime(CLOCK_REALTIME, tp));
 
 	ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_settime, clock_id, tp);
 	if (ret) {
