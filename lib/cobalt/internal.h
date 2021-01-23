@@ -20,6 +20,7 @@
 
 #include <limits.h>
 #include <stdbool.h>
+#include <time.h>
 #include <boilerplate/ancillaries.h>
 #include <cobalt/sys/cobalt.h>
 #include "current.h"
@@ -87,6 +88,8 @@ int cobalt_xlate_schedparam(int policy,
 			    struct sched_param *param);
 int cobalt_init(void);
 
+void *cobalt_lookup_vdso(const char *version, const char *name);
+
 extern struct sigaction __cobalt_orig_sigdebug;
 
 extern int __cobalt_std_fifo_minpri,
@@ -94,6 +97,9 @@ extern int __cobalt_std_fifo_minpri,
 
 extern int __cobalt_std_rr_minpri,
 	   __cobalt_std_rr_maxpri;
+
+extern int (*__cobalt_vdso_gettime)(clockid_t clk_id,
+				    struct timespec *tp);
 
 extern unsigned int cobalt_features;
 

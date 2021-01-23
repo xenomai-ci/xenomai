@@ -22,6 +22,7 @@ libcobalt_la_SOURCES =		\
 	internal.c		\
 	mq.c			\
 	mutex.c			\
+	parse_vdso.c		\
 	printf.c		\
 	rtdm.c			\
 	sched.c			\

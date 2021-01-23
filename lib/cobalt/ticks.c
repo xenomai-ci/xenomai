@@ -18,9 +18,22 @@
 #include <cobalt/arith.h>
 #include <cobalt/ticks.h>
 #include <asm/xenomai/tsc.h>
+#include <asm/xenomai/time.h>
 #include "internal.h"
 
 unsigned long long __cobalt_tsc_clockfreq;
+
+/*
+ * If we have no fast path via the vDSO for reading timestamps, ask
+ * the Cobalt core.
+ */
+static int gettime_fallback(clockid_t clk_id, struct timespec *tp)
+{
+	return __RT(clock_gettime(clk_id, tp));
+}
+
+int (*__cobalt_vdso_gettime)(clockid_t clk_id,
+			struct timespec *tp) = gettime_fallback;
 
 #ifdef XNARCH_HAVE_LLMULSHFT
 
@@ -102,14 +115,19 @@ unsigned long long cobalt_divrem_billion(unsigned long long value,
 void cobalt_ticks_init(unsigned long long freq)
 {
 	__cobalt_tsc_clockfreq = freq;
-#ifdef XNARCH_HAVE_LLMULSHFT
 	if (freq) {
+#ifdef XNARCH_HAVE_LLMULSHFT
 		xnarch_init_llmulshft(1000000000, freq, &tsc_scale, &tsc_shift);
 #ifdef XNARCH_HAVE_NODIV_LLIMD
 		xnarch_init_u32frac(&tsc_frac, 1 << tsc_shift, tsc_scale);
 #endif
-	}
 #endif
+	} else {
+		void *vcall = cobalt_lookup_vdso(COBALT_VDSO_VERSION,
+						 COBALT_VDSO_GETTIME);
+		if (vcall)
+			__cobalt_vdso_gettime = vcall;
+	}
 #ifdef XNARCH_HAVE_NODIV_LLIMD
 	xnarch_init_u32frac(&bln_frac, 1, 1000000000);
 #endif
