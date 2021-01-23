@@ -205,6 +205,9 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,7,0)
 #define pci_aer_clear_nonfatal_status	pci_cleanup_aer_uncorrect_error_status
+#define old_timespec32    compat_timespec
+#define old_itimerspec32  compat_itimerspec
+#define old_timeval32     compat_timeval
 #endif
 
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
