@@ -124,14 +124,14 @@ COBALT_SYSCALL32emu(sem_open, lostage,
 
 COBALT_SYSCALL32emu(sem_timedwait, primary,
 		    (struct cobalt_sem_shadow __user *u_sem,
-		     struct compat_timespec __user *u_ts))
+		     struct old_timespec32 __user *u_ts))
 {
 	return __cobalt_sem_timedwait(u_sem, u_ts, sys32_fetch_timeout);
 }
 
 COBALT_SYSCALL32emu(clock_getres, current,
 		    (clockid_t clock_id,
-		     struct compat_timespec __user *u_ts))
+		     struct old_timespec32 __user *u_ts))
 {
 	struct timespec64 ts;
 	int ret;
@@ -145,7 +145,7 @@ COBALT_SYSCALL32emu(clock_getres, current,
 
 COBALT_SYSCALL32emu(clock_gettime, current,
 		    (clockid_t clock_id,
-		     struct compat_timespec __user *u_ts))
+		     struct old_timespec32 __user *u_ts))
 {
 	struct timespec64 ts;
 	int ret;
@@ -159,7 +159,7 @@ COBALT_SYSCALL32emu(clock_gettime, current,
 
 COBALT_SYSCALL32emu(clock_settime, current,
 		    (clockid_t clock_id,
-		     const struct compat_timespec __user *u_ts))
+		     const struct old_timespec32 __user *u_ts))
 {
 	struct timespec64 ts;
 	int ret;
@@ -190,8 +190,8 @@ COBALT_SYSCALL32emu(clock_adjtime, current,
 
 COBALT_SYSCALL32emu(clock_nanosleep, nonrestartable,
 		    (clockid_t clock_id, int flags,
-		     const struct compat_timespec __user *u_rqt,
-		     struct compat_timespec __user *u_rmt))
+		     const struct old_timespec32 __user *u_rqt,
+		     struct old_timespec32 __user *u_rmt))
 {
 	struct timespec64 rqt, rmt, *rmtp = NULL;
 	int ret;
@@ -212,7 +212,7 @@ COBALT_SYSCALL32emu(clock_nanosleep, nonrestartable,
 
 COBALT_SYSCALL32emu(mutex_timedlock, primary,
 		    (struct cobalt_mutex_shadow __user *u_mx,
-		     const struct compat_timespec __user *u_ts))
+		     const struct old_timespec32 __user *u_ts))
 {
 	return __cobalt_mutex_timedlock_break(u_mx, u_ts, sys32_fetch_timeout);
 }
@@ -222,7 +222,7 @@ COBALT_SYSCALL32emu(cond_wait_prologue, nonrestartable,
 		     struct cobalt_mutex_shadow __user *u_mx,
 		     int *u_err,
 		     unsigned int timed,
-		     struct compat_timespec __user *u_ts))
+		     struct old_timespec32 __user *u_ts))
 {
 	return __cobalt_cond_wait_prologue(u_cnd, u_mx, u_err, u_ts,
 					   timed ? sys32_fetch_timeout : NULL);
@@ -261,7 +261,7 @@ COBALT_SYSCALL32emu(mq_getattr, current,
 COBALT_SYSCALL32emu(mq_timedsend, primary,
 		    (mqd_t uqd, const void __user *u_buf, size_t len,
 		     unsigned int prio,
-		     const struct compat_timespec __user *u_ts))
+		     const struct old_timespec32 __user *u_ts))
 {
 	return __cobalt_mq_timedsend(uqd, u_buf, len, prio,
 				     u_ts, u_ts ? sys32_fetch_timeout : NULL);
@@ -271,7 +271,7 @@ COBALT_SYSCALL32emu(mq_timedreceive, primary,
 		    (mqd_t uqd, void __user *u_buf,
 		     compat_ssize_t __user *u_len,
 		     unsigned int __user *u_prio,
-		     const struct compat_timespec __user *u_ts))
+		     const struct old_timespec32 __user *u_ts))
 {
 	compat_ssize_t clen;
 	ssize_t len;
@@ -511,8 +511,8 @@ COBALT_SYSCALL32emu(timer_create, current,
 
 COBALT_SYSCALL32emu(timer_settime, primary,
 		    (timer_t tm, int flags,
-		     const struct compat_itimerspec __user *u_newval,
-		     struct compat_itimerspec __user *u_oldval))
+		     const struct old_itimerspec32 __user *u_newval,
+		     struct old_itimerspec32 __user *u_oldval))
 {
 	struct itimerspec64 newv, oldv, *oldvp = &oldv;
 	int ret;
@@ -538,7 +538,7 @@ COBALT_SYSCALL32emu(timer_settime, primary,
 }
 
 COBALT_SYSCALL32emu(timer_gettime, current,
-		    (timer_t tm, struct compat_itimerspec __user *u_val))
+		    (timer_t tm, struct old_itimerspec32 __user *u_val))
 {
 	struct itimerspec64 val;
 	int ret;
@@ -550,8 +550,8 @@ COBALT_SYSCALL32emu(timer_gettime, current,
 
 COBALT_SYSCALL32emu(timerfd_settime, primary,
 		    (int fd, int flags,
-		     const struct compat_itimerspec __user *new_value,
-		     struct compat_itimerspec __user *old_value))
+		     const struct old_itimerspec32 __user *new_value,
+		     struct old_itimerspec32 __user *old_value))
 {
 	struct itimerspec64 ovalue, value;
 	int ret;
@@ -575,7 +575,7 @@ COBALT_SYSCALL32emu(timerfd_settime, primary,
 }
 
 COBALT_SYSCALL32emu(timerfd_gettime, current,
-		    (int fd, struct compat_itimerspec __user *curr_value))
+		    (int fd, struct old_itimerspec32 __user *curr_value))
 {
 	struct itimerspec64 value;
 	int ret;
@@ -606,7 +606,7 @@ COBALT_SYSCALL32emu(sigwait, primary,
 COBALT_SYSCALL32emu(sigtimedwait, nonrestartable,
 		    (const compat_sigset_t __user *u_set,
 		     struct compat_siginfo __user *u_si,
-		     const struct compat_timespec __user *u_timeout))
+		     const struct old_timespec32 __user *u_timeout))
 {
 	struct timespec64 timeout;
 	sigset_t set;
@@ -658,7 +658,7 @@ COBALT_SYSCALL32emu(sigqueue, conforming,
 
 COBALT_SYSCALL32emu(monitor_wait, nonrestartable,
 		    (struct cobalt_monitor_shadow __user *u_mon,
-		     int event, const struct compat_timespec __user *u_ts,
+		     int event, const struct old_timespec32 __user *u_ts,
 		     int __user *u_ret))
 {
 	struct timespec64 ts, *tsp = NULL;
@@ -678,7 +678,7 @@ COBALT_SYSCALL32emu(event_wait, primary,
 		    (struct cobalt_event_shadow __user *u_event,
 		     unsigned int bits,
 		     unsigned int __user *u_bits_r,
-		     int mode, const struct compat_timespec __user *u_ts))
+		     int mode, const struct old_timespec32 __user *u_ts))
 {
 	struct timespec64 ts, *tsp = NULL;
 	int ret;
@@ -698,7 +698,7 @@ COBALT_SYSCALL32emu(select, nonrestartable,
 		     compat_fd_set __user *u_rfds,
 		     compat_fd_set __user *u_wfds,
 		     compat_fd_set __user *u_xfds,
-		     struct compat_timeval __user *u_tv))
+		     struct old_timeval32 __user *u_tv))
 {
 	compat_fd_set __user *ufd_sets[XNSELECT_MAX_TYPES] = {
 		[XNSELECT_READ] = u_rfds,
@@ -829,7 +829,7 @@ static int put_mmsg32(void __user **u_mmsg_p, const struct mmsghdr *mmsg)
 
 COBALT_SYSCALL32emu(recvmmsg, primary,
 	       (int ufd, struct compat_mmsghdr __user *u_msgvec, unsigned int vlen,
-		unsigned int flags, struct compat_timespec *u_timeout))
+		unsigned int flags, struct old_timespec32 *u_timeout))
 {
 	return __rtdm_fd_recvmmsg(ufd, u_msgvec, vlen, flags, u_timeout,
 				  get_mmsg32, put_mmsg32,

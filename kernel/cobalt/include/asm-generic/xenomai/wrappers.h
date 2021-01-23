@@ -191,6 +191,12 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
+#define old_timespec32    compat_timespec
+#define old_itimerspec32  compat_itimerspec
+#define old_timeval32     compat_timeval
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
 #define mmap_read_lock(__mm)	down_read(&mm->mmap_sem)
 #define mmap_read_unlock(__mm)	up_read(&mm->mmap_sem)
 #define mmap_write_lock(__mm)	down_write(&mm->mmap_sem)

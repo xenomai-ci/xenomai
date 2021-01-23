@@ -29,13 +29,13 @@ struct mq_attr;
 
 struct __compat_sched_ss_param {
 	int __sched_low_priority;
-	struct compat_timespec __sched_repl_period;
-	struct compat_timespec __sched_init_budget;
+	struct old_timespec32 __sched_repl_period;
+	struct old_timespec32 __sched_init_budget;
 	int __sched_max_repl;
 };
 
 struct __compat_sched_rr_param {
-	struct compat_timespec __sched_rr_quantum;
+	struct old_timespec32 __sched_rr_quantum;
 };
 
 struct compat_sched_param_ex {
@@ -56,8 +56,8 @@ struct compat_mq_attr {
 };
 
 struct compat_sched_tp_window {
-	struct compat_timespec offset;
-	struct compat_timespec duration;
+	struct old_timespec32 offset;
+	struct old_timespec32 duration;
 	int ptid;
 };
 
@@ -87,21 +87,21 @@ struct compat_rtdm_mmap_request {
 };
 
 int sys32_get_timespec(struct timespec64 *ts,
-		       const struct compat_timespec __user *cts);
+		       const struct old_timespec32 __user *cts);
 
-int sys32_put_timespec(struct compat_timespec __user *cts,
+int sys32_put_timespec(struct old_timespec32 __user *cts,
 		       const struct timespec64 *ts);
 
 int sys32_get_itimerspec(struct itimerspec64 *its,
-			 const struct compat_itimerspec __user *cits);
+			 const struct old_itimerspec32 __user *cits);
 
-int sys32_put_itimerspec(struct compat_itimerspec __user *cits,
+int sys32_put_itimerspec(struct old_itimerspec32 __user *cits,
 			 const struct itimerspec64 *its);
 
 int sys32_get_timeval(struct __kernel_old_timeval *tv,
-		      const struct compat_timeval __user *ctv);
+		      const struct old_timeval32 __user *ctv);
 
-int sys32_put_timeval(struct compat_timeval __user *ctv,
+int sys32_put_timeval(struct old_timeval32 __user *ctv,
 		      const struct __kernel_old_timeval *tv);
 
 int sys32_get_timex(struct __kernel_timex *tx,

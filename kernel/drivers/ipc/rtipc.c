@@ -273,7 +273,7 @@ int rtipc_get_timeval(struct rtdm_fd *fd, struct __kernel_old_timeval *tv,
 {
 #ifdef CONFIG_XENO_ARCH_SYS3264
 	if (rtdm_fd_is_compat(fd)) {
-		if (arglen != sizeof(struct compat_timeval))
+		if (arglen != sizeof(struct old_timeval32))
 			return -EINVAL;
 		return sys32_get_timeval(tv, arg);
 	}
@@ -295,7 +295,7 @@ int rtipc_put_timeval(struct rtdm_fd *fd, void *arg,
 {
 #ifdef CONFIG_XENO_ARCH_SYS3264
 	if (rtdm_fd_is_compat(fd)) {
-		if (arglen != sizeof(struct compat_timeval))
+		if (arglen != sizeof(struct old_timeval32))
 			return -EINVAL;
 		return sys32_put_timeval(arg, tv);
 	}

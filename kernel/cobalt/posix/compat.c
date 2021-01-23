@@ -23,9 +23,9 @@
 #include <xenomai/posix/mqueue.h>
 
 int sys32_get_timespec(struct timespec64 *ts,
-		       const struct compat_timespec __user *u_cts)
+		       const struct old_timespec32 __user *u_cts)
 {
-	struct compat_timespec cts;
+	struct old_timespec32 cts;
 
 	if (u_cts == NULL || !access_rok(u_cts, sizeof(*u_cts)))
 		return -EFAULT;
@@ -41,10 +41,10 @@ int sys32_get_timespec(struct timespec64 *ts,
 }
 EXPORT_SYMBOL_GPL(sys32_get_timespec);
 
-int sys32_put_timespec(struct compat_timespec __user *u_cts,
+int sys32_put_timespec(struct old_timespec32 __user *u_cts,
 		       const struct timespec64 *ts)
 {
-	struct compat_timespec cts;
+	struct old_timespec32 cts;
 
 	if (u_cts == NULL || !access_wok(u_cts, sizeof(*u_cts)))
 		return -EFAULT;
@@ -61,7 +61,7 @@ int sys32_put_timespec(struct compat_timespec __user *u_cts,
 EXPORT_SYMBOL_GPL(sys32_put_timespec);
 
 int sys32_get_itimerspec(struct itimerspec64 *its,
-			 const struct compat_itimerspec __user *cits)
+			 const struct old_itimerspec32 __user *cits)
 {
 	int ret = sys32_get_timespec(&its->it_value, &cits->it_value);
 
@@ -69,7 +69,7 @@ int sys32_get_itimerspec(struct itimerspec64 *its,
 }
 EXPORT_SYMBOL_GPL(sys32_get_itimerspec);
 
-int sys32_put_itimerspec(struct compat_itimerspec __user *cits,
+int sys32_put_itimerspec(struct old_itimerspec32 __user *cits,
 			 const struct itimerspec64 *its)
 {
 	int ret = sys32_put_timespec(&cits->it_value, &its->it_value);
@@ -79,7 +79,7 @@ int sys32_put_itimerspec(struct compat_itimerspec __user *cits,
 EXPORT_SYMBOL_GPL(sys32_put_itimerspec);
 
 int sys32_get_timeval(struct __kernel_old_timeval *tv,
-		      const struct compat_timeval __user *ctv)
+		      const struct old_timeval32 __user *ctv)
 {
 	return (ctv == NULL ||
 		!access_rok(ctv, sizeof(*ctv)) ||
@@ -88,7 +88,7 @@ int sys32_get_timeval(struct __kernel_old_timeval *tv,
 }
 EXPORT_SYMBOL_GPL(sys32_get_timeval);
 
-int sys32_put_timeval(struct compat_timeval __user *ctv,
+int sys32_put_timeval(struct old_timeval32 __user *ctv,
 		      const struct __kernel_old_timeval *tv)
 {
 	return (ctv == NULL ||
