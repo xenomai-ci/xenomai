@@ -525,6 +525,12 @@ int __real_clock_gettime(clockid_t clk_id, struct timespec *tp)
 }
 
 __weak
+int __real_clock_settime(clockid_t clk_id, const struct timespec *tp)
+{
+	return clock_settime(clk_id, tp);
+}
+
+__weak
 int __real_sigwait(const sigset_t *set, int *sig)
 {
 	return sigwait(set, sig);
