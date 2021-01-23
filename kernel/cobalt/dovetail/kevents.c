@@ -86,6 +86,14 @@ static void unregister_debugged_thread(struct xnthread *thread)
 		resume_debugged_process(process);
 }
 
+void arch_inband_task_init(struct task_struct *tsk)
+{
+	struct cobalt_threadinfo *p = dovetail_task_state(tsk);
+
+	p->thread = NULL;
+	p->process = NULL;
+}
+
 void handle_oob_trap_entry(unsigned int trapnr, struct pt_regs *regs)
 {
 	struct xnthread *thread;
