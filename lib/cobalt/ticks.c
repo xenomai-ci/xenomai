@@ -99,11 +99,6 @@ unsigned long long cobalt_divrem_billion(unsigned long long value,
 }
 #endif /* !XNARCH_HAVE_NODIV_LLIMD */
 
-xnticks_t cobalt_read_hrclock(void)
-{
-	return cobalt_read_tsc();
-}
-
 void cobalt_ticks_init(unsigned long long freq)
 {
 	clockfreq = freq;
