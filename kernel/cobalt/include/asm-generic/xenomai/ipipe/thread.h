@@ -16,16 +16,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _COBALT_ASM_GENERIC_THREAD_H
-#define _COBALT_ASM_GENERIC_THREAD_H
+#ifndef _COBALT_ASM_GENERIC_IPIPE_THREAD_H
+#define _COBALT_ASM_GENERIC_IPIPE_THREAD_H
 
 #include <asm/ptrace.h>
 #include <asm/processor.h>
 
 struct task_struct;
-
-struct xnthread;
-struct xnarchtcb;
 
 struct xntcb {
 	struct task_struct *host_task;
@@ -39,4 +36,4 @@ struct xntcb {
 #endif
 };
 
-#endif /* !_COBALT_ASM_GENERIC_THREAD_H */
+#endif /* !_COBALT_ASM_GENERIC_IPIPE_THREAD_H */
