@@ -3,6 +3,7 @@ menuconfig XENOMAI
 	bool "Xenomai/cobalt"
 	select IPIPE if HAVE_IPIPE_SUPPORT
 	select IPIPE_WANT_APIREV_2 if IPIPE
+	select DOVETAIL if HAVE_DOVETAIL
 	default y
 	help
 	  Xenomai's Cobalt core is a real-time extension to the Linux
