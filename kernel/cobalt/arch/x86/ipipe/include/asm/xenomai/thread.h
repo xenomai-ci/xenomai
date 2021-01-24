@@ -20,7 +20,7 @@
 #ifndef _COBALT_X86_ASM_THREAD_H
 #define _COBALT_X86_ASM_THREAD_H
 
-#include <asm-generic/xenomai/thread.h>
+#include <asm-generic/xenomai/ipipe/thread.h>
 #include <asm/xenomai/wrappers.h>
 #include <asm/traps.h>
 
@@ -63,6 +63,12 @@ struct xnarchtcb {
 #define xnarch_fault_bp_p(d)	((current->ptrace & PT_PTRACED) &&	\
 				 ((d)->exception == X86_TRAP_DB || (d)->exception == X86_TRAP_BP))
 #define xnarch_fault_notify(d)	(!xnarch_fault_bp_p(d))
+
+static inline
+struct task_struct *xnarch_host_task(struct xnarchtcb *tcb)
+{
+	return tcb->core.host_task;
+}
 
 void xnarch_switch_fpu(struct xnthread *from, struct xnthread *to);
 

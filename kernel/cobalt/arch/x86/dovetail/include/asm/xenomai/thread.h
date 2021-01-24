@@ -20,14 +20,8 @@
 #ifndef _COBALT_X86_ASM_THREAD_H
 #define _COBALT_X86_ASM_THREAD_H
 
-#include <linux/dovetail.h>
-#include <asm-generic/xenomai/thread.h>
+#include <asm-generic/xenomai/dovetail/thread.h>
 #include <asm/traps.h>
-
-struct xnarchtcb {
-	struct xntcb core;
-	struct dovetail_altsched_context altsched;
-};
 
 #define xnarch_fault_pc(__regs)		((__regs)->ip)
 #define xnarch_fault_pf_p(__nr)		((__nr) == X86_TRAP_PF)

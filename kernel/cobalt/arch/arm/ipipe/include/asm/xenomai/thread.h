@@ -19,7 +19,7 @@
 #ifndef _COBALT_ARM_ASM_THREAD_H
 #define _COBALT_ARM_ASM_THREAD_H
 
-#include <asm-generic/xenomai/thread.h>
+#include <asm-generic/xenomai/ipipe/thread.h>
 
 #ifdef CONFIG_XENO_ARCH_FPU
 #ifdef CONFIG_VFP
@@ -50,6 +50,12 @@ struct xnarchtcb {
 				  (d)->exception == IPIPE_TRAP_UNDEFINSTR))
 
 #define xnarch_fault_notify(d) (!xnarch_fault_bp_p(d))
+
+static inline
+struct task_struct *xnarch_host_task(struct xnarchtcb *tcb)
+{
+	return tcb->core.host_task;
+}
 
 void xnarch_switch_to(struct xnthread *out, struct xnthread *in);
 

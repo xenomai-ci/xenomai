@@ -268,7 +268,7 @@ static inline int xnthread_current_priority(const struct xnthread *thread)
 
 static inline struct task_struct *xnthread_host_task(struct xnthread *thread)
 {
-	return xnthread_archtcb(thread)->core.host_task;
+	return xnarch_host_task(xnthread_archtcb(thread));
 }
 
 #define xnthread_for_each_booster(__pos, __thread)		\
@@ -283,7 +283,7 @@ static inline struct task_struct *xnthread_host_task(struct xnthread *thread)
 		if ((__p__)->ops.__h)					\
 			(__p__)->ops.__h(__t, ##__a);			\
 	} while (0)
-	
+
 #define xnthread_run_handler_stack(__t, __h, __a...)			\
 	do {								\
 		struct xnthread_personality *__p__ = (__t)->personality;	\
@@ -293,7 +293,7 @@ static inline struct task_struct *xnthread_host_task(struct xnthread *thread)
 			__p__ = (__p__)->ops.__h(__t, ##__a);		\
 		} while (__p__);					\
 	} while (0)
-	
+
 static inline
 struct xnthread_wait_context *xnthread_get_wait_context(struct xnthread *thread)
 {

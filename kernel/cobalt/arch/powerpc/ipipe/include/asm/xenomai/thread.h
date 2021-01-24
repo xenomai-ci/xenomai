@@ -19,7 +19,7 @@
 #ifndef _COBALT_POWERPC_ASM_THREAD_H
 #define _COBALT_POWERPC_ASM_THREAD_H
 
-#include <asm-generic/xenomai/thread.h>
+#include <asm-generic/xenomai/ipipe/thread.h>
 
 struct xnarchtcb {
 	struct xntcb core;
@@ -43,6 +43,12 @@ struct xnarchtcb {
 				 (d)->exception == IPIPE_TRAP_SSTEP ||	\
 				 (d)->exception == IPIPE_TRAP_DEBUG))
 #define xnarch_fault_notify(d) (xnarch_fault_bp_p(d) == 0)
+
+static inline
+struct task_struct *xnarch_host_task(struct xnarchtcb *tcb)
+{
+	return tcb->core.host_task;
+}
 
 static inline void xnarch_enter_root(struct xnthread *root) { }
 

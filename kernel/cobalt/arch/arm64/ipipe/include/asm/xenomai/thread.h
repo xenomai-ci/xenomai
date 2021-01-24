@@ -20,7 +20,7 @@
 #define _COBALT_ARM64_ASM_THREAD_H
 
 #include <linux/version.h>
-#include <asm-generic/xenomai/thread.h>
+#include <asm-generic/xenomai/ipipe/thread.h>
 
 #if defined(CONFIG_XENO_ARCH_FPU) && LINUX_VERSION_CODE < KERNEL_VERSION(4,9,0)
 #define ARM64_XENO_OLD_SWITCH
@@ -46,6 +46,12 @@ struct xnarchtcb {
 				  (d)->exception == IPIPE_TRAP_UNDEFINSTR))
 
 #define xnarch_fault_notify(d) (!xnarch_fault_bp_p(d))
+
+static inline
+struct task_struct *xnarch_host_task(struct xnarchtcb *tcb)
+{
+	return tcb->core.host_task;
+}
 
 void xnarch_switch_to(struct xnthread *out, struct xnthread *in);
 
