@@ -23,6 +23,7 @@
 #include <linux/sched.h>
 #include <linux/sched/rt.h>
 #include <pipeline/thread.h>
+#include <pipeline/inband_work.h>
 #include <cobalt/kernel/list.h>
 #include <cobalt/kernel/stat.h>
 #include <cobalt/kernel/timer.h>
@@ -194,6 +195,11 @@ struct xnthread {
 	struct xnthread_personality *personality;
 
 	struct completion exited;
+
+	struct xnthread_wakeup_work {
+		struct pipeline_inband_work inband_work;
+		struct task_struct *task;
+	} wakeup_work;
 
 #ifdef CONFIG_XENO_OPT_DEBUG
 	const char *exe_path;	/* Executable path */

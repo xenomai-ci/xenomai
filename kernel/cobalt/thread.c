@@ -39,7 +39,6 @@
 #include <cobalt/kernel/lock.h>
 #include <cobalt/kernel/thread.h>
 #include <pipeline/kevents.h>
-#include <pipeline/inband_work.h>
 #include <pipeline/sched.h>
 #include <trace/events/cobalt-core.h>
 #include "debug.h"
@@ -147,6 +146,24 @@ static inline int spawn_kthread(struct xnthread *thread)
 	return 0;
 }
 
+static void wakeup_thread_lostage(struct pipeline_inband_work *inband_work)
+{
+	struct xnthread_wakeup_work *w;
+
+	/*
+	 * Revisit: once I-pipe support is gone, we may get rid of the
+	 * the task struct pointer which is actually
+	 * xnthread_host_task() for the target thread. However, since
+	 * the I-pipe passes us its own local copy of our wake up
+	 * descriptor, we cannot retrieve the xnthread descriptor
+	 * which contains inband_work based on such address. THis
+	 * would be fine with Dovetail though.
+	 */
+	w = container_of(inband_work, typeof(*w), inband_work);
+	trace_cobalt_lostage_wakeup(w->task);
+	wake_up_process(w->task);
+}
+
 int __xnthread_init(struct xnthread *thread,
 		    const struct xnthread_init_attr *attr,
 		    struct xnsched *sched,
@@ -202,6 +219,9 @@ int __xnthread_init(struct xnthread *thread,
 	thread->cookie = NULL;
 	init_completion(&thread->exited);
 	memset(xnthread_archtcb(thread), 0, sizeof(struct xnarchtcb));
+	thread->wakeup_work.inband_work = (struct pipeline_inband_work)
+		PIPELINE_INBAND_WORK_INITIALIZER(thread->wakeup_work,
+						wakeup_thread_lostage);
 
 	gravity = flags & XNUSER ? XNTIMER_UGRAVITY : XNTIMER_KGRAVITY;
 	xntimer_init(&thread->rtimer, &nkclock, timeout_handler,
@@ -1890,37 +1910,6 @@ int xnthread_harden(void)
 }
 EXPORT_SYMBOL_GPL(xnthread_harden);
 
-struct lostage_wakeup {
-	struct pipeline_inband_work inband_work; /* Must be first. */
-	struct task_struct *task;
-};
-
-static void lostage_task_wakeup(struct pipeline_inband_work *inband_work)
-{
-	struct lostage_wakeup *rq;
-	struct task_struct *p;
-
-	rq = container_of(inband_work, struct lostage_wakeup, inband_work);
-	p = rq->task;
-
-	trace_cobalt_lostage_wakeup(p);
-
-	wake_up_process(p);
-}
-
-static void post_wakeup(struct task_struct *p)
-{
-	struct lostage_wakeup wakework = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(wakework,
-					lostage_task_wakeup),
-		.task = p,
-	};
-
-	trace_cobalt_lostage_request("wakeup", wakework.task);
-
-	pipeline_post_inband_work(&wakework);
-}
-
 void __xnthread_propagate_schedparam(struct xnthread *curr)
 {
 	int kpolicy = SCHED_FIFO, kprio = curr->bprio, ret;
@@ -2005,7 +1994,10 @@ void xnthread_relax(int notify, int reason)
 	 * xnthread_suspend() has an interrupts-on section built in.
 	 */
 	splmax();
-	post_wakeup(p);
+	trace_cobalt_lostage_request("wakeup", p);
+	thread->wakeup_work.task = p;
+	pipeline_post_inband_work(&thread->wakeup_work);
+
 	/*
 	 * Grab the nklock to synchronize the Linux task state
 	 * manipulation with handle_sigwake_event. This lock will be
@@ -2087,6 +2079,7 @@ struct lostage_signal {
 	struct pipeline_inband_work inband_work; /* Must be first. */
 	struct task_struct *task;
 	int signo, sigval;
+	struct lostage_signal *self; /* Revisit: I-pipe requirement */
 };
 
 static inline void do_kthread_signal(struct task_struct *p,
@@ -2112,7 +2105,7 @@ static void lostage_task_signal(struct pipeline_inband_work *inband_work)
 	thread = xnthread_from_task(p);
 	if (thread && !xnthread_test_state(thread, XNUSER)) {
 		do_kthread_signal(p, thread, rq);
-		return;
+		goto out;
 	}
 
 	signo = rq->signo;
@@ -2127,6 +2120,8 @@ static void lostage_task_signal(struct pipeline_inband_work *inband_work)
 		send_sig_info(signo, &si, p);
 	} else
 		send_sig(signo, p, 1);
+out:
+	xnfree(rq->self);
 }
 
 static int force_wakeup(struct xnthread *thread) /* nklock locked, irqs off */
@@ -2290,17 +2285,23 @@ EXPORT_SYMBOL_GPL(xnthread_demote);
 
 void xnthread_signal(struct xnthread *thread, int sig, int arg)
 {
-	struct lostage_signal sigwork = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(sigwork,
-					lostage_task_signal),
-		.task = xnthread_host_task(thread),
-		.signo = sig,
-		.sigval = sig == SIGDEBUG ? arg | sigdebug_marker : arg,
-	};
+	struct lostage_signal *sigwork;
 
-	trace_cobalt_lostage_request("signal", sigwork.task);
+	sigwork = xnmalloc(sizeof(*sigwork));
+	if (WARN_ON(sigwork == NULL))
+		return;
 
-	pipeline_post_inband_work(&sigwork);
+	sigwork->inband_work = (struct pipeline_inband_work)
+			PIPELINE_INBAND_WORK_INITIALIZER(*sigwork,
+					lostage_task_signal);
+	sigwork->task = xnthread_host_task(thread);
+	sigwork->signo = sig;
+	sigwork->sigval = sig == SIGDEBUG ? arg | sigdebug_marker : arg;
+	sigwork->self = sigwork; /* Revisit: I-pipe requirement */
+
+	trace_cobalt_lostage_request("signal", sigwork->task);
+
+	pipeline_post_inband_work(sigwork);
 }
 EXPORT_SYMBOL_GPL(xnthread_signal);
 
@@ -2337,6 +2338,7 @@ void xnthread_pin_initial(struct xnthread *thread)
 struct parent_wakeup_request {
 	struct pipeline_inband_work inband_work; /* Must be first. */
 	struct completion *done;
+	struct parent_wakeup_request *self; /* Revisit: I-pipe requirement */
 };
 
 static void do_parent_wakeup(struct pipeline_inband_work *inband_work)
@@ -2345,19 +2347,26 @@ static void do_parent_wakeup(struct pipeline_inband_work *inband_work)
 
 	rq = container_of(inband_work, struct parent_wakeup_request, inband_work);
 	complete(rq->done);
+	xnfree(rq->self);
 }
 
 static inline void wakeup_parent(struct completion *done)
 {
-	struct parent_wakeup_request wakework = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(wakework,
-					do_parent_wakeup),
-		.done = done,
-	};
+	struct parent_wakeup_request *rq;
+
+	rq = xnmalloc(sizeof(*rq));
+	if (WARN_ON(rq == NULL))
+		return;
+
+	rq->inband_work = (struct pipeline_inband_work)
+		PIPELINE_INBAND_WORK_INITIALIZER(*rq,
+				do_parent_wakeup);
+	rq->done = done;
+	rq->self = rq; /* Revisit: I-pipe requirement */
 
 	trace_cobalt_lostage_request("wakeup", current);
 
-	pipeline_post_inband_work(&wakework);
+	pipeline_post_inband_work(rq);
 }
 
 static inline void init_kthread_info(struct xnthread *thread)
