@@ -257,10 +257,6 @@ out:
 }
 EXPORT_SYMBOL_GPL(rtdm_fd_get);
 
-struct lostage_trigger_close {
-	struct pipeline_inband_work inband_work; /* Must be first. */
-};
-
 static int fd_cleanup_thread(void *data)
 {
 	struct rtdm_fd *fd;
@@ -293,9 +289,16 @@ static void lostage_trigger_close(struct pipeline_inband_work *inband_work)
 	up(&rtdm_fd_cleanup_sem);
 }
 
+static struct lostage_trigger_close {
+	struct pipeline_inband_work inband_work; /* Must be first. */
+} fd_closework =  {
+	.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(fd_closework,
+						lostage_trigger_close),
+};
+
 static void __put_fd(struct rtdm_fd *fd, spl_t s)
 {
-	bool destroy;
+	bool destroy, trigger;
 
 	XENO_WARN_ON(COBALT, fd->refs <= 0);
 	destroy = --fd->refs == 0;
@@ -310,16 +313,13 @@ static void __put_fd(struct rtdm_fd *fd, spl_t s)
 	if (is_secondary_domain())
 		fd->ops->close(fd);
 	else {
-		struct lostage_trigger_close closework = {
-			.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(closework,
-					lostage_trigger_close),
-		};
-
 		xnlock_get_irqsave(&fdtree_lock, s);
+		trigger = list_empty(&rtdm_fd_cleanup_queue);
 		list_add_tail(&fd->cleanup, &rtdm_fd_cleanup_queue);
 		xnlock_put_irqrestore(&fdtree_lock, s);
 
-		pipeline_post_inband_work(&closework);
+		if (trigger)
+			pipeline_post_inband_work(&fd_closework);
 	}
 }
 
