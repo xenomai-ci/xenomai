@@ -100,7 +100,7 @@ static void *timerobj_server(void *arg)
 {
 	void (*handler)(struct timerobj *tmobj);
 	struct timespec now, value, interval;
-	struct timerobj *tmobj, *tmp;
+	struct timerobj *tmobj;
 	sigset_t set;
 	int sig, ret;
 
@@ -119,7 +119,10 @@ static void *timerobj_server(void *arg)
 
 		__RT(clock_gettime(CLOCK_COPPERPLATE, &now));
 
-		pvlist_for_each_entry_safe(tmobj, tmp, &svtimers, next) {
+		while (!pvlist_empty(&svtimers)) {
+			tmobj = pvlist_first_entry(&svtimers, typeof(*tmobj),
+						   next);
+
 			value = tmobj->itspec.it_value;
 			interval = tmobj->itspec.it_interval;
 			handler = tmobj->handler;
