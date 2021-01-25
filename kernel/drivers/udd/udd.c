@@ -520,6 +520,7 @@ struct irqswitch_work {
 	rtdm_irq_t *irqh;
 	int enabled;
 	rtdm_event_t *done;
+	struct irqswitch_work *self; /* Revisit: I-pipe requirement */
 };
 
 static void lostage_irqswitch_line(struct pipeline_inband_work *inband_work)
@@ -538,24 +539,32 @@ static void lostage_irqswitch_line(struct pipeline_inband_work *inband_work)
 
 	if (rq->done)
 		rtdm_event_signal(rq->done);
+
+	xnfree(rq->self);
 }
 
 static void switch_irq_line(rtdm_irq_t *irqh, int enable, rtdm_event_t *done)
 {
-	struct irqswitch_work switchwork = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(switchwork,
-					lostage_irqswitch_line),
-		.irqh = irqh,
-		.enabled = enable,
-		.done = done,
-	};
+	struct irqswitch_work *rq;
+
+	rq = xnmalloc(sizeof(*rq));
+	if (WARN_ON(rq == NULL))
+		return;
+
+	rq->inband_work = (struct pipeline_inband_work)
+		PIPELINE_INBAND_WORK_INITIALIZER(*rq,
+					lostage_irqswitch_line);
+	rq->irqh = irqh;
+	rq->enabled = enable;
+	rq->done = done;
+	rq->self = rq;	/* Revisit: I-pipe requirement */
 
 	/*
 	 * Not pretty, but we may not traverse the kernel code for
 	 * enabling/disabling IRQ lines from primary mode. Defer this
 	 * to the root context.
 	 */
-	pipeline_post_inband_work(&switchwork);
+	pipeline_post_inband_work(rq);
 }
 
 /**
