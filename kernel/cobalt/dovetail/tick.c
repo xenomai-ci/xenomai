@@ -73,10 +73,10 @@ static int proxy_set_next_ktime(ktime_t expires,
 	if (delta < 0)
 		delta = 0;
 
-	flags = hard_local_irq_save(); /* Prevent CPU migration. */
+	xnlock_get_irqsave(&nklock, flags);
 	sched = xnsched_current();
 	ret = xntimer_start(&sched->htimer, delta, XN_INFINITE, XN_RELATIVE);
-	hard_local_irq_restore(flags);
+	xnlock_put_irqrestore(&nklock, flags);
 
 	return ret ? -ETIME : 0;
 }

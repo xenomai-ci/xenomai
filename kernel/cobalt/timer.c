@@ -121,6 +121,8 @@ int xntimer_start(struct xntimer *timer,
 	unsigned long gravity;
 	int ret = 0;
 
+	atomic_only();
+
 	trace_cobalt_timer_start(timer, value, interval, mode);
 
 	if ((timer->status & XNTIMER_DEQUEUED) == 0)
@@ -207,6 +209,8 @@ void __xntimer_stop(struct xntimer *timer)
 	struct xnsched *sched;
 	int heading = 1;
 
+	atomic_only();
+
 	trace_cobalt_timer_stop(timer);
 
 	if ((timer->status & XNTIMER_DEQUEUED) == 0) {
@@ -242,6 +246,8 @@ EXPORT_SYMBOL_GPL(__xntimer_stop);
  */
 xnticks_t xntimer_get_date(struct xntimer *timer)
 {
+	atomic_only();
+
 	if (!xntimer_running_p(timer))
 		return XN_INFINITE;
 
@@ -271,6 +277,8 @@ xnticks_t __xntimer_get_timeout(struct xntimer *timer)
 {
 	struct xnclock *clock;
 	xnticks_t expiry, now;
+
+	atomic_only();
 
 	clock = xntimer_clock(timer);
 	now = xnclock_read_raw(clock);
@@ -434,6 +442,8 @@ void __xntimer_switch_tracking(struct xntimer *timer,
 void xntimer_set_clock(struct xntimer *timer,
 		       struct xnclock *newclock)
 {
+	atomic_only();
+
 	if (timer->clock != newclock) {
 		xntimer_stop(timer);
 		timer->clock = newclock;
@@ -607,6 +617,8 @@ unsigned long long xntimer_get_overruns(struct xntimer *timer,
 	unsigned long long overruns = 0;
 	xnsticks_t delta;
 	xntimerq_t *q;
+
+	atomic_only();
 
 	delta = now - xntimer_pexpect(timer);
 	if (unlikely(delta >= (xnsticks_t) period)) {
