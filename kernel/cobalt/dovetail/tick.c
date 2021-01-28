@@ -26,33 +26,31 @@ const char *pipeline_timer_name(void)
 	return real_dev->name;
 }
 
-void pipeline_set_timer_shot(unsigned long cycles)
+void pipeline_set_timer_shot(unsigned long delay) /* ns */
 {
 	struct clock_proxy_device *dev = __this_cpu_read(proxy_device);
 	struct clock_event_device *real_dev = dev->real_device;
-	int ret;
-	u64 sumcyc;
+	u64 cycles;
 	ktime_t t;
+	int ret;
 
 	if (real_dev->features & CLOCK_EVT_FEAT_KTIME) {
-		t = ktime_add(cycles, xnclock_core_read_raw());
+		t = ktime_add(delay, xnclock_core_read_raw());
 		real_dev->set_next_ktime(t, real_dev);
 	} else {
-		if (cycles <= 0)
-			cycles = real_dev->min_delta_ns;
-		else {
-			cycles = min_t(int64_t, cycles,
-					real_dev->max_delta_ns);
-			cycles = max_t(int64_t, cycles,
-					real_dev->min_delta_ns);
+		if (delay <= 0) {
+			delay = real_dev->min_delta_ns;
+		} else {
+			delay = min_t(int64_t, delay,
+				real_dev->max_delta_ns);
+			delay = max_t(int64_t, delay,
+				real_dev->min_delta_ns);
 		}
-		sumcyc = ((u64)cycles * real_dev->mult) >> real_dev->shift;
-
-		ret = real_dev->set_next_event(sumcyc, real_dev);
-		if (ret) {
-			ret = real_dev->set_next_event(real_dev->min_delta_ticks,
-							real_dev);
-		}
+		cycles = ((u64)delay * real_dev->mult) >> real_dev->shift;
+		ret = real_dev->set_next_event(cycles, real_dev);
+		if (ret)
+			real_dev->set_next_event(real_dev->min_delta_ticks,
+						real_dev);
 	}
 }
 
