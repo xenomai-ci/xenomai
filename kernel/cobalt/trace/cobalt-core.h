@@ -24,6 +24,16 @@
 #define _TRACE_COBALT_CORE_H
 
 #include <linux/tracepoint.h>
+#include <linux/math64.h>
+#include <cobalt/kernel/timer.h>
+#include <cobalt/uapi/kernel/types.h>
+
+struct xnsched;
+struct xnthread;
+struct xnsynch;
+struct xnsched_class;
+struct xnsched_quota_group;
+struct xnthread_init_attr;
 
 DECLARE_EVENT_CLASS(thread_event,
 	TP_PROTO(struct xnthread *thread),
@@ -766,6 +776,80 @@ DEFINE_EVENT(synch_post_event, cobalt_synch_flush,
 DEFINE_EVENT(synch_post_event, cobalt_synch_forget,
 	TP_PROTO(struct xnsynch *synch),
 	TP_ARGS(synch)
+);
+
+TRACE_EVENT(cobalt_tick_shot,
+	TP_PROTO(s64 delta),
+	TP_ARGS(delta),
+
+	TP_STRUCT__entry(
+		__field(u64, secs)
+		__field(u32, nsecs)
+		__field(s64, delta)
+	),
+
+	TP_fast_assign(
+		__entry->delta = delta;
+		__entry->secs = div_u64_rem(trace_clock_local() + delta,
+					    NSEC_PER_SEC, &__entry->nsecs);
+	),
+
+	TP_printk("next tick at %Lu.%06u (delay: %Ld us)",
+		  (unsigned long long)__entry->secs,
+		  __entry->nsecs / 1000, div_s64(__entry->delta, 1000))
+);
+
+TRACE_EVENT(cobalt_trace,
+	TP_PROTO(const char *msg),
+	TP_ARGS(msg),
+	TP_STRUCT__entry(
+		__string(msg, msg)
+	),
+	TP_fast_assign(
+		__assign_str(msg, msg);
+	),
+	TP_printk("%s", __get_str(msg))
+);
+
+TRACE_EVENT(cobalt_trace_longval,
+	TP_PROTO(int id, u64 val),
+	TP_ARGS(id, val),
+	TP_STRUCT__entry(
+		__field(int, id)
+		__field(u64, val)
+	),
+	TP_fast_assign(
+		__entry->id = id;
+		__entry->val = val;
+	),
+	TP_printk("id=%#x, v=%llu", __entry->id, __entry->val)
+);
+
+TRACE_EVENT(cobalt_trace_pid,
+	TP_PROTO(pid_t pid, int prio),
+	TP_ARGS(pid, prio),
+	TP_STRUCT__entry(
+		__field(pid_t, pid)
+		__field(int, prio)
+	),
+	TP_fast_assign(
+		__entry->pid = pid;
+		__entry->prio = prio;
+	),
+	TP_printk("pid=%d, prio=%d", __entry->pid, __entry->prio)
+);
+
+/* Basically cobalt_trace() + trigger point */
+TRACE_EVENT(cobalt_trigger,
+	TP_PROTO(const char *issuer),
+	TP_ARGS(issuer),
+	TP_STRUCT__entry(
+		__string(issuer, issuer)
+	),
+	TP_fast_assign(
+		__assign_str(issuer, issuer);
+	),
+	TP_printk("%s", __get_str(issuer))
 );
 
 #endif /* _TRACE_COBALT_CORE_H */
