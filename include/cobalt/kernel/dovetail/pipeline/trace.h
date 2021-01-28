@@ -22,96 +22,80 @@
 #include <linux/types.h>
 #include <linux/kconfig.h>
 #include <cobalt/uapi/kernel/trace.h>
+#include <trace/events/cobalt-core.h>
+#include <cobalt/kernel/assert.h>
 
 static inline int xntrace_max_begin(unsigned long v)
 {
-//#chz: NTD
-	//ipipe_trace_begin(v);
+	TODO();
 	return 0;
 }
 
 static inline int xntrace_max_end(unsigned long v)
 {
-//#chz: NTD
-	//ipipe_trace_end(v);
+	TODO();
 	return 0;
 }
 
 static inline int xntrace_max_reset(void)
 {
-//#chz: NTD
-	//ipipe_trace_max_reset();
+	TODO();
 	return 0;
 }
 
 static inline int xntrace_user_start(void)
 {
-//#chz: NTD
-	//return ipipe_trace_frozen_reset();
+	TODO();
 	return 0;
 }
 
 static inline int xntrace_user_stop(unsigned long v)
 {
-//#chz: NTD
-	//ipipe_trace_freeze(v);
+	TODO();
 	return 0;
 }
 
 static inline int xntrace_user_freeze(unsigned long v, int once)
 {
-	int ret = 0;
-//#chz: NTD
-/*
-	if (!once)
-		ret = ipipe_trace_frozen_reset();
-
-	ipipe_trace_freeze(v);
-*/
-	return ret;
+	trace_cobalt_trace_longval(0, v);
+	trace_cobalt_trigger("freeze");
+	return 0;
 }
 
 static inline int xntrace_special(unsigned char id, unsigned long v)
 {
-//#chz: NTD
-//	ipipe_trace_special(id, v);
+	trace_cobalt_trace_longval(id, v);
 	return 0;
 }
 
 static inline int xntrace_special_u64(unsigned char id,
-					unsigned long long v)
+				unsigned long long v)
 {
-//#chz: NTD
-//	ipipe_trace_special(id, (unsigned long)(v >> 32));
-//	ipipe_trace_special(id, (unsigned long)(v & 0xFFFFFFFF));
+	trace_cobalt_trace_longval(id, v);
 	return 0;
 }
 
 static inline int xntrace_pid(pid_t pid, short prio)
 {
-//#chz: NTD
-//	ipipe_trace_pid(pid, prio);
+	trace_cobalt_trace_pid(pid, prio);
 	return 0;
 }
 
-static inline int xntrace_tick(unsigned long delay_ticks)
+static inline int xntrace_tick(unsigned long delay_ticks) /* ns */
 {
-//#chz: NTD
-//	ipipe_trace_event(0, delay_ticks);
+	trace_cobalt_tick_shot(delay_ticks);
 	return 0;
 }
 
 static inline int xntrace_panic_freeze(void)
 {
-//#chz: NTD
-//	ipipe_trace_panic_freeze();
+	TODO();
 	return 0;
 }
 
 static inline int xntrace_panic_dump(void)
 {
-//#chz: NTD
-//	ipipe_trace_panic_dump();
+	TODO();
 	return 0;
 }
 
