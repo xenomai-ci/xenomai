@@ -10,3 +10,7 @@ config XENO_ARCH_SYS3264
 config XENO_ARCH_OUTOFLINE_XNLOCK
        bool
        default y
+
+config XENO_ARCH_IPIPE_COMPAT
+       def_bool DOVETAIL
+       select IPIPE_COMPAT
