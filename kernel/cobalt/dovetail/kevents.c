@@ -481,14 +481,19 @@ int handle_ptrace_resume(struct task_struct *tracee)
 
 static void handle_ptrace_cont(void)
 {
-	/*
-	 * This is the place where the ptrace-related work which used
-	 * to happen in handle_schedule_event() should go. We are
-	 * called when current is resuming execution after a ptrace
-	 * stopped state, which is what look for in
-	 * handle_schedule_event().
-	 */
-	TODO();
+	struct xnthread *curr = xnthread_current();
+	spl_t s;
+
+	xnlock_get_irqsave(&nklock, s);
+
+	if (xnthread_test_state(curr, XNSSTEP)) {
+		if (!xnthread_test_info(curr, XNCONTHI))
+			unregister_debugged_thread(curr);
+
+		xnthread_set_localinfo(curr, XNHICCUP);
+	}
+
+	xnlock_put_irqrestore(&nklock, s);
 }
 
 void handle_inband_event(enum inband_event_type event, void *data)
