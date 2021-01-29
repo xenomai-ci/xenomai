@@ -40,6 +40,8 @@ int xntrace_special(unsigned char id, unsigned long v);
 
 int xntrace_special_u64(unsigned char id, unsigned long long v);
 
+void xntrace_latpeak_freeze(int delay);
+
 int xnftrace_vprintf(const char *format, va_list args);
 int xnftrace_printf(const char *format, ...);
 

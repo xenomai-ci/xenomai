@@ -177,6 +177,12 @@ static COBALT_SYSCALL(trace, current,
 		ret = xntrace_special_u64(a1 & 0xFF,
 					  (((u64) a2) << 32) | a3);
 		break;
+
+	case __xntrace_op_latpeak_freeze:
+		xntrace_latpeak_freeze(a1);
+		ret = 0;
+		break;
+
 	}
 	return ret;
 }

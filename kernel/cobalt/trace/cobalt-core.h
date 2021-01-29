@@ -839,6 +839,20 @@ TRACE_EVENT(cobalt_trace_pid,
 	TP_printk("pid=%d, prio=%d", __entry->pid, __entry->prio)
 );
 
+TRACE_EVENT(cobalt_latpeak,
+	TP_PROTO(int latmax_ns),
+	TP_ARGS(latmax_ns),
+	TP_STRUCT__entry(
+		 __field(int, latmax_ns)
+	),
+	TP_fast_assign(
+		__entry->latmax_ns = latmax_ns;
+	),
+	TP_printk("** latency peak: %d.%.3d us **",
+		  __entry->latmax_ns / 1000,
+		  __entry->latmax_ns % 1000)
+);
+
 /* Basically cobalt_trace() + trigger point */
 TRACE_EVENT(cobalt_trigger,
 	TP_PROTO(const char *issuer),

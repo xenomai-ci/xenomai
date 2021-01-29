@@ -192,7 +192,7 @@ static void *latency(void *cookie)
 
 			if (freeze_max && (dt > gmaxjitter)
 			    && !(finished || warmup)) {
-				xntrace_user_freeze(dt, 0);
+				xntrace_latpeak_freeze(dt);
 				gmaxjitter = dt;
 			}
 

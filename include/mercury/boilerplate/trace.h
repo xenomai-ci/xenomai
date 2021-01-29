@@ -50,6 +50,10 @@ static inline int xntrace_user_freeze(unsigned long v, int once)
 	return -ENOSYS;
 }
 
+static inline void xntrace_latpeak_freeze(int delay)
+{
+}
+
 static inline int xntrace_special(unsigned char id, unsigned long v)
 {
 	return -ENOSYS;
