@@ -13,8 +13,14 @@ struct timespec64;
 
 static inline u64 pipeline_read_cycle_counter(void)
 {
-	/* Read the raw cycle counter of the core clock. */
-	return  ktime_get_raw_fast_ns();
+	/*
+	 * With Dovetail, our idea of time is directly based on a
+	 * refined count of nanoseconds since the epoch, the hardware
+	 * time counter is transparent to us. For this reason,
+	 * xnclock_ticks_to_ns() and xnclock_ns_to_ticks() are
+	 * idempotent when building for Dovetail.
+	 */
+	return ktime_get_mono_fast_ns();
 }
 
 void pipeline_set_timer_shot(unsigned long cycles);
