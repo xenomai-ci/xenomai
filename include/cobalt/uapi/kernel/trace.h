@@ -26,5 +26,6 @@
 #define __xntrace_op_user_freeze	5
 #define __xntrace_op_special		6
 #define __xntrace_op_special_u64	7
+#define __xntrace_op_latpeak_freeze	8
 
 #endif /* !_COBALT_UAPI_KERNEL_TRACE_H */

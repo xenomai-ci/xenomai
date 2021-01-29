@@ -65,6 +65,11 @@ static inline int xntrace_user_freeze(unsigned long v, int once)
 	return ret;
 }
 
+static inline void xntrace_latpeak_freeze(int delay)
+{
+	xntrace_user_freeze(delay, 0);
+}
+
 static inline int xntrace_special(unsigned char id, unsigned long v)
 {
 	ipipe_trace_special(id, v);

@@ -53,6 +53,11 @@ int xntrace_user_freeze(unsigned long v, int once)
 				v, once);
 }
 
+void xntrace_latpeak_freeze(int delay)
+{
+	XENOMAI_SYSCALL2(sc_cobalt_trace, __xntrace_op_latpeak_freeze, delay);
+}
+
 int xntrace_special(unsigned char id, unsigned long v)
 {
 	return XENOMAI_SYSCALL3(sc_cobalt_trace, __xntrace_op_special, id, v);

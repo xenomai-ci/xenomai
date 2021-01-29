@@ -82,8 +82,8 @@ static void eval_inner_loop(struct rt_tmbench_context *ctx, __s32 dt)
 		ctx->freeze_max &&
 		(dt > ctx->result.overall.max) &&
 		!ctx->warmup) {
-		xntrace_user_freeze(dt, false);
 		ctx->result.overall.max = dt;
+		xntrace_latpeak_freeze(dt);
 	}
 
 	ctx->date += ctx->period;

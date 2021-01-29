@@ -58,8 +58,14 @@ static inline int xntrace_user_stop(unsigned long v)
 static inline int xntrace_user_freeze(unsigned long v, int once)
 {
 	trace_cobalt_trace_longval(0, v);
-	trace_cobalt_trigger("freeze");
+	trace_cobalt_trigger("user-freeze");
 	return 0;
+}
+
+static inline void xntrace_latpeak_freeze(int delay)
+{
+	trace_cobalt_latpeak(delay);
+	trace_cobalt_trigger("latency-freeze");
 }
 
 static inline int xntrace_special(unsigned char id, unsigned long v)
