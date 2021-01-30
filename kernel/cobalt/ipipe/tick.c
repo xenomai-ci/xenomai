@@ -184,9 +184,6 @@ int pipeline_install_tick_proxy(void)
 		    per_cpu(ipipe_percpu.hrtimer_irq, 0), NULL, NULL, 0);
 #endif /* CONFIG_XENO_OPT_STATS_IRQS */
 
-	nkclock.wallclock_offset =
-		ktime_to_ns(ktime_get_real()) - xnclock_read_monotonic(&nkclock);
-
 #ifdef CONFIG_SMP
 	ret = ipipe_request_irq(&cobalt_pipeline.domain,
 				IPIPE_HRTIMER_IPI,

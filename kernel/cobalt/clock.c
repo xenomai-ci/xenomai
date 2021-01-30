@@ -226,18 +226,28 @@ enqueue:
 	xntimer_enqueue(timer, q);
 }
 
-static void adjust_clock_timers(struct xnclock *clock, xnsticks_t delta)
+void xnclock_apply_offset(struct xnclock *clock, xnsticks_t delta_ns)
 {
 	struct xntimer *timer, *tmp;
 	struct list_head adjq;
 	struct xnsched *sched;
+	xnsticks_t delta;
 	xntimerq_it_t it;
 	unsigned int cpu;
 	xntimerh_t *h;
 	xntimerq_t *q;
 
+	atomic_only();
+
+	/*
+	 * The (real-time) epoch just changed for the clock. Since
+	 * timeout dates of timers are expressed as monotonic ticks
+	 * internally, we need to apply the new offset to the
+	 * monotonic clock to all outstanding timers based on the
+	 * affected clock.
+	 */
 	INIT_LIST_HEAD(&adjq);
-	delta = xnclock_ns_to_ticks(clock, delta);
+	delta = xnclock_ns_to_ticks(clock, delta_ns);
 
 	for_each_online_cpu(cpu) {
 		sched = xnsched_struct(cpu);
@@ -265,34 +275,28 @@ static void adjust_clock_timers(struct xnclock *clock, xnsticks_t delta)
 			xnclock_program_shot(clock, sched);
 	}
 }
+EXPORT_SYMBOL_GPL(xnclock_apply_offset);
 
-/**
- * @fn void xnclock_adjust(struct xnclock *clock, xnsticks_t delta)
- * @brief Adjust a clock time.
- *
- * This service changes the epoch for the given clock by applying the
- * specified tick delta on its wallclock offset.
- *
- * @param clock The clock to adjust.
- *
- * @param delta The adjustment value expressed in nanoseconds.
- *
- * @coretags{task-unrestricted, atomic-entry}
- *
- * @note Xenomai tracks the system time in @a nkclock, as a
- * monotonously increasing count of ticks since the epoch. The epoch
- * is initially the same as the underlying machine time.
- */
-void xnclock_adjust(struct xnclock *clock, xnsticks_t delta)
+void xnclock_set_wallclock(xnticks_t epoch_ns)
 {
-	xnticks_t now;
+	xnsticks_t old_offset_ns, offset_ns;
+	spl_t s;
 
-	nkclock.wallclock_offset += delta;
-	nkvdso->wallclock_offset = nkclock.wallclock_offset;
-	now = xnclock_read_monotonic(clock) + nkclock.wallclock_offset;
-	adjust_clock_timers(clock, delta);
+	/*
+	 * The epoch of CLOCK_REALTIME just changed. Since timeouts
+	 * are expressed as monotonic ticks, we need to apply the
+	 * wallclock-to-monotonic offset to all outstanding timers
+	 * based on this clock.
+	 */
+	xnlock_get_irqsave(&nklock, s);
+	old_offset_ns = nkclock.wallclock_offset;
+	offset_ns = (xnsticks_t)(epoch_ns - xnclock_core_read_monotonic());
+	nkclock.wallclock_offset = offset_ns;
+	nkvdso->wallclock_offset = offset_ns;
+	xnclock_apply_offset(&nkclock, offset_ns - old_offset_ns);
+	xnlock_put_irqrestore(&nklock, s);
 }
-EXPORT_SYMBOL_GPL(xnclock_adjust);
+EXPORT_SYMBOL_GPL(xnclock_set_wallclock);
 
 xnticks_t xnclock_core_read_monotonic(void)
 {
@@ -464,7 +468,7 @@ static int clock_show(struct xnvfile_regular_iterator *it, void *data)
 
 	if (clock->id >= 0)	/* External clock, print id. */
 		xnvfile_printf(it, "%7s: %d\n", "id", __COBALT_CLOCK_EXT(clock->id));
-		
+
 	xnvfile_printf(it, "%7s: irq=%Ld kernel=%Ld user=%Ld\n", "gravity",
 		       xnclock_ticks_to_ns(clock, xnclock_get_gravity(clock, irq)),
 		       xnclock_ticks_to_ns(clock, xnclock_get_gravity(clock, kernel)),
@@ -700,7 +704,7 @@ void xnclock_tick(struct xnclock *clock)
 	else
 #endif
 		tmq = &xnclock_this_timerdata(clock)->q;
-	
+
 	/*
 	 * Optimisation: any local timer reprogramming triggered by
 	 * invoked timer handlers can wait until we leave the tick
@@ -807,11 +811,17 @@ void xnclock_cleanup(void)
 
 int __init xnclock_init()
 {
+	spl_t s;
+
 #ifdef XNARCH_HAVE_NODIV_LLIMD
 	xnarch_init_u32frac(&bln_frac, 1, 1000000000);
 #endif
 	pipeline_init_clock();
 	xnclock_reset_gravity(&nkclock);
+	xnlock_get_irqsave(&nklock, s);
+	nkclock.wallclock_offset = pipeline_read_wallclock() -
+		xnclock_core_read_monotonic();
+	xnlock_put_irqrestore(&nklock, s);
 	xnclock_register(&nkclock, &xnsched_realtime_cpus);
 
 	return 0;
