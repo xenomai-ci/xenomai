@@ -15,6 +15,7 @@
 #include <cobalt/kernel/thread.h>
 #include <cobalt/kernel/clock.h>
 #include <cobalt/kernel/vdso.h>
+#include <cobalt/kernel/init.h>
 #include <rtdm/driver.h>
 #include <trace/events/cobalt-core.h>
 #include "../posix/process.h"
@@ -526,6 +527,15 @@ void handle_inband_event(enum inband_event_type event, void *data)
 		handle_cleanup_event(data);
 		break;
 	}
+}
+
+/*
+ * Called by the in-band kernel when the CLOCK_REALTIME epoch changes.
+ */
+void inband_clock_was_set(void)
+{
+	if (realtime_core_enabled())
+		xnclock_set_wallclock(ktime_get_real_fast_ns());
 }
 
 #ifdef CONFIG_MMU

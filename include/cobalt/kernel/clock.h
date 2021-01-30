@@ -43,7 +43,7 @@ struct xnclock_gravity {
 
 struct xnclock {
 	/** (ns) */
-	xnticks_t wallclock_offset;
+	xnsticks_t wallclock_offset;
 	/** (ns) */
 	xnticks_t resolution;
 	/** (raw clock ticks). */
@@ -111,9 +111,6 @@ int xnclock_register(struct xnclock *clock,
 void xnclock_deregister(struct xnclock *clock);
 
 void xnclock_tick(struct xnclock *clock);
-
-void xnclock_adjust(struct xnclock *clock,
-		    xnsticks_t delta);
 
 void xnclock_core_local_shot(struct xnsched *sched);
 
@@ -319,12 +316,19 @@ static inline void xnclock_reset_gravity(struct xnclock *clock)
 
 static inline xnticks_t xnclock_read_realtime(struct xnclock *clock)
 {
+	if (likely(clock == &nkclock))
+		return pipeline_read_wallclock();
 	/*
 	 * Return an adjusted value of the monotonic time with the
 	 * translated system wallclock offset.
 	 */
 	return xnclock_read_monotonic(clock) + xnclock_get_offset(clock);
 }
+
+void xnclock_apply_offset(struct xnclock *clock,
+			  xnsticks_t delta_ns);
+
+void xnclock_set_wallclock(xnticks_t epoch_ns);
 
 unsigned long long xnclock_divrem_billion(unsigned long long value,
 					  unsigned long *rem);

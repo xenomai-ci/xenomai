@@ -7,6 +7,8 @@
 #include <cobalt/kernel/clock.h>
 #include <cobalt/kernel/vdso.h>
 #include <cobalt/kernel/arith.h>
+#include <cobalt/kernel/timer.h>
+#include <xenomai/posix/clock.h>
 #include <pipeline/machine.h>
 
 static unsigned long long clockfreq;
@@ -119,6 +121,19 @@ int pipeline_get_host_time(struct timespec64 *tp)
 #else
 	return -EINVAL;
 #endif
+}
+
+xnticks_t pipeline_read_wallclock(void)
+{
+	return xnclock_read_monotonic(&nkclock) + xnclock_get_offset(&nkclock);
+}
+EXPORT_SYMBOL_GPL(pipeline_read_wallclock);
+
+int pipeline_set_wallclock(xnticks_t epoch_ns)
+{
+	xnclock_set_wallclock(epoch_ns);
+
+	return 0;
 }
 
 void pipeline_update_clock_freq(unsigned long long freq)

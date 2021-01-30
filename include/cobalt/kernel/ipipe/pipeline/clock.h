@@ -6,6 +6,7 @@
 #define _COBALT_KERNEL_IPIPE_CLOCK_H
 
 #include <linux/ipipe_tickdev.h>
+#include <cobalt/uapi/kernel/types.h>
 
 struct timespec64;
 
@@ -15,6 +16,10 @@ static inline u64 pipeline_read_cycle_counter(void)
 	ipipe_read_tsc(t);
 	return t;
 }
+
+xnticks_t pipeline_read_wallclock(void);
+
+int pipeline_set_wallclock(xnticks_t epoch_ns);
 
 static inline void pipeline_set_timer_shot(unsigned long cycles)
 {

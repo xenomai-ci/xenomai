@@ -142,18 +142,13 @@ COBALT_SYSCALL(clock_gettime, current,
 int __cobalt_clock_settime(clockid_t clock_id, const struct timespec64 *ts)
 {
 	int _ret, ret = 0;
-	xnticks_t now;
-	spl_t s;
 
 	if ((unsigned long)ts->tv_nsec >= ONE_BILLION)
 		return -EINVAL;
 
 	switch (clock_id) {
 	case CLOCK_REALTIME:
-		xnlock_get_irqsave(&nklock, s);
-		now = xnclock_read_realtime(&nkclock);
-		xnclock_adjust(&nkclock, (xnsticks_t) (ts2ns(ts) - now));
-		xnlock_put_irqrestore(&nklock, s);
+		ret = pipeline_set_wallclock(ts2ns(ts));
 		break;
 	default:
 		_ret = do_ext_clock(clock_id, set_time, ret, ts);
@@ -163,7 +158,7 @@ int __cobalt_clock_settime(clockid_t clock_id, const struct timespec64 *ts)
 
 	trace_cobalt_clock_settime(clock_id, ts);
 
-	return 0;
+	return ret;
 }
 
 int __cobalt_clock_adjtime(clockid_t clock_id, struct __kernel_timex *tx)

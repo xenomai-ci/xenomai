@@ -8,6 +8,7 @@
 #include <cobalt/uapi/kernel/types.h>
 #include <cobalt/kernel/assert.h>
 #include <linux/ktime.h>
+#include <linux/errno.h>
 
 struct timespec64;
 
@@ -21,6 +22,16 @@ static inline u64 pipeline_read_cycle_counter(void)
 	 * idempotent when building for Dovetail.
 	 */
 	return ktime_get_mono_fast_ns();
+}
+
+static inline xnticks_t pipeline_read_wallclock(void)
+{
+	return ktime_get_real_fast_ns();
+}
+
+static inline int pipeline_set_wallclock(xnticks_t epoch_ns)
+{
+	return -EOPNOTSUPP;
 }
 
 void pipeline_set_timer_shot(unsigned long cycles);
