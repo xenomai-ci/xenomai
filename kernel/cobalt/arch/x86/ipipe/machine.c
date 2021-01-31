@@ -17,11 +17,9 @@
  *   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  *   02111-1307, USA.
  */
-#include <linux/ipipe_tickdev.h>
-#include <cobalt/kernel/arith.h>
-#include <asm/xenomai/syscall.h>
 #include <asm/xenomai/machine.h>
 #include <asm/xenomai/thread.h>
+#include <asm/xenomai/syscall.h>
 #include <asm/xenomai/smi.h>
 #include <asm/xenomai/c1e.h>
 
@@ -43,40 +41,6 @@ long strncpy_from_user_nocheck(char *dst, const char __user *src, long count)
 	return n;
 }
 EXPORT_SYMBOL_GPL(strncpy_from_user_nocheck);
-
-static unsigned long mach_x86_calibrate(void)
-{
-	unsigned long delay = (cobalt_pipeline.timer_freq + HZ / 2) / HZ;
-	unsigned long long t0, t1, dt;
-	unsigned long flags;
-	int i;
-
-	flags = ipipe_critical_enter(NULL);
-
-	ipipe_timer_set(delay);
-
-	ipipe_read_tsc(t0);
-
-	for (i = 0; i < 100; i++)
-		ipipe_timer_set(delay);
-
-	ipipe_read_tsc(t1);
-	dt = t1 - t0;
-
-	ipipe_critical_exit(flags);
-
-	/*
-	 * Reset the max trace, since it contains the calibration time
-	 * now.
-	 */
-	ipipe_trace_max_reset();
-
-	/*
-	 * Compute average with a 5% margin to avoid negative
-	 * latencies with PIT.
-	 */
-	return xnarch_ulldiv(dt, i + 5, NULL);
-}
 
 static int mach_x86_init(void)
 {
@@ -128,7 +92,6 @@ struct cobalt_machine cobalt_machine = {
 	.init = mach_x86_init,
 	.late_init = NULL,
 	.cleanup = mach_x86_cleanup,
-	.calibrate = mach_x86_calibrate,
 	.prefault = NULL,
 	.fault_labels = fault_labels,
 };
