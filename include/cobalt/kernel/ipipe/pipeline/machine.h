@@ -37,7 +37,6 @@ DECLARE_PER_CPU(struct cobalt_machine_cpudata, cobalt_machine_cpudata);
 
 struct cobalt_pipeline {
 	struct ipipe_domain domain;
-	unsigned long timer_freq;
 	unsigned long clock_freq;
 	unsigned int escalate_virq;
 #ifdef CONFIG_SMP

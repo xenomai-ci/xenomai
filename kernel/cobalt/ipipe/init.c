@@ -11,9 +11,6 @@
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/clock.h>
 
-static unsigned long timerfreq_arg;
-module_param_named(timerfreq, timerfreq_arg, ulong, 0444);
-
 static unsigned long clockfreq_arg;
 module_param_named(clockfreq, clockfreq_arg, ulong, 0444);
 
@@ -28,9 +25,6 @@ int __init pipeline_init(void)
 
 	ipipe_get_sysinfo(&sysinfo);
 
-	if (timerfreq_arg == 0)
-		timerfreq_arg = sysinfo.sys_hrtimer_freq;
-
 	if (clockfreq_arg == 0)
 		clockfreq_arg = sysinfo.sys_hrclock_freq;
 
@@ -39,7 +33,6 @@ int __init pipeline_init(void)
 		return -ENODEV;
 	}
 
-	cobalt_pipeline.timer_freq = timerfreq_arg;
 	cobalt_pipeline.clock_freq = clockfreq_arg;
 
 	if (cobalt_machine.init) {

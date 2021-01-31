@@ -154,13 +154,6 @@ when initializing. It is strongly recommended *not* to use this option
 unless you really know what you are doing. This value is expressed in
 HZ. | 0 (=calibrated)
 
-|xenomai.timerfreq=<hz-freq> | Override the real-time timer frequency
-used in programming timer shots with the given value. The most
-accurate value is normally determined by the Cobalt core automatically
-when initializing. It is strongly recommended *not* to use this option
-unless you really know what you are doing. This value is expressed in
-HZ. | 0 (=calibrated)
-
 |xenomai.smi=<state> | *x86-specific*: Set the state of the SMI
 workaround. The possible values are _disabled_, _detect_ and
 _enabled_. See the discussion about link:dealing-with-x86-SMI[SMIs]
