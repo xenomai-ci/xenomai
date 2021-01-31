@@ -24,11 +24,6 @@
 #include <asm/cputable.h>
 #include <asm/xenomai/machine.h>
 
-static unsigned long mach_powerpc_calibrate(void)
-{
-	return 5;	/* 5 clock cycles. */
-}
-
 static int mach_powerpc_init(void)
 {
 #ifdef CONFIG_ALTIVEC
@@ -67,7 +62,6 @@ struct cobalt_machine cobalt_machine = {
 	.init = mach_powerpc_init,
 	.late_init = NULL,
 	.cleanup = NULL,
-	.calibrate = mach_powerpc_calibrate,
 	.prefault = NULL,
 	.fault_labels = fault_labels,
 };
