@@ -25,7 +25,7 @@ bool pipeline_switch_to(struct xnthread *prev,
 
 int pipeline_leave_inband(void);
 
-void pipeline_leave_oob_prepare(void);
+int pipeline_leave_oob_prepare(void);
 
 void pipeline_leave_oob_finish(void);
 

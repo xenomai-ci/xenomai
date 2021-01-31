@@ -1981,9 +1981,8 @@ void __xnthread_propagate_schedparam(struct xnthread *curr)
 void xnthread_relax(int notify, int reason)
 {
 	struct xnthread *thread = xnthread_current();
+	int cpu __maybe_unused, suspension;
 	struct task_struct *p = current;
-	int suspension = XNRELAX;
-	int cpu __maybe_unused;
 	kernel_siginfo_t si;
 
 	primary_mode_only();
@@ -2013,21 +2012,8 @@ void xnthread_relax(int notify, int reason)
 	 * dropped by xnthread_suspend().
 	 */
 	xnlock_get(&nklock);
-#ifdef IPIPE_KEVT_USERINTRET
-	/*
-	 * If the thread is being debugged, record that it should migrate back
-	 * in case it resumes in userspace. If it resumes in kernel space, i.e.
-	 * over a restarting syscall, the associated hardening will both clear
-	 * XNCONTHI and disable the user return notifier again.
-	 */
-	if (xnthread_test_state(thread, XNSSTEP)) {
-		xnthread_set_info(thread, XNCONTHI);
-		ipipe_enable_user_intret_notifier();
-		suspension |= XNDBGSTOP;
-	}
-#endif
 	xnthread_run_handler_stack(thread, relax_thread);
-	pipeline_leave_oob_prepare();
+	suspension = pipeline_leave_oob_prepare();
 	xnthread_suspend(thread, suspension, XN_INFINITE, XN_RELATIVE, NULL);
 	splnone();
 

@@ -150,11 +150,33 @@ int pipeline_leave_inband(void)
 	return 0;
 }
 
-void pipeline_leave_oob_prepare(void)
+int pipeline_leave_oob_prepare(void)
 {
+	struct xnthread *curr = xnthread_current();
 	struct task_struct *p = current;
+	int suspmask = XNRELAX;
 
 	set_current_state(p->state & ~TASK_NOWAKEUP);
+
+#ifdef IPIPE_KEVT_USERINTRET
+	/*
+	 * If current is being debugged, record that it should migrate
+	 * back in case it resumes in userspace. If it resumes in
+	 * kernel space, i.e.  over a restarting syscall, the
+	 * associated hardening will both clear XNCONTHI and disable
+	 * the user return notifier again.
+	 */
+	if (xnthread_test_state(curr, XNSSTEP)) {
+		xnthread_set_info(curr, XNCONTHI);
+		ipipe_enable_user_intret_notifier();
+		suspmask |= XNDBGSTOP;
+	}
+#endif
+	/*
+	 * Return the suspension bits the caller should pass to
+	 * xnthread_suspend().
+	 */
+	return suspmask;
 }
 
 void pipeline_leave_oob_finish(void)
