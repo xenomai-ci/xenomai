@@ -74,7 +74,6 @@ enabled (default), unless *linuxthreads* are used instead of *NPTL*.
 System parameters renamed::
 
 * xeno_hal.supported_cpus -> xenomai.supported_cpus
-* xeno_hal.clockfreq -> xenomai.clockfreq
 * xeno_hal.disable -> xenomai.state=disabled
 * xeno_hal.cpufreq -> xenomai.cpufreq
 * xeno_nucleus.watchdog_timeout -> xenomai.watchdog_timeout

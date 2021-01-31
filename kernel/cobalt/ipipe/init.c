@@ -11,9 +11,6 @@
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/clock.h>
 
-static unsigned long clockfreq_arg;
-module_param_named(clockfreq, clockfreq_arg, ulong, 0444);
-
 int __init pipeline_init(void)
 {
 	struct ipipe_sysinfo sysinfo;
@@ -25,15 +22,7 @@ int __init pipeline_init(void)
 
 	ipipe_get_sysinfo(&sysinfo);
 
-	if (clockfreq_arg == 0)
-		clockfreq_arg = sysinfo.sys_hrclock_freq;
-
-	if (clockfreq_arg == 0) {
-		printk(XENO_ERR "null clock frequency? Aborting.\n");
-		return -ENODEV;
-	}
-
-	cobalt_pipeline.clock_freq = clockfreq_arg;
+	cobalt_pipeline.clock_freq = sysinfo.sys_hrclock_freq;
 
 	if (cobalt_machine.init) {
 		ret = cobalt_machine.init();
