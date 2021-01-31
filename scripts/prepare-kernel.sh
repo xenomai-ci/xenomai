@@ -147,7 +147,7 @@ generate_patch() {
 }
 
 
-usage='usage: prepare-kernel --linux=<linux-tree> --ipipe=<ipipe-patch> [--arch=<arch>] [--outpatch=<file> [--filterkvers=y|n] [--filterarch=y|n]] [--forcelink] [--default] [--verbose]'
+usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>]|[--ipipe=<ipipe-patch>] [--arch=<arch>] [--outpatch=<file> [--filterkvers=y|n] [--filterarch=y|n]] [--forcelink] [--default] [--verbose]'
 me=`basename $0`
 
 while test $# -gt 0; do
@@ -157,12 +157,25 @@ while test $# -gt 0; do
 	linux_tree=`eval "echo $linux_tree"`
 	;;
     --adeos=*)
-	ipipe_patch=`echo $1|sed -e 's,^--adeos=\\(.*\\)$,\\1,g'`
-	ipipe_patch=`eval "echo $ipipe_patch"`
+	pipeline_patch=`echo $1|sed -e 's,^--adeos=\\(.*\\)$,\\1,g'`
+	pipeline_patch=`eval "echo $pipeline_patch"`
+	probe_header=include/linux/ipipe.h
+	arch_probe_header=include/asm/ipipe.h
+	pipeline_type=ipipe
 	;;
     --ipipe=*)
-	ipipe_patch=`echo $1|sed -e 's,^--ipipe=\\(.*\\)$,\\1,g'`
-	ipipe_patch=`eval "echo $ipipe_patch"`
+	pipeline_patch=`echo $1|sed -e 's,^--ipipe=\\(.*\\)$,\\1,g'`
+	pipeline_patch=`eval "echo $pipeline_patch"`
+	probe_header=include/linux/ipipe.h
+	arch_probe_header=include/asm/ipipe.h
+	pipeline_type=ipipe
+	;;
+    --dovetail=*)
+	pipeline_patch=`echo $1|sed -e 's,^--dovetail=\\(.*\\)$,\\1,g'`
+	pipeline_patch=`eval "echo $pipeline_patch"`
+	probe_header=include/linux/dovetail.h
+	arch_probe_header=include/asm/dovetail.h
+	pipeline_type=dovetail
 	;;
     --arch=*)
 	linux_arch=`echo $1|sed -e 's,^--arch=\\(.*\\)$,\\1,g'`
@@ -305,51 +318,58 @@ eval linux_`grep '^VERSION =' $linux_tree/Makefile | sed -e 's, ,,g'`
 
 linux_version="$linux_VERSION.$linux_PATCHLEVEL.$linux_SUBLEVEL"
 
+if test x$pipeline_type = x; then
+    if test -r $linux_tree/include/linux/ipipe.h; then
+	probe_header=include/linux/ipipe.h
+	arch_probe_header=include/asm/ipipe.h
+	pipeline_type=ipipe
+    elif test -r $linux_tree/include/linux/dovetail.h; then
+	probe_header=include/linux/dovetail.h
+	arch_probe_header=include/asm/dovetail.h
+	pipeline_type=dovetail
+    fi
+fi
+
 if test x$verbose = x1; then
 echo "Preparing kernel $linux_version$linux_EXTRAVERSION in $linux_tree..."
 fi
 
-if test -r $linux_tree/include/linux/ipipe.h; then
+if test -r $linux_tree/$probe_header; then
     if test x$verbose = x1; then
-       echo "I-pipe found - bypassing patch."
+       echo "IRQ pipeline found - bypassing patch."
     fi
 else
    if test x$verbose = x1; then
-      echo "$me: no I-pipe support found." >&2
+      echo "$me: no IRQ pipeline support found." >&2
    fi
-   while test x$ipipe_patch = x; do
-      echo -n "I-pipe patch: "
-      read ipipe_patch
-      if test \! -r "$ipipe_patch" -o x$ipipe_patch = x; then
-         echo "$me: cannot read I-pipe patch from $ipipe_patch" >&2
-         ipipe_patch=
+   while test x$pipeline_patch = x; do
+      echo -n "IRQ pipeline patch: "
+      read pipeline_patch
+      if test \! -r "$pipeline_patch" -o x$pipeline_patch = x; then
+         echo "$me: cannot read IRQ pipeline support from $pipeline_patch" >&2
+         pipeline_patch=
       fi
    done
-   patchdir=`dirname $ipipe_patch`; 
+   patchdir=`dirname $pipeline_patch`;
    patchdir=`cd $patchdir && pwd`
-   ipipe_patch=$patchdir/`basename $ipipe_patch`
+   pipeline_patch=$patchdir/`basename $pipeline_patch`
    curdir=$PWD
-   cd $linux_tree && patch --dry-run -p1 -f < $ipipe_patch || { 
+   cd $linux_tree && patch --dry-run -p1 -f < $pipeline_patch || {
         cd $curdir;
-        echo "$me: Unable to patch kernel $linux_version$linux_EXTRAVERSION with `basename $ipipe_patch`." >&2
+        echo "$me: Unable to patch kernel $linux_version$linux_EXTRAVERSION with `basename $pipeline_patch`." >&2
         exit 2;
    }
-   patch -p1 -f -s < $ipipe_patch
+   patch -p1 -f -s < $pipeline_patch
    cd $curdir
 fi
 
-if test \! -r $linux_tree/arch/$linux_arch/include/asm/ipipe.h; then
-   echo "$me: $linux_tree has no I-pipe support for $linux_arch" >&2
+if test \! -r $linux_tree/arch/$linux_arch/$arch_probe_header; then
+   echo "$me: $linux_tree has no IRQ pipeline support for $linux_arch" >&2
    exit 2
 fi
 
-ipipe_core=`grep '^#define.*IPIPE_CORE_RELEASE.*' $linux_tree/arch/$linux_arch/include/asm/ipipe.h 2>/dev/null|head -n1|sed -e 's,[^0-9]*\([0-9]*\)$,\1,'`
-if test "x$ipipe_core" = x; then
-    echo "$me: $linux_tree has no I-pipe support for $linux_arch" >&2
-    exit 2
-fi
 if test x$verbose = x1; then
-   echo "I-pipe core/$linux_arch #$ipipe_core installed."
+   echo "IRQ pipeline installed."
 fi
 
 patch_kernelversion_specific="y"
@@ -387,9 +407,9 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 test "x$CONFIG_XENO_REVISION_LEVEL" = "x" && CONFIG_XENO_REVISION_LEVEL=0
 
     if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$linux_arch/Makefile; then
-	p="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
+	p="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/arch/\$(SRCARCH)/xenomai/$pipeline_type/include -I\$(srctree)/include/xenomai"
 	(echo; echo $p) | patch_append arch/$linux_arch/Makefile
-	p="core-\$(CONFIG_XENOMAI)	+= arch/$linux_arch/xenomai/"
+	p="core-\$(CONFIG_XENOMAI)	+= arch/$linux_arch/xenomai/$pipeline_type/"
 	echo $p | patch_append arch/$linux_arch/Makefile
     fi
 
@@ -415,7 +435,7 @@ esac
 patch_kernelversion_specific="n"
 patch_architecture_specific="y"
 patch_link r m kernel/cobalt/arch/$linux_arch arch/$linux_arch/xenomai
-patch_link n n kernel/cobalt/include/ipipe arch/$linux_arch/include/ipipe
+patch_link n n kernel/cobalt/include/$pipeline_type arch/$linux_arch/include/$pipeline_type
 patch_architecture_specific="n"
 patch_link n m kernel/cobalt kernel/xenomai
 patch_link n cobalt-core.h kernel/cobalt/trace include/trace/events
@@ -425,11 +445,11 @@ patch_link r n kernel/cobalt/include/asm-generic/xenomai include/asm-generic/xen
 patch_link r n kernel/cobalt/include/linux/xenomai include/linux/xenomai
 patch_link n m kernel/cobalt/posix kernel/xenomai/posix
 patch_link n m kernel/cobalt/rtdm kernel/xenomai/rtdm
-patch_link n m kernel/cobalt/ipipe kernel/xenomai/pipeline
+patch_link n m kernel/cobalt/$pipeline_type kernel/xenomai/pipeline
 patch_link r m kernel/drivers drivers/xenomai
 patch_link n n include/cobalt/kernel include/xenomai/cobalt/kernel
 patch_link r n include/cobalt/kernel/rtdm include/xenomai/rtdm
-patch_link r n include/cobalt/kernel/ipipe/pipeline include/xenomai/pipeline
+patch_link r n include/cobalt/kernel/$pipeline_type/pipeline include/xenomai/pipeline
 patch_link r n include/cobalt/uapi include/xenomai/cobalt/uapi
 patch_link r n include/rtdm/uapi include/xenomai/rtdm/uapi
 patch_link n version.h include/xenomai include/xenomai
