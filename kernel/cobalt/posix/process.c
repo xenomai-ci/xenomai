@@ -47,6 +47,7 @@
 #include <cobalt/kernel/thread.h>
 #include <cobalt/uapi/signal.h>
 #include <cobalt/uapi/syscall.h>
+#include <pipeline/sched.h>
 #include <trace/events/cobalt-core.h>
 #include <rtdm/driver.h>
 #include <asm/xenomai/features.h>
@@ -624,7 +625,7 @@ int cobalt_map_user(struct xnthread *thread, __u32 __user *u_winoff)
 	 * positive in debug code from handle_schedule_event() and
 	 * friends.
 	 */
-	xnthread_init_shadow_tcb(thread);
+	pipeline_init_shadow_tcb(thread);
 	xnthread_suspend(thread, XNRELAX, XN_INFINITE, XN_RELATIVE, NULL);
 	pipeline_attach_current(thread);
 	xnthread_set_state(thread, XNMAPPED);

@@ -40,6 +40,7 @@
 #include <cobalt/kernel/thread.h>
 #include <pipeline/kevents.h>
 #include <pipeline/inband_work.h>
+#include <pipeline/sched.h>
 #include <trace/events/cobalt-core.h>
 #include "debug.h"
 
@@ -236,44 +237,6 @@ err_out:
 	return ret;
 }
 
-void xnthread_init_shadow_tcb(struct xnthread *thread)
-{
-	struct xnarchtcb *tcb = xnthread_archtcb(thread);
-	struct task_struct *p = current;
-
-	/*
-	 * If the current task is a kthread, the pipeline will take
-	 * the necessary steps to make the FPU usable in such
-	 * context. The kernel already took care of this issue for
-	 * userland tasks (e.g. setting up a clean backup area).
-	 */
-	__ipipe_share_current(0);
-
-	tcb->core.host_task = p;
-	tcb->core.tsp = &p->thread;
-	tcb->core.mm = p->mm;
-	tcb->core.active_mm = p->mm;
-	tcb->core.tip = task_thread_info(p);
-#ifdef CONFIG_XENO_ARCH_FPU
-	tcb->core.user_fpu_owner = p;
-#endif /* CONFIG_XENO_ARCH_FPU */
-	xnarch_init_shadow_tcb(thread);
-
-	trace_cobalt_shadow_map(thread);
-}
-
-void xnthread_init_root_tcb(struct xnthread *thread)
-{
-	struct xnarchtcb *tcb = xnthread_archtcb(thread);
-	struct task_struct *p = current;
-
-	tcb->core.host_task = p;
-	tcb->core.tsp = &tcb->core.ts;
-	tcb->core.mm = p->mm;
-	tcb->core.tip = NULL;
-	xnarch_init_root_tcb(thread);
-}
-
 void xnthread_deregister(struct xnthread *thread)
 {
 	if (thread->handle != XN_NO_HANDLE)
@@ -408,35 +371,6 @@ void xnthread_prepare_wait(struct xnthread_wait_context *wc)
 }
 EXPORT_SYMBOL_GPL(xnthread_prepare_wait);
 
-#ifdef CONFIG_XENO_ARCH_FPU
-
-static inline void giveup_fpu(struct xnsched *sched,
-			      struct xnthread *thread)
-{
-	if (thread == sched->fpuholder)
-		sched->fpuholder = NULL;
-}
-
-void xnthread_switch_fpu(struct xnsched *sched)
-{
-	struct xnthread *curr = sched->curr;
-
-	if (!xnthread_test_state(curr, XNFPU))
-		return;
-
-	xnarch_switch_fpu(sched->fpuholder, curr);
-	sched->fpuholder = curr;
-}
-
-#else /* !CONFIG_XENO_ARCH_FPU */
-
-static inline void giveup_fpu(struct xnsched *sched,
-				      struct xnthread *thread)
-{
-}
-
-#endif /* !CONFIG_XENO_ARCH_FPU */
-
 static inline void release_all_ownerships(struct xnthread *curr)
 {
 	struct xnsynch *synch, *tmp;
@@ -455,8 +389,6 @@ static inline void release_all_ownerships(struct xnthread *curr)
 
 static inline void cleanup_tcb(struct xnthread *curr) /* nklock held, irqs off */
 {
-	struct xnsched *sched = curr->sched;
-
 	list_del(&curr->glink);
 	cobalt_nrthreads--;
 	xnvfile_touch_tag(&nkthreadlist_tag);
@@ -479,7 +411,7 @@ static inline void cleanup_tcb(struct xnthread *curr) /* nklock held, irqs off *
 	 */
 	release_all_ownerships(curr);
 
-	giveup_fpu(sched, curr);
+	pipeline_finalize_thread(curr);
 	xnsched_forget(curr);
 	xnthread_deregister(curr);
 }
@@ -1912,7 +1844,6 @@ int xnthread_harden(void)
 {
 	struct task_struct *p = current;
 	struct xnthread *thread;
-	struct xnsched *sched;
 	int ret;
 
 	secondary_mode_only();
@@ -1928,16 +1859,14 @@ int xnthread_harden(void)
 
 	xnthread_clear_sync_window(thread, XNRELAX);
 
-	ret = __ipipe_migrate_head();
+	ret = pipeline_leave_inband();
 	if (ret) {
 		xnthread_test_cancel();
 		xnthread_set_sync_window(thread, XNRELAX);
 		return ret;
 	}
 
-	/* "current" is now running into the Xenomai domain. */
-	sched = xnsched_current();
-	xnthread_switch_fpu(sched);
+	/* "current" is now running on the out-of-band stage. */
 
 	xnlock_clear_irqon(&nklock);
 	xnthread_test_cancel();
@@ -2097,8 +2026,8 @@ void xnthread_relax(int notify, int reason)
 		suspension |= XNDBGSTOP;
 	}
 #endif
-	set_current_state(p->state & ~TASK_NOWAKEUP);
 	xnthread_run_handler_stack(thread, relax_thread);
+	pipeline_leave_oob_prepare();
 	xnthread_suspend(thread, suspension, XN_INFINITE, XN_RELATIVE, NULL);
 	splnone();
 
@@ -2110,7 +2039,7 @@ void xnthread_relax(int notify, int reason)
 		  "xnthread_relax() failed for thread %s[%d]",
 		  thread->name, xnthread_host_pid(thread));
 
-	__ipipe_reenter_root();
+	pipeline_leave_oob_finish();
 
 	/* Account for secondary mode switch. */
 	xnstat_counter_inc(&thread->stat.ssw);
@@ -2162,7 +2091,7 @@ void xnthread_relax(int notify, int reason)
 	 */
 	xnthread_clear_localinfo(thread, XNSYSRST);
 
-	ipipe_clear_thread_flag(TIP_MAYDAY);
+	pipeline_clear_mayday();
 
 	trace_cobalt_shadow_relaxed(thread);
 }
@@ -2320,7 +2249,7 @@ void __xnthread_kick(struct xnthread *thread) /* nklock locked, irqs off */
 	 */
 	if (thread != xnsched_current_thread() &&
 	    xnthread_test_state(thread, XNUSER))
-		ipipe_raise_mayday(p);
+		pipeline_raise_mayday(p);
 }
 
 void xnthread_kick(struct xnthread *thread)
@@ -2510,7 +2439,7 @@ int xnthread_map(struct xnthread *thread, struct completion *done)
 	thread->u_window = NULL;
 	xnthread_pin_initial(thread);
 
-	xnthread_init_shadow_tcb(thread);
+	pipeline_init_shadow_tcb(thread);
 	xnthread_suspend(thread, XNRELAX, XN_INFINITE, XN_RELATIVE, NULL);
 	init_kthread_info(thread);
 	xnthread_set_state(thread, XNMAPPED);
@@ -2568,7 +2497,7 @@ void xnthread_call_mayday(struct xnthread *thread, int reason)
 	XENO_BUG_ON(COBALT, !xnthread_test_state(thread, XNUSER));
 	xnthread_set_info(thread, XNKICKED);
 	xnthread_signal(thread, SIGDEBUG, reason);
-	ipipe_raise_mayday(p);
+	pipeline_raise_mayday(p);
 }
 EXPORT_SYMBOL_GPL(xnthread_call_mayday);
 

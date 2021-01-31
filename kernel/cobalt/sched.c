@@ -27,6 +27,7 @@
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/arith.h>
 #include <cobalt/uapi/signal.h>
+#include <pipeline/sched.h>
 #define CREATE_TRACE_POINTS
 #include <trace/events/cobalt-core.h>
 
@@ -212,7 +213,7 @@ static void xnsched_init(struct xnsched *sched, int cpu)
 	sched->fpuholder = &sched->rootcb;
 #endif /* CONFIG_XENO_ARCH_FPU */
 
-	xnthread_init_root_tcb(&sched->rootcb);
+	pipeline_init_root_tcb(&sched->rootcb);
 	list_add_tail(&sched->rootcb.glink, &nkthreadq);
 	cobalt_nrthreads++;
 
@@ -875,16 +876,7 @@ static inline void enter_root(struct xnthread *root)
 
 static inline void leave_root(struct xnthread *root)
 {
-	struct xnarchtcb *rootcb = xnthread_archtcb(root);
-	struct task_struct *p = current;
-
-	ipipe_notify_root_preemption();
-	/* Remember the preempted Linux task pointer. */
-	rootcb->core.host_task = p;
-	rootcb->core.tsp = &p->thread;
-	rootcb->core.mm = rootcb->core.active_mm = ipipe_get_active_mm();
-	rootcb->core.tip = task_thread_info(p);
-	xnarch_leave_root(root);
+	pipeline_prep_switch_oob(root);
 
 #ifdef CONFIG_XENO_OPT_WATCHDOG
 	xntimer_start(&root->sched->wdtimer, get_watchdog_timeout(),
@@ -905,15 +897,11 @@ static inline void do_lazy_user_work(struct xnthread *curr)
 
 int ___xnsched_run(struct xnsched *sched)
 {
+	bool switched = false, leaving_inband;
 	struct xnthread *prev, *next, *curr;
-	int switched, shadow;
 	spl_t s;
 
-	XENO_WARN_ON_ONCE(COBALT,
-			  !hard_irqs_disabled() && is_secondary_domain());
-
-	if (xnarch_escalate())
-		return 0;
+	XENO_WARN_ON_ONCE(COBALT, is_secondary_domain());
 
 	trace_cobalt_schedule(sched);
 
@@ -931,7 +919,6 @@ int ___xnsched_run(struct xnsched *sched)
 	if (xnthread_test_state(curr, XNUSER))
 		do_lazy_user_work(curr);
 
-	switched = 0;
 	if (!test_resched(sched))
 		goto out;
 
@@ -958,11 +945,11 @@ int ___xnsched_run(struct xnsched *sched)
 	 * store tearing.
 	 */
 	WRITE_ONCE(sched->curr, next);
-	shadow = 1;
+	leaving_inband = false;
 
 	if (xnthread_test_state(prev, XNROOT)) {
 		leave_root(prev);
-		shadow = 0;
+		leaving_inband = true;
 	} else if (xnthread_test_state(next, XNROOT)) {
 		if (sched->lflags & XNHTICK)
 			xnintr_host_tick(sched);
@@ -973,46 +960,23 @@ int ___xnsched_run(struct xnsched *sched)
 
 	xnstat_exectime_switch(sched, &next->stat.account);
 	xnstat_counter_inc(&next->stat.csw);
-	xnarch_switch_to(prev, next);
+
+	if (pipeline_switch_to(prev, next, leaving_inband))
+		/* oob -> in-band transition detected. */
+		return true;
 
 	/*
-	 * Test whether we transitioned from primary mode to secondary
-	 * over a shadow thread, caused by a call to xnthread_relax().
-	 * In such a case, we are running over the regular schedule()
-	 * tail code, so we have to skip our tail code.
+	 * Re-read sched->curr for tracing: the current thread may
+	 * have switched from in-band to oob context.
 	 */
-	if (shadow && is_secondary_domain())
-		goto shadow_epilogue;
+	xntrace_pid(task_pid_nr(current),
+		xnthread_current_priority(xnsched_current()->curr));
 
-	switched = 1;
-	sched = xnsched_current();
-	/*
-	 * Re-read the currently running thread, this is needed
-	 * because of relaxed/hardened transitions.
-	 */
-	curr = sched->curr;
-	xnthread_switch_fpu(sched);
-	xntrace_pid(task_pid_nr(current), xnthread_current_priority(curr));
+	switched = true;
 out:
 	xnlock_put_irqrestore(&nklock, s);
 
-	return switched;
-
-shadow_epilogue:
-	__ipipe_complete_domain_migration();
-
-	XENO_BUG_ON(COBALT, xnthread_current() == NULL);
-
-	/*
-	 * Interrupts must be disabled here (has to be done on entry
-	 * of the Linux [__]switch_to function), but it is what
-	 * callers expect, specifically the reschedule of an IRQ
-	 * handler that hit before we call xnsched_run in
-	 * xnthread_suspend() when relaxing a thread.
-	 */
-	XENO_BUG_ON(COBALT, !hard_irqs_disabled());
-
-	return 1;
+	return !!switched;
 }
 EXPORT_SYMBOL_GPL(___xnsched_run);
 

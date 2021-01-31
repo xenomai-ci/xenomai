@@ -427,10 +427,6 @@ void xnthread_switch_fpu(struct xnsched *sched);
 static inline void xnthread_switch_fpu(struct xnsched *sched) { }
 #endif /* CONFIG_XENO_ARCH_FPU */
 
-void xnthread_init_shadow_tcb(struct xnthread *thread);
-
-void xnthread_init_root_tcb(struct xnthread *thread);
-
 void xnthread_deregister(struct xnthread *thread);
 
 char *xnthread_format_status(unsigned long status,

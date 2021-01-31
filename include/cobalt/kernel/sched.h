@@ -30,6 +30,7 @@
 #include <cobalt/kernel/vfile.h>
 #include <cobalt/kernel/assert.h>
 #include <asm/xenomai/machine.h>
+#include <pipeline/sched.h>
 
 /**
  * @addtogroup cobalt_core_sched
@@ -300,7 +301,7 @@ static inline int __xnsched_run(struct xnsched *sched)
 	     (XNINIRQ|XNINSW|XNRESCHED)) != XNRESCHED)
 		return 0;
 
-	return ___xnsched_run(sched);
+	return pipeline_schedule(sched);
 }
 
 static inline int xnsched_run(void)
