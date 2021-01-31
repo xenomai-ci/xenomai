@@ -104,8 +104,6 @@ struct xnclock_ratelimit_state {
 
 extern struct xnclock nkclock;
 
-extern unsigned long nktimerlat;
-
 int xnclock_register(struct xnclock *clock,
 		     const cpumask_t *affinity);
 

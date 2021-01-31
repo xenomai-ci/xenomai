@@ -24,7 +24,6 @@ struct cobalt_machine {
 	int (*late_init)(void);
 	void (*cleanup)(void);
 	void (*prefault)(struct vm_area_struct *vma);
-	unsigned long (*calibrate)(void);
 	const char *const *fault_labels;
 };
 
@@ -45,11 +44,6 @@ struct cobalt_pipeline {
 	cpumask_t supported_cpus;
 #endif
 };
-
-static inline unsigned long xnarch_timer_calibrate(void)
-{
-	return cobalt_machine.calibrate();
-}
 
 int pipeline_init(void);
 

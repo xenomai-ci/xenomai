@@ -32,7 +32,6 @@
  *
  * @{
  */
-unsigned long nktimerlat;
 
 #ifdef XNARCH_HAVE_NODIV_LLIMD
 
@@ -456,8 +455,6 @@ void print_core_clock_status(struct xnclock *clock,
 	xnvfile_printf(it, "%8s: timer=%s, clock=%s\n",
 		       "devices", pipeline_timer_name(), pipeline_clock_name());
 	xnvfile_printf(it, "%8s: %s\n", "watchdog", wd_status);
-	xnvfile_printf(it, "%8s: %Lu\n", "setup",
-		       xnclock_ticks_to_ns(&nkclock, nktimerlat));
 }
 
 static int clock_show(struct xnvfile_regular_iterator *it, void *data)
@@ -784,11 +781,8 @@ static void reset_core_clock_gravity(struct xnclock *clock)
 	struct xnclock_gravity gravity;
 
 	xnarch_get_latencies(&gravity);
-	gravity.user += nktimerlat;
 	if (gravity.kernel == 0)
 		gravity.kernel = gravity.user;
-	if (gravity.irq == 0)
-		gravity.irq = nktimerlat;
 	set_core_clock_gravity(clock, &gravity);
 }
 
@@ -817,7 +811,6 @@ int __init xnclock_init()
 	xnarch_init_u32frac(&bln_frac, 1, 1000000000);
 #endif
 	pipeline_init_clock();
-	nktimerlat = xnarch_timer_calibrate();
 	xnclock_reset_gravity(&nkclock);
 	xnclock_register(&nkclock, &xnsched_realtime_cpus);
 
