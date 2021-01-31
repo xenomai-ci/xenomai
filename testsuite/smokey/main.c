@@ -31,6 +31,7 @@ int main(int argc, char *const argv[])
 
 	for_each_smokey_test(t) {
 		pthread_setschedparam(pthread_self(), SCHED_OTHER, &param);
+		smokey_trace("\n===  running %s ===\n", t->name);
 		ret = t->run(t, argc, argv);
 		if (ret) {
 			if (ret == -ENOSYS) {
