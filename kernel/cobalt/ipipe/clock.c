@@ -6,6 +6,66 @@
 
 #include <cobalt/kernel/clock.h>
 #include <cobalt/kernel/vdso.h>
+#include <cobalt/kernel/arith.h>
+#include <pipeline/machine.h>
+
+static unsigned long long clockfreq;
+
+#ifdef XNARCH_HAVE_LLMULSHFT
+
+static unsigned int tsc_scale, tsc_shift;
+
+#ifdef XNARCH_HAVE_NODIV_LLIMD
+
+static struct xnarch_u32frac tsc_frac;
+
+long long xnclock_core_ns_to_ticks(long long ns)
+{
+	return xnarch_nodiv_llimd(ns, tsc_frac.frac, tsc_frac.integ);
+}
+
+#else /* !XNARCH_HAVE_NODIV_LLIMD */
+
+long long xnclock_core_ns_to_ticks(long long ns)
+{
+	return xnarch_llimd(ns, 1 << tsc_shift, tsc_scale);
+}
+
+#endif /* !XNARCH_HAVE_NODIV_LLIMD */
+
+xnsticks_t xnclock_core_ticks_to_ns(xnsticks_t ticks)
+{
+	return xnarch_llmulshft(ticks, tsc_scale, tsc_shift);
+}
+
+xnsticks_t xnclock_core_ticks_to_ns_rounded(xnsticks_t ticks)
+{
+	unsigned int shift = tsc_shift - 1;
+	return (xnarch_llmulshft(ticks, tsc_scale, shift) + 1) / 2;
+}
+
+#else  /* !XNARCH_HAVE_LLMULSHFT */
+
+xnsticks_t xnclock_core_ticks_to_ns(xnsticks_t ticks)
+{
+	return xnarch_llimd(ticks, 1000000000, clockfreq);
+}
+
+xnsticks_t xnclock_core_ticks_to_ns_rounded(xnsticks_t ticks)
+{
+	return (xnarch_llimd(ticks, 1000000000, clockfreq/2) + 1) / 2;
+}
+
+xnsticks_t xnclock_core_ns_to_ticks(xnsticks_t ns)
+{
+	return xnarch_llimd(ns, clockfreq, 1000000000);
+}
+
+#endif /* !XNARCH_HAVE_LLMULSHFT */
+
+EXPORT_SYMBOL_GPL(xnclock_core_ticks_to_ns);
+EXPORT_SYMBOL_GPL(xnclock_core_ticks_to_ns_rounded);
+EXPORT_SYMBOL_GPL(xnclock_core_ns_to_ticks);
 
 int pipeline_get_host_time(struct timespec *tp)
 {
@@ -59,4 +119,25 @@ int pipeline_get_host_time(struct timespec *tp)
 #else
 	return -EINVAL;
 #endif
+}
+
+void pipeline_update_clock_freq(unsigned long long freq)
+{
+	spl_t s;
+
+	xnlock_get_irqsave(&nklock, s);
+	clockfreq = freq;
+#ifdef XNARCH_HAVE_LLMULSHFT
+	xnarch_init_llmulshft(1000000000, freq, &tsc_scale, &tsc_shift);
+#ifdef XNARCH_HAVE_NODIV_LLIMD
+	xnarch_init_u32frac(&tsc_frac, 1 << tsc_shift, tsc_scale);
+#endif
+#endif
+	cobalt_pipeline.clock_freq = freq;
+	xnlock_put_irqrestore(&nklock, s);
+}
+
+void pipeline_init_clock(void)
+{
+	pipeline_update_clock_freq(cobalt_pipeline.clock_freq);
 }

@@ -33,4 +33,8 @@ static inline const char *pipeline_clock_name(void)
 
 int pipeline_get_host_time(struct timespec *tp);
 
+void pipeline_update_clock_freq(unsigned long long freq);
+
+void pipeline_init_clock(void);
+
 #endif /* !_COBALT_KERNEL_IPIPE_CLOCK_H */

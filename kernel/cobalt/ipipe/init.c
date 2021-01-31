@@ -61,7 +61,7 @@ int __init pipeline_init(void)
 			  (ipipe_irq_handler_t)__xnsched_run_handler,
 			  NULL, NULL);
 
-	ret = xnclock_init(cobalt_pipeline.clock_freq);
+	ret = xnclock_init();
 	if (ret)
 		goto fail_clock;
 
