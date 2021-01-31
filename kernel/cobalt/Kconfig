@@ -485,3 +485,9 @@ config XENO_OPT_WATCHDOG_TIMEOUT
 	  Watchdog timeout value (in seconds).
 
 endif # XENO_OPT_DEBUG
+
+config XENO_TODO
+	bool "Reveal TODO places"
+	help
+	  This option causes a build time assertion to trigger
+	  when the TODO() marker is found in the compiled code.
