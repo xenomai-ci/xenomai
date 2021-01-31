@@ -20,6 +20,11 @@
 
 #include <cobalt/uapi/kernel/urw.h>
 
+/*
+ * I-pipe only. Dovetail enables the common vDSO for getting
+ * CLOCK_REALTIME timestamps from the out-of-band stage
+ * (XNVDSO_FEAT_HOST_REALTIME is cleared in this case).
+ */
 struct xnvdso_hostrt_data {
 	__u64 wall_sec;
 	__u64 wtom_sec;

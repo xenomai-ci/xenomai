@@ -7,6 +7,8 @@
 
 #include <linux/ipipe_tickdev.h>
 
+struct timespec;
+
 static inline u64 pipeline_read_cycle_counter(void)
 {
 	u64 t;
@@ -28,5 +30,7 @@ static inline const char *pipeline_clock_name(void)
 {
 	return ipipe_clock_name();
 }
+
+int pipeline_get_host_time(struct timespec *tp);
 
 #endif /* !_COBALT_KERNEL_IPIPE_CLOCK_H */
