@@ -25,6 +25,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <cobalt/wrappers.h>
+#include <cobalt/ticks.h>
 #include <asm/xenomai/syscall.h>
 #include <asm/xenomai/tsc.h>
 #include <asm/xenomai/features.h>
@@ -43,6 +44,9 @@ void cobalt_arch_check_features(struct cobalt_featinfo *finfo)
 	unsigned page_size;
 	int err, fd;
 	void *addr;
+
+	if (!cobalt_use_legacy_tsc())
+		return;
 
 	if (__xn_tscinfo.kinfo.counter != NULL)
 		return;
