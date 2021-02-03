@@ -23,7 +23,7 @@
 #include <asm/xenomai/uapi/fptest.h>
 #include <asm/hwcap.h>
 
-#define have_fp (elf_hwcap & HWCAP_FP)
+#define have_fp (ELF_HWCAP & HWCAP_FP)
 
 static inline int fp_kernel_supported(void)
 {
