@@ -23,7 +23,7 @@
 #include <asm/hwcap.h>
 
 #ifdef CONFIG_VFP
-#define have_vfp (elf_hwcap & HWCAP_VFP)
+#define have_vfp (ELF_HWCAP & HWCAP_VFP)
 #else /* !CONFIG_VFP */
 #define have_vfp 0
 #endif /* !CONFIG_VFP */
