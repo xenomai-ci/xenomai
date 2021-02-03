@@ -29,7 +29,11 @@
 #define XNARCH_HOST_TICK_IRQ __ipipe_hrtimer_irq
 
 #include <asm/barrier.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
 #include <asm/compiler.h>
+#endif
+
 #include <asm/cmpxchg.h>
 #include <asm/switch_to.h>
 #include <asm/system_misc.h>
