@@ -21,6 +21,7 @@ variables:
   USE_CCACHE: "1"
   CCACHE_MAXSIZE: "1G"
   IPIPE_MIRROR_URL: "https://source.denx.de/Xenomai"
+  DOVETAIL_URL: "https://source.denx.de/Xenomai/linux-dovetail.git"
   PACKAGES: "gcc-8 u-boot-tools git make bc bison libelf-dev autotools-dev \
              autoconf autogen libtool pkg-config ccache flex libssl-dev"
   PACKAGES_arm: "gcc-8-arm-linux-gnueabihf libc6-dev-armhf-cross"
@@ -72,6 +73,7 @@ variables:
     - ./scripts/config -d DEBUG_INFO
     # I-pipe and Xenomai settings
     - ./scripts/config -e IPIPE
+    - ./scripts/config -e DOVETAIL
     - ./scripts/config -e XENOMAI
     - ./scripts/config -e XENO_OPT_SCHED_CLASSES
     - ./scripts/config -e XENO_OPT_SCHED_WEAK
@@ -170,6 +172,14 @@ variables:
     paths:
       - .ccache
 
+arm-5.10-head:
+  extends: .build
+  variables:
+    ARCH: arm
+    PIPELINE_REV: v5.10.y-dovetail-rebase
+    PIPELINE_KERNEL: ${DOVETAIL_URL}
+    KERNEL_DEFCONFIG: multi_v7_defconfig
+
 arm-5.4-release:
   extends: .build
   variables:
@@ -186,6 +196,14 @@ arm-4.19-release:
     PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm.git
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
+arm64-5.10-head:
+  extends: .build
+  variables:
+    ARCH: arm64
+    PIPELINE_REV: v5.10.y-dovetail-rebase
+    PIPELINE_KERNEL: ${DOVETAIL_URL}
+    KERNEL_DEFCONFIG: defconfig
+
 arm64-5.4-release:
   extends: .build
   variables:
@@ -201,6 +219,14 @@ arm64-4.19-cip-release:
     PIPELINE_REV: ipipe-core-4.19..*cip.*-arm64-.*
     PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm64.git
     KERNEL_DEFCONFIG: defconfig
+
+x86-5.10-head:
+  extends: .build
+  variables:
+    ARCH: x86
+    PIPELINE_REV: v5.10.y-dovetail-rebase
+    PIPELINE_KERNEL: ${DOVETAIL_URL}
+    KERNEL_DEFCONFIG: x86_64_defconfig
 
 x86-5.4-head:
   extends: .build
