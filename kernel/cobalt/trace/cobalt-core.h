@@ -32,6 +32,7 @@ struct xnsched;
 struct xnthread;
 struct xnsynch;
 struct xnsched_class;
+struct xnsched_quota_group;
 struct xnthread_init_attr;
 
 DECLARE_EVENT_CLASS(thread_event,
