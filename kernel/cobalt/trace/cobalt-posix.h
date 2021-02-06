@@ -156,7 +156,7 @@
 		__cobalt_symbolic_syscall(sendmmsg),			\
 		__cobalt_symbolic_syscall(clock_adjtime))
 
-DECLARE_EVENT_CLASS(syscall_entry,
+DECLARE_EVENT_CLASS(cobalt_syscall_entry,
 	TP_PROTO(unsigned int nr),
 	TP_ARGS(nr),
 
@@ -171,7 +171,7 @@ DECLARE_EVENT_CLASS(syscall_entry,
 	TP_printk("syscall=%s", __cobalt_syscall_name(__entry->nr))
 );
 
-DECLARE_EVENT_CLASS(syscall_exit,
+DECLARE_EVENT_CLASS(cobalt_syscall_exit,
 	TP_PROTO(long result),
 	TP_ARGS(result),
 
@@ -266,22 +266,22 @@ DECLARE_EVENT_CLASS(cobalt_void,
 	TP_printk("%s", "")
 );
 
-DEFINE_EVENT(syscall_entry, cobalt_head_sysentry,
+DEFINE_EVENT(cobalt_syscall_entry, cobalt_head_sysentry,
 	TP_PROTO(unsigned int nr),
 	TP_ARGS(nr)
 );
 
-DEFINE_EVENT(syscall_exit, cobalt_head_sysexit,
+DEFINE_EVENT(cobalt_syscall_exit, cobalt_head_sysexit,
 	TP_PROTO(long result),
 	TP_ARGS(result)
 );
 
-DEFINE_EVENT(syscall_entry, cobalt_root_sysentry,
+DEFINE_EVENT(cobalt_syscall_entry, cobalt_root_sysentry,
 	TP_PROTO(unsigned int nr),
 	TP_ARGS(nr)
 );
 
-DEFINE_EVENT(syscall_exit, cobalt_root_sysexit,
+DEFINE_EVENT(cobalt_syscall_exit, cobalt_root_sysexit,
 	TP_PROTO(long result),
 	TP_ARGS(result)
 );
