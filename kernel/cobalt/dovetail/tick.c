@@ -55,19 +55,21 @@ void pipeline_set_timer_shot(unsigned long delay) /* ns */
 }
 
 static int proxy_set_next_ktime(ktime_t expires,
-				struct clock_event_device *proxy_dev)
+				struct clock_event_device *proxy_dev) /* hard irqs on/off */
 {
 	struct xnsched *sched;
-	ktime_t delta;
 	unsigned long flags;
+	ktime_t delta;
 	int ret;
 
 	/*
-	 * When Negative delta have been observed, we set delta zero.
-	 * Or else exntimer_start() will return -ETIMEDOUT and do not
-	 * trigger shot
+	 * Expiration dates of in-band timers are based on the common
+	 * monotonic time base. If the timeout date has already
+	 * elapsed, make sure xntimer_start() does not fail with
+	 * -ETIMEDOUT but programs the hardware for ticking
+	 * immediately instead.
 	 */
-	delta = ktime_sub(expires, ktime_get_mono_fast_ns());
+	delta = ktime_sub(expires, ktime_get());
 	if (delta < 0)
 		delta = 0;
 
