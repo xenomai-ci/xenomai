@@ -79,12 +79,7 @@ static int proxy_set_next_ktime(ktime_t expires,
 	return ret ? -ETIME : 0;
 }
 
-void xn_core_tick(struct clock_event_device *dummy) /* hard irqs off */
-{
-	xnintr_core_clock_handler();
-}
-
-inline bool pipeline_must_force_program_tick(struct xnsched *sched)
+bool pipeline_must_force_program_tick(struct xnsched *sched)
 {
 	return sched->lflags & XNTSTOP;
 }
@@ -126,7 +121,8 @@ static void setup_proxy(struct clock_proxy_device *dev)
 {
 	struct clock_event_device *proxy_dev = &dev->proxy_device;
 
-	dev->handle_oob_event = xn_core_tick;
+	dev->handle_oob_event = (typeof(dev->handle_oob_event))
+		xnintr_core_clock_handler;
 	proxy_dev->features |= CLOCK_EVT_FEAT_KTIME;
 	proxy_dev->set_next_ktime = proxy_set_next_ktime;
 	if (proxy_dev->set_state_oneshot_stopped)
@@ -134,11 +130,21 @@ static void setup_proxy(struct clock_proxy_device *dev)
 	__this_cpu_write(proxy_device, dev);
 }
 
+static irqreturn_t tick_ipi_handler(int irq, void *dev_id)
+{
+	xnintr_core_clock_handler();
+
+	return IRQ_HANDLED;
+}
+
 int pipeline_install_tick_proxy(void)
 {
 	int ret;
 
-	ret = pipeline_request_timer_ipi(xnintr_core_clock_handler);
+	ret = __request_percpu_irq(TIMER_OOB_IPI,
+				tick_ipi_handler,
+				IRQF_OOB, "Xenomai timer IPI",
+				&cobalt_machine_cpudata);
 	if (ret)
 		return ret;
 
@@ -150,7 +156,7 @@ int pipeline_install_tick_proxy(void)
 	return 0;
 
 fail_proxy:
-	pipeline_free_timer_ipi();
+	free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
 
 	return ret;
 }
@@ -160,5 +166,5 @@ void pipeline_uninstall_tick_proxy(void)
 	/* Uninstall the proxy tick device. */
 	tick_uninstall_proxy(&xnsched_realtime_cpus);
 
-	pipeline_free_timer_ipi();
+	free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
 }

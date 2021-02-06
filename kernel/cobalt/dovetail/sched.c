@@ -75,3 +75,11 @@ void pipeline_clear_mayday(void) /* May solely affect current. */
 {
 	clear_thread_flag(TIF_MAYDAY);
 }
+
+irqreturn_t pipeline_reschedule_ipi_handler(int irq, void *dev_id)
+{
+
+	/* Will reschedule from irq_exit_pipeline(). */
+
+	return IRQ_HANDLED;
+}
