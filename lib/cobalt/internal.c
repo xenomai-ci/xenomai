@@ -31,6 +31,8 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <asm/xenomai/syscall.h>
+#include <asm/xenomai/tsc.h>
+#include <cobalt/ticks.h>
 #include <cobalt/sys/cobalt.h>
 #include "internal.h"
 
@@ -553,7 +555,7 @@ int cobalt_xlate_schedparam(int policy,
 
 	if (priority < 0)
 		priority = -priority;
-	
+
 	memset(param, 0, sizeof(*param));
 	param->sched_priority = priority;
 
@@ -564,6 +566,18 @@ void cobalt_assert_nrt(void)
 {
 	if (cobalt_should_warn())
 		pthread_kill(pthread_self(), SIGDEBUG);
+}
+
+unsigned long long cobalt_read_tsc(void)
+{
+	struct timespec ts;
+
+	if (cobalt_use_legacy_tsc())
+		return cobalt_read_legacy_tsc();
+
+	__cobalt_vdso_gettime(CLOCK_MONOTONIC, &ts);
+
+	return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }
 
 unsigned int cobalt_features;

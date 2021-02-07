@@ -40,7 +40,7 @@ struct __xn_full_tscinfo {
 extern struct __xn_full_tscinfo __xn_tscinfo;
 
 static inline __attribute__((always_inline))
-unsigned long long cobalt_read_tsc(void)
+unsigned long long cobalt_read_legacy_tsc(void)
 {
 	return __xn_tscinfo.kuser_tsc_get(__xn_tscinfo.kinfo.counter);
 }

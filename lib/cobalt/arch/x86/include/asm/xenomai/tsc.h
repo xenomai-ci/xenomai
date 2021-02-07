@@ -19,7 +19,7 @@
 #ifndef _LIB_COBALT_X86_TSC_H
 #define _LIB_COBALT_X86_TSC_H
 
-static inline unsigned long long cobalt_read_tsc(void)
+static inline unsigned long long cobalt_read_legacy_tsc(void)
 {
 #ifdef __i386__
 	unsigned long long t;

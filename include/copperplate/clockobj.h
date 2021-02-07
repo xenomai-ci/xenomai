@@ -70,8 +70,6 @@ void clockobj_get_distance(struct clockobj *clkobj,
 			   const struct itimerspec *itm,
 			   struct timespec *delta);
 
-ticks_t clockobj_get_tsc(void);
-
 void clockobj_caltime_to_timeout(struct clockobj *clkobj, const struct tm *tm,
 				 unsigned long rticks, struct timespec *ts);
 
@@ -112,6 +110,7 @@ void __clockobj_ticks_to_timespec(struct clockobj *clkobj,
 #ifdef CONFIG_XENO_COBALT
 
 #include <cobalt/ticks.h>
+#include <cobalt/sys/cobalt.h>
 
 /*
  * The Cobalt core exclusively deals with aperiodic timings, so a
@@ -121,6 +120,13 @@ void __clockobj_ticks_to_timespec(struct clockobj *clkobj,
  * equivalent to Copperplate TSC units, and Copperplate ticks are
  * periods of the reference clockobj which Cobalt does not know about.
  */
+
+static inline ticks_t clockobj_get_tsc(void)
+{
+	/* Guaranteed to be the source of CLOCK_COPPERPLATE. */
+	return cobalt_read_tsc();
+}
+
 static inline sticks_t clockobj_ns_to_tsc(sticks_t ns)
 {
 	return cobalt_ns_to_ticks(ns);
@@ -141,6 +147,8 @@ void clockobj_ns_to_timespec(ticks_t ns, struct timespec *ts)
 }
 
 #else /* CONFIG_XENO_MERCURY */
+
+ticks_t clockobj_get_tsc(void);
 
 static inline sticks_t clockobj_ns_to_tsc(sticks_t ns)
 {

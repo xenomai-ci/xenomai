@@ -30,7 +30,7 @@
 
 #include <smokey/smokey.h>
 
-#include <asm/xenomai/tsc.h>
+#include <cobalt/sys/cobalt.h>
 
 #define DURATION 10000000
 
