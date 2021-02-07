@@ -134,6 +134,8 @@ void cobalt_register_tsd_hook(struct cobalt_tsd_hook *th);
 
 void cobalt_assert_nrt(void);
 
+unsigned long long cobalt_read_tsc(void);
+
 extern int __cobalt_control_bind;
 
 #ifdef __cplusplus

@@ -229,21 +229,11 @@ int clockobj_set_resolution(struct clockobj *clkobj, unsigned int resolution_ns)
 #ifdef CONFIG_XENO_COBALT
 
 #include <cobalt/arith.h>
-#include <asm/xenomai/tsc.h>
+#include <cobalt/sys/cobalt.h>
 
 #ifdef CONFIG_XENO_COPPERPLATE_CLOCK_RESTRICTED
 #error "restricted CLOCK_COPPERPLATE not available"
 #endif
-
-/*
- * NOTE: we can't inline this routine, as we don't want to expose
- * lib/cobalt/arch/.../include/asm/xenomai/tsc.h.
- */
-ticks_t clockobj_get_tsc(void)
-{
-	/* Guaranteed to be the source of CLOCK_COPPERPLATE. */
-	return cobalt_read_tsc();
-}
 
 ticks_t clockobj_get_time(struct clockobj *clkobj)
 {

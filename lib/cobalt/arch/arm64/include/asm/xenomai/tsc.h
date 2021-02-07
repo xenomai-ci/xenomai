@@ -46,7 +46,7 @@ static inline uint64_t get_counter(void)
 }
 
 static inline __attribute__((always_inline))
-unsigned long long cobalt_read_tsc(void)
+unsigned long long cobalt_read_legacy_tsc(void)
 {
 	return get_counter();
 }
