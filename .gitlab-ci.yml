@@ -197,11 +197,11 @@ arm64-5.4-release:
     PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm64.git
     KERNEL_DEFCONFIG: defconfig
 
-arm64-4.19-release:
+arm64-4.19-cip-release:
   extends: .build
   variables:
     ARCH: arm64
-    PIPELINE_REV: ipipe-core-4.19..*-arm64-.*
+    PIPELINE_REV: ipipe-core-4.19..*cip.*-arm64-.*
     PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm64.git
     KERNEL_DEFCONFIG: defconfig
 
