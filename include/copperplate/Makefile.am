@@ -13,8 +13,7 @@ includesub_HEADERS =		\
 	threadobj.h		\
 	timerobj.h		\
 	traceobj.h		\
-	tunables.h		\
-	wrappers.h
+	tunables.h
 
 noinst_HEADERS =		\
 	registry-obstack.h
