@@ -199,12 +199,13 @@ static double run_quota(int quota)
 	req.tv_nsec = 0;
 	clock_nanosleep(CLOCK_MONOTONIC, 0, &req, NULL);
 
-	for (n = 0, count = 0; n < nrthreads; n++) {
+	for (n = 0, count = 0; n < nrthreads; n++)
 		count += counts[n];
-		pthread_kill(threads[n], SIGDEMT);
-	}
 
 	percent = ((double)count / TEST_SECS) * 100.0 / loops_per_sec;
+
+	atomic_set(&throttle, 1);
+	smp_wmb();
 
 	for (n = 0; n < nrthreads; n++) {
 		smokey_trace("done quota_thread[%d], count=%lu", n, counts[n]);
@@ -224,7 +225,7 @@ static double run_quota(int quota)
 static unsigned long long calibrate(void)
 {
 	struct timespec start, end, delta;
-	const int crunch_loops = 10000;
+	const int crunch_loops = 100000;
 	unsigned long long ns, lps;
 	unsigned long count;
 	struct timespec req;
@@ -255,10 +256,8 @@ static unsigned long long calibrate(void)
 	req.tv_nsec = 0;
 	clock_nanosleep(CLOCK_MONOTONIC, 0, &req, NULL);
 
-	for (n = 0, lps = 0; n < nrthreads; n++) {
+	for (n = 0, lps = 0; n < nrthreads; n++)
 		lps += counts[n];
-		pthread_kill(threads[n], SIGDEMT);
-	}
 
 	atomic_set(&throttle, 1);
 	smp_wmb();
