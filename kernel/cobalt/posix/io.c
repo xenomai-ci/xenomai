@@ -212,13 +212,13 @@ int __cobalt_select_bind_all(struct xnselector *selector,
 	return 0;
 }
 
-/* int select(int, fd_set *, fd_set *, fd_set *, struct timeval *) */
+/* int select(int, fd_set *, fd_set *, fd_set *, struct __kernel_old_timeval *) */
 COBALT_SYSCALL(select, primary,
 	       (int nfds,
 		fd_set __user *u_rfds,
 		fd_set __user *u_wfds,
 		fd_set __user *u_xfds,
-		struct timeval __user *u_tv))
+		struct __kernel_old_timeval __user *u_tv))
 {
 	fd_set __user *ufd_sets[XNSELECT_MAX_TYPES] = {
 		[XNSELECT_READ] = u_rfds,
@@ -234,7 +234,7 @@ COBALT_SYSCALL(select, primary,
 	xntmode_t mode = XN_RELATIVE;
 	struct xnselector *selector;
 	struct xnthread *curr;
-	struct timeval tv;
+	struct __kernel_old_timeval tv;
 	size_t fds_size;
 	int i, err;
 

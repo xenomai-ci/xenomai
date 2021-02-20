@@ -1742,7 +1742,7 @@ static int rt_tcp_setsockopt(struct rtdm_fd *fd, struct tcp_socket *ts,
 			     socklen_t optlen)
 {
 	/* uint64_t val; */
-	struct timeval tv;
+	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t context;
 
 	switch (optname) {

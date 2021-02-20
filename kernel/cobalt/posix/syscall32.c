@@ -715,7 +715,7 @@ COBALT_SYSCALL32emu(select, nonrestartable,
 	xntmode_t mode = XN_RELATIVE;
 	struct xnselector *selector;
 	struct xnthread *curr;
-	struct timeval tv;
+	struct __kernel_old_timeval tv;
 	xnsticks_t diff;
 	size_t fds_size;
 	int i, err;

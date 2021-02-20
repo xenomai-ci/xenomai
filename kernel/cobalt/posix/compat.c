@@ -60,7 +60,7 @@ int sys32_put_itimerspec(struct compat_itimerspec __user *cits,
 }
 EXPORT_SYMBOL_GPL(sys32_put_itimerspec);
 
-int sys32_get_timeval(struct timeval *tv,
+int sys32_get_timeval(struct __kernel_old_timeval *tv,
 		      const struct compat_timeval __user *ctv)
 {
 	return (ctv == NULL ||
@@ -71,7 +71,7 @@ int sys32_get_timeval(struct timeval *tv,
 EXPORT_SYMBOL_GPL(sys32_get_timeval);
 
 int sys32_put_timeval(struct compat_timeval __user *ctv,
-		      const struct timeval *tv)
+		      const struct __kernel_old_timeval *tv)
 {
 	return (ctv == NULL ||
 		!access_wok(ctv, sizeof(*ctv)) ||

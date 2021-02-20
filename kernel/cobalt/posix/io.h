@@ -71,6 +71,6 @@ COBALT_SYSCALL_DECL(select,
 		     fd_set __user *u_rfds,
 		     fd_set __user *u_wfds,
 		     fd_set __user *u_xfds,
-		     struct timeval __user *u_tv));
+		     struct __kernel_old_timeval __user *u_tv));
 
 #endif /* !_COBALT_POSIX_IO_H */

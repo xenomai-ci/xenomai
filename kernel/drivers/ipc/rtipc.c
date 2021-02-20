@@ -21,6 +21,7 @@
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/poll.h>
+#include <linux/time.h>
 #include <rtdm/ipc.h>
 #include <rtdm/compat.h>
 #include "internal.h"
@@ -267,7 +268,7 @@ int rtipc_get_sockoptin(struct rtdm_fd *fd, struct _rtdm_setsockopt_args *sopt,
 	return rtdm_safe_copy_from_user(fd, sopt, arg, sizeof(*sopt));
 }
 
-int rtipc_get_timeval(struct rtdm_fd *fd, struct timeval *tv,
+int rtipc_get_timeval(struct rtdm_fd *fd, struct __kernel_old_timeval *tv,
 		      const void *arg, size_t arglen)
 {
 #ifdef CONFIG_XENO_ARCH_SYS3264
@@ -282,7 +283,7 @@ int rtipc_get_timeval(struct rtdm_fd *fd, struct timeval *tv,
 		return -EINVAL;
 
 	if (!rtdm_fd_is_user(fd)) {
-		*tv = *(struct timeval *)arg;
+		*tv = *(struct __kernel_old_timeval *)arg;
 		return 0;
 	}
 
@@ -290,7 +291,7 @@ int rtipc_get_timeval(struct rtdm_fd *fd, struct timeval *tv,
 }
 
 int rtipc_put_timeval(struct rtdm_fd *fd, void *arg,
-		      const struct timeval *tv, size_t arglen)
+		      const struct __kernel_old_timeval *tv, size_t arglen)
 {
 #ifdef CONFIG_XENO_ARCH_SYS3264
 	if (rtdm_fd_is_compat(fd)) {
@@ -304,7 +305,7 @@ int rtipc_put_timeval(struct rtdm_fd *fd, void *arg,
 		return -EINVAL;
 
 	if (!rtdm_fd_is_user(fd)) {
-		*(struct timeval *)arg = *tv;
+		*(struct __kernel_old_timeval *)arg = *tv;
 		return 0;
 	}
 

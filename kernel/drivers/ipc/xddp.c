@@ -21,6 +21,7 @@
 #include <linux/string.h>
 #include <linux/poll.h>
 #include <linux/slab.h>
+#include <linux/time.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/bufd.h>
 #include <cobalt/kernel/pipe.h>
@@ -855,7 +856,7 @@ static int __xddp_setsockopt(struct xddp_socket *sk,
 	int (*monitor)(struct rtdm_fd *fd, int event, long arg);
 	struct _rtdm_setsockopt_args sopt;
 	struct rtipc_port_label plabel;
-	struct timeval tv;
+	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t s;
 	size_t len;
 	int ret;
@@ -961,7 +962,7 @@ static int __xddp_getsockopt(struct xddp_socket *sk,
 {
 	struct _rtdm_getsockopt_args sopt;
 	struct rtipc_port_label plabel;
-	struct timeval tv;
+	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t s;
 	socklen_t len;
 	int ret;

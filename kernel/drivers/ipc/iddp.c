@@ -22,6 +22,7 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/poll.h>
+#include <linux/time.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/bufd.h>
 #include <cobalt/kernel/map.h>
@@ -700,7 +701,7 @@ static int __iddp_setsockopt(struct iddp_socket *sk,
 {
 	struct _rtdm_setsockopt_args sopt;
 	struct rtipc_port_label plabel;
-	struct timeval tv;
+	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t s;
 	size_t len;
 	int ret;
@@ -789,7 +790,7 @@ static int __iddp_getsockopt(struct iddp_socket *sk,
 {
 	struct _rtdm_getsockopt_args sopt;
 	struct rtipc_port_label plabel;
-	struct timeval tv;
+	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t s;
 	socklen_t len;
 	int ret;

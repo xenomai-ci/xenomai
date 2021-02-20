@@ -43,7 +43,7 @@ static inline xnticks_t ts2ns(const struct timespec *ts)
 	return nsecs;
 }
 
-static inline xnticks_t tv2ns(const struct timeval *tv)
+static inline xnticks_t tv2ns(const struct __kernel_old_timeval *tv)
 {
 	xnticks_t nsecs = tv->tv_usec * 1000;
 
@@ -53,7 +53,7 @@ static inline xnticks_t tv2ns(const struct timeval *tv)
 	return nsecs;
 }
 
-static inline void ticks2tv(struct timeval *tv, xnticks_t ticks)
+static inline void ticks2tv(struct __kernel_old_timeval *tv, xnticks_t ticks)
 {
 	unsigned long nsecs;
 

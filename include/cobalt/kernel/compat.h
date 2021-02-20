@@ -98,11 +98,11 @@ int sys32_get_itimerspec(struct itimerspec *its,
 int sys32_put_itimerspec(struct compat_itimerspec __user *cits,
 			 const struct itimerspec *its);
 
-int sys32_get_timeval(struct timeval *tv,
+int sys32_get_timeval(struct __kernel_old_timeval *tv,
 		      const struct compat_timeval __user *ctv);
 
 int sys32_put_timeval(struct compat_timeval __user *ctv,
-		      const struct timeval *tv);
+		      const struct __kernel_old_timeval *tv);
 
 int sys32_get_timex(struct timex *tx,
 		    const struct old_timex32 __user *ctx);

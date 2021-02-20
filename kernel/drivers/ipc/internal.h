@@ -21,6 +21,7 @@
 #define _RTIPC_INTERNAL_H
 
 #include <linux/uio.h>
+#include <linux/time.h>
 #include <cobalt/kernel/registry.h>
 #include <cobalt/kernel/clock.h>
 #include <cobalt/kernel/select.h>
@@ -65,7 +66,7 @@ static inline void *rtipc_fd_to_state(struct rtdm_fd *fd)
 	return p->state;
 }
 
-static inline nanosecs_rel_t rtipc_timeval_to_ns(const struct timeval *tv)
+static inline nanosecs_rel_t rtipc_timeval_to_ns(const struct __kernel_old_timeval *tv)
 {
 	nanosecs_rel_t ns = tv->tv_usec * 1000;
 
@@ -75,7 +76,7 @@ static inline nanosecs_rel_t rtipc_timeval_to_ns(const struct timeval *tv)
 	return ns;
 }
 
-static inline void rtipc_ns_to_timeval(struct timeval *tv, nanosecs_rel_t ns)
+static inline void rtipc_ns_to_timeval(struct __kernel_old_timeval *tv, nanosecs_rel_t ns)
 {
 	unsigned long nsecs;
 
@@ -101,11 +102,11 @@ int rtipc_get_sockoptin(struct rtdm_fd *fd,
 			struct _rtdm_setsockopt_args *sopt,
 			const void *arg);
 
-int rtipc_get_timeval(struct rtdm_fd *fd, struct timeval *tv,
+int rtipc_get_timeval(struct rtdm_fd *fd, struct __kernel_old_timeval *tv,
 		      const void *arg, size_t arglen);
 
 int rtipc_put_timeval(struct rtdm_fd *fd, void *arg,
-		      const struct timeval *tv, size_t arglen);
+		      const struct __kernel_old_timeval *tv, size_t arglen);
 
 int rtipc_get_length(struct rtdm_fd *fd, size_t *lenp,
 		     const void *arg, size_t arglen);
