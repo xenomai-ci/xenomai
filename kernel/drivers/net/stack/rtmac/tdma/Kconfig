@@ -2,7 +2,7 @@ config XENO_DRIVERS_NET_TDMA
     tristate "TDMA discipline for RTmac"
     depends on XENO_DRIVERS_NET_RTMAC
     default y
-    ---help---
+    help
     The Time Division Multiple Access discipline is the default RTmac
     protocol for Ethernet networks. It consists of a master synchronising
     the access of the slaves to the media by periodically issuing frames.
@@ -16,6 +16,6 @@ config XENO_DRIVERS_NET_TDMA_MASTER
     bool "TDMA master support"
     depends on XENO_DRIVERS_NET_TDMA
     default y
-    ---help---
+    help
     Enables TDMA master and backup master support for the node. This can
     be switched of to reduce the memory footprint of pure slave nodes.

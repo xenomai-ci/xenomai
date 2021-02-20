@@ -24,7 +24,7 @@ config XENO_DRIVERS_NET_DRV_EEPRO100_CMDTIMEOUT
     int "Command Timeout"
     depends on XENO_DRIVERS_NET_DRV_EEPRO100
     default 20
-    ---help---
+    help
     Timeout in microseconds of transmission or configuration commands that
     are issued in real-time contexts.
 
@@ -32,7 +32,7 @@ config XENO_DRIVERS_NET_DRV_EEPRO100_DBG
     depends on XENO_DRIVERS_NET && PCI
     bool "Enable debugging and instrumentation"
     depends on XENO_DRIVERS_NET_DRV_EEPRO100
-    ---help---
+    help
     This option switches on internal debugging code of the EEPRO/100 driver.
     It also enables the collection of worst-case command delays in real-time
     contexts in order to reduce the command timeout (which, effectively, will
@@ -127,7 +127,7 @@ config XENO_DRIVERS_NET_DRV_MACB
     depends on XENO_DRIVERS_NET
     select AT91_PROGRAMMABLE_CLOCKS if ARCH_AT91
     tristate "Cadence MACB/GEM devices"
-    ---help---
+    help
     Driver for internal MAC-controller on AT91SAM926x microcontrollers.
     Porting by Cristiano Mantovani and Stefano Banzi (Marposs SpA).
 

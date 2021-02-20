@@ -2,7 +2,7 @@ config XENO_DRIVERS_NET_RTCFG
     depends on XENO_DRIVERS_NET
     tristate "RTcfg Service"
     default y
-    ---help---
+    help
     The Real-Time Configuration service configures and monitors nodes in
     a RTnet network. It works both with plain MAC as well as with IPv4
     addresses (in case CONFIG_RTNET_RTIPV4 has been switched on). RTcfg
@@ -18,6 +18,6 @@ config XENO_DRIVERS_NET_RTCFG_DEBUG
     bool "RTcfg Debugging"
     depends on XENO_DRIVERS_NET_RTCFG
     default n
-    ---help---
+    help
     Enables debug message output of the RTcfg state machines. Switch on if
     you have to trace some problem related to RTcfg.

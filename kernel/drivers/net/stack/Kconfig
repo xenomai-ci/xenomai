@@ -7,7 +7,7 @@ config XENO_DRIVERS_NET_RX_FIFO_SIZE
     int "Size of central RX-FIFO"
     depends on XENO_DRIVERS_NET
     default 32
-    ---help---
+    help
     Size of FIFO between NICs and stack manager task. Must be power
     of two! Effectively, only CONFIG_RTNET_RX_FIFO_SIZE-1 slots will
     be usable.
@@ -15,7 +15,7 @@ config XENO_DRIVERS_NET_RX_FIFO_SIZE
 config XENO_DRIVERS_NET_ETH_P_ALL
     depends on XENO_DRIVERS_NET
     bool "Support for ETH_P_ALL"
-    ---help---
+    help
     Enables core support for registering listeners on all layer 3
     protocols (ETH_P_ALL). Internally this is currently realised by
     clone-copying incoming frames for those listners, future versions
@@ -26,7 +26,7 @@ config XENO_DRIVERS_NET_ETH_P_ALL
 config XENO_DRIVERS_NET_RTWLAN
     depends on XENO_DRIVERS_NET
     bool "Real-Time WLAN"
-    ---help---
+    help
     Enables core support for real-time wireless LAN. RT-WLAN is based
     on low-level access to 802.11-compliant adapters and is currently
     in an experimental stage.

@@ -2,7 +2,7 @@ menuconfig XENO_DRIVERS_NET_RTMAC
     depends on XENO_DRIVERS_NET
     tristate "RTmac Layer"
     default y
-    ---help---
+    help
     The Real-Time Media Access Control layer allows to extend the RTnet
     stack with software-based access control mechanisms (also called
     disciplines) for nondeterministic transport media. Disciplines can be
