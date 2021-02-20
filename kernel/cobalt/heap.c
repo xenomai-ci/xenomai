@@ -27,6 +27,7 @@
 #include <cobalt/kernel/assert.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/vfile.h>
+#include <cobalt/kernel/ancillaries.h>
 
 /**
  * @ingroup cobalt_core
