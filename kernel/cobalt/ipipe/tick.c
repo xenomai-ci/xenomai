@@ -187,9 +187,14 @@ int pipeline_install_tick_proxy(void)
 	nkclock.wallclock_offset =
 		ktime_to_ns(ktime_get_real()) - xnclock_read_monotonic(&nkclock);
 
-	ret = xntimer_setup_ipi();
+#ifdef CONFIG_SMP
+	ret = ipipe_request_irq(&cobalt_pipeline.domain,
+				IPIPE_HRTIMER_IPI,
+				(ipipe_irq_handler_t)xnintr_core_clock_handler,
+				NULL, NULL);
 	if (ret)
 		return ret;
+#endif
 
 	for_each_realtime_cpu(cpu) {
 		ret = grab_timer_on_cpu(cpu);
@@ -244,7 +249,10 @@ fail:
 		ipipe_timer_stop(_cpu);
 	}
 
-	xntimer_release_ipi();
+#ifdef CONFIG_SMP
+	ipipe_free_irq(&cobalt_pipeline.domain,
+		       IPIPE_HRTIMER_IPI);
+#endif
 
 	return ret;
 }
@@ -270,7 +278,10 @@ void pipeline_uninstall_tick_proxy(void)
 	for_each_realtime_cpu(cpu)
 		ipipe_timer_stop(cpu);
 
-	xntimer_release_ipi();
+#ifdef CONFIG_SMP
+	ipipe_free_irq(&cobalt_pipeline.domain,
+		       IPIPE_HRTIMER_IPI);
+#endif
 
 #ifdef CONFIG_XENO_OPT_STATS_IRQS
 	xnintr_destroy(&nktimer);

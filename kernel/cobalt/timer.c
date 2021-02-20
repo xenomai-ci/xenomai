@@ -574,16 +574,6 @@ void __xntimer_set_affinity(struct xntimer *timer, struct xnsched *sched)
 }
 EXPORT_SYMBOL_GPL(__xntimer_set_affinity);
 
-int xntimer_setup_ipi(void)
-{
-	return pipeline_request_timer_ipi(xnintr_core_clock_handler);
-}
-
-void xntimer_release_ipi(void)
-{
-	pipeline_free_timer_ipi();
-}
-
 #endif /* CONFIG_SMP */
 
 /**

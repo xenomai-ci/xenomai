@@ -235,9 +235,7 @@ void xnsched_init_all(void)
 		xnsched_init(sched, cpu);
 	}
 
-#ifdef CONFIG_SMP
 	pipeline_request_resched_ipi(__xnsched_run_handler);
-#endif
 }
 
 static void xnsched_destroy(struct xnsched *sched)
@@ -258,9 +256,7 @@ void xnsched_destroy_all(void)
 	int cpu;
 	spl_t s;
 
-#ifdef CONFIG_SMP
 	pipeline_free_resched_ipi();
-#endif
 
 	xnlock_get_irqsave(&nklock, s);
 

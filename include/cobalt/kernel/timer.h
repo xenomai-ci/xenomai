@@ -517,10 +517,6 @@ void xntimer_migrate(struct xntimer *timer, struct xnsched *sched)
 		__xntimer_migrate(timer, sched);
 }
 
-int xntimer_setup_ipi(void);
-
-void xntimer_release_ipi(void);
-
 void __xntimer_set_affinity(struct xntimer *timer,
 			    struct xnsched *sched);
 
@@ -538,13 +534,6 @@ static inline void xntimer_migrate(struct xntimer *timer,
 {
 	timer->sched = sched;
 }
-
-static inline int xntimer_setup_ipi(void)
-{
-	return 0;
-}
-
-static inline void xntimer_release_ipi(void) { }
 
 static inline void xntimer_set_affinity(struct xntimer *timer,
 					struct xnsched *sched)

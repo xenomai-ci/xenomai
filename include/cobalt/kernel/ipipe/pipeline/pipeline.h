@@ -51,26 +51,24 @@ static inline void pipeline_send_resched_ipi(const struct cpumask *dest)
 	ipipe_send_ipi(IPIPE_RESCHEDULE_IPI, *dest);
 }
 
-static inline int pipeline_request_timer_ipi(void (*handler)(void))
-{
-	return ipipe_request_irq(&cobalt_pipeline.domain,
-				IPIPE_HRTIMER_IPI,
-				(ipipe_irq_handler_t)handler,
-				NULL, NULL);
-}
-
-static inline void pipeline_free_timer_ipi(void)
-{
-	return ipipe_free_irq(&cobalt_pipeline.domain,
-			IPIPE_HRTIMER_IPI);
-}
-
 static inline void pipeline_send_timer_ipi(const struct cpumask *dest)
 {
 	ipipe_send_ipi(IPIPE_HRTIMER_IPI, *dest);
 }
 
-#endif
+#else  /* !CONFIG_SMP */
+
+static inline int pipeline_request_resched_ipi(void (*handler)(void))
+{
+	return 0;
+}
+
+
+static inline void pipeline_free_resched_ipi(void)
+{
+}
+
+#endif	/* CONFIG_SMP */
 
 static inline void pipeline_prepare_panic(void)
 {
