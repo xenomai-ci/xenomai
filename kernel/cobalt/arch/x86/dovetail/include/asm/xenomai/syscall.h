@@ -25,9 +25,7 @@
 
 /*
  * Cobalt and Linux syscall numbers can be fetched from ORIG_AX,
- * masking out the __COBALT_SYSCALL_BIT marker. Make sure to offset
- * the number by __COBALT_X32_BASE for Cobalt 32-bit compat syscalls
- * only.
+ * masking out the __COBALT_SYSCALL_BIT marker.
  */
 #define __xn_reg_sys(regs)    ((regs)->orig_ax)
 #define __xn_reg_rval(regs)   ((regs)->ax)
