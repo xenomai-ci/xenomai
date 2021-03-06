@@ -18,12 +18,6 @@
 #ifndef _COBALT_X86_ASM_UAPI_SYSCALL_H
 #define _COBALT_X86_ASM_UAPI_SYSCALL_H
 
-#ifdef __ILP32__
-#define __xn_syscall_base  __COBALT_X32_BASE
-#else
-#define __xn_syscall_base  0
-#endif
-
-#define __xn_syscode(__nr)	(__COBALT_SYSCALL_BIT | (__nr + __xn_syscall_base))
+#define __xn_syscode(__nr)	(__COBALT_SYSCALL_BIT | __nr)
 
 #endif /* !_COBALT_X86_ASM_UAPI_SYSCALL_H */

@@ -42,12 +42,6 @@
 #define __timespec_args(__name)					\
 	(long long)__entry->tv_sec_##__name, __entry->tv_nsec_##__name
 
-#ifdef CONFIG_X86_X32
-#define __sc_x32(__name)	, { sc_cobalt_##__name + __COBALT_X32_BASE, "x32-" #__name }
-#else
-#define __sc_x32(__name)
-#endif
-
 #ifdef CONFIG_IA32_EMULATION
 #define __sc_compat(__name)	, { sc_cobalt_##__name + __COBALT_IA32_BASE, "compat-" #__name }
 #else
@@ -56,7 +50,6 @@
 
 #define __cobalt_symbolic_syscall(__name)				\
 	{ sc_cobalt_##__name, #__name }					\
-	__sc_x32(__name)						\
 	__sc_compat(__name)						\
 
 #define __cobalt_syscall_name(__nr)					\
