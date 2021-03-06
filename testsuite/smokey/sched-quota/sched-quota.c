@@ -18,7 +18,6 @@
 #include <sys/cobalt.h>
 #include <boilerplate/time.h>
 #include <boilerplate/ancillaries.h>
-#include <boilerplate/atomic.h>
 #include <smokey/smokey.h>
 
 smokey_test_plugin(sched_quota,
@@ -60,7 +59,7 @@ static int started;
 
 static sem_t ready;
 
-static atomic_t throttle;
+static volatile int throttle;
 
 static unsigned long __attribute__(( noinline ))
 __do_work(unsigned long count)
@@ -98,7 +97,7 @@ static void *thread_body(void *arg)
 
 	for (;;) {
 		do_work(loops, count_r);
-		if (atomic_read(&throttle))
+		if (throttle)
 			sleep(1);
 		else if (nrthreads > 1)
 			sched_yield();
@@ -204,7 +203,7 @@ static double run_quota(int quota)
 
 	percent = ((double)count / TEST_SECS) * 100.0 / loops_per_sec;
 
-	atomic_set(&throttle, 1);
+	throttle = 1;
 	smp_wmb();
 
 	for (n = 0; n < nrthreads; n++) {
@@ -259,7 +258,7 @@ static unsigned long long calibrate(void)
 	for (n = 0, lps = 0; n < nrthreads; n++)
 		lps += counts[n];
 
-	atomic_set(&throttle, 1);
+	throttle = 1;
 	smp_wmb();
 
 	for (n = 0; n < nrthreads; n++) {
@@ -268,7 +267,7 @@ static unsigned long long calibrate(void)
 	}
 
 	started = 0;
-	atomic_set(&throttle, 0);
+	throttle = 0;
 
 	return lps;
 }
