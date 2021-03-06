@@ -23,11 +23,7 @@
 
 static inline __attribute_const__ unsigned long ffnz(unsigned long ul)
 {
-#ifdef __i386__
-	__asm__("bsfl %1, %0":"=r,r" (ul) : "r,?m" (ul));
-#else
 	__asm__("bsfq %1, %0":"=r" (ul) : "rm" (ul));
-#endif
 	return ul;
 }
 
