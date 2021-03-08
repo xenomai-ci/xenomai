@@ -19,7 +19,7 @@ variables:
   KDIR: "/tmp/kernel"
   USE_CCACHE: "1"
   CCACHE_MAXSIZE: "400M"
-  IPIPE_MIRROR_URL: "https://gitlab.denx.de/Xenomai"
+  IPIPE_MIRROR_URL: "https://source.denx.de/Xenomai"
   PACKAGES: "gcc-8 gcc-8-aarch64-linux-gnu libc6-dev-arm64-cross \
              gcc-8-arm-linux-gnueabihf libc6-dev-armhf-cross \
              gcc-8-powerpc-linux-gnu libc6-dev-powerpc-cross  \
