@@ -491,6 +491,8 @@ static void handle_ptrace_cont(void)
 			unregister_debugged_thread(curr);
 
 		xnthread_set_localinfo(curr, XNHICCUP);
+
+		dovetail_request_ucall(current);
 	}
 
 	xnlock_put_irqrestore(&nklock, s);

@@ -56,9 +56,22 @@ int pipeline_leave_inband(void)
 
 int pipeline_leave_oob_prepare(void)
 {
-	dovetail_leave_oob();
+	int suspmask = XNRELAX;
+	struct xnthread *curr = xnthread_current();
 
-	return XNRELAX;
+	dovetail_leave_oob();
+	/*
+	 * If current is being debugged, record that it should migrate
+	 * back in case it resumes in userspace. If it resumes in
+	 * kernel space, i.e.  over a restarting syscall, the
+	 * associated hardening will clear XNCONTHI.
+	 */
+	if (xnthread_test_state(curr, XNSSTEP)) {
+		xnthread_set_info(curr, XNCONTHI);
+		dovetail_request_ucall(current);
+		suspmask |= XNDBGSTOP;
+	}
+	return suspmask;
 }
 
 void pipeline_leave_oob_finish(void)
