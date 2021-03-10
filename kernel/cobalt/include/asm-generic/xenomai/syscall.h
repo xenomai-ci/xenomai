@@ -36,13 +36,6 @@
 #define access_wok(addr, size)	access_ok(VERIFY_WRITE, (addr), (size))
 #endif
 
-#define __xn_reg_arglist(regs)	\
-	__xn_reg_arg1(regs),	\
-	__xn_reg_arg2(regs),	\
-	__xn_reg_arg3(regs),	\
-	__xn_reg_arg4(regs),	\
-	__xn_reg_arg5(regs)
-
 #define __xn_copy_from_user(dstP, srcP, n)	raw_copy_from_user(dstP, srcP, n)
 #define __xn_copy_to_user(dstP, srcP, n)	raw_copy_to_user(dstP, srcP, n)
 #define __xn_put_user(src, dstP)		__put_user(src, dstP)

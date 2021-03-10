@@ -11,6 +11,7 @@
 
 #include <pipeline/machine.h>
 #include <asm/xenomai/features.h>
+#include <asm/xenomai/syscall.h>
 
 #define xnsched_primary_domain  cobalt_pipeline.domain
 
@@ -79,6 +80,17 @@ static inline void pipeline_prepare_panic(void)
 static inline void pipeline_collect_features(struct cobalt_featinfo *f)
 {
 	f->clock_freq = cobalt_pipeline.clock_freq;
+}
+
+static inline void pipeline_get_syscall_args(struct task_struct *task,
+					     struct pt_regs *regs,
+					     unsigned long *args)
+{
+	*args++ = __xn_reg_arg1(regs);
+	*args++ = __xn_reg_arg2(regs);
+	*args++ = __xn_reg_arg3(regs);
+	*args++ = __xn_reg_arg4(regs);
+	*args   = __xn_reg_arg5(regs);
 }
 
 #endif /* !_COBALT_KERNEL_IPIPE_PIPELINE_H */

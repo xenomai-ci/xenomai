@@ -486,6 +486,7 @@ int handle_head_syscall(bool caller_is_relaxed, struct pt_regs *regs)
 	struct xnthread *thread;
 	cobalt_syshand handler;
 	struct task_struct *p;
+	unsigned long args[6];
 	unsigned int nr, code;
 	long ret;
 
@@ -592,7 +593,10 @@ restart:
 	 * handler (lostage ones), or rejected by allowed_syscall().
 	 */
 
-	ret = handler(__xn_reg_arglist(regs));
+	p = current;
+	pipeline_get_syscall_args(p, regs, args);
+
+	ret = handler(args[0], args[1], args[2], args[3], args[4]);
 	if (ret == -ENOSYS && (sysflags & __xn_exec_adaptive)) {
 		if (switched) {
 			ret = xnthread_harden();
@@ -611,7 +615,6 @@ done:
 	__xn_status_return(regs, ret);
 	sigs = 0;
 	if (!xnsched_root_p()) {
-		p = current;
 		if (signal_pending(p) ||
 		    xnthread_test_info(thread, XNKICKED)) {
 			sigs = 1;
@@ -677,6 +680,7 @@ int handle_root_syscall(struct pt_regs *regs)
 	struct xnthread *thread;
 	cobalt_syshand handler;
 	struct task_struct *p;
+	unsigned long args[6];
 	unsigned int nr, code;
 	long ret;
 
@@ -735,7 +739,10 @@ restart:
 			xnthread_propagate_schedparam(thread);
 	}
 
-	ret = handler(__xn_reg_arglist(regs));
+	p = current;
+	pipeline_get_syscall_args(p, regs, args);
+
+	ret = handler(args[0], args[1], args[2], args[3], args[4]);
 	if (ret == -ENOSYS && (sysflags & __xn_exec_adaptive)) {
 		sysflags ^= __xn_exec_histage;
 		if (switched) {
@@ -756,7 +763,6 @@ restart:
 		 * just invoked, so make sure to fetch it.
 		 */
 		thread = xnthread_current();
-		p = current;
 		if (signal_pending(p)) {
 			sigs = 1;
 			prepare_for_signal(p, thread, regs, sysflags);

@@ -6,6 +6,7 @@
 #define _COBALT_KERNEL_DOVETAIL_PIPELINE_H
 
 #include <linux/irq_pipeline.h>
+#include <asm/syscall.h>
 #include <cobalt/kernel/assert.h>
 #include <asm/xenomai/features.h>
 #include <pipeline/machine.h>
@@ -88,6 +89,13 @@ static inline void pipeline_prepare_panic(void)
 static inline void pipeline_collect_features(struct cobalt_featinfo *f)
 {
 	f->clock_freq = 0;	/* N/A */
+}
+
+static inline void pipeline_get_syscall_args(struct task_struct *task,
+					     struct pt_regs *regs,
+					     unsigned long *args)
+{
+	syscall_get_arguments(task, regs, args);
 }
 
 #endif /* !_COBALT_KERNEL_DOVETAIL_PIPELINE_H */

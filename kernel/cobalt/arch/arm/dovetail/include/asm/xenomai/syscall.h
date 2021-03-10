@@ -59,11 +59,6 @@
 	})
 
 #define __xn_reg_rval(__regs)	((__regs)->ARM_r0)
-#define __xn_reg_arg1(__regs)	((__regs)->ARM_r1)
-#define __xn_reg_arg2(__regs)	((__regs)->ARM_r2)
-#define __xn_reg_arg3(__regs)	((__regs)->ARM_r3)
-#define __xn_reg_arg4(__regs)	((__regs)->ARM_r4)
-#define __xn_reg_arg5(__regs)	((__regs)->ARM_r5)
 #define __xn_reg_pc(__regs)	((__regs)->ARM_ip)
 #define __xn_reg_sp(__regs)	((__regs)->ARM_sp)
 
