@@ -103,6 +103,7 @@ variables:
     - ./scripts/config -e XENO_DRIVERS_CAN_SJA1000_EMS_PCI
     - ./scripts/config -e XENO_DRIVERS_CAN_SJA1000_ESD_PCI
     - ./scripts/config -e XENO_DRIVERS_CAN_SJA1000_PEAK_DNG
+    - ./scripts/config -e XENO_DRIVERS_CAN_PEAK_CANFD
     - ./scripts/config -m XENO_DRIVERS_NET
     - ./scripts/config -e XENO_DRIVERS_RTNET_CHECKED
     - ./scripts/config -e XENO_DRIVERS_NET_ETH_P_ALL
