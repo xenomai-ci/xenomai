@@ -185,15 +185,6 @@ static void xnsched_init(struct xnsched *sched, int cpu)
 	sched->inesting = 0;
 	sched->curr = &sched->rootcb;
 
-	attr.flags = XNROOT | XNFPU;
-	attr.name = root_name;
-	attr.personality = &xenomai_personality;
-	attr.affinity = *cpumask_of(cpu);
-	param.idle.prio = XNSCHED_IDLE_PRIO;
-
-	__xnthread_init(&sched->rootcb, &attr,
-			sched, &xnsched_class_idle, &param);
-
 	/*
 	 * No direct handler here since the host timer processing is
 	 * postponed to xnintr_irq_handler(), as part of the interrupt
@@ -208,21 +199,28 @@ static void xnsched_init(struct xnsched *sched, int cpu)
 	xntimer_set_name(&sched->rrbtimer, rrbtimer_name);
 	xntimer_set_priority(&sched->rrbtimer, XNTIMER_LOPRIO);
 
-	xnstat_exectime_set_current(sched, &sched->rootcb.stat.account);
-#ifdef CONFIG_XENO_ARCH_FPU
-	sched->fpuholder = &sched->rootcb;
-#endif /* CONFIG_XENO_ARCH_FPU */
-
-	pipeline_init_root_tcb(&sched->rootcb);
-	list_add_tail(&sched->rootcb.glink, &nkthreadq);
-	cobalt_nrthreads++;
-
 #ifdef CONFIG_XENO_OPT_WATCHDOG
 	xntimer_init(&sched->wdtimer, &nkclock, watchdog_handler,
 		     sched, XNTIMER_IGRAVITY);
 	xntimer_set_name(&sched->wdtimer, "[watchdog]");
 	xntimer_set_priority(&sched->wdtimer, XNTIMER_LOPRIO);
 #endif /* CONFIG_XENO_OPT_WATCHDOG */
+
+#ifdef CONFIG_XENO_ARCH_FPU
+	sched->fpuholder = &sched->rootcb;
+#endif /* CONFIG_XENO_ARCH_FPU */
+	xnstat_exectime_set_current(sched, &sched->rootcb.stat.account);
+	pipeline_init_root_tcb(&sched->rootcb);
+	attr.flags = XNROOT | XNFPU;
+	attr.name = root_name;
+	attr.personality = &xenomai_personality;
+	attr.affinity = *cpumask_of(cpu);
+	param.idle.prio = XNSCHED_IDLE_PRIO;
+	__xnthread_init(&sched->rootcb, &attr,
+			sched, &xnsched_class_idle, &param);
+
+	list_add_tail(&sched->rootcb.glink, &nkthreadq);
+	cobalt_nrthreads++;
 }
 
 void xnsched_init_all(void)
@@ -465,7 +463,15 @@ int xnsched_set_policy(struct xnthread *thread,
 	if (xnthread_test_state(thread, XNREADY))
 		xnsched_enqueue(thread);
 
-	if (!xnthread_test_state(thread, XNDORMANT))
+	/*
+	 * Make sure not to raise XNSCHED when setting up the root
+	 * thread, so that we can't start rescheduling from
+	 * irq_exit_pipeline() before all CPUs have their runqueue
+	 * fully built. Filtering on XNROOT here is correct because
+	 * the root thread enters the idle class once as part of the
+	 * runqueue setup process and never leaves it afterwards.
+	 */
+	if (!xnthread_test_state(thread, XNDORMANT|XNROOT))
 		xnsched_set_resched(thread->sched);
 
 	return 0;
