@@ -91,6 +91,7 @@ void pipeline_clear_mayday(void) /* May solely affect current. */
 
 irqreturn_t pipeline_reschedule_ipi_handler(int irq, void *dev_id)
 {
+	trace_cobalt_schedule_remote(xnsched_current());
 
 	/* Will reschedule from irq_exit_pipeline(). */
 

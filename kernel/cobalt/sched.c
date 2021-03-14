@@ -465,7 +465,15 @@ int xnsched_set_policy(struct xnthread *thread,
 	if (xnthread_test_state(thread, XNREADY))
 		xnsched_enqueue(thread);
 
-	if (!xnthread_test_state(thread, XNDORMANT))
+	/*
+	 * Make sure not to raise XNSCHED when setting up the root
+	 * thread, so that we can't start rescheduling on interrupt
+	 * exit before all CPUs have their runqueue fully
+	 * built. Filtering on XNROOT here is correct because the root
+	 * thread enters the idle class once as part of the runqueue
+	 * setup process and never leaves it afterwards.
+	 */
+	if (!xnthread_test_state(thread, XNDORMANT|XNROOT))
 		xnsched_set_resched(thread->sched);
 
 	return 0;
