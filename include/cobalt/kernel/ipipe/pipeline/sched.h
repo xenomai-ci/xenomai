@@ -7,6 +7,8 @@
 #ifndef _COBALT_KERNEL_IPIPE_SCHED_H
 #define _COBALT_KERNEL_IPIPE_SCHED_H
 
+#include <cobalt/kernel/lock.h>
+
 struct xnthread;
 struct xnsched;
 struct task_struct;
@@ -26,6 +28,24 @@ bool pipeline_switch_to(struct xnthread *prev,
 int pipeline_leave_inband(void);
 
 int pipeline_leave_oob_prepare(void);
+
+static inline void pipeline_leave_oob_unlock(void)
+{
+	/*
+	 * Introduce an opportunity for interrupt delivery right
+	 * before switching context, which shortens the
+	 * uninterruptible code path.
+	 *
+	 * We have to shut irqs off before __xnsched_run() is called
+	 * next though: if an interrupt could preempt us right after
+	 * xnarch_escalate() is passed but before the nklock is
+	 * grabbed, we would enter the critical section in
+	 * ___xnsched_run() from the root domain, which would defeat
+	 * the purpose of escalating the request.
+	 */
+	xnlock_clear_irqon(&nklock);
+	splmax();
+}
 
 void pipeline_leave_oob_finish(void);
 

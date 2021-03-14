@@ -7,6 +7,8 @@
 #ifndef _COBALT_KERNEL_DOVETAIL_SCHED_H
 #define _COBALT_KERNEL_DOVETAIL_SCHED_H
 
+#include <cobalt/kernel/lock.h>
+
 struct xnthread;
 struct xnsched;
 struct task_struct;
@@ -34,6 +36,16 @@ bool pipeline_switch_to(struct xnthread *prev,
 int pipeline_leave_inband(void);
 
 int pipeline_leave_oob_prepare(void);
+
+static inline void pipeline_leave_oob_unlock(void)
+{
+	/*
+	 * We may not re-enable hard irqs due to the specifics of
+	 * stage escalation via run_oob_call(), to prevent breaking
+	 * the (virtual) interrupt state.
+	 */
+	xnlock_put(&nklock);
+}
 
 void pipeline_leave_oob_finish(void);
 
