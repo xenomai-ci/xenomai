@@ -955,27 +955,17 @@ void xnthread_suspend(struct xnthread *thread, int mask,
 	if (wchan)
 		thread->wchan = wchan;
 
-	/*
-	 * If the current thread is being relaxed, we must have been
-	 * called from xnthread_relax(), in which case we introduce an
-	 * opportunity for interrupt delivery right before switching
-	 * context, which shortens the uninterruptible code path.
-	 *
-	 * We have to shut irqs off before calling __xnsched_run()
-	 * though: if an interrupt could preempt us right after
-	 * xnarch_escalate() is passed but before the nklock is
-	 * grabbed, we would enter the critical section in
-	 * ___xnsched_run() from the root domain, which would defeat
-	 * the purpose of escalating the request.
-	 *
-	 * NOTE: using __xnsched_run() for rescheduling allows us to
-	 * break the scheduler lock temporarily.
-	 */
 	if (likely(thread == sched->curr)) {
 		xnsched_set_resched(sched);
+		/*
+		 * Transition to secondary mode (XNRELAX) is a
+		 * separate path which is only available to
+		 * xnthread_relax(). Using __xnsched_run() there for
+		 * rescheduling allows us to break the scheduler lock
+		 * temporarily.
+		 */
 		if (unlikely(mask & XNRELAX)) {
-			xnlock_clear_irqon(&nklock);
-			splmax();
+			pipeline_leave_oob_unlock();
 			__xnsched_run(sched);
 			return;
 		}
@@ -1683,7 +1673,7 @@ int xnthread_join(struct xnthread *thread, bool uninterruptible)
 
 	xnthread_set_state(thread, XNJOINED);
 	tpid = xnthread_host_pid(thread);
-	
+
 	if (curr && !xnthread_test_state(curr, XNRELAX)) {
 		xnlock_put_irqrestore(&nklock, s);
 		xnthread_relax(0, 0);
@@ -1889,7 +1879,7 @@ int __xnthread_set_schedparam(struct xnthread *thread,
 	/* Ask the target thread to call back if relaxed. */
 	if (xnthread_test_state(thread, XNRELAX))
 		__xnthread_signal(thread, SIGSHADOW, SIGSHADOW_ACTION_HOME);
-	
+
 	return ret;
 }
 
@@ -2081,7 +2071,6 @@ void xnthread_relax(int notify, int reason)
 	 * We disable interrupts during the migration sequence, but
 	 * xnthread_suspend() has an interrupts-on section built in.
 	 */
-	splmax();
 	trace_cobalt_lostage_request("wakeup", p);
 	pipeline_post_inband_work(&wakework);
 	/*
@@ -2089,6 +2078,7 @@ void xnthread_relax(int notify, int reason)
 	 * manipulation with handle_sigwake_event. This lock will be
 	 * dropped by xnthread_suspend().
 	 */
+	splmax();
 	xnlock_get(&nklock);
 	xnthread_run_handler_stack(thread, relax_thread);
 	suspension = pipeline_leave_oob_prepare();
