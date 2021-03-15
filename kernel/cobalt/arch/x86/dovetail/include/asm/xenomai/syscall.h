@@ -29,11 +29,6 @@
  */
 #define __xn_reg_sys(regs)    ((regs)->orig_ax)
 #define __xn_reg_rval(regs)   ((regs)->ax)
-#define __xn_reg_arg1(regs)   ((regs)->di)
-#define __xn_reg_arg2(regs)   ((regs)->si)
-#define __xn_reg_arg3(regs)   ((regs)->dx)
-#define __xn_reg_arg4(regs)   ((regs)->r10)
-#define __xn_reg_arg5(regs)   ((regs)->r8)
 #define __xn_reg_pc(regs)     ((regs)->ip)
 #define __xn_reg_sp(regs)     ((regs)->sp)
 

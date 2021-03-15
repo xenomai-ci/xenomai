@@ -23,11 +23,6 @@
 #define __xn_syscall(__regs)	((unsigned long)(__xn_reg_sys(__regs) & ~__COBALT_SYSCALL_BIT))
 
 #define __xn_reg_rval(__regs)	((__regs)->regs[0])
-#define __xn_reg_arg1(__regs)	((__regs)->regs[0])
-#define __xn_reg_arg2(__regs)	((__regs)->regs[1])
-#define __xn_reg_arg3(__regs)	((__regs)->regs[2])
-#define __xn_reg_arg4(__regs)	((__regs)->regs[3])
-#define __xn_reg_arg5(__regs)	((__regs)->regs[4])
 #define __xn_reg_pc(__regs)	((__regs)->pc)
 #define __xn_reg_sp(__regs)	((__regs)->sp)
 

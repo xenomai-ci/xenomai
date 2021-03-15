@@ -9,6 +9,8 @@
 #include <linux/cpumask.h>
 #include <cobalt/kernel/assert.h>
 #include <asm/xenomai/features.h>
+#include <asm/xenomai/syscall.h>
+#include <asm/syscall.h>
 #include <pipeline/machine.h>
 
 typedef unsigned long spl_t;
@@ -94,5 +96,14 @@ static inline void pipeline_collect_features(struct cobalt_featinfo *f)
 {
 	f->clock_freq = 0;	/* N/A */
 }
+
+#ifndef pipeline_get_syscall_args
+static inline void pipeline_get_syscall_args(struct task_struct *task,
+					     struct pt_regs *regs,
+					     unsigned long *args)
+{
+	syscall_get_arguments(task, regs, args);
+}
+#endif	/* !pipeline_get_syscall_args */
 
 #endif /* !_COBALT_KERNEL_DOVETAIL_PIPELINE_H */

@@ -59,11 +59,6 @@
 	})
 
 #define __xn_reg_rval(__regs)	((__regs)->ARM_r0)
-#define __xn_reg_arg1(__regs)	((__regs)->ARM_r1)
-#define __xn_reg_arg2(__regs)	((__regs)->ARM_r2)
-#define __xn_reg_arg3(__regs)	((__regs)->ARM_r3)
-#define __xn_reg_arg4(__regs)	((__regs)->ARM_r4)
-#define __xn_reg_arg5(__regs)	((__regs)->ARM_r5)
 #define __xn_reg_pc(__regs)	((__regs)->ARM_ip)
 #define __xn_reg_sp(__regs)	((__regs)->ARM_sp)
 
@@ -89,6 +84,18 @@ int xnarch_local_syscall(unsigned long a1, unsigned long a2,
 {
 	/* We need none of these with Dovetail. */
 	return -ENOSYS;
+}
+
+#define pipeline_get_syscall_args pipeline_get_syscall_args
+static inline void pipeline_get_syscall_args(struct task_struct *task,
+					     struct pt_regs *regs,
+					     unsigned long *args)
+{
+	args[0] = regs->ARM_r1;
+	args[1] = regs->ARM_r2;
+	args[2] = regs->ARM_r3;
+	args[3] = regs->ARM_r4;
+	args[4] = regs->ARM_r5;
 }
 
 #endif /* !_COBALT_ARM_DOVETAIL_SYSCALL_H */
