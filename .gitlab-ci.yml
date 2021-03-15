@@ -20,40 +20,42 @@ variables:
   USE_CCACHE: "1"
   CCACHE_MAXSIZE: "400M"
   IPIPE_MIRROR_URL: "https://source.denx.de/Xenomai"
-  PACKAGES: "gcc-8 gcc-8-aarch64-linux-gnu libc6-dev-arm64-cross \
-             gcc-8-arm-linux-gnueabihf libc6-dev-armhf-cross \
-             gcc-8-powerpc-linux-gnu libc6-dev-powerpc-cross  \
-             u-boot-tools git make bc bison libelf-dev autotools-dev \
+  PACKAGES: "gcc-8 u-boot-tools git make bc bison libelf-dev autotools-dev \
              autoconf autogen libtool pkg-config ccache flex libssl-dev"
+  PACKAGES_arm: "gcc-8-arm-linux-gnueabihf libc6-dev-armhf-cross"
+  PACKAGES_arm64: "gcc-8-aarch64-linux-gnu libc6-dev-arm64-cross"
+  PACKAGES_powerpc: "gcc-8-powerpc-linux-gnu libc6-dev-powerpc-cross"
+  PACKAGES_x86: ""
 
 .build:
   stage: build
   before_script:
     - apt update
-    - apt install -y ${PACKAGES}
+    - ARCH_PACKAGES="PACKAGES_${ARCH}"
+    - apt install -y ${PACKAGES} ${!ARCH_PACKAGES}
     - update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800
-    - update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 800
-    - update-alternatives --install /usr/bin/arm-linux-gnueabihf-gcc arm-linux-gnueabihf-gcc /usr/bin/arm-linux-gnueabihf-gcc-8 800
-    - update-alternatives --install /usr/bin/powerpc-linux-gnu-gcc powerpc-linux-gnu-gcc /usr/bin/powerpc-linux-gnu-gcc-8 800
     - REV=$(git ls-remote --tags --head --refs ${IPIPE_KERNEL} | sed -e "s|.*[[:space:]]refs/.*/||" | grep "${IPIPE_REV}" | sort -r -n -t - -k 5 -k 6 | head -1)
     - test -n "${REV}" || REV="${IPIPE_REV}"
     - git clone --depth 1 --branch ${REV} ${IPIPE_KERNEL} ${KDIR}
     - case "${ARCH}" in
       "arm64")
-      export CROSS_COMPILE=aarch64-linux-gnu-
-      export CONFIGURE_OPTS="--host=aarch64-linux-gnu --with-cc=aarch64-linux-gnu-gcc"
+      export CROSS_COMPILE=aarch64-linux-gnu-;
+      export CONFIGURE_OPTS="--host=aarch64-linux-gnu --with-cc=aarch64-linux-gnu-gcc";
+      update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 800;
       ;;
       "arm")
-      export CROSS_COMPILE=arm-linux-gnueabihf-
-      export CONFIGURE_OPTS="--host=arm-linux-gnueabihf --with-cc=arm-linux-gnueabihf-gcc"
+      export CROSS_COMPILE=arm-linux-gnueabihf-;
+      export CONFIGURE_OPTS="--host=arm-linux-gnueabihf --with-cc=arm-linux-gnueabihf-gcc";
+      update-alternatives --install /usr/bin/arm-linux-gnueabihf-gcc arm-linux-gnueabihf-gcc /usr/bin/arm-linux-gnueabihf-gcc-8 800;
       ;;
       "powerpc")
-      export CROSS_COMPILE=powerpc-linux-gnu-
-      export CONFIGURE_OPTS="--host=powerpc-linux-gnu --with-cc=powerpc-linux-gnu-gcc"
+      export CROSS_COMPILE=powerpc-linux-gnu-;
+      export CONFIGURE_OPTS="--host=powerpc-linux-gnu --with-cc=powerpc-linux-gnu-gcc";
+      update-alternatives --install /usr/bin/powerpc-linux-gnu-gcc powerpc-linux-gnu-gcc /usr/bin/powerpc-linux-gnu-gcc-8 800;
       ;;
       "x86")
-      export CROSS_COMPILE=
-      export CONFIGURE_OPTS="--enable-dlopen-libs --enable-lazy-setsched"
+      export CROSS_COMPILE=;
+      export CONFIGURE_OPTS="--enable-dlopen-libs --enable-lazy-setsched";
       ;;
       esac
     - ln -s /usr/lib/ccache/${CROSS_COMPILE}gcc-8 /usr/lib/ccache/${CROSS_COMPILE}gcc
