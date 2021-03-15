@@ -374,7 +374,10 @@ static int mq_open(int uqd, const char *name, int oflags,
 
 static inline int mq_close(mqd_t fd)
 {
-	return rtdm_fd_close(fd, COBALT_MQD_MAGIC);
+	int err;
+
+	err = rtdm_fd_close(fd, COBALT_MQD_MAGIC);
+	return err == -EADV ? -EBADF : err;
 }
 
 static inline int mq_unlink(const char *name)
@@ -736,8 +739,8 @@ static inline struct cobalt_mqd *cobalt_mqd_get(mqd_t ufd)
 	fd = rtdm_fd_get(ufd, COBALT_MQD_MAGIC);
 	if (IS_ERR(fd)) {
 		int err = PTR_ERR(fd);
-		if (err == -EBADF && cobalt_current_process() == NULL)
-			err = -EPERM;
+		if (err == -EADV)
+			err = cobalt_current_process() ? -EBADF : -EPERM;
 		return ERR_PTR(err);
 	}
 
