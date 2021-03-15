@@ -46,9 +46,10 @@ typedef struct xnstat_exectime {
 /* Accumulate exectime of the current account until the given date. */
 #define xnstat_exectime_update(sched, date) \
 do { \
+	xnticks_t __date = date; \
 	(sched)->current_account->total += \
-		date - (sched)->last_account_switch; \
-	(sched)->last_account_switch = date; \
+		__date - (sched)->last_account_switch; \
+	(sched)->last_account_switch = __date; \
 	/* All changes must be committed before changing the current_account \
 	   reference in sched (required for xnintr_sync_stat_references) */ \
 	smp_wmb(); \
