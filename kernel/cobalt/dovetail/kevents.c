@@ -516,7 +516,8 @@ void handle_inband_event(enum inband_event_type event, void *data)
 }
 
 #ifdef CONFIG_MMU
-static inline int disable_ondemand_memory(void)
+
+int pipeline_prepare_current(void)
 {
 	struct task_struct *p = current;
 	kernel_siginfo_t si;
@@ -527,15 +528,9 @@ static inline int disable_ondemand_memory(void)
 		si.si_code = SI_QUEUE;
 		si.si_int = SIGDEBUG_NOMLOCK | sigdebug_marker;
 		send_sig_info(SIGDEBUG, &si, p);
-		return 0;
 	}
 
-	return force_commit_memory();
-}
-
-int pipeline_prepare_current(void)
-{
-	return disable_ondemand_memory();
+	return 0;
 }
 
 static inline int get_mayday_prot(void)
