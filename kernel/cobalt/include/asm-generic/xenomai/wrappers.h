@@ -167,6 +167,13 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
+#define mmap_read_lock(__mm)	down_read(&mm->mmap_sem)
+#define mmap_read_unlock(__mm)	up_read(&mm->mmap_sem)
+#define mmap_write_lock(__mm)	down_write(&mm->mmap_sem)
+#define mmap_write_unlock(__mm)	up_write(&mm->mmap_sem)
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
 #define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags, PAGE_KERNEL)
 #else
 #define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags)
