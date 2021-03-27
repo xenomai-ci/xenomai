@@ -592,7 +592,7 @@ int xnlock_dbg_release(struct xnlock *lock,
 				"          last owner = %s:%u (%s(), CPU #%d)\n",
 		       lock, cpu, lock->file, lock->line, lock->function,
 		       lock->cpu);
-		show_stack(NULL,NULL);
+		dump_stack();
 		return 1;
 	}
 
