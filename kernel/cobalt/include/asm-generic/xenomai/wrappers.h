@@ -173,6 +173,26 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #define mmap_write_unlock(__mm)	up_write(&mm->mmap_sem)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,6,0)
+#define DEFINE_PROC_OPS(__name, __open, __release, __read, __write) \
+	struct file_operations __name = {			    \
+		.open = (__open),				    \
+		.release = (__release),				    \
+		.read = (__read),				    \
+		.write = (__write),				    \
+		.llseek = seq_lseek,				    \
+}
+#else
+#define DEFINE_PROC_OPS(__name, __open, __release, __read, __write)	\
+	struct proc_ops __name = {					\
+		.proc_open = (__open),					\
+		.proc_release = (__release),				\
+		.proc_read = (__read),					\
+		.proc_write = (__write),				\
+		.proc_lseek = seq_lseek,				\
+}
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
 #define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags, PAGE_KERNEL)
 #else

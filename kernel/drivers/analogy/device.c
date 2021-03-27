@@ -95,12 +95,11 @@ static int a4l_proc_transfer_open(struct inode *inode, struct file *file)
 	return single_open(file, a4l_rdproc_transfer, PDE_DATA(inode));
 }
 
-static const struct file_operations a4l_proc_transfer_ops = {
-	.open		= a4l_proc_transfer_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
+static const DEFINE_PROC_OPS(a4l_proc_transfer_ops,
+			a4l_proc_transfer_open,
+			single_release,
+			seq_read,
+			NULL);
 
 int a4l_proc_attach(struct a4l_device_context * cxt)
 {

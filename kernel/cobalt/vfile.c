@@ -340,13 +340,11 @@ ssize_t vfile_snapshot_write(struct file *file, const char __user *buf,
 	return ret;
 }
 
-static struct file_operations vfile_snapshot_fops = {
-	.open = vfile_snapshot_open,
-	.read = seq_read,
-	.write = vfile_snapshot_write,
-	.llseek = seq_lseek,
-	.release = vfile_snapshot_release,
-};
+static const DEFINE_PROC_OPS(vfile_snapshot_fops,
+			vfile_snapshot_open,
+			vfile_snapshot_release,
+			seq_read,
+			vfile_snapshot_write);
 
 /**
  * @fn int xnvfile_init_snapshot(const char *name, struct xnvfile_snapshot *vfile, struct xnvfile_directory *parent)
@@ -592,13 +590,11 @@ ssize_t vfile_regular_write(struct file *file, const char __user *buf,
 	return ret;
 }
 
-static struct file_operations vfile_regular_fops = {
-	.open = vfile_regular_open,
-	.read = seq_read,
-	.write = vfile_regular_write,
-	.llseek = seq_lseek,
-	.release = vfile_regular_release,
-};
+static const DEFINE_PROC_OPS(vfile_regular_fops,
+			vfile_regular_open,
+			vfile_regular_release,
+			seq_read,
+			vfile_regular_write);
 
 /**
  * @fn int xnvfile_init_regular(const char *name, struct xnvfile_regular *vfile, struct xnvfile_directory *parent)

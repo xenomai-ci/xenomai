@@ -50,12 +50,11 @@ static int rtcan_sja_proc_regs_open(struct inode *inode, struct file *file)
 	return single_open(file, rtcan_sja_proc_regs, PDE_DATA(inode));
 }
 
-static const struct file_operations rtcan_sja_proc_regs_ops = {
-	.open		= rtcan_sja_proc_regs_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
+static const DEFINE_PROC_OPS(rtcan_sja_proc_regs_ops,
+			rtcan_sja_proc_regs_open,
+			single_release,
+			seq_read,
+			NULL);
 
 int rtcan_sja_create_proc(struct rtcan_device* dev)
 {

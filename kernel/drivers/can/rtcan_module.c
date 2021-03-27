@@ -157,12 +157,11 @@ static int rtcan_proc_devices_open(struct inode *inode, struct file *file)
 	return single_open(file, rtcan_read_proc_devices, NULL);
 }
 
-static const struct file_operations rtcan_proc_devices_ops = {
-	.open		= rtcan_proc_devices_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
+static const DEFINE_PROC_OPS(rtcan_proc_devices_ops,
+			rtcan_proc_devices_open,
+			single_release,
+			seq_read,
+			NULL);
 
 static int rtcan_read_proc_sockets(struct seq_file *p, void *data)
 {
@@ -220,13 +219,11 @@ static int rtcan_proc_sockets_open(struct inode *inode, struct file *file)
 	return single_open(file, rtcan_read_proc_sockets, NULL);
 }
 
-static const struct file_operations rtcan_proc_sockets_ops = {
-	.open		= rtcan_proc_sockets_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
-
+static const DEFINE_PROC_OPS(rtcan_proc_sockets_ops,
+			rtcan_proc_sockets_open,
+			single_release,
+			seq_read,
+			NULL);
 
 static int rtcan_read_proc_info(struct seq_file *p, void *data)
 {
@@ -271,14 +268,11 @@ static int rtcan_proc_info_open(struct inode *inode, struct file *file)
 	return single_open(file, rtcan_read_proc_info, PDE_DATA(inode));
 }
 
-static const struct file_operations rtcan_proc_info_ops = {
-	.open		= rtcan_proc_info_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
-
-
+static const DEFINE_PROC_OPS(rtcan_proc_info_ops,
+			rtcan_proc_info_open,
+			single_release,
+			seq_read,
+			NULL);
 
 static int rtcan_read_proc_filter(struct seq_file *p, void *data)
 {
@@ -319,14 +313,11 @@ static int rtcan_proc_filter_open(struct inode *inode, struct file *file)
 	return single_open(file, rtcan_read_proc_filter, PDE_DATA(inode));
 }
 
-static const struct file_operations rtcan_proc_filter_ops = {
-	.open		= rtcan_proc_filter_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
-
-
+static const DEFINE_PROC_OPS(rtcan_proc_filter_ops,
+			rtcan_proc_filter_open,
+			single_release,
+			seq_read,
+			NULL);
 
 static int rtcan_read_proc_version(struct seq_file *p, void *data)
 {
@@ -341,13 +332,11 @@ static int rtcan_proc_version_open(struct inode *inode, struct file *file)
 	return single_open(file, rtcan_read_proc_version, NULL);
 }
 
-static const struct file_operations rtcan_proc_version_ops = {
-	.open		= rtcan_proc_version_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
-
+static const DEFINE_PROC_OPS(rtcan_proc_version_ops,
+			rtcan_proc_version_open,
+			single_release,
+			seq_read,
+			NULL);
 
 void rtcan_dev_remove_proc(struct rtcan_device* dev)
 {

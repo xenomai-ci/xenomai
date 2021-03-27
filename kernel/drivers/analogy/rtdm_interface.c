@@ -58,24 +58,22 @@ static int a4l_proc_devs_open(struct inode *inode, struct file *file)
 	return single_open(file, a4l_rdproc_devs, NULL);
 }
 
-static const struct file_operations a4l_proc_devs_ops = {
-	.open		= a4l_proc_devs_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
+static const DEFINE_PROC_OPS(a4l_proc_devs_ops,
+			a4l_proc_devs_open,
+			single_release,
+			seq_read,
+			NULL);
 
 static int a4l_proc_drvs_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, a4l_rdproc_drvs, NULL);
 }
 
-static const struct file_operations a4l_proc_drvs_ops = {
-	.open		= a4l_proc_drvs_open,
-	.read		= seq_read,
-	.llseek		= seq_lseek,
-	.release	= single_release,
-};
+static const DEFINE_PROC_OPS(a4l_proc_drvs_ops,
+			a4l_proc_drvs_open,
+			single_release,
+			seq_read,
+			NULL);
 
 int a4l_init_proc(void)
 {
