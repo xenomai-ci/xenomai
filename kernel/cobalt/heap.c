@@ -28,6 +28,7 @@
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/vfile.h>
 #include <cobalt/kernel/ancillaries.h>
+#include <asm/xenomai/wrappers.h>
 
 /**
  * @ingroup cobalt_core
@@ -849,7 +850,7 @@ void *xnheap_vmalloc(size_t size)
 	 * software on a 32bit system had to be wrong in the first
 	 * place anyway.
 	 */
-	return __vmalloc(size, GFP_KERNEL, PAGE_KERNEL);
+	return vmalloc_kernel(size, 0);
 }
 EXPORT_SYMBOL_GPL(xnheap_vmalloc);
 

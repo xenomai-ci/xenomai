@@ -166,4 +166,10 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #define __kernel_old_timeval	timeval
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
+#define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags, PAGE_KERNEL)
+#else
+#define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags)
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
