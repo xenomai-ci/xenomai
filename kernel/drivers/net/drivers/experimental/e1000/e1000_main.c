@@ -2396,9 +2396,11 @@ static void e1000_setup_rctl(struct e1000_adapter *adapter)
 		case 3:
 			psrctl |= PAGE_SIZE <<
 				E1000_PSRCTL_BSIZE3_SHIFT;
+			/* fall through */
 		case 2:
 			psrctl |= PAGE_SIZE <<
 				E1000_PSRCTL_BSIZE2_SHIFT;
+			/* fall through */
 		case 1:
 			psrctl |= PAGE_SIZE >>
 				E1000_PSRCTL_BSIZE1_SHIFT;
