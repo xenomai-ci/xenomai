@@ -466,7 +466,6 @@ static int rtl8169_interrupt(rtdm_irq_t *irq_handle);
 static void rtl8169_init_ring (struct rtnet_device *rtdev);
 static void rtl8169_hw_start (struct rtnet_device *rtdev);
 static int rtl8169_close (struct rtnet_device *rtdev);
-static inline u32 ether_crc (int length, unsigned char *data);
 static void rtl8169_set_rx_mode (struct rtnet_device *rtdev);
 /* static void rtl8169_tx_timeout (struct net_device *dev); */	/*** RTnet ***/
 static struct net_device_stats *rtl8169_get_stats(struct rtnet_device *netdev);
@@ -1819,29 +1818,6 @@ static int rtl8169_close (struct rtnet_device *rtdev)
 
 	return 0;
 }
-
-
-
-
-
-
-
-//======================================================================================================
-static unsigned const ethernet_polynomial = 0x04c11db7U;
-static inline u32 ether_crc (int length, unsigned char *data)
-{
-	int crc = -1;
-
-	while (--length >= 0) {
-		unsigned char current_octet = *data++;
-		int bit;
-		for (bit = 0; bit < 8; bit++, current_octet >>= 1)
-			crc = (crc << 1) ^ ((crc < 0) ^ (current_octet & 1) ? ethernet_polynomial : 0);
-	}
-
-	return crc;
-}
-
 
 
 
