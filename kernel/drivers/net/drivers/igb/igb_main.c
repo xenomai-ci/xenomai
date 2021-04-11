@@ -5437,10 +5437,10 @@ static pci_ers_result_t igb_io_slot_reset(struct pci_dev *pdev)
 		result = PCI_ERS_RESULT_RECOVERED;
 	}
 
-	err = pci_cleanup_aer_uncorrect_error_status(pdev);
+	err = pci_aer_clear_nonfatal_status(pdev);
 	if (err) {
 		dev_err(&pdev->dev,
-			"pci_cleanup_aer_uncorrect_error_status failed 0x%0x\n",
+			"pci_aer_clear_nonfatal_status failed 0x%0x\n",
 			err);
 		/* non-fatal, continue */
 	}
