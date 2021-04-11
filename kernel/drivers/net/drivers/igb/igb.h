@@ -39,6 +39,8 @@
 
 #include <rtdev.h>
 
+#undef CONFIG_IGB_HWMON
+
 struct igb_adapter;
 
 #define E1000_PCS_CFG_IGN_SD	1
