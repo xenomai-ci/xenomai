@@ -18,7 +18,7 @@ variables:
   GIT_STRATEGY: clone
   KDIR: "/tmp/kernel"
   USE_CCACHE: "1"
-  CCACHE_MAXSIZE: "400M"
+  CCACHE_MAXSIZE: "1G"
   IPIPE_MIRROR_URL: "https://source.denx.de/Xenomai"
   PACKAGES: "gcc-8 u-boot-tools git make bc bison libelf-dev autotools-dev \
              autoconf autogen libtool pkg-config ccache flex libssl-dev"
