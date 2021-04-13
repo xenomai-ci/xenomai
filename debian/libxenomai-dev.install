@@ -1,3 +1,4 @@
+usr/bin/xeno-config
 usr/include
 usr/lib/*.la
 usr/lib/*.a
