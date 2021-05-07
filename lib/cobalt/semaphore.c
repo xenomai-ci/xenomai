@@ -373,7 +373,12 @@ COBALT_IMPL(int, sem_timedwait, (sem_t *sem, const struct timespec *abs_timeout)
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
+#ifdef __USE_TIME_BITS64
+	ret = XENOMAI_SYSCALL2(sc_cobalt_sem_timedwait64, _sem,
+			       abs_timeout);
+#else
 	ret = XENOMAI_SYSCALL2(sc_cobalt_sem_timedwait, _sem, abs_timeout);
+#endif
 
 	pthread_setcanceltype(oldtype, NULL);
 
