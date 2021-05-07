@@ -229,6 +229,6 @@ COBALT_SYSCALL32emu_DECL(sem_open,
 
 COBALT_SYSCALL32emu_DECL(sem_timedwait,
 			 (struct cobalt_sem_shadow __user *u_sem,
-			  struct old_timespec32 __user *u_ts));
+			  const struct old_timespec32 __user *u_ts));
 
 #endif /* !_COBALT_POSIX_SYSCALL32_H */

@@ -124,9 +124,15 @@ COBALT_SYSCALL32emu(sem_open, lostage,
 
 COBALT_SYSCALL32emu(sem_timedwait, primary,
 		    (struct cobalt_sem_shadow __user *u_sem,
-		     struct old_timespec32 __user *u_ts))
+		     const struct old_timespec32 __user *u_ts))
 {
-	return __cobalt_sem_timedwait(u_sem, u_ts, sys32_fetch_timeout);
+	int ret = 1;
+	struct timespec64 ts64;
+
+	if (u_ts)
+		ret = sys32_fetch_timeout(&ts64, u_ts);
+
+	return __cobalt_sem_timedwait(u_sem, ret ? NULL : &ts64);
 }
 
 COBALT_SYSCALL32emu(clock_getres, current,

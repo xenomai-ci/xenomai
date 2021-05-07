@@ -267,20 +267,11 @@ out:
 	return ret;
 }
 
-static inline int sem_fetch_timeout(struct timespec64 *ts,
-				    const void __user *u_ts)
-{
-	return u_ts == NULL ? -EFAULT :
-		cobalt_copy_from_user(ts, u_ts, sizeof(*ts));
-}
-
 int __cobalt_sem_timedwait(struct cobalt_sem_shadow __user *u_sem,
-			   const void __user *u_ts,
-			   int (*fetch_timeout)(struct timespec64 *ts,
-						const void __user *u_ts))
+			   const struct timespec64 *ts)
 {
-	struct timespec64 ts = { .tv_sec = 0, .tv_nsec = 0 };
-	int pull_ts = 1, ret, info;
+	int ret, info;
+	bool validate_ts = true;
 	struct cobalt_sem *sem;
 	xnhandle_t handle;
 	xntmode_t tmode;
@@ -304,24 +295,23 @@ int __cobalt_sem_timedwait(struct cobalt_sem_shadow __user *u_sem,
 		 * it's actually more complex, to keep some
 		 * applications ported to Linux happy.
 		 */
-		if (pull_ts) {
+		if (validate_ts) {
 			atomic_inc(&sem->state->value);
-			xnlock_put_irqrestore(&nklock, s);
-			ret = fetch_timeout(&ts, u_ts);
-			xnlock_get_irqsave(&nklock, s);
-			if (ret)
+			if (!ts) {
+				ret = -EFAULT;
 				break;
-			if (ts.tv_nsec >= ONE_BILLION) {
+			}
+			if (!timespec64_valid(ts)) {
 				ret = -EINVAL;
 				break;
 			}
-			pull_ts = 0;
+			validate_ts = false;
 			continue;
 		}
 
 		ret = 0;
 		tmode = sem->flags & SEM_RAWCLOCK ? XN_ABSOLUTE : XN_REALTIME;
-		info = xnsynch_sleep_on(&sem->synchbase, ts2ns(&ts) + 1, tmode);
+		info = xnsynch_sleep_on(&sem->synchbase, ts2ns(ts) + 1, tmode);
 		if (info & XNRMID)
 			ret = -EINVAL;
 		else if (info & (XNBREAK|XNTIMEO)) {
@@ -434,9 +424,15 @@ COBALT_SYSCALL(sem_wait, primary,
 
 COBALT_SYSCALL(sem_timedwait, primary,
 	       (struct cobalt_sem_shadow __user *u_sem,
-		struct __user_old_timespec __user *u_ts))
+		const struct __user_old_timespec __user *u_ts))
 {
-	return __cobalt_sem_timedwait(u_sem, u_ts, sem_fetch_timeout);
+	int ret = 1;
+	struct timespec64 ts64;
+
+	if (u_ts)
+		ret = cobalt_get_u_timespec(&ts64, u_ts);
+
+	return __cobalt_sem_timedwait(u_sem, ret ? NULL : &ts64);
 }
 
 COBALT_SYSCALL(sem_trywait, primary,
