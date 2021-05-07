@@ -13,6 +13,7 @@ xenomai-y :=	arith.o 	\
 		select.o	\
 		synch.o		\
 		thread.o	\
+		time.o		\
 		timer.o		\
 		tree.o
 

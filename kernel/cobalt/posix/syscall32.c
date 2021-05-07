@@ -135,6 +135,13 @@ COBALT_SYSCALL32emu(sem_timedwait, primary,
 	return __cobalt_sem_timedwait(u_sem, ret ? NULL : &ts64);
 }
 
+COBALT_SYSCALL32emu(sem_timedwait64, primary,
+		    (struct cobalt_sem_shadow __user *u_sem,
+		     const struct __kernel_timespec __user *u_ts))
+{
+	return __cobalt_sem_timedwait64(u_sem, u_ts);
+}
+
 COBALT_SYSCALL32emu(clock_getres, current,
 		    (clockid_t clock_id,
 		     struct old_timespec32 __user *u_ts))
