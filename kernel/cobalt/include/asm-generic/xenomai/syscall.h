@@ -82,40 +82,11 @@ static inline int cobalt_strncpy_from_user(char *dst, const char __user *src,
 	return __xn_strncpy_from_user(dst, src, count);
 }
 
-#if __BITS_PER_LONG == 64
 
 /*
  * NOTE: those copy helpers won't work in compat mode: use
  * sys32_get_*(), sys32_put_*() instead.
  */
-
-static inline int cobalt_get_u_timespec(struct timespec64 *dst,
-			const struct __user_old_timespec __user *src)
-{
-	return cobalt_copy_from_user(dst, src, sizeof(*dst));
-}
-
-static inline int cobalt_put_u_timespec(
-	struct __user_old_timespec __user *dst,
-	const struct timespec64 *src)
-{
-	return cobalt_copy_to_user(dst, src, sizeof(*dst));
-}
-
-static inline int cobalt_get_u_itimerspec(struct itimerspec64 *dst,
-			const struct __user_old_itimerspec __user *src)
-{
-	return cobalt_copy_from_user(dst, src, sizeof(*dst));
-}
-
-static inline int cobalt_put_u_itimerspec(
-	struct __user_old_itimerspec __user *dst,
-	const struct itimerspec64 *src)
-{
-	return cobalt_copy_to_user(dst, src, sizeof(*dst));
-}
-
-#else /* __BITS_PER_LONG == 32 */
 
 static inline int cobalt_get_u_timespec(struct timespec64 *dst,
 			const struct __user_old_timespec __user *src)
@@ -181,8 +152,6 @@ static inline int cobalt_put_u_itimerspec(
 
 	return cobalt_copy_to_user(dst, &u_its, sizeof(*dst));
 }
-
-#endif
 
 /* 32bit syscall emulation */
 #define __COBALT_COMPAT_BIT	0x1
