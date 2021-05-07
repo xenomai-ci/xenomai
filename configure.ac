@@ -990,6 +990,7 @@ AC_CONFIG_FILES([ \
 	testsuite/smokey/net_common/Makefile \
 	testsuite/smokey/cpu-affinity/Makefile \
 	testsuite/smokey/gdb/Makefile \
+	testsuite/smokey/y2038/Makefile \
 	testsuite/clocktest/Makefile \
 	testsuite/xeno-test/Makefile \
 	utils/Makefile \

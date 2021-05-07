@@ -38,7 +38,8 @@ COBALT_SUBDIRS = 	\
 	timerfd		\
 	tsc		\
 	vdso-access 	\
-	xddp
+	xddp		\
+	y2038
 
 MERCURY_SUBDIRS =	\
 	memory-heapmem	\
@@ -76,7 +77,8 @@ DIST_SUBDIRS = 		\
 	timerfd		\
 	tsc		\
 	vdso-access 	\
-	xddp
+	xddp		\
+	y2038
 
 if XENO_COBALT
 if CONFIG_XENO_LIBS_DLOPEN
