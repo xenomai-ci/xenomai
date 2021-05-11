@@ -10,6 +10,7 @@
 
 stages:
   - build
+  - test
 
 default:
   image: debian:buster
@@ -26,6 +27,7 @@ variables:
   PACKAGES_arm64: "gcc-8-aarch64-linux-gnu libc6-dev-arm64-cross"
   PACKAGES_powerpc: "gcc-8-powerpc-linux-gnu libc6-dev-powerpc-cross"
   PACKAGES_x86: ""
+  XENOMAI_IMAGES_BRANCH: "master"
 
 .build:
   stage: build
@@ -262,3 +264,14 @@ powerpc-4.19-release:
     IPIPE_REV: ipipe-core-4.19..*-ppc32-.*
     IPIPE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-ppc32.git
     KERNEL_DEFCONFIG: mpc5200_defconfig
+
+trigger-xenomai-images:
+  stage: test
+  image: curlimages/curl
+  script:
+    - curl -X POST -F "token=${XENOMAI_IMAGES_TOKEN}"
+           -F "ref=${XENOMAI_IMAGES_BRANCH}"
+           -F "variables[ONLY_RUN]=${CI_COMMIT_BRANCH}"
+           https://source.denx.de/api/v4/projects/479/trigger/pipeline
+  rules:
+    - if: '$XENOMAI_IMAGES_TOKEN != "" && ($CI_COMMIT_BRANCH == "next" || $CI_COMMIT_BRANCH =~ /stable\/.*/)'
