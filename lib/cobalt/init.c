@@ -177,11 +177,11 @@ static void low_init(void)
 		early_panic("mlockall: %s", strerror(errno));
 
 	trace_me("memory locked");
+	cobalt_ticks_init(f->clock_freq);
 	cobalt_features_init(f);
 	cobalt_init_umm(f->vdso_offset);
 	trace_me("memory heaps mapped");
 	cobalt_init_current_keys();
-	cobalt_ticks_init(f->clock_freq);
 }
 
 static int cobalt_init_2(void);
