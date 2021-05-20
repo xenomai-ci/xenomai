@@ -29,10 +29,6 @@ static inline __attribute_const__ unsigned long ffnz(unsigned long ul)
 
 #define XNARCH_HOST_TICK_IRQ	__ipipe_hrtimer_irq
 
-long strncpy_from_user_nocheck(char *dst,
-			       const char __user *src,
-			       long count);
-
 /* Read this last to enable default settings. */
 #include <asm-generic/xenomai/machine.h>
 

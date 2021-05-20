@@ -23,25 +23,6 @@
 #include <asm/xenomai/smi.h>
 #include <asm/xenomai/c1e.h>
 
-long strncpy_from_user_nocheck(char *dst, const char __user *src, long count)
-{
-	int ret;
-	char c;
-	long n;
-	
-	for (n = 0; n < count; n++, src++, dst++) {
-		ret = __xn_get_user(c, src);
-		if (ret)
-			return -EFAULT;
-		*dst = c;
-		if (c == 0)
-			break;
-	}
-
-	return n;
-}
-EXPORT_SYMBOL_GPL(strncpy_from_user_nocheck);
-
 static int mach_x86_init(void)
 {
 	int ret;
