@@ -109,10 +109,10 @@ static void *vfile_snapshot_next(struct seq_file *seq, void *v, loff_t *offp)
 	struct xnvfile_snapshot_iterator *it = seq->private;
 	loff_t pos = *offp;
 
+	++*offp;
+
 	if (pos >= it->nrdata)
 		return NULL;
-
-	++*offp;
 
 	return it->databuf + pos * it->vfile->datasz;
 }
@@ -452,16 +452,14 @@ static void *vfile_regular_next(struct seq_file *seq, void *v, loff_t *offp)
 	struct xnvfile_regular *vfile = it->vfile;
 	void *data;
 
+	it->pos = ++(*offp);
+
 	if (vfile->ops->next == NULL)
 		return NULL;
-
-	it->pos = *offp + 1;
 
 	data = vfile->ops->next(it);
 	if (data == NULL)
 		return NULL;
-
-	*offp = it->pos;
 
 	return data;
 }
