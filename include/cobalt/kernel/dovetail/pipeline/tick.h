@@ -11,6 +11,6 @@ void pipeline_uninstall_tick_proxy(void);
 
 struct xnsched;
 
-inline bool pipeline_must_force_program_tick(struct xnsched *sched);
+bool pipeline_must_force_program_tick(struct xnsched *sched);
 
 #endif /* !_COBALT_KERNEL_IPIPE_TICK_H */
