@@ -149,6 +149,11 @@ static int __do_clock_host_realtime(struct timespec *ts)
 	return 0;
 }
 
+static int __do_clock_gettime(clockid_t clock_id, struct timespec *tp)
+{
+	return -XENOMAI_SYSCALL2(sc_cobalt_clock_gettime, clock_id, tp);
+}
+
 static int gettime_via_tsc(clockid_t clock_id, struct timespec *tp)
 {
 	unsigned long rem;
@@ -172,7 +177,7 @@ static int gettime_via_tsc(clockid_t clock_id, struct timespec *tp)
 		tp->tv_nsec = rem;
 		return 0;
 	default:
-		ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_gettime, clock_id, tp);
+		ret = __do_clock_gettime(clock_id, tp);
 	}
 
 	if (ret) {
@@ -197,7 +202,7 @@ static int gettime_via_vdso(clockid_t clock_id, struct timespec *tp)
 		ret = __cobalt_vdso_gettime(clock_id, tp);
 		break;
 	default:
-		ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_gettime, clock_id, tp);
+		ret = __do_clock_gettime(clock_id, tp);
 	}
 
 	if (ret) {
