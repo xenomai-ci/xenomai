@@ -106,6 +106,9 @@ int __cobalt_clock_gettime64(clockid_t clock_id,
 int __cobalt_clock_settime(clockid_t clock_id,
 			   const struct timespec64 *ts);
 
+int __cobalt_clock_settime64(clockid_t clock_id,
+			const struct __kernel_timespec __user *u_ts);
+
 int __cobalt_clock_adjtime(clockid_t clock_id,
 			   struct __kernel_timex *tx);
 
@@ -124,6 +127,10 @@ COBALT_SYSCALL_DECL(clock_gettime64,
 
 COBALT_SYSCALL_DECL(clock_settime,
 		    (clockid_t clock_id, const struct __user_old_timespec __user *u_ts));
+
+COBALT_SYSCALL_DECL(clock_settime64,
+		    (clockid_t clock_id,
+			 const struct __kernel_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(clock_adjtime,
 		    (clockid_t clock_id, struct __user_old_timex __user *u_tx));
