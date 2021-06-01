@@ -93,6 +93,30 @@ COBALT_SYSCALL(clock_getres, current,
 	return 0;
 }
 
+int __cobalt_clock_getres64(clockid_t clock_id,
+			struct __kernel_timespec __user *u_ts)
+{
+	struct timespec64 ts;
+	int ret;
+
+	ret = __cobalt_clock_getres(clock_id, &ts);
+	if (ret)
+		return ret;
+
+	if (cobalt_put_timespec64(&ts, u_ts))
+		return -EFAULT;
+
+	trace_cobalt_clock_getres(clock_id, &ts);
+
+	return 0;
+}
+
+COBALT_SYSCALL(clock_getres64, current,
+	       (clockid_t clock_id, struct __kernel_timespec __user *u_ts))
+{
+	return __cobalt_clock_getres64(clock_id, u_ts);
+}
+
 int __cobalt_clock_gettime(clockid_t clock_id, struct timespec64 *ts)
 {
 	xnticks_t ns;
@@ -437,7 +461,7 @@ struct xnclock *cobalt_clock_find(clockid_t clock_id)
 	    clock_id == CLOCK_MONOTONIC_RAW ||
 	    clock_id == CLOCK_REALTIME)
 		return &nkclock;
-	
+
 	if (__COBALT_CLOCK_EXT_P(clock_id)) {
 		nr = __COBALT_CLOCK_EXT_INDEX(clock_id);
 		xnlock_get_irqsave(&nklock, s);
