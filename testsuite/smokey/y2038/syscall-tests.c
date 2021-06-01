@@ -242,6 +242,69 @@ static int test_sc_cobalt_clock_settime64(void)
 	return 0;
 }
 
+static int test_sc_cobalt_clock_nanosleep64(void)
+{
+	int ret;
+	int sc_nr = sc_cobalt_clock_nanosleep64;
+	struct xn_timespec64 next, rmt;
+	struct timespec ts1, ts2, delta;
+	long interval = 1;
+
+	/* Make sure we don't crash because of NULL pointers */
+	ret = XENOMAI_SYSCALL4(sc_nr, NULL, NULL, NULL, NULL);
+	if (ret == -ENOSYS) {
+		smokey_note("clock_nanosleep64: skipped. (no kernel support)");
+		return 0; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* Providing an invalid address has to deliver EFAULT */
+	ret = XENOMAI_SYSCALL4(sc_nr, CLOCK_MONOTONIC, TIMER_ABSTIME,
+			       (void *)0xdeadbeefUL, &rmt);
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* Provide a valid 64bit timespec, round 1 */
+	ret = clock_gettime(CLOCK_MONOTONIC, &ts1);
+	if (ret)
+		return -errno;
+
+	next.tv_sec  = ts1.tv_sec + interval;
+	next.tv_nsec = ts1.tv_nsec;
+
+	ret = XENOMAI_SYSCALL4(sc_nr, CLOCK_MONOTONIC, TIMER_ABSTIME,
+			       &next, (void *)0xdeadbeefUL);
+	if (!smokey_assert(!ret))
+		return ret ? ret : -EINVAL;
+
+	ret = clock_gettime(CLOCK_MONOTONIC, &ts2);
+	if (ret)
+		return -errno;
+
+	timespec_sub(&delta, &ts2, &ts1);
+	if (delta.tv_sec < interval)
+		smokey_warning("nanosleep didn't sleep long enough.");
+
+	/* Provide a valid 64bit timespec, round 2*/
+	next.tv_sec  = ts2.tv_sec + interval;
+	next.tv_nsec = ts2.tv_nsec;
+
+	ret = XENOMAI_SYSCALL4(sc_nr, CLOCK_MONOTONIC, TIMER_ABSTIME, &next, &rmt);
+	if (!smokey_assert(!ret))
+		return ret ? ret : -EINVAL;
+
+	ret = clock_gettime(CLOCK_MONOTONIC, &ts1);
+	if (ret)
+		return -errno;
+
+	timespec_sub(&delta, &ts1, &ts2);
+	if (delta.tv_sec < interval)
+		smokey_warning("nanosleep didn't sleep long enough.");
+
+	return 0;
+}
+
 static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 {
 	int ret;
@@ -255,6 +318,10 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	ret = test_sc_cobalt_clock_settime64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_clock_nanosleep64();
 	if (ret)
 		return ret;
 
