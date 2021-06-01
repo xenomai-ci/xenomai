@@ -101,7 +101,12 @@ COBALT_IMPL(int, clock_getres, (clockid_t clock_id, struct timespec *tp))
 {
 	int ret;
 
+#ifdef __USE_TIME_BITS64
+	ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_getres64, clock_id, tp);
+#else
 	ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_getres, clock_id, tp);
+#endif
+
 	if (ret) {
 		errno = ret;
 		return -1;
