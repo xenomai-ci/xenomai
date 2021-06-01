@@ -151,7 +151,11 @@ static int __do_clock_host_realtime(struct timespec *ts)
 
 static int __do_clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
+#ifdef __USE_TIME_BITS64
+	return -XENOMAI_SYSCALL2(sc_cobalt_clock_gettime64, clock_id, tp);
+#else
 	return -XENOMAI_SYSCALL2(sc_cobalt_clock_gettime, clock_id, tp);
+#endif
 }
 
 static int gettime_via_tsc(clockid_t clock_id, struct timespec *tp)
