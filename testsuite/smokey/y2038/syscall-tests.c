@@ -308,6 +308,37 @@ static int test_sc_cobalt_clock_nanosleep64(void)
 	return 0;
 }
 
+static int test_sc_cobalt_clock_getres64(void)
+{
+	int ret;
+	int sc_nr = sc_cobalt_clock_getres64;
+	struct xn_timespec64 ts64;
+
+	/* Make sure we don't crash because of NULL pointers */
+	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
+	if (ret == -ENOSYS) {
+		smokey_note("clock_getres64: skipped. (no kernel support)");
+		return 0; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* Providing an invalid address has to deliver EFAULT */
+	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_MONOTONIC, (void *)0xdeadbeefUL);
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* Provide a valid 64bit timespec */
+	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_MONOTONIC, &ts64);
+	if (!smokey_assert(!ret))
+		return ret;
+
+	if (ts64.tv_sec != 0 || ts64.tv_nsec != 1)
+		smokey_warning("High resolution timers not available\n");
+
+	return 0;
+}
+
 static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 {
 	int ret;
@@ -325,6 +356,10 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	ret = test_sc_cobalt_clock_nanosleep64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_clock_getres64();
 	if (ret)
 		return ret;
 
