@@ -166,11 +166,95 @@ static int test_sc_cobalt_sem_timedwait64(void)
 	return 0;
 }
 
+static int test_sc_cobalt_clock_gettime64(void)
+{
+	int ret;
+	int sc_nr = sc_cobalt_clock_gettime64;
+	struct xn_timespec64 ts64 = {0};
+
+	/* Make sure we don't crash because of NULL pointers */
+	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
+	if (ret == -ENOSYS) {
+		smokey_note("clock_gettime64: skipped. (no kernel support)");
+		return 0; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* Providing an invalid address has to deliver EFAULT */
+	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_MONOTONIC, (void *)0xdeadbeefUL);
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* Provide a valid 64bit timespec */
+	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_MONOTONIC, &ts64);
+	if (!smokey_assert(!ret))
+		return ret ? ret : -EINVAL;
+
+	/* Validate seconds only, nanoseconds might still be zero */
+	smokey_assert(ts64.tv_sec != 0);
+
+	return 0;
+}
+
+static int test_sc_cobalt_clock_settime64(void)
+{
+	int ret;
+	int sc_nr = sc_cobalt_clock_settime64;
+	struct xn_timespec64 ts64, now64;
+	struct timespec now;
+
+	/* Make sure we don't crash because of NULL pointers */
+	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
+	if (ret == -ENOSYS) {
+		smokey_note("clock_settime64: skipped. (no kernel support)");
+		return 0; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* Providing an invalid address has to deliver EFAULT */
+	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_MONOTONIC, (void *)0xdeadbeefUL);
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	ret = clock_gettime(CLOCK_REALTIME, &now);
+	if (ret)
+		return -errno;
+
+	/* Provide a valid 64bit timespec */
+	ts64.tv_sec  = now.tv_sec + 1;
+	ts64.tv_nsec = now.tv_nsec;
+	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_REALTIME, &ts64);
+	if (!smokey_assert(!ret))
+		return ret ? ret : -EINVAL;
+
+	ret = clock_gettime(CLOCK_REALTIME, &now);
+	if (ret)
+		return -errno;
+
+	now64.tv_sec = now.tv_sec;
+	now64.tv_nsec = now.tv_nsec;
+
+	if (ts_less(&now64, &ts64))
+		smokey_warning("clock_settime() reported no error but no new time seen");
+
+	return 0;
+}
+
 static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 {
 	int ret;
 
 	ret = test_sc_cobalt_sem_timedwait64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_clock_gettime64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_clock_settime64();
 	if (ret)
 		return ret;
 
