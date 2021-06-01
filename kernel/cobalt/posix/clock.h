@@ -116,6 +116,10 @@ int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 			     const struct timespec64 *rqt,
 			     struct timespec64 *rmt);
 
+int __cobalt_clock_nanosleep64(clockid_t clock_id, int flags,
+		const struct __kernel_timespec __user *u_rqt,
+		struct __kernel_timespec __user *u_rmt);
+
 COBALT_SYSCALL_DECL(clock_getres,
 		    (clockid_t clock_id, struct __user_old_timespec __user *u_ts));
 
@@ -139,6 +143,11 @@ COBALT_SYSCALL_DECL(clock_nanosleep,
 		    (clockid_t clock_id, int flags,
 		     const struct __user_old_timespec __user *u_rqt,
 		     struct __user_old_timespec __user *u_rmt));
+
+COBALT_SYSCALL_DECL(clock_nanosleep64,
+		    (clockid_t clock_id, int flags,
+		     const struct __kernel_timespec __user *u_rqt,
+		     struct __kernel_timespec __user *u_rmt));
 
 int cobalt_clock_register(struct xnclock *clock,
 			  const cpumask_t *affinity,

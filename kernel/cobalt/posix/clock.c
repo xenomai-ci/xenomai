@@ -350,6 +350,36 @@ COBALT_SYSCALL(clock_nanosleep, primary,
 	return ret;
 }
 
+int __cobalt_clock_nanosleep64(clockid_t clock_id, int flags,
+		const struct __kernel_timespec __user *u_rqt,
+		struct __kernel_timespec __user *u_rmt)
+{
+	struct timespec64 rqt, rmt, *rmtp = NULL;
+	int ret;
+
+	if (u_rmt)
+		rmtp = &rmt;
+
+	if (cobalt_get_timespec64(&rqt, u_rqt))
+		return -EFAULT;
+
+	ret = __cobalt_clock_nanosleep(clock_id, flags, &rqt, rmtp);
+	if (ret == -EINTR && flags == 0 && rmtp) {
+		if (cobalt_put_timespec64(rmtp, u_rmt))
+			return -EFAULT;
+	}
+
+	return ret;
+}
+
+COBALT_SYSCALL(clock_nanosleep64, primary,
+	       (clockid_t clock_id, int flags,
+		const struct __kernel_timespec __user *u_rqt,
+		struct __kernel_timespec __user *u_rmt))
+{
+	return __cobalt_clock_nanosleep64(clock_id, flags, u_rqt, u_rmt);
+}
+
 int cobalt_clock_register(struct xnclock *clock, const cpumask_t *affinity,
 			  clockid_t *clk_id)
 {

@@ -80,6 +80,12 @@ COBALT_SYSCALL32emu_DECL(clock_nanosleep,
 			  const struct old_timespec32 __user *u_rqt,
 			  struct old_timespec32 __user *u_rmt));
 
+COBALT_SYSCALL32emu_DECL(clock_nanosleep64,
+			 (clockid_t clock_id, int flags,
+			  const struct __kernel_timespec __user *u_rqt,
+			  struct __kernel_timespec __user *u_rmt));
+
+
 COBALT_SYSCALL32emu_DECL(mutex_timedlock,
 			 (struct cobalt_mutex_shadow __user *u_mx,
 			  const struct old_timespec32 __user *u_ts));
