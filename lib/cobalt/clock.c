@@ -361,8 +361,13 @@ COBALT_IMPL(int, clock_nanosleep, (clockid_t clock_id,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
+#ifdef __USE_TIME_BITS64
+	ret = -XENOMAI_SYSCALL4(sc_cobalt_clock_nanosleep64,
+				clock_id, flags, rqtp, rmtp);
+#else
 	ret = -XENOMAI_SYSCALL4(sc_cobalt_clock_nanosleep,
 				clock_id, flags, rqtp, rmtp);
+#endif
 
 	pthread_setcanceltype(oldtype, NULL);
 
