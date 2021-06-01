@@ -25,3 +25,14 @@ int cobalt_get_timespec64(struct timespec64 *ts,
 
 	return 0;
 }
+
+int cobalt_put_timespec64(const struct timespec64 *ts,
+		   struct __kernel_timespec __user *uts)
+{
+	struct __kernel_timespec kts = {
+		.tv_sec = ts->tv_sec,
+		.tv_nsec = ts->tv_nsec
+	};
+
+	return cobalt_copy_to_user(uts, &kts, sizeof(kts)) ? -EFAULT : 0;
+}

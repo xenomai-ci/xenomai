@@ -23,6 +23,7 @@
 #include "thread.h"
 #include "clock.h"
 #include <trace/events/cobalt-posix.h>
+#include <cobalt/kernel/time.h>
 
 static struct xnclock *external_clocks[COBALT_MAX_EXTCLOCKS];
 
@@ -134,9 +135,29 @@ COBALT_SYSCALL(clock_gettime, current,
 	if (cobalt_put_u_timespec(u_ts, &ts))
 		return -EFAULT;
 
-	trace_cobalt_clock_gettime(clock_id, &ts);
+	return 0;
+}
+
+int __cobalt_clock_gettime64(clockid_t clock_id,
+			struct __kernel_timespec __user *u_ts)
+{
+	struct timespec64 ts;
+	int ret;
+
+	ret = __cobalt_clock_gettime(clock_id, &ts);
+	if (ret)
+		return ret;
+
+	if (cobalt_put_timespec64(&ts, u_ts))
+		return -EFAULT;
 
 	return 0;
+}
+
+COBALT_SYSCALL(clock_gettime64, current,
+	       (clockid_t clock_id, struct __kernel_timespec __user *u_ts))
+{
+	return __cobalt_clock_gettime64(clock_id, u_ts);
 }
 
 int __cobalt_clock_settime(clockid_t clock_id, const struct timespec64 *ts)

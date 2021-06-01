@@ -123,6 +123,7 @@
 #define sc_cobalt_clock_adjtime			100
 #define sc_cobalt_thread_setschedprio		101
 #define sc_cobalt_sem_timedwait64		102
+#define sc_cobalt_clock_gettime64		103
 
 #define __NR_COBALT_SYSCALLS			128 /* Power of 2 */
 
