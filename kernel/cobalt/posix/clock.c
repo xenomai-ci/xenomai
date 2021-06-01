@@ -271,6 +271,28 @@ COBALT_SYSCALL(clock_adjtime, current,
 	return cobalt_copy_to_user(u_tx, &tx, sizeof(tx));
 }
 
+int __cobalt_clock_adjtime64(clockid_t clock_id,
+			struct __kernel_timex __user *u_tx)
+{
+	struct __kernel_timex tx;
+	int ret;
+
+	if (cobalt_copy_from_user(&tx, u_tx, sizeof(tx)))
+		return -EFAULT;
+
+	ret = __cobalt_clock_adjtime(clock_id, &tx);
+	if (ret)
+		return ret;
+
+	return cobalt_copy_to_user(u_tx, &tx, sizeof(tx));
+}
+
+COBALT_SYSCALL(clock_adjtime64, current,
+	       (clockid_t clock_id, struct __kernel_timex __user *u_tx))
+{
+	return __cobalt_clock_adjtime64(clock_id, u_tx);
+}
+
 int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 			     const struct timespec64 *rqt,
 			     struct timespec64 *rmt)

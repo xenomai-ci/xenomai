@@ -79,6 +79,10 @@ COBALT_SYSCALL32emu_DECL(clock_adjtime,
 			 (clockid_t clock_id,
 			  struct old_timex32 __user *u_tx));
 
+COBALT_SYSCALL32emu_DECL(clock_adjtime64,
+			 (clockid_t clock_id,
+			  struct __kernel_timex __user *u_tx));
+
 COBALT_SYSCALL32emu_DECL(clock_nanosleep,
 			 (clockid_t clock_id, int flags,
 			  const struct old_timespec32 __user *u_rqt,
