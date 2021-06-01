@@ -285,7 +285,11 @@ COBALT_IMPL(int, clock_settime, (clockid_t clock_id, const struct timespec *tp))
 	if (clock_id == CLOCK_REALTIME && !cobalt_use_legacy_tsc())
 		return __STD(clock_settime(CLOCK_REALTIME, tp));
 
+#ifdef __USE_TIME_BITS64
+	ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_settime64, clock_id, tp);
+#else
 	ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_settime, clock_id, tp);
+#endif
 	if (ret) {
 		errno = ret;
 		return -1;
