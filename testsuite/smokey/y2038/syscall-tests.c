@@ -137,7 +137,7 @@ static int test_sc_cobalt_sem_timedwait64(void)
 	 * Providing a valid timeout, waiting for it to time out and check
 	 * that we didn't come back to early.
 	 */
-	ret = clock_gettime(CLOCK_MONOTONIC, &ts_nat);
+	ret = clock_gettime(CLOCK_REALTIME, &ts_nat);
 	if (ret)
 		return -errno;
 
@@ -149,7 +149,7 @@ static int test_sc_cobalt_sem_timedwait64(void)
 	if (!smokey_assert(ret == -ETIMEDOUT))
 		return ret;
 
-	ret = clock_gettime(CLOCK_MONOTONIC, &ts_nat);
+	ret = clock_gettime(CLOCK_REALTIME, &ts_nat);
 	if (ret)
 		return -errno;
 
