@@ -204,6 +204,9 @@ static int test_sc_cobalt_clock_settime64(void)
 	struct xn_timespec64 ts64, now64;
 	struct timespec now;
 
+	if (!cobalt_use_legacy_tsc())
+		return 0; // Not implemented, nothing to test, success
+
 	/* Make sure we don't crash because of NULL pointers */
 	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
 	if (ret == -ENOSYS) {
