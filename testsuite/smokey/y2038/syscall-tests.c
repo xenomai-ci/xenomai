@@ -105,7 +105,7 @@ static int test_sc_cobalt_sem_timedwait64(void)
 	sem_post(&sem);
 	ret = XENOMAI_SYSCALL2(sc_nr, &sem, NULL);
 	if (!smokey_assert(!ret))
-		return ret ? ret : -EINVAL;
+		return ret;
 
 	/*
 	 * The semaphore is already exhausted, so calling again will validate
@@ -189,7 +189,7 @@ static int test_sc_cobalt_clock_gettime64(void)
 	/* Provide a valid 64bit timespec */
 	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_MONOTONIC, &ts64);
 	if (!smokey_assert(!ret))
-		return ret ? ret : -EINVAL;
+		return ret;
 
 	/* Validate seconds only, nanoseconds might still be zero */
 	smokey_assert(ts64.tv_sec != 0);
@@ -227,7 +227,7 @@ static int test_sc_cobalt_clock_settime64(void)
 	ts64.tv_nsec = now.tv_nsec;
 	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_REALTIME, &ts64);
 	if (!smokey_assert(!ret))
-		return ret ? ret : -EINVAL;
+		return ret;
 
 	ret = clock_gettime(CLOCK_REALTIME, &now);
 	if (ret)
@@ -276,7 +276,7 @@ static int test_sc_cobalt_clock_nanosleep64(void)
 	ret = XENOMAI_SYSCALL4(sc_nr, CLOCK_MONOTONIC, TIMER_ABSTIME,
 			       &next, (void *)0xdeadbeefUL);
 	if (!smokey_assert(!ret))
-		return ret ? ret : -EINVAL;
+		return ret;
 
 	ret = clock_gettime(CLOCK_MONOTONIC, &ts2);
 	if (ret)
@@ -292,7 +292,7 @@ static int test_sc_cobalt_clock_nanosleep64(void)
 
 	ret = XENOMAI_SYSCALL4(sc_nr, CLOCK_MONOTONIC, TIMER_ABSTIME, &next, &rmt);
 	if (!smokey_assert(!ret))
-		return ret ? ret : -EINVAL;
+		return ret;
 
 	ret = clock_gettime(CLOCK_MONOTONIC, &ts1);
 	if (ret)
