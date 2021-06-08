@@ -23,7 +23,7 @@
 #include <linux/random.h>
 #include <cobalt/kernel/assert.h>
 #include <cobalt/kernel/heap.h>
-#include <rtdm/uapi/testing.h>
+#include <rtdm/testing.h>
 #include <rtdm/driver.h>
 
 #define complain(__fmt, __args...)	\
@@ -446,6 +446,9 @@ static void heapcheck_close(struct rtdm_fd *fd)
 static int heapcheck_ioctl(struct rtdm_fd *fd,
 			   unsigned int request, void __user *arg)
 {
+#ifdef CONFIG_XENO_ARCH_SYS3264
+	struct compat_rttst_heap_stathdr compat_sthdr;
+#endif
 	struct rttst_heap_stathdr sthdr;
 	struct rttst_heap_parms parms;
 	int ret;
@@ -465,14 +468,36 @@ static int heapcheck_ioctl(struct rtdm_fd *fd,
 		break;
 	case RTTST_RTIOC_HEAP_STAT_COLLECT:
 		sthdr.buf = NULL;
-		ret = rtdm_copy_from_user(fd, &sthdr, arg, sizeof(sthdr));
-		if (ret)
-			return ret;
-		ret = collect_stats(fd, sthdr.buf, sthdr.nrstats);
-		if (ret < 0)
-			return ret;
-		sthdr.nrstats = ret;
-		ret = rtdm_copy_to_user(fd, arg, &sthdr, sizeof(sthdr));
+#ifdef CONFIG_XENO_ARCH_SYS3264
+		if (rtdm_fd_is_compat(fd)) {
+			ret = rtdm_copy_from_user(fd, &compat_sthdr, arg,
+						  sizeof(compat_sthdr));
+			if (ret)
+				return ret;
+
+			ret = collect_stats(fd, compat_ptr(compat_sthdr.buf),
+					    compat_sthdr.nrstats);
+			if (ret < 0)
+				return ret;
+
+			compat_sthdr.nrstats = ret;
+			ret = rtdm_copy_to_user(fd, arg, &compat_sthdr,
+						sizeof(compat_sthdr));
+		} else
+#endif
+		{
+			ret = rtdm_copy_from_user(fd, &sthdr, arg,
+						  sizeof(sthdr));
+			if (ret)
+				return ret;
+
+			ret = collect_stats(fd, sthdr.buf, sthdr.nrstats);
+			if (ret < 0)
+				return ret;
+
+			sthdr.nrstats = ret;
+			ret = rtdm_copy_to_user(fd, arg, &sthdr, sizeof(sthdr));
+		}
 		break;
 	default:
 		ret = -EINVAL;

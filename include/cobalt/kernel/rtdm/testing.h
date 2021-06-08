@@ -32,6 +32,11 @@ struct compat_rttst_overall_bench_res {
 	compat_uptr_t histogram_max;
 };
 
+struct compat_rttst_heap_stathdr {
+	int nrstats;
+	compat_uptr_t buf;
+};
+
 #define RTTST_RTIOC_TMBENCH_STOP_COMPAT \
 	_IOWR(RTIOC_TYPE_TESTING, 0x11, struct compat_rttst_overall_bench_res)
 
