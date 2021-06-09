@@ -1052,6 +1052,20 @@ static long xnpipe_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 	return ret;
 }
 
+#ifdef CONFIG_COMPAT
+/*
+ * Could be replaced with compat_ptr_ioctl if support for kernels < 5.4 is
+ * dropped.
+ */
+static long xnpipe_compat_ioctl(struct file *file, unsigned int cmd,
+				unsigned long arg)
+{
+	return xnpipe_ioctl(file, cmd, (unsigned long)compat_ptr(arg));
+}
+#else
+#define xnpipe_compat_ioctl	NULL
+#endif
+
 static int xnpipe_fasync(int fd, struct file *file, int on)
 {
 	struct xnpipe_state *state = file->private_data;
@@ -1112,6 +1126,7 @@ static struct file_operations xnpipe_fops = {
 	.write = xnpipe_write,
 	.poll = xnpipe_poll,
 	.unlocked_ioctl = xnpipe_ioctl,
+	.compat_ioctl = xnpipe_compat_ioctl,
 	.open = xnpipe_open,
 	.release = xnpipe_release,
 	.fasync = xnpipe_fasync
