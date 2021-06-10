@@ -130,23 +130,27 @@ static void setup_proxy(struct clock_proxy_device *dev)
 	__this_cpu_write(proxy_device, dev);
 }
 
+#ifdef CONFIG_SMP
 static irqreturn_t tick_ipi_handler(int irq, void *dev_id)
 {
 	xnintr_core_clock_handler();
 
 	return IRQ_HANDLED;
 }
+#endif
 
 int pipeline_install_tick_proxy(void)
 {
 	int ret;
 
+#ifdef CONFIG_SMP
 	ret = __request_percpu_irq(TIMER_OOB_IPI,
 				tick_ipi_handler,
 				IRQF_OOB, "Xenomai timer IPI",
 				&cobalt_machine_cpudata);
 	if (ret)
 		return ret;
+#endif
 
 	/* Install the proxy tick device */
 	ret = tick_install_proxy(setup_proxy, &xnsched_realtime_cpus);
@@ -156,7 +160,9 @@ int pipeline_install_tick_proxy(void)
 	return 0;
 
 fail_proxy:
+#ifdef CONFIG_SMP
 	free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
+#endif
 
 	return ret;
 }
@@ -166,5 +172,7 @@ void pipeline_uninstall_tick_proxy(void)
 	/* Uninstall the proxy tick device. */
 	tick_uninstall_proxy(&xnsched_realtime_cpus);
 
+#ifdef CONFIG_SMP
 	free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
+#endif
 }
