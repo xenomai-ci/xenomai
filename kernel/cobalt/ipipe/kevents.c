@@ -261,7 +261,7 @@ static int handle_setaffinity_event(struct ipipe_cpu_migration_data *d)
 	xnlock_get_irqsave(&nklock, s);
 
 	if (xnthread_test_state(thread, XNTHREAD_BLOCK_BITS & ~XNRELAX))
-		xnthread_signal(thread, SIGSHADOW, SIGSHADOW_ACTION_HARDEN);
+		__xnthread_signal(thread, SIGSHADOW, SIGSHADOW_ACTION_HARDEN);
 
 	xnlock_put_irqrestore(&nklock, s);
 

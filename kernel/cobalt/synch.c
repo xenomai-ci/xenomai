@@ -1147,7 +1147,7 @@ void xnsynch_detect_relaxed_owner(struct xnsynch *synch,
 	    !xnthread_test_info(sleeper, XNPIALERT) &&
 	    xnthread_test_state(synch->owner, XNRELAX)) {
 		xnthread_set_info(sleeper, XNPIALERT);
-		xnthread_signal(sleeper, SIGDEBUG,
+		__xnthread_signal(sleeper, SIGDEBUG,
 				  SIGDEBUG_MIGRATE_PRIOINV);
 	} else
 		xnthread_clear_info(sleeper,  XNPIALERT);
@@ -1171,7 +1171,7 @@ void xnsynch_detect_boosted_relax(struct xnthread *owner)
 		xnsynch_for_each_sleeper(sleeper, synch) {
 			if (xnthread_test_state(sleeper, XNWARN)) {
 				xnthread_set_info(sleeper, XNPIALERT);
-				xnthread_signal(sleeper, SIGDEBUG,
+				__xnthread_signal(sleeper, SIGDEBUG,
 						  SIGDEBUG_MIGRATE_PRIOINV);
 			}
 		}

@@ -948,7 +948,7 @@ void xnthread_suspend(struct xnthread *thread, int mask,
 	 */
 	if (((oldstate & (XNTHREAD_BLOCK_BITS|XNUSER)) == (XNRELAX|XNUSER)) &&
 	    (mask & (XNDELAY | XNSUSP | XNHELD)) != 0)
-		xnthread_signal(thread, SIGSHADOW, SIGSHADOW_ACTION_HARDEN);
+		__xnthread_signal(thread, SIGSHADOW, SIGSHADOW_ACTION_HARDEN);
 out:
 	xnlock_put_irqrestore(&nklock, s);
 	return;
@@ -959,7 +959,7 @@ lock_break:
 	    !xnthread_test_localinfo(thread, XNLBALERT)) {
 		xnthread_set_info(thread, XNKICKED);
 		xnthread_set_localinfo(thread, XNLBALERT);
-		xnthread_signal(thread, SIGDEBUG, SIGDEBUG_LOCK_BREAK);
+		__xnthread_signal(thread, SIGDEBUG, SIGDEBUG_LOCK_BREAK);
 	}
 abort:
 	if (wchan) {
@@ -1492,7 +1492,7 @@ check_self_cancel:
 	 */
 	if (xnthread_test_state(thread, XNUSER)) {
 		__xnthread_demote(thread);
-		xnthread_signal(thread, SIGTERM, 0);
+		__xnthread_signal(thread, SIGTERM, 0);
 	} else
 		__xnthread_kick(thread);
 out:
@@ -1803,7 +1803,7 @@ int __xnthread_set_schedparam(struct xnthread *thread,
 	xnthread_set_info(thread, XNSCHEDP);
 	/* Ask the target thread to call back if relaxed. */
 	if (xnthread_test_state(thread, XNRELAX))
-		xnthread_signal(thread, SIGSHADOW, SIGSHADOW_ACTION_HOME);
+		__xnthread_signal(thread, SIGSHADOW, SIGSHADOW_ACTION_HOME);
 	
 	return ret;
 }
@@ -2083,23 +2083,29 @@ void xnthread_relax(int notify, int reason)
 }
 EXPORT_SYMBOL_GPL(xnthread_relax);
 
-struct lostage_signal {
-	struct pipeline_inband_work inband_work; /* Must be first. */
-	struct task_struct *task;
-	int signo, sigval;
-};
-
 static void lostage_task_signal(struct pipeline_inband_work *inband_work)
 {
 	struct lostage_signal *rq;
 	struct task_struct *p;
 	kernel_siginfo_t si;
-	int signo;
+	int signo, sigval;
+	spl_t s;
 
 	rq = container_of(inband_work, struct lostage_signal, inband_work);
-	p = rq->task;
+	/*
+	 * Revisit: I-pipe requirement. It passes a copy of the original work
+	 * struct, so retrieve the original one first in order to update is.
+	 */
+	rq = rq->self;
 
+	xnlock_get_irqsave(&nklock, s);
+
+	p = rq->task;
 	signo = rq->signo;
+	sigval = rq->sigval;
+	rq->task = NULL;
+
+	xnlock_put_irqrestore(&nklock, s);
 
 	trace_cobalt_lostage_signal(p, signo);
 
@@ -2107,10 +2113,11 @@ static void lostage_task_signal(struct pipeline_inband_work *inband_work)
 		memset(&si, '\0', sizeof(si));
 		si.si_signo = signo;
 		si.si_code = SI_QUEUE;
-		si.si_int = rq->sigval;
+		si.si_int = sigval;
 		send_sig_info(signo, &si, p);
-	} else
+	} else {
 		send_sig(signo, p, 1);
+	}
 }
 
 static int force_wakeup(struct xnthread *thread) /* nklock locked, irqs off */
@@ -2272,22 +2279,68 @@ void xnthread_demote(struct xnthread *thread)
 }
 EXPORT_SYMBOL_GPL(xnthread_demote);
 
-void xnthread_signal(struct xnthread *thread, int sig, int arg)
+static int get_slot_index_from_sig(int sig, int arg)
 {
-	struct lostage_signal sigwork = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(sigwork,
-					lostage_task_signal),
-		.task = xnthread_host_task(thread),
-		.signo = sig,
-		.sigval = sig == SIGDEBUG ? arg | sigdebug_marker : arg,
-	};
+	int action;
+
+	switch (sig) {
+	case SIGDEBUG:
+		return XNTHREAD_SIGDEBUG;
+	case SIGSHADOW:
+		action = sigshadow_action(arg);
+		switch (action) {
+		case SIGSHADOW_ACTION_HARDEN:
+			return XNTHREAD_SIGSHADOW_HARDEN;
+		case SIGSHADOW_ACTION_BACKTRACE:
+			return XNTHREAD_SIGSHADOW_BACKTRACE;
+		case SIGSHADOW_ACTION_HOME:
+			return XNTHREAD_SIGSHADOW_HOME;
+		}
+		break;
+	case SIGTERM:
+		return XNTHREAD_SIGTERM;
+	}
+
+	return -1;
+}
+
+/* nklock locked, irqs off */
+void __xnthread_signal(struct xnthread *thread, int sig, int arg)
+{
+	struct lostage_signal *sigwork;
+	int slot;
 
 	if (XENO_WARN_ON(COBALT, !xnthread_test_state(thread, XNUSER)))
 		return;
 
-	trace_cobalt_lostage_request("signal", sigwork.task);
+	slot = get_slot_index_from_sig(sig, arg);
+	if (WARN_ON_ONCE(slot < 0))
+		return;
 
-	pipeline_post_inband_work(&sigwork);
+	sigwork = &thread->sigarray[slot];
+	if (sigwork->task)
+		return;
+
+	sigwork->inband_work = (struct pipeline_inband_work)
+			PIPELINE_INBAND_WORK_INITIALIZER(*sigwork,
+							 lostage_task_signal);
+	sigwork->task = xnthread_host_task(thread);
+	sigwork->signo = sig;
+	sigwork->sigval = sig == SIGDEBUG ? arg | sigdebug_marker : arg;
+	sigwork->self = sigwork; /* Revisit: I-pipe requirement */
+
+	trace_cobalt_lostage_request("signal", sigwork->task);
+
+	pipeline_post_inband_work(sigwork);
+}
+
+void xnthread_signal(struct xnthread *thread, int sig, int arg)
+{
+	spl_t s;
+
+	xnlock_get_irqsave(&nklock, s);
+	__xnthread_signal(thread, sig, arg);
+	xnlock_put_irqrestore(&nklock, s);
 }
 EXPORT_SYMBOL_GPL(xnthread_signal);
 
@@ -2469,7 +2522,7 @@ void xnthread_call_mayday(struct xnthread *thread, int reason)
 	/* Mayday traps are available to userland threads only. */
 	XENO_BUG_ON(COBALT, !xnthread_test_state(thread, XNUSER));
 	xnthread_set_info(thread, XNKICKED);
-	xnthread_signal(thread, SIGDEBUG, reason);
+	__xnthread_signal(thread, SIGDEBUG, reason);
 	pipeline_raise_mayday(p);
 }
 EXPORT_SYMBOL_GPL(xnthread_call_mayday);

@@ -23,6 +23,7 @@
 #include <linux/sched.h>
 #include <linux/sched/rt.h>
 #include <pipeline/thread.h>
+#include <pipeline/inband_work.h>
 #include <cobalt/kernel/list.h>
 #include <cobalt/kernel/stat.h>
 #include <cobalt/kernel/timer.h>
@@ -42,6 +43,13 @@
 #define XNTHREAD_BLOCK_BITS   (XNSUSP|XNPEND|XNDELAY|XNDORMANT|XNRELAX|XNHELD|XNDBGSTOP)
 #define XNTHREAD_MODE_BITS    (XNRRB|XNWARN|XNTRAPLB)
 
+#define XNTHREAD_SIGDEBUG		0
+#define XNTHREAD_SIGSHADOW_HARDEN	1
+#define XNTHREAD_SIGSHADOW_BACKTRACE	2
+#define XNTHREAD_SIGSHADOW_HOME		3
+#define XNTHREAD_SIGTERM		4
+#define XNTHREAD_MAX_SIGNALS		5
+
 struct xnthread;
 struct xnsched;
 struct xnselector;
@@ -49,6 +57,13 @@ struct xnsched_class;
 struct xnsched_tpslot;
 struct xnthread_personality;
 struct completion;
+
+struct lostage_signal {
+	struct pipeline_inband_work inband_work; /* Must be first. */
+	struct task_struct *task;
+	int signo, sigval;
+	struct lostage_signal *self; /* Revisit: I-pipe requirement */
+};
 
 struct xnthread_init_attr {
 	struct xnthread_personality *personality;
@@ -199,6 +214,7 @@ struct xnthread {
 	const char *exe_path;	/* Executable path */
 	u32 proghash;		/* Hash value for exe_path */
 #endif
+	struct lostage_signal sigarray[XNTHREAD_MAX_SIGNALS];
 };
 
 static inline int xnthread_get_state(const struct xnthread *thread)
@@ -492,8 +508,9 @@ void __xnthread_demote(struct xnthread *thread);
 
 void xnthread_demote(struct xnthread *thread);
 
-void xnthread_signal(struct xnthread *thread,
-		     int sig, int arg);
+void __xnthread_signal(struct xnthread *thread, int sig, int arg);
+
+void xnthread_signal(struct xnthread *thread, int sig, int arg);
 
 void xnthread_pin_initial(struct xnthread *thread);
 
