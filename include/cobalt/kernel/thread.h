@@ -514,9 +514,6 @@ void xnthread_signal(struct xnthread *thread, int sig, int arg);
 
 void xnthread_pin_initial(struct xnthread *thread);
 
-int xnthread_map(struct xnthread *thread,
-		 struct completion *done);
-
 void xnthread_call_mayday(struct xnthread *thread, int reason);
 
 static inline void xnthread_get_resource(struct xnthread *curr)
