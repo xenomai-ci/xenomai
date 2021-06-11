@@ -1993,19 +1993,6 @@ static void lostage_task_wakeup(struct pipeline_inband_work *inband_work)
 	wake_up_process(p);
 }
 
-static void post_wakeup(struct task_struct *p)
-{
-	struct lostage_wakeup wakework = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(wakework,
-					lostage_task_wakeup),
-		.task = p,
-	};
-
-	trace_cobalt_lostage_request("wakeup", wakework.task);
-
-	pipeline_post_inband_work(&wakework);
-}
-
 void __xnthread_propagate_schedparam(struct xnthread *curr)
 {
 	int kpolicy = SCHED_FIFO, kprio = curr->bprio, ret;
@@ -2065,9 +2052,14 @@ void __xnthread_propagate_schedparam(struct xnthread *curr)
  */
 void xnthread_relax(int notify, int reason)
 {
+	struct task_struct *p = current;
+	struct lostage_wakeup wakework = {
+		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(wakework,
+					lostage_task_wakeup),
+		.task = p,
+	};
 	struct xnthread *thread = xnthread_current();
 	int cpu __maybe_unused, suspension;
-	struct task_struct *p = current;
 	kernel_siginfo_t si;
 
 	primary_mode_only();
@@ -2090,7 +2082,8 @@ void xnthread_relax(int notify, int reason)
 	 * xnthread_suspend() has an interrupts-on section built in.
 	 */
 	splmax();
-	post_wakeup(p);
+	trace_cobalt_lostage_request("wakeup", p);
+	pipeline_post_inband_work(&wakework);
 	/*
 	 * Grab the nklock to synchronize the Linux task state
 	 * manipulation with handle_sigwake_event. This lock will be
