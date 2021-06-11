@@ -84,30 +84,18 @@ static inline void enlist_new_thread(struct xnthread *thread)
 	xnvfile_touch_tag(&nkthreadlist_tag);
 }
 
-struct parent_wakeup_request {
+struct kthread_arg {
 	struct pipeline_inband_work inband_work; /* Must be first. */
+	struct xnthread *thread;
 	struct completion *done;
 };
 
 static void do_parent_wakeup(struct pipeline_inband_work *inband_work)
 {
-	struct parent_wakeup_request *rq;
+	struct kthread_arg *ka;
 
-	rq = container_of(inband_work, struct parent_wakeup_request, inband_work);
-	complete(rq->done);
-}
-
-static inline void wakeup_parent(struct completion *done)
-{
-	struct parent_wakeup_request wakework = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(wakework,
-					do_parent_wakeup),
-		.done = done,
-	};
-
-	trace_cobalt_lostage_request("wakeup", current);
-
-	pipeline_post_inband_work(&wakework);
+	ka = container_of(inband_work, struct kthread_arg, inband_work);
+	complete(ka->done);
 }
 
 static inline void init_kthread_info(struct xnthread *thread)
@@ -119,7 +107,7 @@ static inline void init_kthread_info(struct xnthread *thread)
 	p->process = NULL;
 }
 
-static int map_kthread(struct xnthread *thread, struct completion *done)
+static int map_kthread(struct xnthread *thread, struct kthread_arg *ka)
 {
 	int ret;
 	spl_t s;
@@ -158,7 +146,12 @@ static int map_kthread(struct xnthread *thread, struct completion *done)
 	 */
 	xnthread_resume(thread, XNDORMANT);
 	ret = xnthread_harden();
-	wakeup_parent(done);
+
+	trace_cobalt_lostage_request("wakeup", current);
+
+	ka->inband_work = (struct pipeline_inband_work)
+		PIPELINE_INBAND_WORK_INITIALIZER(*ka, do_parent_wakeup);
+	pipeline_post_inband_work(ka);
 
 	xnlock_get_irqsave(&nklock, s);
 
@@ -180,11 +173,6 @@ static int map_kthread(struct xnthread *thread, struct completion *done)
 
 	return ret;
 }
-
-struct kthread_arg {
-	struct xnthread *thread;
-	struct completion *done;
-};
 
 static int kthread_trampoline(void *arg)
 {
@@ -210,7 +198,7 @@ static int kthread_trampoline(void *arg)
 	param.sched_priority = prio;
 	sched_setscheduler(current, policy, &param);
 
-	ret = map_kthread(thread, ka->done);
+	ret = map_kthread(thread, ka);
 	if (ret) {
 		printk(XENO_WARNING "failed to create kernel shadow %s\n",
 		       thread->name);
