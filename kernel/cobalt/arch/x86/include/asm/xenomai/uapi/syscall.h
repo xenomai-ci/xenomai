@@ -18,7 +18,7 @@
 #ifndef _COBALT_X86_ASM_UAPI_SYSCALL_H
 #define _COBALT_X86_ASM_UAPI_SYSCALL_H
 
-#ifdef __ILP32__
+#if defined(__x86_64__) && defined(__ILP32__)
 #define __xn_syscall_base  __COBALT_X32_BASE
 #else
 #define __xn_syscall_base  0
