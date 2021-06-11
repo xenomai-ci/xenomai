@@ -2089,31 +2089,15 @@ struct lostage_signal {
 	int signo, sigval;
 };
 
-static inline void do_kthread_signal(struct task_struct *p,
-				     struct xnthread *thread,
-				     struct lostage_signal *rq)
-{
-	printk(XENO_WARNING
-	       "kernel shadow %s received unhandled signal %d (action=0x%x)\n",
-	       thread->name, rq->signo, rq->sigval);
-}
-
 static void lostage_task_signal(struct pipeline_inband_work *inband_work)
 {
 	struct lostage_signal *rq;
-	struct xnthread *thread;
 	struct task_struct *p;
 	kernel_siginfo_t si;
 	int signo;
 
 	rq = container_of(inband_work, struct lostage_signal, inband_work);
 	p = rq->task;
-
-	thread = xnthread_from_task(p);
-	if (thread && !xnthread_test_state(thread, XNUSER)) {
-		do_kthread_signal(p, thread, rq);
-		return;
-	}
 
 	signo = rq->signo;
 
@@ -2297,6 +2281,9 @@ void xnthread_signal(struct xnthread *thread, int sig, int arg)
 		.signo = sig,
 		.sigval = sig == SIGDEBUG ? arg | sigdebug_marker : arg,
 	};
+
+	if (XENO_WARN_ON(COBALT, !xnthread_test_state(thread, XNUSER)))
+		return;
 
 	trace_cobalt_lostage_request("signal", sigwork.task);
 
