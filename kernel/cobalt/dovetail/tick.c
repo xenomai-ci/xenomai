@@ -144,12 +144,20 @@ int pipeline_install_tick_proxy(void)
 	int ret;
 
 #ifdef CONFIG_SMP
-	ret = __request_percpu_irq(TIMER_OOB_IPI,
-				tick_ipi_handler,
-				IRQF_OOB, "Xenomai timer IPI",
-				&cobalt_machine_cpudata);
-	if (ret)
-		return ret;
+	/*
+	 * We may be running a SMP kernel on a uniprocessor machine
+	 * whose interrupt controller provides no IPI: attempt to hook
+	 * the timer IPI only if the hardware can support multiple
+	 * CPUs.
+	 */
+	if (num_possible_cpus() > 1) {
+		ret = __request_percpu_irq(TIMER_OOB_IPI,
+					tick_ipi_handler,
+					IRQF_OOB, "Xenomai timer IPI",
+					&cobalt_machine_cpudata);
+		if (ret)
+			return ret;
+	}
 #endif
 
 	/* Install the proxy tick device */
@@ -161,7 +169,8 @@ int pipeline_install_tick_proxy(void)
 
 fail_proxy:
 #ifdef CONFIG_SMP
-	free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
+	if (num_possible_cpus() > 1)
+		free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
 #endif
 
 	return ret;
@@ -173,6 +182,7 @@ void pipeline_uninstall_tick_proxy(void)
 	tick_uninstall_proxy(&xnsched_realtime_cpus);
 
 #ifdef CONFIG_SMP
-	free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
+	if (num_possible_cpus() > 1)
+		free_percpu_irq(TIMER_OOB_IPI, &cobalt_machine_cpudata);
 #endif
 }

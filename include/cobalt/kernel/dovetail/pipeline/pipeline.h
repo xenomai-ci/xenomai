@@ -6,6 +6,7 @@
 #define _COBALT_KERNEL_DOVETAIL_PIPELINE_H
 
 #include <linux/irq_pipeline.h>
+#include <linux/cpumask.h>
 #include <cobalt/kernel/assert.h>
 #include <asm/xenomai/features.h>
 #include <pipeline/machine.h>
@@ -35,6 +36,9 @@ irqreturn_t pipeline_reschedule_ipi_handler(int irq, void *dev_id);
 
 static inline int pipeline_request_resched_ipi(void (*handler)(void))
 {
+	if (num_possible_cpus() == 1)
+		return 0;
+
 	/* Trap the out-of-band rescheduling interrupt. */
 	return __request_percpu_irq(RESCHEDULE_OOB_IPI,
 			pipeline_reschedule_ipi_handler,
@@ -45,8 +49,9 @@ static inline int pipeline_request_resched_ipi(void (*handler)(void))
 
 static inline void pipeline_free_resched_ipi(void)
 {
-	/* Release the out-of-band rescheduling interrupt. */
-	free_percpu_irq(RESCHEDULE_OOB_IPI, &cobalt_machine_cpudata);
+	if (num_possible_cpus() > 1)
+		/* Release the out-of-band rescheduling interrupt. */
+		free_percpu_irq(RESCHEDULE_OOB_IPI, &cobalt_machine_cpudata);
 }
 
 static inline void pipeline_send_resched_ipi(const struct cpumask *dest)
