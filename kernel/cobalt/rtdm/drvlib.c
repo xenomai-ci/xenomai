@@ -1568,20 +1568,14 @@ int rtdm_nrtsig_init(rtdm_nrtsig_t *nrt_sig, rtdm_nrtsig_handler_t handler,
 void rtdm_nrtsig_destroy(rtdm_nrtsig_t *nrt_sig);
 #endif /* DOXYGEN_CPP */
 
-struct nrtsig_work {
-	struct pipeline_inband_work inband_work; /* Must be first. */
-	struct rtdm_nrtsig *nrtsig;
-};
-
-static void nrtsig_execute(struct pipeline_inband_work *inband_work)
+void __rtdm_nrtsig_execute(struct pipeline_inband_work *inband_work)
 {
-	struct rtdm_nrtsig *nrtsig;
-	struct nrtsig_work *w;
+	struct rtdm_nrtsig *nrt_sig;
 
-	w = container_of(inband_work, typeof(*w), inband_work);
-	nrtsig = w->nrtsig;
-	nrtsig->handler(nrtsig, nrtsig->arg);
+	nrt_sig = container_of(inband_work, typeof(*nrt_sig), inband_work);
+	nrt_sig->handler(nrt_sig, nrt_sig->arg);
 }
+EXPORT_SYMBOL_GPL(__rtdm_nrtsig_execute);
 
 /**
  * Trigger non-real-time signal
@@ -1592,27 +1586,41 @@ static void nrtsig_execute(struct pipeline_inband_work *inband_work)
  */
 void rtdm_nrtsig_pend(rtdm_nrtsig_t *nrt_sig)
 {
-	struct nrtsig_work nrtsig_work = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(nrtsig_work,
-					nrtsig_execute),
-		.nrtsig = nrt_sig,
-	};
-	pipeline_post_inband_work(&nrtsig_work);
+	pipeline_post_inband_work(nrt_sig);
 }
 EXPORT_SYMBOL_GPL(rtdm_nrtsig_pend);
 
-struct lostage_schedule_work {
-	struct pipeline_inband_work inband_work; /* Must be first. */
-	struct work_struct *lostage_work;
-};
+static LIST_HEAD(nrt_work_list);
+DEFINE_PRIVATE_XNLOCK(nrt_work_lock);
 
 static void lostage_schedule_work(struct pipeline_inband_work *inband_work)
 {
-	struct lostage_schedule_work *w;
+	struct work_struct *lostage_work;
+	spl_t s;
 
-	w = container_of(inband_work, typeof(*w), inband_work);
-	schedule_work(w->lostage_work);
+	xnlock_get_irqsave(&nrt_work_lock, s);
+
+	while (!list_empty(&nrt_work_list)) {
+		lostage_work = list_first_entry(&nrt_work_list,
+						struct work_struct, entry);
+		list_del_init(&lostage_work->entry);
+
+		xnlock_put_irqrestore(&nrt_work_lock, s);
+
+		schedule_work(lostage_work);
+
+		xnlock_get_irqsave(&nrt_work_lock, s);
+	}
+
+	xnlock_put_irqrestore(&nrt_work_lock, s);
 }
+
+static struct lostage_trigger_work {
+	struct pipeline_inband_work inband_work; /* Must be first. */
+} nrt_work =  {
+	.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(nrt_work,
+							lostage_schedule_work),
+};
 
 /**
  * Put a work task in Linux non real-time global workqueue from primary mode.
@@ -1621,17 +1629,19 @@ static void lostage_schedule_work(struct pipeline_inband_work *inband_work)
  */
 void rtdm_schedule_nrt_work(struct work_struct *lostage_work)
 {
-	struct lostage_schedule_work sched_work = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(sched_work,
-					lostage_schedule_work),
-		.lostage_work = lostage_work,
-	};
+	spl_t s;
 
-	if (is_secondary_domain())
+	if (is_secondary_domain()) {
 		schedule_work(lostage_work);
-	else
-		pipeline_post_inband_work(&sched_work);
+		return;
+	}
 
+	xnlock_get_irqsave(&nrt_work_lock, s);
+
+	list_add_tail(&lostage_work->entry, &nrt_work_list);
+	pipeline_post_inband_work(&nrt_work);
+
+	xnlock_put_irqrestore(&nrt_work_lock, s);
 }
 EXPORT_SYMBOL_GPL(rtdm_schedule_nrt_work);
 

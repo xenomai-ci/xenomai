@@ -33,6 +33,7 @@
 #include <linux/wait.h>
 #include <linux/notifier.h>
 #include <pipeline/lock.h>
+#include <pipeline/inband_work.h>
 #include <xenomai/version.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/sched.h>
@@ -896,6 +897,7 @@ typedef struct rtdm_nrtsig rtdm_nrtsig_t;
 typedef void (*rtdm_nrtsig_handler_t)(rtdm_nrtsig_t *nrt_sig, void *arg);
 
 struct rtdm_nrtsig {
+	struct pipeline_inband_work inband_work; /* Must be first */
 	rtdm_nrtsig_handler_t handler;
 	void *arg;
 };
@@ -904,9 +906,14 @@ void rtdm_schedule_nrt_work(struct work_struct *lostage_work);
 /** @} rtdm_nrtsignal */
 
 #ifndef DOXYGEN_CPP /* Avoid static inline tags for RTDM in doxygen */
+void __rtdm_nrtsig_execute(struct pipeline_inband_work *inband_work);
+
 static inline void rtdm_nrtsig_init(rtdm_nrtsig_t *nrt_sig,
-				rtdm_nrtsig_handler_t handler, void *arg)
+				    rtdm_nrtsig_handler_t handler, void *arg)
 {
+	nrt_sig->inband_work = (struct pipeline_inband_work)
+		PIPELINE_INBAND_WORK_INITIALIZER(*nrt_sig,
+						 __rtdm_nrtsig_execute);
 	nrt_sig->handler = handler;
 	nrt_sig->arg = arg;
 }
