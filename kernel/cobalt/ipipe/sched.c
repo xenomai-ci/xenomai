@@ -158,7 +158,6 @@ int pipeline_leave_oob_prepare(void)
 
 	set_current_state(p->state & ~TASK_NOWAKEUP);
 
-#ifdef IPIPE_KEVT_USERINTRET
 	/*
 	 * If current is being debugged, record that it should migrate
 	 * back in case it resumes in userspace. If it resumes in
@@ -171,7 +170,6 @@ int pipeline_leave_oob_prepare(void)
 		ipipe_enable_user_intret_notifier();
 		suspmask |= XNDBGSTOP;
 	}
-#endif
 	/*
 	 * Return the suspension bits the caller should pass to
 	 * xnthread_suspend().
