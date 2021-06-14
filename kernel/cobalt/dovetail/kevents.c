@@ -24,69 +24,6 @@
 
 static void detach_current(void);
 
-static inline struct cobalt_process *
-process_from_thread(struct xnthread *thread)
-{
-	return container_of(thread, struct cobalt_thread, threadbase)->process;
-}
-
-static inline void stop_debugged_process(struct xnthread *thread)
-{
-	struct cobalt_process *process = process_from_thread(thread);
-	struct cobalt_thread *cth;
-
-	if (process->debugged_threads > 0)
-		return;
-
-	list_for_each_entry(cth, &process->thread_list, next) {
-		if (&cth->threadbase == thread)
-			continue;
-
-		xnthread_suspend(&cth->threadbase, XNDBGSTOP, XN_INFINITE,
-				 XN_RELATIVE, NULL);
-	}
-}
-
-static inline void resume_debugged_process(struct cobalt_process *process)
-{
-	struct cobalt_thread *cth;
-
-	xnsched_lock();
-
-	list_for_each_entry(cth, &process->thread_list, next)
-		if (xnthread_test_state(&cth->threadbase, XNDBGSTOP))
-			xnthread_resume(&cth->threadbase, XNDBGSTOP);
-
-	xnsched_unlock();
-}
-
-/* called with nklock held */
-static void register_debugged_thread(struct xnthread *thread)
-{
-	struct cobalt_process *process = process_from_thread(thread);
-
-	xnthread_set_state(thread, XNSSTEP);
-
-	stop_debugged_process(thread);
-	process->debugged_threads++;
-
-	if (xnthread_test_state(thread, XNRELAX))
-		xnthread_suspend(thread, XNDBGSTOP, XN_INFINITE, XN_RELATIVE,
-				 NULL);
-}
-
-/* called with nklock held */
-static void unregister_debugged_thread(struct xnthread *thread)
-{
-	struct cobalt_process *process = process_from_thread(thread);
-
-	process->debugged_threads--;
-	xnthread_clear_state(thread, XNSSTEP);
-
-	if (process->debugged_threads == 0)
-		resume_debugged_process(process);
-}
-
 void arch_inband_task_init(struct task_struct *tsk)
 {
 	struct cobalt_threadinfo *p = dovetail_task_state(tsk);
@@ -117,7 +54,7 @@ void handle_oob_trap_entry(unsigned int trapnr, struct pt_regs *regs)
 		xnlock_get_irqsave(&nklock, s);
 		xnthread_set_info(thread, XNCONTHI);
 		dovetail_request_ucall(current);
-		stop_debugged_process(thread);
+		cobalt_stop_debugged_process(thread);
 		xnlock_put_irqrestore(&nklock, s);
 		xnsched_run();
 	}
@@ -288,7 +225,7 @@ static void __handle_taskexit_event(struct task_struct *p)
 	xnlock_get_irqsave(&nklock, s);
 
 	if (xnthread_test_state(thread, XNSSTEP))
-		unregister_debugged_thread(thread);
+		cobalt_unregister_debugged_thread(thread);
 
 	xnsched_run();
 
@@ -386,7 +323,7 @@ static int handle_sigwake_event(struct task_struct *p)
 		if (sigismember(&pending, SIGTRAP) ||
 		    sigismember(&pending, SIGSTOP)
 		    || sigismember(&pending, SIGINT))
-			register_debugged_thread(thread);
+			cobalt_register_debugged_thread(thread);
 	}
 
 	if (xnthread_test_state(thread, XNRELAX))
@@ -472,7 +409,7 @@ int handle_ptrace_resume(struct task_struct *tracee)
 		xnlock_get_irqsave(&nklock, s);
 
 		xnthread_resume(thread, XNDBGSTOP);
-		unregister_debugged_thread(thread);
+		cobalt_unregister_debugged_thread(thread);
 
 		xnlock_put_irqrestore(&nklock, s);
 	}
@@ -489,7 +426,7 @@ static void handle_ptrace_cont(void)
 
 	if (xnthread_test_state(curr, XNSSTEP)) {
 		if (!xnthread_test_info(curr, XNCONTHI))
-			unregister_debugged_thread(curr);
+			cobalt_unregister_debugged_thread(curr);
 
 		xnthread_set_localinfo(curr, XNHICCUP);
 
@@ -608,7 +545,7 @@ void resume_oob_task(struct task_struct *p) /* inband, oob stage stalled */
 
 	/* Unregister as debugged thread in case we postponed this. */
 	if (unlikely(xnthread_test_state(thread, XNSSTEP)))
-		unregister_debugged_thread(thread);
+		cobalt_unregister_debugged_thread(thread);
 
 	xnlock_put(&nklock);
 

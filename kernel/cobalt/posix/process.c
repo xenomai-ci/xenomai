@@ -672,6 +672,69 @@ void cobalt_signal_yield(void)
 	xnlock_put_irqrestore(&nklock, s);
 }
 
+static inline struct cobalt_process *
+process_from_thread(struct xnthread *thread)
+{
+	return container_of(thread, struct cobalt_thread, threadbase)->process;
+}
+
+void cobalt_stop_debugged_process(struct xnthread *thread)
+{
+	struct cobalt_process *process = process_from_thread(thread);
+	struct cobalt_thread *cth;
+
+	if (process->debugged_threads > 0)
+		return;
+
+	list_for_each_entry(cth, &process->thread_list, next) {
+		if (&cth->threadbase == thread)
+			continue;
+
+		xnthread_suspend(&cth->threadbase, XNDBGSTOP, XN_INFINITE,
+				 XN_RELATIVE, NULL);
+	}
+}
+
+static void cobalt_resume_debugged_process(struct cobalt_process *process)
+{
+	struct cobalt_thread *cth;
+
+	xnsched_lock();
+
+	list_for_each_entry(cth, &process->thread_list, next)
+		if (xnthread_test_state(&cth->threadbase, XNDBGSTOP))
+			xnthread_resume(&cth->threadbase, XNDBGSTOP);
+
+	xnsched_unlock();
+}
+
+/* called with nklock held */
+void cobalt_register_debugged_thread(struct xnthread *thread)
+{
+	struct cobalt_process *process = process_from_thread(thread);
+
+	xnthread_set_state(thread, XNSSTEP);
+
+	cobalt_stop_debugged_process(thread);
+	process->debugged_threads++;
+
+	if (xnthread_test_state(thread, XNRELAX))
+		xnthread_suspend(thread, XNDBGSTOP, XN_INFINITE, XN_RELATIVE,
+				 NULL);
+}
+
+/* called with nklock held */
+void cobalt_unregister_debugged_thread(struct xnthread *thread)
+{
+	struct cobalt_process *process = process_from_thread(thread);
+
+	process->debugged_threads--;
+	xnthread_clear_state(thread, XNSSTEP);
+
+	if (process->debugged_threads == 0)
+		cobalt_resume_debugged_process(process);
+}
+
 static int attach_process(struct cobalt_process *process)
 {
 	struct cobalt_ppd *p = &process->sys_ppd;

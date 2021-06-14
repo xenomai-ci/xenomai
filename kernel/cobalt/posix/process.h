@@ -151,6 +151,12 @@ void cobalt_remove_process(struct cobalt_process *process);
 
 void cobalt_signal_yield(void);
 
+void cobalt_stop_debugged_process(struct xnthread *thread);
+
+void cobalt_register_debugged_thread(struct xnthread *thread);
+
+void cobalt_unregister_debugged_thread(struct xnthread *thread);
+
 extern struct xnthread_personality *cobalt_personalities[];
 
 extern struct xnthread_personality cobalt_personality;

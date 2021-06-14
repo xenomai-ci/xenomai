@@ -26,69 +26,6 @@
 
 static void detach_current(void);
 
-static inline struct cobalt_process *
-process_from_thread(struct xnthread *thread)
-{
-	return container_of(thread, struct cobalt_thread, threadbase)->process;
-}
-
-static void stop_debugged_process(struct xnthread *thread)
-{
-	struct cobalt_process *process = process_from_thread(thread);
-	struct cobalt_thread *cth;
-
-	if (process->debugged_threads > 0)
-		return;
-
-	list_for_each_entry(cth, &process->thread_list, next) {
-		if (&cth->threadbase == thread)
-			continue;
-
-		xnthread_suspend(&cth->threadbase, XNDBGSTOP, XN_INFINITE,
-				 XN_RELATIVE, NULL);
-	}
-}
-
-static void resume_debugged_process(struct cobalt_process *process)
-{
-	struct cobalt_thread *cth;
-
-	xnsched_lock();
-
-	list_for_each_entry(cth, &process->thread_list, next)
-		if (xnthread_test_state(&cth->threadbase, XNDBGSTOP))
-			xnthread_resume(&cth->threadbase, XNDBGSTOP);
-
-	xnsched_unlock();
-}
-
-/* called with nklock held */
-static void register_debugged_thread(struct xnthread *thread)
-{
-	struct cobalt_process *process = process_from_thread(thread);
-
-	xnthread_set_state(thread, XNSSTEP);
-
-	stop_debugged_process(thread);
-	process->debugged_threads++;
-
-	if (xnthread_test_state(thread, XNRELAX))
-		xnthread_suspend(thread, XNDBGSTOP, XN_INFINITE, XN_RELATIVE,
-				 NULL);
-}
-
-/* called with nklock held */
-static void unregister_debugged_thread(struct xnthread *thread)
-{
-	struct cobalt_process *process = process_from_thread(thread);
-
-	process->debugged_threads--;
-	xnthread_clear_state(thread, XNSSTEP);
-
-	if (process->debugged_threads == 0)
-		resume_debugged_process(process);
-}
-
 static inline int handle_exception(struct ipipe_trap_data *d)
 {
 	struct xnthread *thread;
@@ -110,7 +47,7 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 		xnlock_get_irqsave(&nklock, s);
 		xnthread_set_info(thread, XNCONTHI);
 		ipipe_enable_user_intret_notifier();
-		stop_debugged_process(thread);
+		cobalt_stop_debugged_process(thread);
 		xnlock_put_irqrestore(&nklock, s);
 		xnsched_run();
 	}
@@ -354,7 +291,7 @@ void ipipe_migration_hook(struct task_struct *p) /* hw IRQs off */
 
 	/* Unregister as debugged thread in case we postponed this. */
 	if (unlikely(xnthread_test_state(thread, XNSSTEP)))
-		unregister_debugged_thread(thread);
+		cobalt_unregister_debugged_thread(thread);
 
 	xnlock_put(&nklock);
 
@@ -433,7 +370,7 @@ static void __handle_taskexit_event(struct task_struct *p)
 	xnlock_get_irqsave(&nklock, s);
 
 	if (xnthread_test_state(thread, XNSSTEP))
-		unregister_debugged_thread(thread);
+		cobalt_unregister_debugged_thread(thread);
 
 	xnsched_run();
 
@@ -505,11 +442,11 @@ static int handle_schedule_event(struct task_struct *next_task)
 
 		/*
 		 * Do not unregister before the thread migrated.
-		 * unregister_debugged_thread will then be called by our
+		 * cobalt_unregister_debugged_thread will then be called by our
 		 * ipipe_migration_hook.
 		 */
 		if (!xnthread_test_info(next, XNCONTHI))
-			unregister_debugged_thread(next);
+			cobalt_unregister_debugged_thread(next);
 
 		xnthread_set_localinfo(next, XNHICCUP);
 	}
@@ -569,7 +506,7 @@ static int handle_sigwake_event(struct task_struct *p)
 		if (sigismember(&pending, SIGTRAP) ||
 		    sigismember(&pending, SIGSTOP)
 		    || sigismember(&pending, SIGINT))
-			register_debugged_thread(thread);
+			cobalt_register_debugged_thread(thread);
 	}
 
 	if (xnthread_test_state(thread, XNRELAX))
@@ -711,7 +648,7 @@ int handle_ptrace_resume(struct ipipe_ptrace_resume_data *resume)
 		xnlock_get_irqsave(&nklock, s);
 
 		xnthread_resume(thread, XNDBGSTOP);
-		unregister_debugged_thread(thread);
+		cobalt_unregister_debugged_thread(thread);
 
 		xnlock_put_irqrestore(&nklock, s);
 	}
