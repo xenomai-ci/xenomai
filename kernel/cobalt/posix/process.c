@@ -735,6 +735,105 @@ void cobalt_unregister_debugged_thread(struct xnthread *thread)
 		cobalt_resume_debugged_process(process);
 }
 
+int cobalt_handle_setaffinity_event(struct task_struct *task)
+{
+#ifdef CONFIG_SMP
+	struct xnthread *thread;
+	spl_t s;
+
+	thread = xnthread_from_task(task);
+	if (thread == NULL)
+		return KEVENT_PROPAGATE;
+
+	/*
+	 * Detect a Cobalt thread sleeping in primary mode which is
+	 * required to migrate to another CPU by the host kernel.
+	 *
+	 * We may NOT fix up thread->sched immediately using the
+	 * passive migration call, because that latter always has to
+	 * take place on behalf of the target thread itself while
+	 * running in secondary mode. Therefore, that thread needs to
+	 * go through secondary mode first, then move back to primary
+	 * mode, so that affinity_ok() does the fixup work.
+	 *
+	 * We force this by sending a SIGSHADOW signal to the migrated
+	 * thread, asking it to switch back to primary mode from the
+	 * handler, at which point the interrupted syscall may be
+	 * restarted.
+	 */
+	xnlock_get_irqsave(&nklock, s);
+
+	if (xnthread_test_state(thread, XNTHREAD_BLOCK_BITS & ~XNRELAX))
+		__xnthread_signal(thread, SIGSHADOW, SIGSHADOW_ACTION_HARDEN);
+
+	xnlock_put_irqrestore(&nklock, s);
+#endif /* CONFIG_SMP */
+
+	return KEVENT_PROPAGATE;
+}
+
+#ifdef CONFIG_SMP
+bool cobalt_affinity_ok(struct task_struct *task) /* nklocked, IRQs off */
+{
+	struct xnthread *thread = xnthread_from_task(task);
+	struct xnsched *sched;
+	int cpu = task_cpu(task);
+
+	/*
+	 * To maintain consistency between both Cobalt and host
+	 * schedulers, reflecting a thread migration to another CPU
+	 * into the Cobalt scheduler state must happen from secondary
+	 * mode only, on behalf of the migrated thread itself once it
+	 * runs on the target CPU.
+	 *
+	 * This means that the Cobalt scheduler state regarding the
+	 * CPU information lags behind the host scheduler state until
+	 * the migrated thread switches back to primary mode
+	 * (i.e. task_cpu(p) != xnsched_cpu(xnthread_from_task(p)->sched)).
+	 * This is ok since Cobalt does not schedule such thread until then.
+	 *
+	 * check_affinity() detects when a Cobalt thread switching
+	 * back to primary mode did move to another CPU earlier while
+	 * in secondary mode. If so, do the fixups to reflect the
+	 * change.
+	 */
+	if (!xnsched_threading_cpu(cpu)) {
+		/*
+		 * The thread is about to switch to primary mode on a
+		 * non-rt CPU, which is damn wrong and hopeless.
+		 * Whine and cancel that thread.
+		 */
+		printk(XENO_WARNING "thread %s[%d] switched to non-rt CPU%d, aborted.\n",
+		       thread->name, xnthread_host_pid(thread), cpu);
+		/*
+		 * Can't call xnthread_cancel() from a migration
+		 * point, that would break. Since we are on the wakeup
+		 * path to hardening, just raise XNCANCELD to catch it
+		 * in xnthread_harden().
+		 */
+		xnthread_set_info(thread, XNCANCELD);
+		return false;
+	}
+
+	sched = xnsched_struct(cpu);
+	if (sched == thread->sched)
+		return true;
+
+	/*
+	 * The current thread moved to a supported real-time CPU,
+	 * which is not part of its original affinity mask
+	 * though. Assume user wants to extend this mask.
+	 */
+	if (!cpumask_test_cpu(cpu, &thread->affinity))
+		cpumask_set_cpu(cpu, &thread->affinity);
+
+	xnthread_run_handler_stack(thread, move_thread, cpu);
+	xnthread_migrate_passive(thread, sched);
+
+	return true;
+}
+#endif /* CONFIG_SMP */
+
 static int attach_process(struct cobalt_process *process)
 {
 	struct cobalt_ppd *p = &process->sys_ppd;
