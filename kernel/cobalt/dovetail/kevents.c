@@ -102,36 +102,9 @@ static inline int handle_taskexit_event(struct task_struct *p)
 	return cobalt_handle_taskexit_event(p);
 }
 
-static int handle_user_return(struct task_struct *task)
+static inline int handle_user_return(struct task_struct *task)
 {
-	struct xnthread *thread;
-	spl_t s;
-	int err;
-
-	thread = xnthread_from_task(task);
-	if (thread == NULL)
-		return KEVENT_PROPAGATE;
-
-	if (xnthread_test_info(thread, XNCONTHI)) {
-		xnlock_get_irqsave(&nklock, s);
-		xnthread_clear_info(thread, XNCONTHI);
-		xnlock_put_irqrestore(&nklock, s);
-
-		err = xnthread_harden();
-
-		/*
-		 * XNCONTHI may or may not have been re-applied if
-		 * harden bailed out due to pending signals. Make sure
-		 * it is set in that case.
-		 */
-		if (err == -ERESTARTSYS) {
-			xnlock_get_irqsave(&nklock, s);
-			xnthread_set_info(thread, XNCONTHI);
-			xnlock_put_irqrestore(&nklock, s);
-		}
-	}
-
-	return KEVENT_PROPAGATE;
+	return cobalt_handle_user_return(task);
 }
 
 void handle_oob_mayday(struct pt_regs *regs)

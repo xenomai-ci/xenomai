@@ -173,4 +173,6 @@ int cobalt_handle_taskexit_event(struct task_struct *task);
 
 int cobalt_handle_cleanup_event(struct mm_struct *mm);
 
+int cobalt_handle_user_return(struct task_struct *task);
+
 #endif /* !_COBALT_POSIX_PROCESS_H */

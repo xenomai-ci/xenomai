@@ -870,6 +870,38 @@ static void __handle_taskexit_event(struct task_struct *p)
 	}
 }
 
+int cobalt_handle_user_return(struct task_struct *task)
+{
+	struct xnthread *thread;
+	spl_t s;
+	int err;
+
+	thread = xnthread_from_task(task);
+	if (thread == NULL)
+		return KEVENT_PROPAGATE;
+
+	if (xnthread_test_info(thread, XNCONTHI)) {
+		xnlock_get_irqsave(&nklock, s);
+		xnthread_clear_info(thread, XNCONTHI);
+		xnlock_put_irqrestore(&nklock, s);
+
+		err = xnthread_harden();
+
+		/*
+		 * XNCONTHI may or may not have been re-applied if
+		 * harden bailed out due to pending signals. Make sure
+		 * it is set in that case.
+		 */
+		if (err == -ERESTARTSYS) {
+			xnlock_get_irqsave(&nklock, s);
+			xnthread_set_info(thread, XNCONTHI);
+			xnlock_put_irqrestore(&nklock, s);
+		}
+	}
+
+	return KEVENT_PROPAGATE;
+}
+
 static void detach_current(void)
 {
 	struct cobalt_threadinfo *p = pipeline_current();
