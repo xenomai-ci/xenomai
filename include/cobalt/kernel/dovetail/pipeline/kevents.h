@@ -31,4 +31,6 @@ int pipeline_trap_kevents(void);
 
 void pipeline_enable_kevents(void);
 
+void pipeline_cleanup_process(void);
+
 #endif /* !_COBALT_KERNEL_DOVETAIL_KEVENTS_H */

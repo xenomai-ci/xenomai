@@ -169,4 +169,8 @@ bool cobalt_affinity_ok(struct task_struct *task);
 #define cobalt_affinity_ok(task)	(true)
 #endif
 
+int cobalt_handle_taskexit_event(struct task_struct *task);
+
+int cobalt_handle_cleanup_event(struct mm_struct *mm);
+
 #endif /* !_COBALT_POSIX_PROCESS_H */

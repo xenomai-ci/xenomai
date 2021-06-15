@@ -834,6 +834,117 @@ bool cobalt_affinity_ok(struct task_struct *task) /* nklocked, IRQs off */
 }
 #endif /* CONFIG_SMP */
 
+static void __handle_taskexit_event(struct task_struct *p)
+{
+	struct cobalt_ppd *sys_ppd;
+	struct xnthread *thread;
+	spl_t s;
+
+	/*
+	 * We are called for both kernel and user shadows over the
+	 * root thread.
+	 */
+	secondary_mode_only();
+
+	thread = xnthread_current();
+	XENO_BUG_ON(COBALT, thread == NULL);
+	trace_cobalt_shadow_unmap(thread);
+
+	xnlock_get_irqsave(&nklock, s);
+
+	if (xnthread_test_state(thread, XNSSTEP))
+		cobalt_unregister_debugged_thread(thread);
+
+	xnsched_run();
+
+	xnlock_put_irqrestore(&nklock, s);
+
+	xnthread_run_handler_stack(thread, exit_thread);
+
+	if (xnthread_test_state(thread, XNUSER)) {
+		cobalt_umm_free(&cobalt_kernel_ppd.umm, thread->u_window);
+		thread->u_window = NULL;
+		sys_ppd = cobalt_ppd_get(0);
+		if (atomic_dec_and_test(&sys_ppd->refcnt))
+			cobalt_remove_process(cobalt_current_process());
+	}
+}
+
+static void detach_current(void)
+{
+	struct cobalt_threadinfo *p = pipeline_current();
+
+	p->thread = NULL;
+	p->process = NULL;
+}
+
+int cobalt_handle_taskexit_event(struct task_struct *task) /* task == current */
+{
+	__handle_taskexit_event(task);
+
+	/*
+	 * __xnthread_cleanup() -> ... -> finalize_thread
+	 * handler. From that point, the TCB is dropped. Be careful of
+	 * not treading on stale memory within @thread.
+	 */
+	__xnthread_cleanup(xnthread_current());
+
+	detach_current();
+
+	return KEVENT_PROPAGATE;
+}
+
+int cobalt_handle_cleanup_event(struct mm_struct *mm)
+{
+	struct cobalt_process *old, *process;
+	struct cobalt_ppd *sys_ppd;
+	struct xnthread *curr;
+
+	/*
+	 * We are NOT called for exiting kernel shadows.
+	 * cobalt_current_process() is cleared if we get there after
+	 * handle_task_exit(), so we need to restore this context
+	 * pointer temporarily.
+	 */
+	process = cobalt_search_process(mm);
+	old = cobalt_set_process(process);
+	sys_ppd = cobalt_ppd_get(0);
+	if (sys_ppd != &cobalt_kernel_ppd) {
+		bool running_exec;
+
+		/*
+		 * Detect a userland shadow running exec(), i.e. still
+		 * attached to the current linux task (no prior
+		 * detach_current). In this case, we emulate a task
+		 * exit, since the Xenomai binding shall not survive
+		 * the exec() syscall. Since the process will keep on
+		 * running though, we have to disable the event
+		 * notifier manually for it.
+		 */
+		curr = xnthread_current();
+		running_exec = curr && (current->flags & PF_EXITING) == 0;
+		if (running_exec) {
+			__handle_taskexit_event(current);
+			pipeline_cleanup_process();
+		}
+		if (atomic_dec_and_test(&sys_ppd->refcnt))
+			cobalt_remove_process(process);
+		if (running_exec) {
+			__xnthread_cleanup(curr);
+			detach_current();
+		}
+	}
+
+	/*
+	 * CAUTION: Do not override a state change caused by
+	 * cobalt_remove_process().
+	 */
+	if (cobalt_current_process() == process)
+		cobalt_set_process(old);
+
+	return KEVENT_PROPAGATE;
+}
+
 static int attach_process(struct cobalt_process *process)
 {
 	struct cobalt_ppd *p = &process->sys_ppd;
