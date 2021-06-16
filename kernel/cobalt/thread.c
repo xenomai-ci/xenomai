@@ -287,6 +287,7 @@ int __xnthread_init(struct xnthread *thread,
 	thread->cookie = NULL;
 	init_completion(&thread->exited);
 	memset(xnthread_archtcb(thread), 0, sizeof(struct xnarchtcb));
+	memset(thread->sigarray, 0, sizeof(thread->sigarray));
 
 	gravity = flags & XNUSER ? XNTIMER_UGRAVITY : XNTIMER_KGRAVITY;
 	xntimer_init(&thread->rtimer, &nkclock, timeout_handler,
