@@ -26,6 +26,7 @@
 #include <cobalt/kernel/vdso.h>
 #include <cobalt/kernel/init.h>
 #include <pipeline/kevents.h>
+#include <pipeline/vdso_fallback.h>
 #include <asm/syscall.h>
 #include "internal.h"
 #include "thread.h"
@@ -655,6 +656,9 @@ linux_syscall:
 
 	if (!__xn_rootcall_p(regs, &code))
 		goto bad_syscall;
+
+	if (pipeline_handle_vdso_fallback(code, regs))
+		return KEVENT_STOP;
 
 	/*
 	 * We know this is a Cobalt thread since it runs over the head
