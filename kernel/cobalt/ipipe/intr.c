@@ -992,11 +992,11 @@ EXPORT_SYMBOL_GPL(xnintr_disable);
  *
  * @coretags{secondary-only}
  */
-void xnintr_affinity(struct xnintr *intr, cpumask_t cpumask)
+void xnintr_affinity(struct xnintr *intr, const cpumask_t *cpumask)
 {
 	secondary_mode_only();
 #ifdef CONFIG_SMP
-	ipipe_set_irq_affinity(intr->irq, cpumask);
+	ipipe_set_irq_affinity(intr->irq, *cpumask);
 #endif
 }
 EXPORT_SYMBOL_GPL(xnintr_affinity);

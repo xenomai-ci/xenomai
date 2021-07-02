@@ -118,12 +118,12 @@ void xnintr_disable(struct xnintr *intr)
 }
 EXPORT_SYMBOL_GPL(xnintr_disable);
 
-void xnintr_affinity(struct xnintr *intr, cpumask_t cpumask)
+void xnintr_affinity(struct xnintr *intr, const cpumask_t *cpumask)
 {
 	int ret;
 
 	secondary_mode_only();
-	ret = irq_set_affinity_hint(intr->irq, &cpumask);
+	ret = irq_set_affinity_hint(intr->irq, cpumask);
 
 	WARN_ON_ONCE(ret);
 }
