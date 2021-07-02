@@ -27,6 +27,7 @@
 #define _COBALT_RTDM_DRIVER_H
 
 #include <asm/atomic.h>
+#include <linux/cpumask.h>
 #include <linux/list.h>
 #include <linux/module.h>
 #include <linux/cdev.h>
@@ -854,6 +855,11 @@ int rtdm_irq_request(rtdm_irq_t *irq_handle, unsigned int irq_no,
 		     rtdm_irq_handler_t handler, unsigned long flags,
 		     const char *device_name, void *arg);
 
+int rtdm_irq_request_affine(rtdm_irq_t *irq_handle, unsigned int irq_no,
+			    rtdm_irq_handler_t handler, unsigned long flags,
+			    const char *device_name, void *arg,
+			    const cpumask_t *cpumask);
+
 #ifndef DOXYGEN_CPP /* Avoid static inline tags for RTDM in doxygen */
 static inline int rtdm_irq_free(rtdm_irq_t *irq_handle)
 {
@@ -873,6 +879,12 @@ static inline int rtdm_irq_disable(rtdm_irq_t *irq_handle)
 {
 	xnintr_disable(irq_handle);
 	return 0;
+}
+
+static inline int rtdm_irq_set_affinity(rtdm_irq_t *irq_handle,
+					const cpumask_t *cpumask)
+{
+	return xnintr_affinity(irq_handle, cpumask);
 }
 #endif /* !DOXYGEN_CPP */
 

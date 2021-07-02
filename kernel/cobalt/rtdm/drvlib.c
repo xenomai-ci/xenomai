@@ -1443,6 +1443,41 @@ int rtdm_irq_request(rtdm_irq_t *irq_handle, unsigned int irq_no,
 		     rtdm_irq_handler_t handler, unsigned long flags,
 		     const char *device_name, void *arg)
 {
+	return rtdm_irq_request_affine(irq_handle, irq_no, handler, flags,
+				       device_name, arg, NULL);
+}
+
+EXPORT_SYMBOL_GPL(rtdm_irq_request);
+
+/**
+ * @brief Register an interrupt handler
+ *
+ * This function registers the provided handler with an IRQ line and enables
+ * the line.
+ *
+ * @param[in,out] irq_handle IRQ handle
+ * @param[in] irq_no Line number of the addressed IRQ
+ * @param[in] handler Interrupt handler
+ * @param[in] flags Registration flags, see @ref RTDM_IRQTYPE_xxx for details
+ * @param[in] device_name Device name to show up in real-time IRQ lists
+ * @param[in] arg Pointer to be passed to the interrupt handler on invocation
+ * @param[in] cpumask CPU affinity of the interrupt
+ *
+ * @return 0 on success, otherwise:
+ *
+ * - -EINVAL is returned if an invalid parameter was passed.
+ *
+ * - -EBUSY is returned if the specified IRQ line is already in use.
+ *
+ * - -ENOSYS is returned if the real-time core is disabled.
+ *
+ * @coretags{secondary-only}
+ */
+int rtdm_irq_request_affine(rtdm_irq_t *irq_handle, unsigned int irq_no,
+			    rtdm_irq_handler_t handler, unsigned long flags,
+			    const char *device_name, void *arg,
+			    const cpumask_t *cpumask)
+{
 	int err;
 
 	if (!realtime_core_enabled())
@@ -1455,7 +1490,7 @@ int rtdm_irq_request(rtdm_irq_t *irq_handle, unsigned int irq_no,
 	if (err)
 		return err;
 
-	err = xnintr_attach(irq_handle, arg, NULL);
+	err = xnintr_attach(irq_handle, arg, cpumask);
 	if (err) {
 		xnintr_destroy(irq_handle);
 		return err;
@@ -1466,7 +1501,7 @@ int rtdm_irq_request(rtdm_irq_t *irq_handle, unsigned int irq_no,
 	return 0;
 }
 
-EXPORT_SYMBOL_GPL(rtdm_irq_request);
+EXPORT_SYMBOL_GPL(rtdm_irq_request_affine);
 
 #ifdef DOXYGEN_CPP /* Only used for doxygen doc generation */
 /**
@@ -1524,6 +1559,19 @@ int rtdm_irq_enable(rtdm_irq_t *irq_handle);
  * @coretags{secondary-only}
  */
 int rtdm_irq_disable(rtdm_irq_t *irq_handle);
+
+/**
+ * @brief Set interrupt affinity
+ *
+ * @param[in] irq_handle IRQ handle as returned by rtdm_irq_request()
+ *
+ * @param[in] cpumask The new CPU affinity of the interrupt
+ *
+ * @return 0 on success, otherwise negative error code
+ *
+ * @coretags{secondary-only}
+ */
+int rtdm_irq_set_affinity(rtdm_irq_t *irq_handle, const cpumask_t *cpumask);
 #endif /* DOXYGEN_CPP */
 
 /** @} Interrupt Management Services */
