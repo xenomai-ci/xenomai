@@ -116,7 +116,7 @@ int xnintr_init(struct xnintr *intr,
 void xnintr_destroy(struct xnintr *intr);
 
 int xnintr_attach(struct xnintr *intr,
-		  void *cookie);
+		  void *cookie, const cpumask_t *cpumask);
 
 void xnintr_detach(struct xnintr *intr);
 

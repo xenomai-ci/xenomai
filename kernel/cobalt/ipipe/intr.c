@@ -828,6 +828,9 @@ EXPORT_SYMBOL_GPL(xnintr_destroy);
  * @param cookie A user-defined opaque value which is stored into the
  * descriptor for further retrieval by the interrupt handler.
  *
+ * @param cpumask Initial CPU affinity of the interrupt. If NULL, affinity is
+ * set to all real-time CPUs.
+ *
  * @return 0 is returned on success. Otherwise:
  *
  * - -EINVAL is returned if an error occurred while attaching the
@@ -843,8 +846,11 @@ EXPORT_SYMBOL_GPL(xnintr_destroy);
  * @note Attaching an interrupt descriptor resets the tracked number
  * of IRQ receipts to zero.
  */
-int xnintr_attach(struct xnintr *intr, void *cookie)
+int xnintr_attach(struct xnintr *intr, void *cookie, const cpumask_t *cpumask)
 {
+#ifdef CONFIG_SMP
+	cpumask_t tmp_mask, *effective_mask;
+#endif
 	int ret;
 
 	secondary_mode_only();
@@ -854,7 +860,17 @@ int xnintr_attach(struct xnintr *intr, void *cookie)
 	clear_irqstats(intr);
 
 #ifdef CONFIG_SMP
-	ipipe_set_irq_affinity(intr->irq, xnsched_realtime_cpus);
+	if (!cpumask) {
+		effective_mask = &xnsched_realtime_cpus;
+	} else {
+		effective_mask = &tmp_mask;
+		cpumask_and(effective_mask, &xnsched_realtime_cpus, cpumask);
+		if (cpumask_empty(effective_mask))
+			return -EINVAL;
+	}
+	ret = ipipe_set_irq_affinity(intr->irq, *effective_mask);
+	if (ret)
+		return ret;
 #endif /* CONFIG_SMP */
 
 	raw_spin_lock(&intr->lock);

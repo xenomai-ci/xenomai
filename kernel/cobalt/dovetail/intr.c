@@ -83,15 +83,24 @@ void xnintr_destroy(struct xnintr *intr)
 }
 EXPORT_SYMBOL_GPL(xnintr_destroy);
 
-int xnintr_attach(struct xnintr *intr, void *cookie)
+int xnintr_attach(struct xnintr *intr, void *cookie, const cpumask_t *cpumask)
 {
+	cpumask_t tmp_mask, *effective_mask;
 	int ret;
 
 	secondary_mode_only();
 
 	intr->cookie = cookie;
 
-	ret = irq_set_affinity_hint(intr->irq, &xnsched_realtime_cpus);
+	if (!cpumask) {
+		effective_mask = &xnsched_realtime_cpus;
+	} else {
+		effective_mask = &tmp_mask;
+		cpumask_and(effective_mask, &xnsched_realtime_cpus, cpumask);
+		if (cpumask_empty(effective_mask))
+			return -EINVAL;
+	}
+	ret = irq_set_affinity_hint(intr->irq, effective_mask);
 	if (ret)
 		return ret;
 
