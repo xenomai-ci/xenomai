@@ -992,11 +992,21 @@ EXPORT_SYMBOL_GPL(xnintr_disable);
  *
  * @coretags{secondary-only}
  */
-void xnintr_affinity(struct xnintr *intr, const cpumask_t *cpumask)
+int xnintr_affinity(struct xnintr *intr, const cpumask_t *cpumask)
 {
-	secondary_mode_only();
 #ifdef CONFIG_SMP
-	ipipe_set_irq_affinity(intr->irq, *cpumask);
+	cpumask_t effective_mask;
+
+	secondary_mode_only();
+
+	cpumask_and(&effective_mask, &xnsched_realtime_cpus, cpumask);
+	if (cpumask_empty(&effective_mask))
+		return -EINVAL;
+
+	return ipipe_set_irq_affinity(intr->irq, effective_mask);
+#else
+	secondary_mode_only();
+	return 0;
 #endif
 }
 EXPORT_SYMBOL_GPL(xnintr_affinity);

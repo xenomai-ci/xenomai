@@ -124,8 +124,7 @@ void xnintr_enable(struct xnintr *intr);
 
 void xnintr_disable(struct xnintr *intr);
 
-void xnintr_affinity(struct xnintr *intr,
-		     const cpumask_t *cpumask);
+int xnintr_affinity(struct xnintr *intr, const cpumask_t *cpumask);
 
 #ifdef CONFIG_XENO_OPT_STATS_IRQS
 

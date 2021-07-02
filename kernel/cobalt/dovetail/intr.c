@@ -118,13 +118,16 @@ void xnintr_disable(struct xnintr *intr)
 }
 EXPORT_SYMBOL_GPL(xnintr_disable);
 
-void xnintr_affinity(struct xnintr *intr, const cpumask_t *cpumask)
+int xnintr_affinity(struct xnintr *intr, const cpumask_t *cpumask)
 {
-	int ret;
+	cpumask_t effective_mask;
 
 	secondary_mode_only();
-	ret = irq_set_affinity_hint(intr->irq, cpumask);
 
-	WARN_ON_ONCE(ret);
+	cpumask_and(&effective_mask, &xnsched_realtime_cpus, cpumask);
+	if (cpumask_empty(&effective_mask))
+		return -EINVAL;
+
+	return irq_set_affinity_hint(intr->irq, &effective_mask);
 }
 EXPORT_SYMBOL_GPL(xnintr_affinity);
