@@ -938,7 +938,11 @@ int rtdm_fd_valid_p(int ufd)
  *
  * @return 0 on success, otherwise:
  *
- * - -EBADF is returned if the file descriptor @a ufd cannot be resolved.
+ * - -EADV is returned if the file descriptor @a ufd cannot be resolved.
+ *
+ * - -EBADF is returned if the underlying device is being torn down at the time
+ *   of the call.
+ *
  * - -EINVAL is returned if @a type is invalid.
  *
  * @coretags{task-unrestricted}
