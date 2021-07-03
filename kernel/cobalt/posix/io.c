@@ -180,17 +180,6 @@ int __cobalt_first_fd_valid_p(fd_set *fds[XNSELECT_MAX_TYPES], int nfds)
 	return 1;
 }
 
-static int select_bind_one(struct xnselector *selector, unsigned type, int fd)
-{
-	int rc;
-
-	rc = rtdm_fd_select(fd, selector, type);
-	if (rc != -ENOENT)
-		return rc;
-
-	return -EBADF;
-}
-
 int __cobalt_select_bind_all(struct xnselector *selector,
 			     fd_set *fds[XNSELECT_MAX_TYPES], int nfds)
 {
@@ -203,7 +192,7 @@ int __cobalt_select_bind_all(struct xnselector *selector,
 			for (fd = find_first_bit(set->fds_bits, nfds);
 			     fd < nfds;
 			     fd = find_next_bit(set->fds_bits, nfds, fd + 1)) {
-				err = select_bind_one(selector, type, fd);
+				err = rtdm_fd_select(fd, selector, type);
 				if (err)
 					return err;
 			}
