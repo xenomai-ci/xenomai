@@ -194,6 +194,7 @@ static int select_bind_one(struct xnselector *selector, unsigned type, int fd)
 int __cobalt_select_bind_all(struct xnselector *selector,
 			     fd_set *fds[XNSELECT_MAX_TYPES], int nfds)
 {
+	bool first_fd = true;
 	unsigned fd, type;
 	int err;
 
@@ -204,8 +205,16 @@ int __cobalt_select_bind_all(struct xnselector *selector,
 			     fd < nfds;
 			     fd = find_next_bit(set->fds_bits, nfds, fd + 1)) {
 				err = select_bind_one(selector, type, fd);
-				if (err)
+				if (err) {
+					/*
+					 * Do not needlessly signal "retry
+					 * under Linux" for mixed fd sets.
+					 */
+					if (err == -EADV && !first_fd)
+						return -EBADF;
 					return err;
+				}
+				first_fd = false;
 			}
 	}
 
@@ -286,7 +295,7 @@ COBALT_SYSCALL(select, primary,
 		   simple test: test if the first file descriptor we find in the
 		   fd_set is an RTDM descriptor or a message queue descriptor. */
 		if (!__cobalt_first_fd_valid_p(in_fds, nfds))
-			return -EBADF;
+			return -EADV;
 
 		selector = xnmalloc(sizeof(*curr->selector));
 		if (selector == NULL)

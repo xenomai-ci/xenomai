@@ -36,7 +36,7 @@ COBALT_IMPL(int, select, (int __nfds, fd_set *__restrict __readfds,
 
 	pthread_setcanceltype(oldtype, NULL);
 
-	if (err == -EBADF || err == -EPERM || err == -ENOSYS)
+	if (err == -EADV || err == -EPERM || err == -ENOSYS)
 		return __STD(select(__nfds, __readfds,
 				    __writefds, __exceptfds, __timeout));
 
