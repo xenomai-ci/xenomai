@@ -52,9 +52,19 @@ static int enosys(void)
 	return -ENOSYS;
 }
 
-static int eadv(void)
+static int enotty(void)
 {
-	return -EADV;
+	return -ENOTTY;
+}
+
+static int ebadf(void)
+{
+	return -EBADF;
+}
+
+static int enodev(void)
+{
+	return -ENODEV;
 }
 
 static inline struct rtdm_fd_index *
@@ -76,24 +86,23 @@ static struct rtdm_fd *fetch_fd(struct cobalt_ppd *p, int ufd)
 	return idx->fd;
 }
 
-#define assign_invalid_handler(__handler)				\
+#define assign_invalid_handler(__handler, __invalid)			\
 	do								\
-		(__handler) = (typeof(__handler))eadv;			\
+		(__handler) = (typeof(__handler))__invalid;		\
 	while (0)
-
-#define __assign_default_handler(__handler, __placeholder)		\
-	do								\
-		if ((__handler) == NULL)				\
-			(__handler) = (typeof(__handler))__placeholder;	\
-	while (0)
-
-/* Calling this handler should beget EADV if not implemented. */
-#define assign_invalid_default_handler(__handler)			\
-	__assign_default_handler(__handler, eadv)
 
 /* Calling this handler should beget ENOSYS if not implemented. */
-#define assign_default_handler(__handler)				\
-	__assign_default_handler(__handler, enosys)
+#define assign_switch_handler(__handler)				\
+	do								\
+		if ((__handler) == NULL)				\
+			assign_invalid_handler(__handler, enosys);	\
+	while (0)
+
+#define assign_default_handler(__handler, __invalid)			\
+	do								\
+		if ((__handler) == NULL)				\
+			assign_invalid_handler(__handler, __invalid);	\
+	while (0)
 
 #define __rt(__handler)		__handler ## _rt
 #define __nrt(__handler)	__handler ## _nrt
@@ -103,14 +112,16 @@ static struct rtdm_fd *fetch_fd(struct cobalt_ppd *p, int ufd)
  * are implemented, ENOSYS otherwise for NULL handlers to trigger the
  * adaptive switch.
  */
-#define assign_default_dual_handlers(__handler)				\
+#define assign_default_dual_handlers(__handler, __invalid_handler)	\
 	do								\
 		if (__rt(__handler) || __nrt(__handler)) {		\
-			assign_default_handler(__rt(__handler));	\
-			assign_default_handler(__nrt(__handler));	\
+			assign_switch_handler(__rt(__handler));		\
+			assign_switch_handler(__nrt(__handler));	\
 		} else {						\
-			assign_invalid_handler(__rt(__handler));	\
-			assign_invalid_handler(__nrt(__handler));	\
+			assign_invalid_handler(__rt(__handler),		\
+					       __invalid_handler);	\
+			assign_invalid_handler(__nrt(__handler),	\
+					       __invalid_handler);	\
 		}							\
 	while (0)
 
@@ -147,13 +158,13 @@ int rtdm_fd_enter(struct rtdm_fd *fd, int ufd, unsigned int magic,
 	if (magic == 0)
 		return -EINVAL;
 
-	assign_default_dual_handlers(ops->ioctl);
-	assign_default_dual_handlers(ops->read);
-	assign_default_dual_handlers(ops->write);
-	assign_default_dual_handlers(ops->recvmsg);
-	assign_default_dual_handlers(ops->sendmsg);
-	assign_invalid_default_handler(ops->select);
-	assign_invalid_default_handler(ops->mmap);
+	assign_default_dual_handlers(ops->ioctl, enotty);
+	assign_default_dual_handlers(ops->read, ebadf);
+	assign_default_dual_handlers(ops->write, ebadf);
+	assign_default_dual_handlers(ops->recvmsg, ebadf);
+	assign_default_dual_handlers(ops->sendmsg, ebadf);
+	assign_default_handler(ops->select, ebadf);
+	assign_default_handler(ops->mmap, enodev);
 
 	ppd = cobalt_ppd_get(0);
 	fd->magic = magic;
