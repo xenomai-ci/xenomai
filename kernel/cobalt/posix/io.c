@@ -291,11 +291,11 @@ COBALT_SYSCALL(select, primary,
 
 	do {
 		err = xnselect(selector, out_fds, in_fds, nfds, timeout, mode);
-
 		if (err == -ECHRNG) {
-			int err = __cobalt_select_bind_all(selector, out_fds, nfds);
-			if (err)
-				return err;
+			int bind_err = __cobalt_select_bind_all(selector,
+								out_fds, nfds);
+			if (bind_err)
+				return bind_err;
 		}
 	} while (err == -ECHRNG);
 
