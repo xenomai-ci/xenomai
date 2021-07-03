@@ -796,7 +796,7 @@ COBALT_SYSCALL32emu(select, nonrestartable,
 	if (selector == NULL) {
 		/* Bail out if non-RTDM fildes is found. */
 		if (!__cobalt_first_fd_valid_p(in_fds, nfds))
-			return -EBADF;
+			return -EADV;
 
 		selector = xnmalloc(sizeof(*curr->selector));
 		if (selector == NULL)
