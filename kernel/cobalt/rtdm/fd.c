@@ -223,7 +223,7 @@ int rtdm_device_new_fd(struct rtdm_fd *fd, int ufd,
  * - ERR_PTR(-EADV) if the use-space handle is either invalid, or not
  * managed by RTDM.
  *
- * - ERR_PTR(-EBADF) if the underlying device is being torned down at
+ * - ERR_PTR(-EBADF) if the underlying device is being torn down at
  * the time of the call.
  *
  * @note The file descriptor returned must be later released by a call
