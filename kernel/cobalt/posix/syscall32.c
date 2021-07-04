@@ -229,7 +229,7 @@ COBALT_SYSCALL32emu(clock_adjtime64, current,
 }
 
 
-COBALT_SYSCALL32emu(clock_nanosleep, nonrestartable,
+COBALT_SYSCALL32emu(clock_nanosleep, primary,
 		    (clockid_t clock_id, int flags,
 		     const struct old_timespec32 __user *u_rqt,
 		     struct old_timespec32 __user *u_rmt))
