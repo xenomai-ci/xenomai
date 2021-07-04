@@ -743,102 +743,14 @@ COBALT_SYSCALL32emu(event_wait, primary,
 	return __cobalt_event_wait(u_event, bits, u_bits_r, mode, tsp);
 }
 
-COBALT_SYSCALL32emu(select, nonrestartable,
+COBALT_SYSCALL32emu(select, primary,
 		    (int nfds,
 		     compat_fd_set __user *u_rfds,
 		     compat_fd_set __user *u_wfds,
 		     compat_fd_set __user *u_xfds,
 		     struct old_timeval32 __user *u_tv))
 {
-	compat_fd_set __user *ufd_sets[XNSELECT_MAX_TYPES] = {
-		[XNSELECT_READ] = u_rfds,
-		[XNSELECT_WRITE] = u_wfds,
-		[XNSELECT_EXCEPT] = u_xfds
-	};
-	fd_set *in_fds[XNSELECT_MAX_TYPES] = {NULL, NULL, NULL};
-	fd_set *out_fds[XNSELECT_MAX_TYPES] = {NULL, NULL, NULL};
-	fd_set in_fds_storage[XNSELECT_MAX_TYPES],
-		out_fds_storage[XNSELECT_MAX_TYPES];
-	xnticks_t timeout = XN_INFINITE;
-	xntmode_t mode = XN_RELATIVE;
-	struct xnselector *selector;
-	struct xnthread *curr;
-	struct __kernel_old_timeval tv;
-	xnsticks_t diff;
-	size_t fds_size;
-	int i, err;
-
-	curr = xnthread_current();
-
-	if (u_tv) {
-		err = sys32_get_timeval(&tv, u_tv);
-		if (err)
-			return err;
-
-		if (tv.tv_usec >= 1000000)
-			return -EINVAL;
-
-		timeout = clock_get_ticks(CLOCK_MONOTONIC) + tv2ns(&tv);
-		mode = XN_ABSOLUTE;
-	}
-
-	fds_size = __FDELT__(nfds + __NFDBITS__ - 1) * sizeof(compat_ulong_t);
-
-	for (i = 0; i < XNSELECT_MAX_TYPES; i++)
-		if (ufd_sets[i]) {
-			in_fds[i] = &in_fds_storage[i];
-			out_fds[i] = & out_fds_storage[i];
-			if (sys32_get_fdset(in_fds[i], ufd_sets[i], fds_size) < 0)
-				return -EFAULT;
-		}
-
-	selector = curr->selector;
-	if (selector == NULL) {
-		/* Bail out if non-RTDM fildes is found. */
-		if (!__cobalt_first_fd_valid_p(in_fds, nfds))
-			return -EADV;
-
-		selector = xnmalloc(sizeof(*curr->selector));
-		if (selector == NULL)
-			return -ENOMEM;
-		xnselector_init(selector);
-		curr->selector = selector;
-
-		/* Bind directly the file descriptors, we do not need to go
-		   through xnselect returning -ECHRNG */
-		err = __cobalt_select_bind_all(selector, in_fds, nfds);
-		if (err)
-			return err;
-	}
-
-	do {
-		err = xnselect(selector, out_fds, in_fds, nfds, timeout, mode);
-		if (err == -ECHRNG) {
-			int bind_err = __cobalt_select_bind_all(selector,
-								out_fds, nfds);
-			if (bind_err)
-				return bind_err;
-		}
-	} while (err == -ECHRNG);
-
-	if (u_tv && (err > 0 || err == -EINTR)) {
-		diff = timeout - clock_get_ticks(CLOCK_MONOTONIC);
-		if (diff > 0)
-			ticks2tv(&tv, diff);
-		else
-			tv.tv_sec = tv.tv_usec = 0;
-
-		if (sys32_put_timeval(u_tv, &tv))
-			return -EFAULT;
-	}
-
-	if (err >= 0)
-		for (i = 0; i < XNSELECT_MAX_TYPES; i++)
-			if (ufd_sets[i] &&
-			    sys32_put_fdset(ufd_sets[i], out_fds[i],
-					    sizeof(fd_set)) < 0)
-				return -EFAULT;
-	return err;
+	return __cobalt_select(nfds, u_rfds, u_wfds, u_xfds, u_tv, true);
 }
 
 COBALT_SYSCALL32emu(recvmsg, handover,

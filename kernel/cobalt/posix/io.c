@@ -19,6 +19,7 @@
  */
 #include <linux/err.h>
 #include <linux/fs.h>
+#include <cobalt/kernel/compat.h>
 #include <cobalt/kernel/ppd.h>
 #include <xenomai/rtdm/internal.h>
 #include "process.h"
@@ -210,15 +211,10 @@ int __cobalt_select_bind_all(struct xnselector *selector,
 	return 0;
 }
 
-/* int select(int, fd_set *, fd_set *, fd_set *, struct __kernel_old_timeval *) */
-COBALT_SYSCALL(select, primary,
-	       (int nfds,
-		fd_set __user *u_rfds,
-		fd_set __user *u_wfds,
-		fd_set __user *u_xfds,
-		struct __kernel_old_timeval __user *u_tv))
+int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
+		    void __user *u_xfds, void __user *u_tv, bool compat)
 {
-	fd_set __user *ufd_sets[XNSELECT_MAX_TYPES] = {
+	void __user *ufd_sets[XNSELECT_MAX_TYPES] = {
 		[XNSELECT_READ] = u_rfds,
 		[XNSELECT_WRITE] = u_wfds,
 		[XNSELECT_EXCEPT] = u_xfds
@@ -250,9 +246,18 @@ COBALT_SYSCALL(select, primary,
 				goto out;
 			}
 		} else {
-			if (!access_wok(u_tv, sizeof(tv))
-			    || cobalt_copy_from_user(&tv, u_tv, sizeof(tv)))
-				return -EFAULT;
+#ifdef CONFIG_XENO_ARCH_SYS3264
+			if (compat) {
+				if (sys32_get_timeval(&tv, u_tv))
+					return -EFAULT;
+			} else
+#endif
+			{
+				if (!access_wok(u_tv, sizeof(tv))
+				    || cobalt_copy_from_user(&tv, u_tv,
+							     sizeof(tv)))
+					return -EFAULT;
+			}
 
 			if (tv.tv_usec >= 1000000)
 				return -EINVAL;
@@ -268,13 +273,22 @@ COBALT_SYSCALL(select, primary,
 	for (i = 0; i < XNSELECT_MAX_TYPES; i++)
 		if (ufd_sets[i]) {
 			in_fds[i] = &in_fds_storage[i];
-			out_fds[i] = & out_fds_storage[i];
-			if (!access_wok((void __user *) ufd_sets[i],
-					sizeof(fd_set))
-			    || cobalt_copy_from_user(in_fds[i],
-						     (void __user *) ufd_sets[i],
-						     fds_size))
-				return -EFAULT;
+			out_fds[i] = &out_fds_storage[i];
+#ifdef CONFIG_XENO_ARCH_SYS3264
+			if (compat) {
+				if (sys32_get_fdset(in_fds[i], ufd_sets[i],
+						    fds_size))
+					return -EFAULT;
+			} else
+#endif
+			{
+				if (!access_wok((void __user *) ufd_sets[i],
+						sizeof(fd_set))
+				    || cobalt_copy_from_user(in_fds[i],
+							     (void __user *)ufd_sets[i],
+							     fds_size))
+					return -EFAULT;
+			}
 		}
 
 	selector = curr->selector;
@@ -294,7 +308,8 @@ COBALT_SYSCALL(select, primary,
 
 		/* Bind directly the file descriptors, we do not need to go
 		   through xnselect returning -ECHRNG */
-		if ((err = __cobalt_select_bind_all(selector, in_fds, nfds)))
+		err = __cobalt_select_bind_all(selector, in_fds, nfds);
+		if (err)
 			return err;
 	}
 
@@ -326,15 +341,45 @@ out:
 		else
 			tv.tv_sec = tv.tv_usec = 0;
 
-		if (cobalt_copy_to_user(u_tv, &tv, sizeof(tv)))
-			return -EFAULT;
+#ifdef CONFIG_XENO_ARCH_SYS3264
+		if (compat) {
+			if (sys32_put_timeval(u_tv, &tv))
+				return -EFAULT;
+		} else
+#endif
+		{
+			if (cobalt_copy_to_user(u_tv, &tv, sizeof(tv)))
+				return -EFAULT;
+		}
 	}
 
 	if (err >= 0)
-		for (i = 0; i < XNSELECT_MAX_TYPES; i++)
-			if (ufd_sets[i]
-			    && cobalt_copy_to_user((void __user *) ufd_sets[i],
-						   out_fds[i], sizeof(fd_set)))
-				return -EFAULT;
+		for (i = 0; i < XNSELECT_MAX_TYPES; i++) {
+			if (!ufd_sets[i])
+				continue;
+#ifdef CONFIG_XENO_ARCH_SYS3264
+			if (compat) {
+				if (sys32_put_fdset(ufd_sets[i], out_fds[i],
+						    sizeof(fd_set)))
+					return -EFAULT;
+			} else
+#endif
+			{
+				if (cobalt_copy_to_user((void __user *)ufd_sets[i],
+							out_fds[i], sizeof(fd_set)))
+					return -EFAULT;
+			}
+		}
 	return err;
+}
+
+/* int select(int, fd_set *, fd_set *, fd_set *, struct __kernel_old_timeval *) */
+COBALT_SYSCALL(select, primary,
+	       (int nfds,
+		fd_set __user *u_rfds,
+		fd_set __user *u_wfds,
+		fd_set __user *u_xfds,
+		struct __kernel_old_timeval __user *u_tv))
+{
+	return __cobalt_select(nfds, u_rfds, u_wfds, u_xfds, u_tv, false);
 }
