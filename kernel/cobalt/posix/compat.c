@@ -176,8 +176,8 @@ int sys32_put_timex(struct old_timex32 __user *ctx,
 }
 EXPORT_SYMBOL_GPL(sys32_put_timex);
 
-ssize_t sys32_get_fdset(fd_set *fds, const compat_fd_set __user *cfds,
-			size_t cfdsize)
+int sys32_get_fdset(fd_set *fds, const compat_fd_set __user *cfds,
+		    size_t cfdsize)
 {
 	int rdpos, wrpos, rdlim = cfdsize / sizeof(compat_ulong_t);
 
@@ -188,12 +188,11 @@ ssize_t sys32_get_fdset(fd_set *fds, const compat_fd_set __user *cfds,
 		if (__xn_get_user(fds->fds_bits[wrpos], cfds->fds_bits + rdpos))
 			return -EFAULT;
 
-	return (ssize_t)rdlim * sizeof(long);
+	return 0;
 }
-EXPORT_SYMBOL_GPL(sys32_get_fdset);
 
-ssize_t sys32_put_fdset(compat_fd_set __user *cfds, const fd_set *fds,
-			size_t fdsize)
+int sys32_put_fdset(compat_fd_set __user *cfds, const fd_set *fds,
+		    size_t fdsize)
 {
 	int rdpos, wrpos, wrlim = fdsize / sizeof(long);
 
@@ -204,9 +203,8 @@ ssize_t sys32_put_fdset(compat_fd_set __user *cfds, const fd_set *fds,
 		if (__xn_put_user(fds->fds_bits[rdpos], cfds->fds_bits + wrpos))
 			return -EFAULT;
 
-	return (ssize_t)wrlim * sizeof(compat_ulong_t);
+	return 0;
 }
-EXPORT_SYMBOL_GPL(sys32_put_fdset);
 
 int sys32_get_param_ex(int policy,
 		       struct sched_param_ex *p,

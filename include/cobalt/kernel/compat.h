@@ -110,11 +110,11 @@ int sys32_get_timex(struct __kernel_timex *tx,
 int sys32_put_timex(struct old_timex32 __user *ctx,
 		    const struct __kernel_timex *tx);
 
-ssize_t sys32_get_fdset(fd_set *fds, const compat_fd_set __user *cfds,
-			size_t cfdsize);
+int sys32_get_fdset(fd_set *fds, const compat_fd_set __user *cfds,
+		    size_t cfdsize);
 
-ssize_t sys32_put_fdset(compat_fd_set __user *cfds, const fd_set *fds,
-			size_t fdsize);
+int sys32_put_fdset(compat_fd_set __user *cfds, const fd_set *fds,
+		    size_t fdsize);
 
 int sys32_get_param_ex(int policy,
 		       struct sched_param_ex *p,
