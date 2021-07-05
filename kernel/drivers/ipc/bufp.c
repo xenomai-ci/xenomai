@@ -119,6 +119,8 @@ static int bufp_socket(struct rtdm_fd *fd)
 	sk->fillsz = 0;
 	sk->rdrsvd = 0;
 	sk->wrrsvd = 0;
+	sk->rdsem = 0;
+	sk->wrsem = 0;
 	sk->status = 0;
 	sk->handle = 0;
 	sk->rx_timeout = RTDM_TIMEOUT_INFINITE;
