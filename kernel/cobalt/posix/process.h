@@ -164,9 +164,9 @@ extern struct xnthread_personality cobalt_personality;
 int cobalt_handle_setaffinity_event(struct task_struct *task);
 
 #ifdef CONFIG_SMP
-bool cobalt_affinity_ok(struct task_struct *task);
+void cobalt_adjust_affinity(struct task_struct *task);
 #else
-#define cobalt_affinity_ok(task)	(true)
+static inline void cobalt_adjust_affinity(struct task_struct *task) { }
 #endif
 
 int cobalt_handle_taskexit_event(struct task_struct *task);

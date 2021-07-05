@@ -307,8 +307,10 @@ void resume_oob_task(struct task_struct *p) /* inband, oob stage stalled */
 	 * relax_thread/harden_thread handlers.
 	 */
 	xnthread_run_handler_stack(thread, harden_thread);
-	if (cobalt_affinity_ok(p))
-		xnthread_resume(thread, XNRELAX);
+
+	cobalt_adjust_affinity(p);
+
+	xnthread_resume(thread, XNRELAX);
 
 	/*
 	 * In case we migrated independently of the user return notifier, clear

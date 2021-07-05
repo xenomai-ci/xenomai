@@ -773,7 +773,7 @@ int cobalt_handle_setaffinity_event(struct task_struct *task)
 }
 
 #ifdef CONFIG_SMP
-bool cobalt_affinity_ok(struct task_struct *task) /* nklocked, IRQs off */
+void cobalt_adjust_affinity(struct task_struct *task) /* nklocked, IRQs off */
 {
 	struct xnthread *thread = xnthread_from_task(task);
 	struct xnsched *sched;
@@ -812,12 +812,12 @@ bool cobalt_affinity_ok(struct task_struct *task) /* nklocked, IRQs off */
 		 * in xnthread_harden().
 		 */
 		xnthread_set_info(thread, XNCANCELD);
-		return false;
+		return;
 	}
 
 	sched = xnsched_struct(cpu);
 	if (sched == thread->sched)
-		return true;
+		return;
 
 	/*
 	 * The current thread moved to a supported real-time CPU,
@@ -829,8 +829,6 @@ bool cobalt_affinity_ok(struct task_struct *task) /* nklocked, IRQs off */
 
 	xnthread_run_handler_stack(thread, move_thread, cpu);
 	xnthread_migrate_passive(thread, sched);
-
-	return true;
 }
 #endif /* CONFIG_SMP */
 
