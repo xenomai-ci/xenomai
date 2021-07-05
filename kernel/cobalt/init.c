@@ -202,6 +202,11 @@ static int __init xenomai_init(void)
 		set_realtime_core_state(COBALT_STATE_DISABLED);
 		return 0;
 	}
+	if (!cpumask_test_cpu(0, &xnsched_realtime_cpus)) {
+		printk(XENO_ERR "CPU 0 is missing in real-time CPU mask\n");
+		set_realtime_core_state(COBALT_STATE_DISABLED);
+		return -EINVAL;
+	}
 	cobalt_cpu_affinity = xnsched_realtime_cpus;
 #endif /* CONFIG_SMP */
 
