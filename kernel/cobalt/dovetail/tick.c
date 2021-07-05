@@ -16,7 +16,7 @@ static DEFINE_PER_CPU(struct clock_proxy_device *, proxy_device);
 
 const char *pipeline_timer_name(void)
 {
-	struct clock_proxy_device *dev = __this_cpu_read(proxy_device);
+	struct clock_proxy_device *dev = per_cpu(proxy_device, 0);
 	struct clock_event_device *real_dev = dev->real_device;
 
 	/*
