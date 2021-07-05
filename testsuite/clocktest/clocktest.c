@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 #include <sys/time.h>
+#include <boilerplate/ancillaries.h>
 #include <boilerplate/atomic.h>
 #include <cobalt/uapi/kernel/vdso.h>
 #include <xeno_config.h>
@@ -52,8 +53,9 @@ pthread_mutex_t lock;
 #define release_lock(lock)			pthread_mutex_unlock(lock)
 #endif
 
-uint64_t last_common = 0;
-clockid_t clock_id = CLOCK_REALTIME;
+static uint64_t last_common = 0;
+static clockid_t clock_id = CLOCK_REALTIME;
+static cpu_set_t cpu_realtime_set, cpu_online_set;
 
 struct per_cpu_data {
 	uint64_t first_tod, first_clock;
@@ -298,7 +300,7 @@ static clockid_t resolve_clock_name(const char *name,
 int main(int argc, char *argv[])
 {
 	const char *clock_name = NULL, *real_clock_name = "CLOCK_REALTIME";
-	int cpus = sysconf(_SC_NPROCESSORS_ONLN);
+	int max_cpu, cpus;
 	int i;
 	int c;
 	int d = 0;
@@ -341,13 +343,33 @@ int main(int argc, char *argv[])
 	if (d && clock_id == CLOCK_HOST_REALTIME)
 		show_hostrt_diagnostics();
 
-	per_cpu_data = malloc(sizeof(*per_cpu_data) * cpus);
+	if (get_realtime_cpu_set(&cpu_realtime_set) != 0)
+		error(1, ENOSYS, "get_realtime_cpu_set");
+
+	if (get_online_cpu_set(&cpu_online_set) != 0)
+		error(1, ENOSYS, "get_online_cpu_set");
+
+	CPU_AND(&cpu_realtime_set, &cpu_realtime_set, &cpu_online_set);
+
+	max_cpu = 0;
+	cpus = 0;
+	for (i = 0; i < CPU_SETSIZE; i++) {
+		if (!CPU_ISSET(i, &cpu_realtime_set))
+			continue;
+		cpus++;
+		if (i > max_cpu)
+			max_cpu = i;
+	}
+
+	per_cpu_data = malloc(sizeof(*per_cpu_data) * (max_cpu + 1));
 	if (per_cpu_data == NULL)
 		error(1, ENOMEM, "malloc");
 
-	memset(per_cpu_data, 0, sizeof(*per_cpu_data) * cpus);
+	memset(per_cpu_data, 0, sizeof(*per_cpu_data) * (max_cpu + 1));
 
-	for (i = 0; i < cpus; i++) {
+	for (i = 0; i <= max_cpu; i++) {
+		if (!CPU_ISSET(i, &cpu_realtime_set))
+			continue;
 		per_cpu_data[i].first_round = 1;
 		pthread_create(&per_cpu_data[i].thread, NULL, cpu_thread,
 			       (void *)(long)i);
@@ -359,13 +381,14 @@ int main(int argc, char *argv[])
 	       "--- -------------------- ---------------- ---------- --------------\n");
 
 	while (1) {
-		for (i = 0; i < cpus; i++)
-			printf("%3d %20.1f %16.3f %10lu %14.1f\n",
-			       i,
-			       per_cpu_data[i].offset/1000.0,
-			       per_cpu_data[i].drift * 1000000.0,
-			       per_cpu_data[i].warps,
-			       per_cpu_data[i].max_warp/1000.0);
+		for (i = 0; i <= max_cpu; i++)
+			if (CPU_ISSET(i, &cpu_realtime_set))
+				printf("%3d %20.1f %16.3f %10lu %14.1f\n",
+				       i,
+				       per_cpu_data[i].offset/1000.0,
+				       per_cpu_data[i].drift * 1000000.0,
+				       per_cpu_data[i].warps,
+				       per_cpu_data[i].max_warp/1000.0);
 		usleep(250000);
 		printf("\033[%dA", cpus);
 	}
