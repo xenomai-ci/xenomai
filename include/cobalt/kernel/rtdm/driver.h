@@ -857,7 +857,7 @@ static inline int rtdm_irq_free(rtdm_irq_t *irq_handle)
 {
 	if (!XENO_ASSERT(COBALT, xnsched_root_p()))
 		return -EPERM;
-	xnintr_detach(irq_handle);
+	xnintr_destroy(irq_handle);
 	return 0;
 }
 
