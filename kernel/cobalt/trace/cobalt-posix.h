@@ -154,7 +154,13 @@
 		__cobalt_symbolic_syscall(ftrace_puts),			\
 		__cobalt_symbolic_syscall(recvmmsg),			\
 		__cobalt_symbolic_syscall(sendmmsg),			\
-		__cobalt_symbolic_syscall(clock_adjtime))
+		__cobalt_symbolic_syscall(clock_adjtime),		\
+		__cobalt_symbolic_syscall(sem_timedwait64),		\
+		__cobalt_symbolic_syscall(clock_gettime64),		\
+		__cobalt_symbolic_syscall(clock_settime64),		\
+		__cobalt_symbolic_syscall(clock_nanosleep64),		\
+		__cobalt_symbolic_syscall(clock_getres64),		\
+		__cobalt_symbolic_syscall(clock_adjtime64))
 
 DECLARE_EVENT_CLASS(cobalt_syscall_entry,
 	TP_PROTO(unsigned int nr),
