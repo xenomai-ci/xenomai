@@ -199,7 +199,7 @@ static int run_rtdm(struct smokey_test *t, int argc, char *const argv[])
 	check("open", open(devname, O_RDWR), -EBUSY);
 	dev2 = check("open", open(devname2, O_RDWR), dev);
 	check("close", close(dev2), 0);
-	usleep(301000);
+	usleep(smokey_on_vm ? 400000 : 301000);
 	dev = check("open", open(devname, O_RDWR), dev);
 
 	smokey_trace("Normal close");
