@@ -170,7 +170,8 @@ static void *mutex_timed_locker(void *arg)
 	int ret;
 
 	clock_gettime(CLOCK_REALTIME, &now);
-	timespec_adds(&ts, &now, 5000000); /* 5ms from now */
+	/* 5ms (or 50ms in VM) from now */
+	timespec_adds(&ts, &now, smokey_on_vm ? 50000000 : 5000000);
 
 	if (p->barrier)
 		smokey_barrier_release(p->barrier);
