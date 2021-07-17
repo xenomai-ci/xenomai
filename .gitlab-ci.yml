@@ -20,7 +20,7 @@ variables:
   KDIR: "/tmp/kernel"
   USE_CCACHE: "1"
   CCACHE_MAXSIZE: "1G"
-  IPIPE_MIRROR_URL: "https://source.denx.de/Xenomai"
+  IPIPE_URL: "https://source.denx.de/Xenomai"
   DOVETAIL_URL: "https://source.denx.de/Xenomai/linux-dovetail.git"
   GCC_VERSION: "10"
   PACKAGES: "u-boot-tools git make bc bison libelf-dev autotools-dev \
@@ -187,7 +187,7 @@ arm-5.4-release:
   variables:
     ARCH: arm
     PIPELINE_REV: ipipe-core-5.4..*-arm-.*
-    PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm.git
+    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm.git
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
 arm-4.19-release:
@@ -195,7 +195,7 @@ arm-4.19-release:
   variables:
     ARCH: arm
     PIPELINE_REV: ipipe-core-4.19..*-arm-.*
-    PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm.git
+    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm.git
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
 arm64-5.10-head:
@@ -211,7 +211,7 @@ arm64-5.4-release:
   variables:
     ARCH: arm64
     PIPELINE_REV: ipipe-core-5.4..*-arm64-.*
-    PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm64.git
+    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm64.git
     KERNEL_DEFCONFIG: defconfig
 
 arm64-4.19-cip-release:
@@ -219,7 +219,7 @@ arm64-4.19-cip-release:
   variables:
     ARCH: arm64
     PIPELINE_REV: ipipe-core-4.19..*cip.*-arm64-.*
-    PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-arm64.git
+    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm64.git
     KERNEL_DEFCONFIG: defconfig
 
 x86-5.10-head:
@@ -235,7 +235,7 @@ x86-5.4-head:
   variables:
     ARCH: x86
     PIPELINE_REV: ipipe-x86-5.4.y
-    PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-x86.git
+    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-x86.git
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 x86-4.19-cip-head:
@@ -243,7 +243,7 @@ x86-4.19-cip-head:
   variables:
     ARCH: x86
     PIPELINE_REV: ipipe-x86-4.19.y-cip
-    PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-x86.git
+    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-x86.git
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 x86-4.19-cip-release:
@@ -251,7 +251,7 @@ x86-4.19-cip-release:
   variables:
     ARCH: x86
     PIPELINE_REV: ipipe-core-4.19..*cip.*-x86-.*
-    PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-x86.git
+    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-x86.git
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 powerpc-4.19-release:
@@ -260,7 +260,7 @@ powerpc-4.19-release:
   variables:
     ARCH: powerpc
     PIPELINE_REV: ipipe-core-4.19..*-ppc32-.*
-    PIPELINE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe-ppc32.git
+    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-ppc32.git
     KERNEL_DEFCONFIG: mpc5200_defconfig
 
 trigger-xenomai-images:
