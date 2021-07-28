@@ -183,7 +183,7 @@ void print_dev(void)
     struct itf_stats *itf;
 
 
-    cmd.head.if_name[9] = 0;
+    cmd.head.if_name[IFNAMSIZ - 1] = 0;
 
     printf("%-9s Medium: ", cmd.head.if_name);
 
