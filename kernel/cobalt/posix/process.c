@@ -808,20 +808,6 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 	if (xnthread_test_state(thread, XNROOT))
 		return 0;
 
-#ifdef IPIPE_KEVT_USERINTRET
-	if (xnarch_fault_bp_p(d) && user_mode(d->regs)) {
-		spl_t s;
-
-		XENO_WARN_ON(CORE, xnthread_test_state(thread, XNRELAX));
-		xnlock_get_irqsave(&nklock, s);
-		xnthread_set_info(thread, XNCONTHI);
-		ipipe_enable_user_intret_notifier();
-		stop_debugged_process(thread);
-		xnlock_put_irqrestore(&nklock, s);
-		xnsched_run();
-	}
-#endif
-
 	if (xnarch_fault_fpu_p(d)) {
 #ifdef CONFIG_XENO_ARCH_FPU
 		spl_t s;
@@ -843,6 +829,20 @@ static inline int handle_exception(struct ipipe_trap_data *d)
 			     xnarch_fault_pc(d));
 #endif
 	}
+
+#ifdef IPIPE_KEVT_USERINTRET
+	if (xnarch_fault_bp_p(d) && user_mode(d->regs)) {
+		spl_t s;
+
+		XENO_WARN_ON(CORE, xnthread_test_state(thread, XNRELAX));
+		xnlock_get_irqsave(&nklock, s);
+		xnthread_set_info(thread, XNCONTHI);
+		ipipe_enable_user_intret_notifier();
+		stop_debugged_process(thread);
+		xnlock_put_irqrestore(&nklock, s);
+		xnsched_run();
+	}
+#endif
 
 	/*
 	 * If we experienced a trap on behalf of a shadow thread
