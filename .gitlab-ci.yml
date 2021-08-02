@@ -135,6 +135,7 @@ variables:
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_3C59X
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_E1000_NEW
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_RT2500
+    - ./scripts/config -m XENO_DRIVERS_NET_FEC
     - ./scripts/config -m XENO_DRIVERS_NET_ADDON_RTCAP
     - ./scripts/config -m XENO_DRIVERS_NET_ADDON_PROXY
     - ./scripts/config -e XENO_DRIVERS_NET_ADDON_PROXY_ARP
