@@ -1158,7 +1158,7 @@ wait_unlock_out:
 
 	case RTSER_RTIOC_BREAK_CTL: {
 		rtdm_lock_get_irqsave(&ctx->lock, lock_ctx);
-		rt_imx_uart_break_ctl(ctx, (int)arg);
+		rt_imx_uart_break_ctl(ctx, (unsigned long)arg);
 		rtdm_lock_put_irqrestore(&ctx->lock, lock_ctx);
 		break;
 	}
