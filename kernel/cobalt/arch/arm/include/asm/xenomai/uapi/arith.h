@@ -79,9 +79,9 @@ mach_arm_nodiv_ullimd(const unsigned long long op,
 	register unsigned frach __asm__ ("r3");
 	register unsigned integ __asm__("r4") = rhs_integ;
 	register unsigned opl __asm__ ("r6");
-	register unsigned oph __asm__ ("r7");
-	register unsigned tl __asm__("r8");
-	register unsigned th __asm__("r9");
+	register unsigned oph __asm__ ("r8");
+	register unsigned tl __asm__("r9");
+	register unsigned th __asm__("r10");
 
 	xnarch_u64tou32(op, oph, opl);
 	xnarch_u64tou32(frac, frach, fracl);
@@ -109,10 +109,10 @@ mach_arm_nodiv_llimd(const long long op,
 	register unsigned frach __asm__ ("r3");
 	register unsigned integ __asm__("r4") = rhs_integ;
 	register unsigned opl __asm__ ("r6");
-	register unsigned oph __asm__ ("r7");
-	register unsigned tl __asm__("r8");
-	register unsigned th __asm__("r9");
-	register unsigned s __asm__("r10");
+	register unsigned oph __asm__ ("r8");
+	register unsigned tl __asm__("r9");
+	register unsigned th __asm__("r10");
+	register unsigned s __asm__("r12");
 
 	xnarch_u64tou32(op, oph, opl);
 	xnarch_u64tou32(frac, frach, fracl);
