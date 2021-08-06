@@ -89,15 +89,11 @@
 #define __sys1(x)	__sys2(x)
 
 #ifdef __ARM_EABI__
-#define __SYS_REG , "r7"
-#define __SYS_REG_DECL register unsigned long __r7 __asm__ ("r7")
-#define __SYS_REG_SET __r7 = XENO_ARM_SYSCALL
-#define __SYS_REG_INPUT ,"r" (__r7)
-#define __SYS_CALLOP "swi\t0"
+#define __SYS_REG_DECL unsigned long __r7 = XENO_ARM_SYSCALL
+#define __SYS_REG_INPUT , [__r7] "r" (__r7)
+#define __SYS_CALLOP "push {r7}; mov %%r7,%[__r7]; swi\t0; pop {r7}"
 #else
-#define __SYS_REG
 #define __SYS_REG_DECL
-#define __SYS_REG_SET
 #define __SYS_REG_INPUT
 #define __NR_OABI_SYSCALL_BASE	0x900000
 #define __SYS_CALLOP "swi\t" __sys1(__NR_OABI_SYSCALL_BASE + XENO_ARM_SYSCALL) ""
@@ -109,9 +105,8 @@
 		__SYS_REG_DECL;						\
 		LOADARGS_##nr(__xn_syscode(op), args);			\
 		__asm__ __volatile__ ("" : /* */ : /* */ :		\
-				      CLOBBER_REGS_##nr __SYS_REG);	\
+				      CLOBBER_REGS_##nr);		\
 		LOADREGS_##nr;						\
-		__SYS_REG_SET;						\
 		__asm__ __volatile__ (					\
 			__SYS_CALLOP					\
 			: "=r" (__r0)					\
