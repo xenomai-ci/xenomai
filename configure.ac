@@ -692,7 +692,8 @@ fi
 dnl Internal CFLAGS and LDFLAGS, may be enhanced per-arch below
 XENO_USER_CFLAGS="$XENO_USER_APP_CFLAGS -pipe -fstrict-aliasing \
 -Wall -Wstrict-prototypes -Wmissing-prototypes -Wno-long-long \
--Wno-unused-parameter -Werror -Wformat-security -D__XENO__ -D__IN_XENO__"
+-Wno-unused-parameter -Wno-format-truncation -Werror -Wformat-security \
+-D__XENO__ -D__IN_XENO__"
 if test x$want_fortify = xyes -a x$debug_mode != xfull; then
    XENO_USER_CFLAGS="$XENO_USER_CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2"
 fi
