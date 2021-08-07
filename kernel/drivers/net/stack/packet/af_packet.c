@@ -347,15 +347,20 @@ static ssize_t rt_packet_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 		sll.sll_pkttype = rtskb->pkt_type;
 		sll.sll_ifindex = rtdev->ifindex;
 
+		if (msg->msg_namelen < 0) {
+			ret = -EINVAL;
+			goto fail;
+		}
+		namelen = min(sizeof(sll), (size_t)msg->msg_namelen);
+
 		/* Ethernet specific - we rather need some parse handler here */
 		memcpy(sll.sll_addr, rtskb->mac.ethernet->h_source, ETH_ALEN);
 		sll.sll_halen = ETH_ALEN;
-		ret = rtnet_put_arg(fd, msg->msg_name, &sll, sizeof(sll));
+		ret = rtnet_put_arg(fd, msg->msg_name, &sll, namelen);
 		if (ret)
 			goto fail;
 
-		namelen = sizeof(sll);
-		msg->msg_namelen = namelen;
+		msg->msg_namelen = sizeof(sll);
 	}
 
 	/* Include the header in raw delivery */

@@ -441,12 +441,18 @@ ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 		sin.sin_family = AF_INET;
 		sin.sin_port = uh->source;
 		sin.sin_addr.s_addr = skb->nh.iph->saddr;
-		ret = rtnet_put_arg(fd, msg->msg_name, &sin, sizeof(sin));
+
+		if (msg->msg_namelen < 0) {
+			ret = -EINVAL;
+			goto fail;
+		}
+		namelen = min(sizeof(sin), (size_t)msg->msg_namelen);
+
+		ret = rtnet_put_arg(fd, msg->msg_name, &sin, namelen);
 		if (ret)
 			goto fail;
 
-		namelen = sizeof(sin);
-		msg->msg_namelen = namelen;
+		msg->msg_namelen = sizeof(sin);
 	}
 
 	data_len = ntohs(uh->len) - sizeof(struct udphdr);
