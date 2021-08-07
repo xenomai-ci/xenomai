@@ -302,7 +302,7 @@ static ssize_t rt_packet_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 	size_t copy_len;
 	struct rtskb *rtskb;
 	struct sockaddr_ll sll;
-	int ret, flags;
+	int ret;
 	nanosecs_rel_t timeout = sock->timeout;
 	socklen_t namelen;
 	struct iovec iov_fast[RTDM_IOV_FASTMAX], *iov;
@@ -355,10 +355,7 @@ static ssize_t rt_packet_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 			goto fail;
 
 		namelen = sizeof(sll);
-		ret = rtnet_put_arg(fd, &msg->msg_namelen, &namelen,
-				    sizeof(namelen));
-		if (ret)
-			goto fail;
+		msg->msg_namelen = namelen;
 	}
 
 	/* Include the header in raw delivery */
@@ -375,11 +372,7 @@ static ssize_t rt_packet_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 
 	if (copy_len > len) {
 		copy_len = len;
-		flags = msg->msg_flags | MSG_TRUNC;
-		ret = rtnet_put_arg(fd, &msg->msg_flags, &flags,
-				    sizeof(flags));
-		if (ret)
-			goto fail;
+		msg->msg_flags |= MSG_TRUNC;
 	}
 
 	copy_len = rtnet_write_to_iov(fd, iov, msg->msg_iovlen, rtskb->data,

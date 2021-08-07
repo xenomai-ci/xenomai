@@ -446,10 +446,7 @@ ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 			goto fail;
 
 		namelen = sizeof(sin);
-		ret = rtnet_put_arg(fd, &msg->msg_namelen, &namelen,
-				    sizeof(namelen));
-		if (ret)
-			goto fail;
+		msg->msg_namelen = namelen;
 	}
 
 	data_len = ntohs(uh->len) - sizeof(struct udphdr);
@@ -489,12 +486,7 @@ ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
 	if (data_len > 0)
 		flags |= MSG_TRUNC;
 
-	if (flags != msg->msg_flags) {
-		ret = rtnet_put_arg(fd, &msg->msg_flags, &flags,
-				    sizeof(flags));
-		if (ret)
-			goto fail;
-	}
+	msg->msg_flags = flags;
 out:
 	if ((msg_flags & MSG_PEEK) == 0)
 		kfree_rtskb(first_skb);
