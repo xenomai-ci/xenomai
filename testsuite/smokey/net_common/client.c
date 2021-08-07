@@ -204,6 +204,12 @@ static int smokey_net_client_loop(struct smokey_net_client *client)
 		} while (err != -ETIMEDOUT);
 	}
 
+	if (smokey_on_vm) {
+		glate = 0; /* ignore late arrivals */
+		if (glost != limit)
+			glost = 0; /* ignore some lost packets, not all */
+	}
+
 	if (glost || glate)
 		fprintf(stderr, "RTnet %s test failed", client->name);
 	if (glost) {
