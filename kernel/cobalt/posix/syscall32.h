@@ -197,6 +197,11 @@ COBALT_SYSCALL32emu_DECL(sigtimedwait,
 			  struct compat_siginfo __user *u_si,
 			  const struct old_timespec32 __user *u_timeout));
 
+COBALT_SYSCALL32emu_DECL(sigtimedwait64,
+			 (const compat_sigset_t __user *u_set,
+			  struct compat_siginfo __user *u_si,
+			  const struct __kernel_timespec __user *u_timeout));
+
 COBALT_SYSCALL32emu_DECL(sigwaitinfo,
 			 (const compat_sigset_t __user *u_set,
 			  struct compat_siginfo __user *u_si));

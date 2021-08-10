@@ -131,6 +131,7 @@
 #define sc_cobalt_mutex_timedlock64		108
 #define sc_cobalt_mq_timedsend64		109
 #define sc_cobalt_mq_timedreceive64		110
+#define sc_cobalt_sigtimedwait64		111
 
 #define __NR_COBALT_SYSCALLS			128 /* Power of 2 */
 

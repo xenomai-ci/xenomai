@@ -18,6 +18,7 @@
 #include <linux/sched.h>
 #include <cobalt/kernel/assert.h>
 #include <cobalt/kernel/compat.h>
+#include <cobalt/kernel/time.h>
 #include "internal.h"
 #include "signal.h"
 #include "thread.h"
@@ -413,9 +414,8 @@ int __cobalt_sigtimedwait(sigset_t *set,
 {
 	xnticks_t ticks;
 
-	if ((unsigned long)timeout->tv_nsec >= ONE_BILLION)
+	if (!timespec64_valid(timeout))
 		return -EINVAL;
-
 	ticks = ts2ns(timeout);
 	if (ticks++ == 0)
 		ticks = XN_NONBLOCK;
@@ -435,6 +435,23 @@ COBALT_SYSCALL(sigtimedwait, nonrestartable,
 		return -EFAULT;
 
 	if (cobalt_copy_from_user(&timeout, u_timeout, sizeof(timeout)))
+		return -EFAULT;
+
+	return __cobalt_sigtimedwait(&set, &timeout, u_si, false);
+}
+
+COBALT_SYSCALL(sigtimedwait64, nonrestartable,
+	       (const sigset_t __user *u_set,
+		struct siginfo __user *u_si,
+		const struct __kernel_timespec __user *u_timeout))
+{
+	struct timespec64 timeout;
+	sigset_t set;
+
+	if (cobalt_copy_from_user(&set, u_set, sizeof(set)))
+		return -EFAULT;
+
+	if (cobalt_get_timespec64(&timeout, u_timeout))
 		return -EFAULT;
 
 	return __cobalt_sigtimedwait(&set, &timeout, u_si, false);

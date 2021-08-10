@@ -18,6 +18,7 @@
 #include <linux/types.h>
 #include <linux/err.h>
 #include <cobalt/uapi/syscall.h>
+#include <cobalt/kernel/time.h>
 #include <xenomai/rtdm/internal.h>
 #include "internal.h"
 #include "syscall32.h"
@@ -690,6 +691,26 @@ COBALT_SYSCALL32emu(sigtimedwait, nonrestartable,
 		return ret;
 
 	ret = sys32_get_timespec(&timeout, u_timeout);
+	if (ret)
+		return ret;
+
+	return __cobalt_sigtimedwait(&set, &timeout, u_si, true);
+}
+
+COBALT_SYSCALL32emu(sigtimedwait64, nonrestartable,
+		    (const compat_sigset_t __user *u_set,
+		     struct compat_siginfo __user *u_si,
+		     const struct __kernel_timespec __user *u_timeout))
+{
+	struct timespec64 timeout;
+	sigset_t set;
+	int ret;
+
+	ret = sys32_get_sigset(&set, u_set);
+	if (ret)
+		return ret;
+
+	ret = cobalt_get_timespec64(&timeout, u_timeout);
 	if (ret)
 		return ret;
 

@@ -163,8 +163,8 @@
 		__cobalt_symbolic_syscall(clock_adjtime64),		\
 		__cobalt_symbolic_syscall(mutex_timedlock64),		\
 		__cobalt_symbolic_syscall(mq_timedsend64),  		\
-		__cobalt_symbolic_syscall(mq_timedreceive64))
-
+		__cobalt_symbolic_syscall(mq_timedreceive64),		\
+		__cobalt_symbolic_syscall(sigtimedwait64))
 
 DECLARE_EVENT_CLASS(cobalt_syscall_entry,
 	TP_PROTO(unsigned int nr),
