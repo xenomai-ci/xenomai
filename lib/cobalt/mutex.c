@@ -479,7 +479,11 @@ slow_path:
 	}
 
 	do {
+#ifdef __USE_TIME_BITS64
+		ret = XENOMAI_SYSCALL2(sc_cobalt_mutex_timedlock64, _mutex, to);
+#else
 		ret = XENOMAI_SYSCALL2(sc_cobalt_mutex_timedlock, _mutex, to);
+#endif
 	} while (ret == -EINTR);
 
 	if (ret == 0)
