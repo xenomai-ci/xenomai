@@ -997,6 +997,8 @@ static int protect_handover(void)
 	if (!__T(ret, pthread_mutex_destroy(&mutex)))
 		return ret;
 
+	smokey_barrier_destroy(&barrier);
+
 	return 0;
 }
 
