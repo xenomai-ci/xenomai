@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <mqueue.h>
+#include <signal.h>
 
 smokey_test_plugin(y2038, SMOKEY_NOARGS, "Validate correct y2038 support");
 
@@ -768,6 +769,81 @@ static int test_sc_cobalt_mq_timedreceive64(void)
 	return 0;
 }
 
+static int test_sc_cobalt_sigtimedwait64(void)
+{
+	int ret;
+	int sc_nr = sc_cobalt_sigtimedwait64;
+	struct xn_timespec64 t1, t2;
+	struct timespec ts_nat;
+	sigset_t set;
+
+	sigaddset(&set, SIGINT);
+
+	/* Make sure we don't crash because of NULL pointers */
+	ret = XENOMAI_SYSCALL3(sc_nr, NULL, NULL, NULL);
+	if (ret == -ENOSYS) {
+		smokey_note("sigtimedwait64: skipped. (no kernel support)");
+		return 0; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* Providing an invalid address has to deliver EFAULT */
+	ret = XENOMAI_SYSCALL3(sc_nr, &set, NULL, (void *)0xdeadbeefUL);
+	if (!smokey_assert(ret == -EFAULT))
+		return ret ? ret : -EINVAL;
+
+	/* providing an invalid timeout has to deliver EINVAL */
+	t1.tv_sec = -1;
+	ret = XENOMAI_SYSCALL3(sc_nr, &set, NULL, &t1);
+	if (!smokey_assert(ret == -EINVAL))
+		return ret ? ret : -EINVAL;
+
+	/*
+	 * Providing a zero timeout, should come back immediately, no signal
+	 * will be received
+	 */
+	t1.tv_sec = 0;
+	t1.tv_nsec = 0;
+	ret = XENOMAI_SYSCALL3(sc_nr, &set, NULL, &t1);
+	if (!smokey_assert(ret == -EAGAIN))
+		return ret ? ret : -EINVAL;
+
+	/*
+	 * Providing a valid timeout, waiting for it to time out and check
+	 * that we didn't come back to early.
+	 */
+	ret = clock_gettime(CLOCK_REALTIME, &ts_nat);
+	if (ret)
+		return -errno;
+
+	t1.tv_sec = 0;
+	t1.tv_nsec = 500000;
+
+	ret = XENOMAI_SYSCALL3(sc_nr, &set, NULL, &t1);
+	if (!smokey_assert(ret == -EAGAIN))
+		return ret;
+
+	t1.tv_sec = ts_nat.tv_sec;
+	t1.tv_nsec = ts_nat.tv_nsec;
+	ts_add_ns(&t1, 500000);
+
+	ret = clock_gettime(CLOCK_REALTIME, &ts_nat);
+	if (ret)
+		return -errno;
+
+	t2.tv_sec = ts_nat.tv_sec;
+	t2.tv_nsec = ts_nat.tv_nsec;
+
+	if (ts_less(&t2, &t1))
+		smokey_warning("sigtimedwait64 returned too early!\n"
+			       "Expected wakeup at: %lld sec %lld nsec\n"
+			       "Back at           : %lld sec %lld nsec\n",
+			       t1.tv_sec, t1.tv_nsec, t2.tv_sec, t2.tv_nsec);
+
+	return 0;
+}
+
 static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 {
 	int ret;
@@ -805,6 +881,10 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	ret = test_sc_cobalt_mq_timedreceive64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_sigtimedwait64();
 	if (ret)
 		return ret;
 
