@@ -161,7 +161,8 @@
 		__cobalt_symbolic_syscall(clock_nanosleep64),		\
 		__cobalt_symbolic_syscall(clock_getres64),		\
 		__cobalt_symbolic_syscall(clock_adjtime64),		\
-		__cobalt_symbolic_syscall(mutex_timedlock64))
+		__cobalt_symbolic_syscall(mutex_timedlock64),		\
+		__cobalt_symbolic_syscall(mq_timedsend64))
 
 
 DECLARE_EVENT_CLASS(cobalt_syscall_entry,

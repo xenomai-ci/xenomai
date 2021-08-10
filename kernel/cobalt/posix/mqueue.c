@@ -29,6 +29,7 @@
 #include "mqueue.h"
 #include "clock.h"
 #include <trace/events/cobalt-posix.h>
+#include <cobalt/kernel/time.h>
 
 #define COBALT_MSGMAX		65536
 #define COBALT_MSGSIZEMAX	(16*1024*1024)
@@ -499,7 +500,7 @@ redo:
 		ret = fetch_timeout(&ts, u_ts);
 		if (ret)
 			return ERR_PTR(ret);
-		if ((unsigned long)ts.tv_nsec >= ONE_BILLION)
+		if (!timespec64_valid(&ts))
 			return ERR_PTR(-EINVAL);
 		to = ts2ns(&ts) + 1;
 		tmode = XN_REALTIME;
@@ -889,6 +890,12 @@ static inline int mq_fetch_timeout(struct timespec64 *ts,
 	return u_ts == NULL ? -EFAULT : cobalt_get_u_timespec(ts, u_ts);
 }
 
+static inline int mq_fetch_timeout64(struct timespec64 *ts,
+				     const void __user *u_ts)
+{
+	return u_ts == NULL ? -EFAULT : cobalt_get_timespec64(ts, u_ts);
+}
+
 int __cobalt_mq_timedsend(mqd_t uqd, const void __user *u_buf, size_t len,
 			  unsigned int prio, const void __user *u_ts,
 			  int (*fetch_timeout)(struct timespec64 *ts,
@@ -933,12 +940,26 @@ out:
 	return ret;
 }
 
+int __cobalt_mq_timedsend64(mqd_t uqd, const void __user *u_buf, size_t len,
+			    unsigned int prio, const void __user *u_ts)
+{
+	return __cobalt_mq_timedsend(uqd, u_buf, len, prio, u_ts,
+				     u_ts ? mq_fetch_timeout64 : NULL);
+}
+
 COBALT_SYSCALL(mq_timedsend, primary,
 	       (mqd_t uqd, const void __user *u_buf, size_t len,
 		unsigned int prio, const struct __user_old_timespec __user *u_ts))
 {
 	return __cobalt_mq_timedsend(uqd, u_buf, len, prio,
 				     u_ts, u_ts ? mq_fetch_timeout : NULL);
+}
+
+COBALT_SYSCALL(mq_timedsend64, primary,
+	       (mqd_t uqd, const void __user *u_buf, size_t len,
+		unsigned int prio, const struct __kernel_timespec __user *u_ts))
+{
+	return __cobalt_mq_timedsend64(uqd, u_buf, len, prio, u_ts);
 }
 
 int __cobalt_mq_timedreceive(mqd_t uqd, void __user *u_buf,
