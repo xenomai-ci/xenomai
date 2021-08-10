@@ -521,8 +521,13 @@ COBALT_IMPL(ssize_t, mq_timedreceive, (mqd_t q,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
+#ifdef __USE_TIME_BITS64
+	err = XENOMAI_SYSCALL5(sc_cobalt_mq_timedreceive64,
+			       q, buffer, &rlen, prio, timeout);
+#else
 	err = XENOMAI_SYSCALL5(sc_cobalt_mq_timedreceive,
 			       q, buffer, &rlen, prio, timeout);
+#endif
 
 	pthread_setcanceltype(oldtype, NULL);
 
