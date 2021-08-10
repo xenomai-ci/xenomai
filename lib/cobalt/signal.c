@@ -62,7 +62,11 @@ COBALT_IMPL(int, sigtimedwait, (const sigset_t *set, siginfo_t *si,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
+#ifdef __USE_TIME_BITS64
+	ret = XENOMAI_SYSCALL3(sc_cobalt_sigtimedwait64, set, si, timeout);
+#else
 	ret = XENOMAI_SYSCALL3(sc_cobalt_sigtimedwait, set, si, timeout);
+#endif
 	if (ret < 0) {
 		errno = -ret;
 		ret = -1;
