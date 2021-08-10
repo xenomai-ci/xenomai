@@ -1002,6 +1002,65 @@ static int protect_handover(void)
 	return 0;
 }
 
+static void *mutex_timed_locker_inv_timeout(void *arg)
+{
+	struct locker_context *p = arg;
+	int ret;
+
+	if (__F(ret, pthread_mutex_timedlock(p->mutex, (void *) 0xdeadbeef)) &&
+	    __Tassert(ret == -EFAULT))
+		return (void *)1;
+
+	return NULL;
+}
+
+static int check_timedlock_abstime_validation(void)
+{
+	struct locker_context args;
+	pthread_mutex_t mutex;
+	pthread_t tid;
+	void *status;
+	int ret;
+
+	if (!__T(ret, pthread_mutex_init(&mutex, NULL)))
+		return ret;
+
+	/*
+	 * We don't own the mutex yet, so no need to validate the timeout as
+	 * the mutex can be locked immediately.
+	 *
+	 * The second parameter of phtread_mutex_timedlock() is flagged as
+	 * __nonnull so we take an invalid address instead of NULL.
+	 */
+	if (!__T(ret, pthread_mutex_timedlock(&mutex, (void *) 0xdeadbeef)))
+		return ret;
+
+	/*
+	 * Create a second thread which will have to wait and therefore will
+	 * validate the (invalid) timeout
+	 */
+	args.mutex = &mutex;
+	ret = create_thread(&tid, SCHED_FIFO, THREAD_PRIO_LOW,
+			    mutex_timed_locker_inv_timeout, &args);
+
+	if (ret)
+		return ret;
+
+	if (!__T(ret, pthread_join(tid, &status)))
+		return ret;
+
+	if (!__T(ret, pthread_mutex_unlock(&mutex)))
+		return ret;
+
+	if (!__T(ret, pthread_mutex_destroy(&mutex)))
+		return ret;
+
+	if (!__Fassert(status == NULL))
+		return -EINVAL;
+
+	return 0;
+}
+
 /* Detect obviously wrong execution times. */
 static int check_time_limit(const struct timespec *start,
 			    xnticks_t limit_ns)
@@ -1065,6 +1124,7 @@ static int run_posix_mutex(struct smokey_test *t, int argc, char *const argv[])
 	do_test(protect_dynamic, MAX_100_MS);
 	do_test(protect_trylock, MAX_100_MS);
 	do_test(protect_handover, MAX_100_MS);
+	do_test(check_timedlock_abstime_validation, MAX_100_MS);
 
 	return 0;
 }

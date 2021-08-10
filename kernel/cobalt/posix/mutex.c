@@ -167,6 +167,11 @@ redo:
 	xnthread_commit_ceiling(curr);
 
 	if (xnsynch_owner_check(&mutex->synchbase, curr)) {
+		/* Check if we can take the mutex immediately */
+		ret = xnsynch_try_acquire(&mutex->synchbase);
+		if (ret != -EBUSY)
+			goto out;
+
 		if (fetch_timeout) {
 			xnlock_put_irqrestore(&nklock, s);
 			ret = fetch_timeout(&ts, u_ts);
