@@ -21,6 +21,7 @@
 #include "mutex.h"
 #include "cond.h"
 #include "clock.h"
+#include <cobalt/kernel/time.h>
 
 static int cobalt_mutex_init_inner(struct cobalt_mutex_shadow *shadow,
 				   struct cobalt_mutex *mutex,
@@ -76,7 +77,7 @@ int __cobalt_mutex_acquire_unchecked(struct xnthread *cur,
 	int ret;
 
 	if (ts) {
-		if (ts->tv_nsec >= ONE_BILLION)
+		if (!timespec64_valid(ts))
 			return -EINVAL;
 		ret = xnsynch_acquire(&mutex->synchbase, ts2ns(ts) + 1, XN_REALTIME);
 	} else
@@ -357,11 +358,31 @@ static inline int mutex_fetch_timeout(struct timespec64 *ts,
 	return u_ts == NULL ? -EFAULT : cobalt_get_u_timespec(ts, u_ts);
 }
 
+static inline int mutex_fetch_timeout64(struct timespec64 *ts,
+					const void __user *u_ts)
+{
+	return u_ts == NULL ? -EFAULT : cobalt_get_timespec64(ts, u_ts);
+}
+
+int __cobalt_mutex_timedlock64(struct cobalt_mutex_shadow __user *u_mx,
+			       const void __user *u_ts)
+{
+	return __cobalt_mutex_timedlock_break(u_mx, u_ts,
+					      mutex_fetch_timeout64);
+}
+
 COBALT_SYSCALL(mutex_timedlock, primary,
 	       (struct cobalt_mutex_shadow __user *u_mx,
 		const struct __user_old_timespec __user *u_ts))
 {
 	return __cobalt_mutex_timedlock_break(u_mx, u_ts, mutex_fetch_timeout);
+}
+
+COBALT_SYSCALL(mutex_timedlock64, primary,
+	       (struct cobalt_mutex_shadow __user *u_mx,
+		const struct __kernel_timespec __user *u_ts))
+{
+	return __cobalt_mutex_timedlock64(u_mx, u_ts);
 }
 
 COBALT_SYSCALL(mutex_unlock, nonrestartable,

@@ -128,6 +128,7 @@
 #define sc_cobalt_clock_nanosleep64		105
 #define sc_cobalt_clock_getres64		106
 #define sc_cobalt_clock_adjtime64		107
+#define sc_cobalt_mutex_timedlock64		108
 
 #define __NR_COBALT_SYSCALLS			128 /* Power of 2 */
 
