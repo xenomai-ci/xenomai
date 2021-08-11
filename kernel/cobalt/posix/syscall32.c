@@ -768,6 +768,14 @@ COBALT_SYSCALL32emu(monitor_wait, nonrestartable,
 	return __cobalt_monitor_wait(u_mon, event, tsp, u_ret);
 }
 
+COBALT_SYSCALL32emu(monitor_wait64, nonrestartable,
+		    (struct cobalt_monitor_shadow __user *u_mon, int event,
+		     const struct __kernel_timespec __user *u_ts,
+		     int __user *u_ret))
+{
+	return __cobalt_monitor_wait64(u_mon, event, u_ts, u_ret);
+}
+
 COBALT_SYSCALL32emu(event_wait, primary,
 		    (struct cobalt_event_shadow __user *u_event,
 		     unsigned int bits,

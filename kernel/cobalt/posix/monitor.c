@@ -20,6 +20,7 @@
 #include "clock.h"
 #include "monitor.h"
 #include <trace/events/cobalt-posix.h>
+#include <cobalt/kernel/time.h>
 
 /*
  * The Cobalt monitor is a double-wait condition object, serializing
@@ -218,8 +219,12 @@ int __cobalt_monitor_wait(struct cobalt_monitor_shadow __user *u_mon,
 
 	handle = cobalt_get_handle_from_user(&u_mon->handle);
 
-	if (ts)
+	if (ts) {
+		if (!timespec64_valid(ts))
+			return -EINVAL;
+
 		timeout = ts2ns(ts) + 1;
+	}
 
 	xnlock_get_irqsave(&nklock, s);
 
@@ -289,6 +294,24 @@ out:
 	return ret;
 }
 
+int __cobalt_monitor_wait64(struct cobalt_monitor_shadow __user *u_mon,
+			    int event,
+			    const struct __kernel_timespec __user *u_ts,
+			    int __user *u_ret)
+{
+	struct timespec64 ts, *tsp = NULL;
+	int ret;
+
+	if (u_ts) {
+		tsp = &ts;
+		ret = cobalt_get_timespec64(&ts, u_ts);
+		if (ret)
+			return ret;
+	}
+
+	return __cobalt_monitor_wait(u_mon, event, tsp, u_ret);
+}
+
 COBALT_SYSCALL(monitor_wait, nonrestartable,
 	       (struct cobalt_monitor_shadow __user *u_mon,
 	       int event, const struct __user_old_timespec __user *u_ts,
@@ -305,6 +328,13 @@ COBALT_SYSCALL(monitor_wait, nonrestartable,
 	}
 
 	return __cobalt_monitor_wait(u_mon, event, tsp, u_ret);
+}
+
+COBALT_SYSCALL(monitor_wait64, nonrestartable,
+	       (struct cobalt_monitor_shadow __user *u_mon, int event,
+		const struct __kernel_timespec __user *u_ts, int __user *u_ret))
+{
+	return __cobalt_monitor_wait64(u_mon, event, u_ts, u_ret);
 }
 
 COBALT_SYSCALL(monitor_sync, nonrestartable,

@@ -218,6 +218,12 @@ COBALT_SYSCALL32emu_DECL(monitor_wait,
 			  int event, const struct old_timespec32 __user *u_ts,
 			  int __user *u_ret));
 
+COBALT_SYSCALL32emu_DECL(monitor_wait64,
+			 (struct cobalt_monitor_shadow __user *u_mon,
+			  int event,
+			  const struct __kernel_timespec __user *u_ts,
+			  int __user *u_ret));
+
 COBALT_SYSCALL32emu_DECL(event_wait,
 			 (struct cobalt_event_shadow __user *u_event,
 			  unsigned int bits,
