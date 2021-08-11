@@ -258,8 +258,12 @@ int cobalt_monitor_wait(cobalt_monitor_t *mon, int event,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
-	ret = XENOMAI_SYSCALL4(sc_cobalt_monitor_wait,
-			       mon, event, ts, &opret);
+#ifdef __USE_TIME_BITS64
+	ret = XENOMAI_SYSCALL4(sc_cobalt_monitor_wait64, mon, event, ts,
+			       &opret);
+#else
+	ret = XENOMAI_SYSCALL4(sc_cobalt_monitor_wait, mon, event, ts, &opret);
+#endif
 
 	pthread_setcanceltype(oldtype, NULL);
 
