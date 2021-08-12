@@ -20,6 +20,7 @@
 #include "clock.h"
 #include "event.h"
 #include <trace/events/cobalt-posix.h>
+#include <cobalt/kernel/time.h>
 
 /*
  * Cobalt event notification services
@@ -119,9 +120,9 @@ int __cobalt_event_wait(struct cobalt_event_shadow __user *u_event,
 	handle = cobalt_get_handle_from_user(&u_event->handle);
 
 	if (ts) {
-		if ((unsigned long)ts->tv_nsec >= ONE_BILLION)
+		if (!timespec64_valid(ts))
 			return -EINVAL;
-	
+
 		timeout = ts2ns(ts);
 		if (timeout) {
 			timeout++;
@@ -189,6 +190,24 @@ out:
 	return ret;
 }
 
+int __cobalt_event_wait64(struct cobalt_event_shadow __user *u_event,
+			  unsigned int bits,
+			  unsigned int __user *u_bits_r,
+			  int mode, const struct __kernel_timespec __user *u_ts)
+{
+	struct timespec64 ts, *tsp = NULL;
+	int ret;
+
+	if (u_ts) {
+		tsp = &ts;
+		ret = cobalt_get_timespec64(&ts, u_ts);
+		if (ret)
+			return ret;
+	}
+
+	return __cobalt_event_wait(u_event, bits, u_bits_r, mode, tsp);
+}
+
 COBALT_SYSCALL(event_wait, primary,
 	       (struct cobalt_event_shadow __user *u_event,
 		unsigned int bits,
@@ -206,6 +225,15 @@ COBALT_SYSCALL(event_wait, primary,
 	}
 
 	return __cobalt_event_wait(u_event, bits, u_bits_r, mode, tsp);
+}
+
+COBALT_SYSCALL(event_wait64, primary,
+	       (struct cobalt_event_shadow __user *u_event,
+		unsigned int bits,
+		unsigned int __user *u_bits_r,
+		int mode, const struct __kernel_timespec __user *u_ts))
+{
+	return __cobalt_event_wait64(u_event, bits, u_bits_r, mode, u_ts);
 }
 
 COBALT_SYSCALL(event_sync, current,
@@ -278,7 +306,7 @@ COBALT_SYSCALL(event_destroy, current,
 	}
 
 	cobalt_event_reclaim(&event->resnode, s); /* drops lock */
-	
+
 	return 0;
 }
 

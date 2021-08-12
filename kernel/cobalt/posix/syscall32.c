@@ -795,6 +795,15 @@ COBALT_SYSCALL32emu(event_wait, primary,
 	return __cobalt_event_wait(u_event, bits, u_bits_r, mode, tsp);
 }
 
+COBALT_SYSCALL32emu(event_wait64, primary,
+		    (struct cobalt_event_shadow __user *u_event,
+		     unsigned int bits,
+		     unsigned int __user *u_bits_r,
+		     int mode, const struct __kernel_timespec __user *u_ts))
+{
+	return __cobalt_event_wait64(u_event, bits, u_bits_r, mode, u_ts);
+}
+
 COBALT_SYSCALL32emu(select, primary,
 		    (int nfds,
 		     compat_fd_set __user *u_rfds,
