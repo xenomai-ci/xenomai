@@ -354,6 +354,14 @@ COBALT_SYSCALL32emu(mq_timedreceive, primary,
 	return ret ?: cobalt_copy_to_user(u_len, &clen, sizeof(*u_len));
 }
 
+COBALT_SYSCALL32emu(mq_timedreceive64, primary,
+		    (mqd_t uqd, void __user *u_buf, ssize_t __user *u_len,
+		     unsigned int __user *u_prio,
+		     const struct __kernel_timespec __user *u_ts))
+{
+	return __cobalt_mq_timedreceive64(uqd, u_buf, u_len, u_prio, u_ts);
+}
+
 static inline int mq_fetch_timeout(struct timespec64 *ts,
 				   const void __user *u_ts)
 {
