@@ -483,8 +483,13 @@ int cobalt_event_wait(cobalt_event_t *event,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
+#ifdef __USE_TIME_BITS64
+	ret = XENOMAI_SYSCALL5(sc_cobalt_event_wait64,
+			       event, bits, bits_r, mode, timeout);
+#else
 	ret = XENOMAI_SYSCALL5(sc_cobalt_event_wait,
 			       event, bits, bits_r, mode, timeout);
+#endif
 
 	pthread_setcanceltype(oldtype, NULL);
 
