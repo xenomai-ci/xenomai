@@ -200,6 +200,18 @@ test \! x$debug_mode = x && AC_DEFINE(CONFIG_XENO_DEBUG,1,[config])
 AM_CONDITIONAL(XENO_DEBUG_FULL,[test x$debug_mode = xfull])
 test x$debug_mode = xfull && AC_DEFINE(CONFIG_XENO_DEBUG_FULL,1,[config])
 
+dnl Demo (default: on)
+
+AC_ARG_ENABLE(demo,
+	AS_HELP_STRING([--disable-demo], [Disable demonstration code]))
+AM_CONDITIONAL(XENO_ENABLE_DEMO,[test x$enable_demo != xno])
+
+dnl Testsuite (default: on)
+
+AC_ARG_ENABLE(testsuite,
+	AS_HELP_STRING([--disable-testsuite], [Disable testsuite]))
+AM_CONDITIONAL(XENO_ENABLE_TESTSUITE,[test x$enable_testsuite != xno])
+
 dnl Low resolution clock (default: off)
 
 unset lores_clock

@@ -6,9 +6,17 @@ SUBDIRS = 		\
 	config		\
 	include		\
 	scripts		\
-	testsuite	\
-	utils		\
+	utils
+
+if XENO_ENABLE_DEMO
+SUBDIRS += 		\
 	demo
+endif
+
+if XENO_ENABLE_TESTSUITE
+SUBDIRS += 		\
+	testsuite
+endif
 
 EXTRA_DIST = kernel debian
 
