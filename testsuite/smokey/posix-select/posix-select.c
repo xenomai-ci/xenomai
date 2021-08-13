@@ -140,6 +140,8 @@ static int run_posix_select(struct smokey_test *t, int argc, char *const argv[])
 	ret = test_status;
 out:
 	pthread_join(tcb, NULL);
-	
+
+	mq_unlink("/select_test_mq");
+
 	return ret;
 }
