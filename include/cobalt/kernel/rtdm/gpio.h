@@ -34,6 +34,7 @@ struct rtdm_gpio_pin {
 	char *name;
 	struct gpio_desc *desc;
 	nanosecs_abs_t timestamp;
+	bool monotonic_timestamp;
 };
 
 struct rtdm_gpio_chip {
