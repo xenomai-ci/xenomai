@@ -26,6 +26,7 @@ variables:
              autoconf autogen libtool pkg-config ccache flex libssl-dev"
   PACKAGES_arm: "gcc-${GCC_VERSION} gcc-${GCC_VERSION}-arm-linux-gnueabihf libc6-dev-armhf-cross"
   PACKAGES_arm64: "gcc-${GCC_VERSION} gcc-${GCC_VERSION}-aarch64-linux-gnu libc6-dev-arm64-cross"
+  PACKAGES_i386: "gcc-${GCC_VERSION} gcc-${GCC_VERSION}-i686-linux-gnu libc6-dev-i386-cross"
   PACKAGES_powerpc: "gcc-8 gcc-8-powerpc-linux-gnu libc6-dev-powerpc-cross"
   PACKAGES_x86: "gcc-${GCC_VERSION}"
   XENOMAI_IMAGES_BRANCH: "master"
@@ -38,7 +39,7 @@ variables:
     - apt install -y ${PACKAGES} ${!ARCH_PACKAGES}
     - REV=$(git ls-remote --tags --head --refs ${IPIPE_KERNEL} | sed -e "s|.*[[:space:]]refs/.*/||" | grep "${IPIPE_REV}" | sort -r -n -t - -k 5 -k 6 | head -1)
     - test -n "${REV}" || REV="${IPIPE_REV}"
-    - git clone --depth 1 --branch ${REV} ${IPIPE_KERNEL} ${KDIR}
+    - test -n "${IPIPE_KERNEL}" && git clone --depth 1 --branch ${REV} ${IPIPE_KERNEL} ${KDIR}
     - case "${ARCH}" in
       "arm64")
       export CROSS_COMPILE=aarch64-linux-gnu-;
@@ -49,6 +50,11 @@ variables:
       export CROSS_COMPILE=arm-linux-gnueabihf-;
       export CONFIGURE_OPTS="--host=arm-linux-gnueabihf --with-cc=arm-linux-gnueabihf-gcc";
       update-alternatives --install /usr/bin/arm-linux-gnueabihf-gcc arm-linux-gnueabihf-gcc /usr/bin/arm-linux-gnueabihf-gcc-${GCC_VERSION} 800;
+      ;;
+      "i386")
+      export CROSS_COMPILE=i686-linux-gnu-;
+      export CONFIGURE_OPTS="--host=i686-linux-gnu --with-cc=i686-linux-gnu-gcc";
+      update-alternatives --install /usr/bin/i686-linux-gnu-gcc i686-linux-gnu-gcc /usr/bin/i686-linux-gnu-gcc-${GCC_VERSION} 800;
       ;;
       "powerpc")
       export GCC_VERSION=8
@@ -250,6 +256,17 @@ x86-4.4-cip-release:
      IPIPE_REV: ipipe-core-4.4..*-cip.*-x86-.*
      IPIPE_KERNEL: ${IPIPE_MIRROR_URL}/ipipe.git
      KERNEL_DEFCONFIG: x86_64_defconfig
+
+i386-userland:
+  extends: .build
+  variables:
+    ARCH: i386
+  script:
+    - export CCACHE_DIR=$(pwd)/.ccache
+    - scripts/bootstrap
+    - ./configure --enable-smp ${CONFIGURE_OPTS}
+    - make -j $(nproc)
+    - ccache -s
 
 powerpc-4.19-release:
   extends: .build
