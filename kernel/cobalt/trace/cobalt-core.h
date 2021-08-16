@@ -26,6 +26,7 @@
 #include <linux/tracepoint.h>
 #include <linux/math64.h>
 #include <cobalt/kernel/timer.h>
+#include <cobalt/kernel/registry.h>
 #include <cobalt/uapi/kernel/types.h>
 
 struct xnsched;
@@ -147,6 +148,23 @@ DECLARE_EVENT_CLASS(timer_event,
 	),
 
 	TP_printk("timer=%p", __entry->timer)
+);
+
+DECLARE_EVENT_CLASS(registry_event,
+	TP_PROTO(const char *key, void *addr),
+	TP_ARGS(key, addr),
+
+	TP_STRUCT__entry(
+		__string(key, key ?: "(anon)")
+		__field(void *, addr)
+	),
+
+	TP_fast_assign(
+		__assign_str(key, key ?: "(anon)");
+		__entry->addr = addr;
+	),
+
+	TP_printk("key=%s, addr=%p", __get_str(key), __entry->addr)
 );
 
 TRACE_EVENT(cobalt_schedule,
@@ -776,6 +794,21 @@ DEFINE_EVENT(synch_post_event, cobalt_synch_flush,
 DEFINE_EVENT(synch_post_event, cobalt_synch_forget,
 	TP_PROTO(struct xnsynch *synch),
 	TP_ARGS(synch)
+);
+
+DEFINE_EVENT(registry_event, cobalt_registry_enter,
+	TP_PROTO(const char *key, void *addr),
+	TP_ARGS(key, addr)
+);
+
+DEFINE_EVENT(registry_event, cobalt_registry_remove,
+	TP_PROTO(const char *key, void *addr),
+	TP_ARGS(key, addr)
+);
+
+DEFINE_EVENT(registry_event, cobalt_registry_unlink,
+	TP_PROTO(const char *key, void *addr),
+	TP_ARGS(key, addr)
 );
 
 TRACE_EVENT(cobalt_tick_shot,

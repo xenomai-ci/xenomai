@@ -23,6 +23,7 @@
 #include <cobalt/kernel/thread.h>
 #include <cobalt/kernel/assert.h>
 #include <pipeline/sirq.h>
+#include <trace/events/cobalt-core.h>
 
 /**
  * @ingroup cobalt_core
@@ -650,6 +651,7 @@ int xnregistry_enter(const char *key, void *objaddr,
 	nr_active_objects++;
 	object->objaddr = objaddr;
 	object->cstamp = ++next_object_stamp;
+	trace_cobalt_registry_enter(key, objaddr);
 #ifdef CONFIG_XENO_OPT_VFILE
 	object->pnode = NULL;
 #endif
@@ -831,6 +833,8 @@ int xnregistry_remove(xnhandle_t handle)
 		goto unlock_and_exit;
 	}
 
+	trace_cobalt_registry_remove(object->key, object->objaddr);
+
 	objaddr = object->objaddr;
 	object->objaddr = NULL;
 	object->cstamp = 0;
@@ -896,6 +900,8 @@ int xnregistry_unlink(const char *key)
 		ret = -ESRCH;
 		goto unlock_and_exit;
 	}
+
+	trace_cobalt_registry_unlink(object->key, object->objaddr);
 
 	ret = registry_hash_remove(object);
 	if (ret < 0)
