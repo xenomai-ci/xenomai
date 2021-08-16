@@ -84,7 +84,7 @@ asm (".L__X'%ebx = 1\n\t"
 		DOSYSCALL					\
 		RESTOREARGS_##nr				\
 		: "=a" (__resultvar)				\
-		: "i" (__xn_syscode(op)) ASMFMT_##nr(args)	\
+		: "g" (__xn_syscode(op)) ASMFMT_##nr(args)	\
 		: "memory", "cc");				\
 	(int) __resultvar;					\
 })
@@ -98,7 +98,7 @@ asm (".L__X'%ebx = 1\n\t"
 		DOSYSCALLSAFE					\
 		RESTOREARGS_##nr				\
 		: "=a" (__resultvar)				\
-		: "i" (__xn_syscode(op)) ASMFMT_##nr(args)	\
+		: "g" (__xn_syscode(op)) ASMFMT_##nr(args)	\
 		: "memory", "cc");				\
 	(int) __resultvar;					\
 })
