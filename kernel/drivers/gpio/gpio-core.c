@@ -42,7 +42,10 @@ static int gpio_pin_interrupt(rtdm_irq_t *irqh)
 
 	pin = rtdm_irq_get_arg(irqh, struct rtdm_gpio_pin);
 
-	pin->timestamp = rtdm_clock_read_monotonic();
+	if (pin->monotonic_timestamp)
+		pin->timestamp = rtdm_clock_read_monotonic();
+	else
+		pin->timestamp = rtdm_clock_read();
 	rtdm_event_signal(&pin->event);
 
 	return RTDM_IRQ_HANDLED;
@@ -189,11 +192,13 @@ static int gpio_pin_ioctl_nrt(struct rtdm_fd *fd,
 		gpio_free(gpio);
 		chan->requested = false;
 		break;
-	case GPIO_RTIOC_TS:
+	case GPIO_RTIOC_TS_MONO:
+	case GPIO_RTIOC_TS_REAL:
 		ret = rtdm_safe_copy_from_user(fd, &val, arg, sizeof(val));
 		if (ret)
 			return ret;
 		chan->want_timestamp = !!val;
+		pin->monotonic_timestamp = request == GPIO_RTIOC_TS_MONO;
 		break;
 	default:
 		return -EINVAL;
@@ -228,8 +233,11 @@ static ssize_t gpio_pin_read_rt(struct rtdm_fd *fd,
 			if (ret)
 				return ret;
 			rdo.timestamp = pin->timestamp;
-		} else
+		} else if (pin->monotonic_timestamp) {
 			rdo.timestamp = rtdm_clock_read_monotonic();
+		} else {
+			rdo.timestamp = rtdm_clock_read();
+		}
 
 		len = sizeof(rdo);
 		rdo.value = gpiod_get_raw_value(pin->desc);
@@ -489,7 +497,10 @@ int rtdm_gpiochip_post_event(struct rtdm_gpio_chip *rgc,
 		return -EINVAL;
 
 	pin = rgc->pins + offset;
-	pin->timestamp = rtdm_clock_read_monotonic();
+	if (pin->monotonic_timestamp)
+		pin->timestamp = rtdm_clock_read_monotonic();
+	else
+		pin->timestamp = rtdm_clock_read();
 	rtdm_event_signal(&pin->event);
 	
 	return 0;
