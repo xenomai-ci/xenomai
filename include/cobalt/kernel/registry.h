@@ -195,6 +195,8 @@ extern struct xnpnode_ops xnregistry_vfsnap_ops;
 
 extern struct xnpnode_ops xnregistry_vlink_ops;
 
+extern struct xnpnode_ops xnregistry_vfreg_ops;
+
 /** @} */
 
 #endif /* !_COBALT_KERNEL_REGISTRY_H */
