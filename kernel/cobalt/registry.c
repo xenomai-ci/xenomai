@@ -403,6 +403,7 @@ static int registry_export_vfreg(struct xnobject *object,
 	object->vfile_u.vfreg.privsz = p->vfile.privsz;
 	object->vfile_u.vfreg.ops = p->vfile.ops;
 	object->vfile_u.vfreg.entry.lockops = p->vfile.lockops;
+	object->vfile_u.vfreg.entry.refcnt = 0;
 
 	ret = xnvfile_init_regular(object->key, &object->vfile_u.vfreg,
 				   &pnode->vdir);
