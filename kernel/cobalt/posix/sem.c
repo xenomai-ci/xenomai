@@ -62,7 +62,6 @@ int __cobalt_sem_destroy(xnhandle_t handle)
 	}
 
 	cobalt_mark_deleted(sem);
-	xnregistry_remove(sem->resnode.handle);
 	if (!sem->pathname)
 		cobalt_del_resource(&sem->resnode);
 	if (xnsynch_destroy(&sem->synchbase) == XNSYNCH_RESCHED) {
@@ -72,6 +71,7 @@ int __cobalt_sem_destroy(xnhandle_t handle)
 
 	xnlock_put_irqrestore(&nklock, s);
 
+	xnregistry_remove(sem->resnode.handle);
 	if (sem->pathname)
 		putname(sem->pathname);
 
