@@ -83,6 +83,8 @@ static struct xnsynch yield_sync;
 
 LIST_HEAD(cobalt_global_thread_list);
 
+DEFINE_XNPTREE(posix_ptree, "posix");
+
 struct cobalt_resources cobalt_global_resources = {
 	.condq = LIST_HEAD_INIT(cobalt_global_resources.condq),
 	.mutexq = LIST_HEAD_INIT(cobalt_global_resources.mutexq),

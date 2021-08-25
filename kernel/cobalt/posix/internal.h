@@ -47,6 +47,8 @@
 
 #define cobalt_mark_deleted(t) ((t)->magic = ~(t)->magic)
 
+extern struct xnptree posix_ptree;
+
 static inline xnhandle_t cobalt_get_handle_from_user(xnhandle_t *u_h)
 {
 	xnhandle_t handle;
