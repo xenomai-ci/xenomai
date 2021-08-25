@@ -28,6 +28,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <semaphore.h>
 #include <mqueue.h>
 #include <signal.h>
@@ -70,6 +71,27 @@ const char *memdev[] = {
 };
 
 static int memdevfd[3];
+
+static int procfs_exists(const char *type, const char *name)
+{
+	struct stat s;
+	char path[128];
+	int ret;
+
+	/* Ignore if the kernel seems to be compiled without procfs support */
+	if (stat("/proc/xenomai", &s) || !S_ISDIR(s.st_mode))
+		return 0;
+
+	/* Give the core some time to populate /proc with the new entry */
+	usleep(100000);
+
+	ret = snprintf(path, 128, "%s/%s/%s", "/proc/xenomai/registry/posix",
+		       type, &name[1]);
+	if (ret < 0)
+		return -EINVAL;
+
+	return smokey_check_errno(stat(path, &s));
+}
 
 static unsigned long long get_used(void)
 {
@@ -121,6 +143,10 @@ static inline int subprocess_leak(void)
 	if (ret)
 		return ret;
 
+	ret = procfs_exists("sem", SEM_NAME);
+	if (ret)
+		return ret;
+
 	sevt.sigev_notify = SIGEV_THREAD_ID;
 	sevt.sigev_signo = SIGALRM;
 	sevt.sigev_notify_thread_id = syscall(__NR_gettid);
@@ -130,6 +156,10 @@ static inline int subprocess_leak(void)
 
 	ret = smokey_check_errno(mq_open(MQ_NAME, O_RDWR | O_CREAT, 0644, NULL));
 	if (ret < 0)
+		return ret;
+
+	ret = procfs_exists("mqueue", MQ_NAME);
+	if (ret)
 		return ret;
 
 	return 0;
