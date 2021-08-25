@@ -26,6 +26,38 @@
 #include "sem.h"
 #include <trace/events/cobalt-posix.h>
 
+#ifdef CONFIG_XENO_OPT_VFILE
+
+static int sem_vfile_show(struct xnvfile_regular_iterator *it, void *data)
+{
+	return 0;
+}
+
+static struct xnvfile_regular_ops sem_vfile_ops = {
+	.show = sem_vfile_show,
+};
+
+static struct xnpnode_regular __sem_pnode = {
+	.node = {
+		.dirname = "sem",
+		.root = &posix_ptree,
+		.ops = &xnregistry_vfreg_ops,
+	},
+	.vfile = {
+		.ops = &sem_vfile_ops,
+	},
+};
+
+#else /* !CONFIG_XENO_OPT_VFILE */
+
+static struct xnpnode_link __sem_pnode = {
+	.node = {
+		.dirname = "sem",
+	}
+};
+
+#endif /* !CONFIG_XENO_OPT_VFILE */
+
 static inline struct cobalt_resources *sem_kqueue(struct cobalt_sem *sem)
 {
 	int pshared = !!(sem->flags & SEM_PSHARED);
@@ -134,7 +166,8 @@ __cobalt_sem_init(const char *name, struct cobalt_sem_shadow *sm,
 		goto err_lock_put;
 	}
 
-	ret = xnregistry_enter(name ?: "", sem, &sem->resnode.handle, NULL);
+	ret = xnregistry_enter(name ?: "", sem, &sem->resnode.handle,
+			       name ? &__sem_pnode.node : NULL);
 	if (ret < 0)
 		goto err_lock_put;
 
