@@ -31,9 +31,10 @@ static inline void xnarch_get_latencies(struct xnclock_gravity *p)
 #else
 	sched_latency = 5000;
 #endif
-	p->user = sched_latency;
-	p->kernel = CONFIG_XENO_OPT_TIMING_KSCHEDLAT;
-	p->irq = CONFIG_XENO_OPT_TIMING_IRQLAT;
+	p->user = xnclock_ns_to_ticks(&nkclock, sched_latency);
+	p->kernel = xnclock_ns_to_ticks(&nkclock,
+					CONFIG_XENO_OPT_TIMING_KSCHEDLAT);
+	p->irq = xnclock_ns_to_ticks(&nkclock, CONFIG_XENO_OPT_TIMING_IRQLAT);
 }
 
 #endif /* !_COBALT_ARM_DOVETAIL_CALIBRATION_H */
