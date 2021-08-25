@@ -87,6 +87,39 @@ static struct mq_attr default_attr = {
 
 static LIST_HEAD(cobalt_mqq);
 
+#ifdef CONFIG_XENO_OPT_VFILE
+
+static int mq_vfile_show(struct xnvfile_regular_iterator *it, void *data)
+{
+	return 0;
+}
+
+static struct xnvfile_regular_ops mq_vfile_ops = {
+	.show = mq_vfile_show,
+};
+
+static struct xnpnode_regular __mq_pnode = {
+	.node = {
+		.dirname = "mqueue",
+		.root = &posix_ptree,
+		.ops = &xnregistry_vfreg_ops,
+	},
+	.vfile = {
+		.ops = &mq_vfile_ops,
+	},
+};
+
+#else /* !CONFIG_XENO_OPT_VFILE */
+
+static struct xnpnode_link __mq_pnode = {
+	.node = {
+		.dirname = "mqueue",
+	}
+};
+
+#endif /* !CONFIG_XENO_OPT_VFILE */
+
+
 static inline struct cobalt_msg *mq_msg_alloc(struct cobalt_mq *mq)
 {
 	if (list_empty(&mq->avail))
@@ -352,7 +385,8 @@ static int mq_open(int uqd, const char *name, int oflags,
 		}
 
 		xnlock_get_irqsave(&nklock, s);
-		err = xnregistry_enter(mq->name, mq, &mq->handle, NULL);
+		err = xnregistry_enter(mq->name, mq, &mq->handle,
+				       &__mq_pnode.node);
 		if (err < 0)
 			--mq->refs;
 		else
