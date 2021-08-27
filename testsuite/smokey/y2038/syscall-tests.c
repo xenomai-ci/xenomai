@@ -11,6 +11,7 @@
  */
 #include <asm/xenomai/syscall.h>
 #include <smokey/smokey.h>
+#include <sys/utsname.h>
 #include <mqueue.h>
 
 smokey_test_plugin(y2038, SMOKEY_NOARGS, "Validate correct y2038 support");
@@ -989,9 +990,35 @@ static int test_sc_cobalt_event_wait64(void)
 	return 0;
 }
 
+static int check_kernel_version(void)
+{
+	int ret, major, minor;
+	struct utsname uts;
+
+	ret = smokey_check_errno(uname(&uts));
+	if (ret)
+		return ret;
+
+	ret = sscanf(uts.release, "%d.%d", &major, &minor);
+	if (!smokey_assert(ret == 2))
+		return -EINVAL;
+
+	/* We need a kernel with y2038 support, 5.4 onwards */
+	if (!(major > 5 || (major == 5 && minor >= 4))) {
+		smokey_note("y2038: skipped. (no y2038 safe kernel)");
+		return 1;
+	}
+
+	return 0;
+}
+
 static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 {
 	int ret;
+
+	ret = check_kernel_version();
+	if (ret)
+		return (ret < 0) ? ret : 0; /* skip if no y2038 safe kernel */
 
 	ret = test_sc_cobalt_sem_timedwait64();
 	if (ret)
