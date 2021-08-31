@@ -619,7 +619,7 @@ int main(int argc, char **argv)
 			goto out;
 		}
 
-		ret = ioctl(ti.fd_dev_intr, GPIO_RTIOC_TS, &value);
+		ret = ioctl(ti.fd_dev_intr, GPIO_RTIOC_TS_MONO, &value);
 		if (ret) {
 			printf("ioctl gpio port ts, failed\n");
 			goto out;
