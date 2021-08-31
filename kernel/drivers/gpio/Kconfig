@@ -57,6 +57,13 @@ config XENO_DRIVERS_GPIO_OMAP
 	Enables support for the GPIO controller available from
 	OMAP family SOC.
 
+config XENO_DRIVERS_GPIO_CHERRYVIEW
+	depends on PINCTRL_CHERRYVIEW
+	tristate "Support for Cherryview GPIOs"
+	help
+
+	Enables support for the Intel Cherryview GPIO controller
+
 config XENO_DRIVERS_GPIO_DEBUG
        bool "Enable GPIO core debugging features"
 
