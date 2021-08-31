@@ -70,9 +70,8 @@ int rtdm_gpiochip_scan_of(struct device_node *from,
 int rtdm_gpiochip_scan_array_of(struct device_node *from,
 				const char *compat[],
 				int nentries, int type);
-
-void rtdm_gpiochip_remove_of(int type);
-
 #endif
+
+void rtdm_gpiochip_remove_by_type(int type);
 
 #endif /* !_COBALT_RTDM_GPIO_H */

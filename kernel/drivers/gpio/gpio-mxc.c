@@ -35,7 +35,7 @@ module_init(mxc_gpio_init);
 
 static void __exit mxc_gpio_exit(void)
 {
-	rtdm_gpiochip_remove_of(RTDM_SUBCLASS_MXC);
+	rtdm_gpiochip_remove_by_type(RTDM_SUBCLASS_MXC);
 }
 module_exit(mxc_gpio_exit);
 

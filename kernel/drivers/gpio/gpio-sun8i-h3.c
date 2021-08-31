@@ -36,7 +36,7 @@ module_init(h3_gpio_init);
 
 static void __exit h3_gpio_exit(void)
 {
-	rtdm_gpiochip_remove_of(RTDM_SUBCLASS_H3);
+	rtdm_gpiochip_remove_by_type(RTDM_SUBCLASS_H3);
 }
 module_exit(h3_gpio_exit);
 

@@ -29,7 +29,7 @@ module_init(bcm2835_gpio_init);
 
 static void __exit bcm2835_gpio_exit(void)
 {
-	rtdm_gpiochip_remove_of(RTDM_SUBCLASS_BCM2835);
+	rtdm_gpiochip_remove_by_type(RTDM_SUBCLASS_BCM2835);
 }
 module_exit(bcm2835_gpio_exit);
 

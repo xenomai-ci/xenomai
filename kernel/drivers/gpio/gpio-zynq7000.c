@@ -32,7 +32,7 @@ module_init(zynq7000_gpio_init);
 
 static void __exit zynq7000_gpio_exit(void)
 {
-	rtdm_gpiochip_remove_of(RTDM_SUBCLASS_ZYNQ7000);
+	rtdm_gpiochip_remove_by_type(RTDM_SUBCLASS_ZYNQ7000);
 }
 module_exit(zynq7000_gpio_exit);
 

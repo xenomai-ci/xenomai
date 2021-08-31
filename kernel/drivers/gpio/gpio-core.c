@@ -629,7 +629,9 @@ int rtdm_gpiochip_scan_array_of(struct device_node *from,
 }
 EXPORT_SYMBOL_GPL(rtdm_gpiochip_scan_array_of);
 
-void rtdm_gpiochip_remove_of(int type)
+#endif /* CONFIG_OF */
+
+void rtdm_gpiochip_remove_by_type(int type)
 {
 	struct rtdm_gpio_chip *rgc, *n;
 
@@ -646,6 +648,4 @@ void rtdm_gpiochip_remove_of(int type)
 
 	mutex_unlock(&chip_lock);
 }
-EXPORT_SYMBOL_GPL(rtdm_gpiochip_remove_of);
-
-#endif /* CONFIG_OF */
+EXPORT_SYMBOL_GPL(rtdm_gpiochip_remove_by_type);

@@ -36,7 +36,7 @@ module_init(omap_gpio_init);
 
 static void __exit omap_gpio_exit(void)
 {
-	rtdm_gpiochip_remove_of(RTDM_SUBCLASS_OMAP);
+	rtdm_gpiochip_remove_by_type(RTDM_SUBCLASS_OMAP);
 }
 module_exit(omap_gpio_exit);
 

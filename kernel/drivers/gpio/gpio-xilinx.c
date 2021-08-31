@@ -32,7 +32,7 @@ module_init(xilinx_gpio_init);
 
 static void __exit xilinx_gpio_exit(void)
 {
-	rtdm_gpiochip_remove_of(RTDM_SUBCLASS_XILINX);
+	rtdm_gpiochip_remove_by_type(RTDM_SUBCLASS_XILINX);
 }
 module_exit(xilinx_gpio_exit);
 
