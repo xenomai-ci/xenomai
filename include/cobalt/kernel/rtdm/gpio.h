@@ -62,6 +62,11 @@ int rtdm_gpiochip_add_by_name(struct rtdm_gpio_chip *rgc,
 int rtdm_gpiochip_post_event(struct rtdm_gpio_chip *rgc,
 			     unsigned int offset);
 
+int rtdm_gpiochip_find(struct device_node *from, const char *label, int type);
+
+int rtdm_gpiochip_array_find(struct device_node *from, const char *label[],
+			     int nentries, int type);
+
 #ifdef CONFIG_OF
 
 int rtdm_gpiochip_scan_of(struct device_node *from,

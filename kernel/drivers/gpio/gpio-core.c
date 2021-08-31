@@ -531,6 +531,46 @@ int rtdm_gpiochip_add_by_name(struct rtdm_gpio_chip *rgc,
 }
 EXPORT_SYMBOL_GPL(rtdm_gpiochip_add_by_name);
 
+int rtdm_gpiochip_find(struct device_node *from, const char *label, int type)
+{
+	struct rtdm_gpio_chip *rgc;
+	struct gpio_chip *chip;
+	int ret = -ENODEV;
+
+	if (!rtdm_available())
+		return -ENOSYS;
+
+	chip = find_chip_by_name(label);
+	if (chip == NULL)
+		return ret;
+
+	ret = 0;
+	rgc = rtdm_gpiochip_alloc(chip, type);
+	if (IS_ERR(rgc))
+		ret = PTR_ERR(rgc);
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(rtdm_gpiochip_find);
+
+int rtdm_gpiochip_array_find(struct device_node *from, const char *label[],
+			     int nentries, int type)
+{
+	int ret = -ENODEV, _ret, n;
+
+	for (n = 0; n < nentries; n++) {
+		_ret = rtdm_gpiochip_find(from, label[n], type);
+		if (_ret) {
+			if (_ret != -ENODEV)
+				return _ret;
+		} else
+			ret = 0;
+	}
+
+	return ret;
+}
+EXPORT_SYMBOL_GPL(rtdm_gpiochip_array_find);
+
 #ifdef CONFIG_OF
 
 #include <linux/of_platform.h>
