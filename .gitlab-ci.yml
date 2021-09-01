@@ -149,6 +149,7 @@ variables:
     - ./scripts/config -e XENO_DRIVERS_ANALOGY_S526
     - ./scripts/config -e XENO_DRIVERS_RTIPC
     - ./scripts/config -e XENO_DRIVERS_UDD
+    - ./scripts/config -e GPIOLIB
     - ./scripts/config -e XENO_DRIVERS_GPIO
     - ./scripts/config -e XENO_DRIVERS_GPIO_BCM2835
     - ./scripts/config -e XENO_DRIVERS_GPIO_MXC
