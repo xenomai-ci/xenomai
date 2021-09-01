@@ -161,6 +161,9 @@ variables:
     - ./scripts/config -e XENO_DRIVERS_GPIO_ZYNQ7000
     - ./scripts/config -e XENO_DRIVERS_GPIO_XILINX
     - ./scripts/config -e XENO_DRIVERS_GPIO_OMAP
+    - ./scripts/config -e PINCTRL
+    - ./scripts/config -e PINCTRL_CHERRYVIEW
+    - ./scripts/config -e XENO_DRIVERS_GPIO_CHERRYVIEW
     - ./scripts/config -e XENO_DRIVERS_GPIO_DEBUG
     - ./scripts/config -e XENO_DRIVERS_GPIOPWM
     - ./scripts/config -e XENO_DRIVERS_SPI_BCM2835
