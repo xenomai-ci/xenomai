@@ -482,6 +482,19 @@ static void print_hist(void)
 {
 	int i;
 
+	if (ti.total_cycles < (ti.max_cycles - 1)) {
+		/*
+		 * Test is interrupted. Force to calculate
+		 * even though it is not accurate but to avoid
+		 * large latency surprising us.
+		 */
+		printf("\nTest is interrupted and exit exceptionally\n");
+		printf("Please run again till it exit normally\n");
+
+		ti.ts.inner_avg /= (ti.total_cycles * 2);
+		ti.ts.outer_avg /= (ti.total_cycles * 2);
+
+	}
 	printf("\n");
 	printf("# Inner Loop Histogram\n");
 	printf("# Inner Loop latency is the latency in kernel space\n"
