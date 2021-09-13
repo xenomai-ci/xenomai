@@ -167,7 +167,7 @@ COBALT_SYSCALL(mmap, lostage,
 	return cobalt_copy_to_user(u_addrp, &u_addr, sizeof(u_addr));
 }
 
-int __cobalt_first_fd_valid_p(fd_set *fds[XNSELECT_MAX_TYPES], int nfds)
+static int __cobalt_first_fd_valid_p(fd_set *fds[XNSELECT_MAX_TYPES], int nfds)
 {
 	int i, fd;
 
@@ -181,8 +181,8 @@ int __cobalt_first_fd_valid_p(fd_set *fds[XNSELECT_MAX_TYPES], int nfds)
 	return 1;
 }
 
-int __cobalt_select_bind_all(struct xnselector *selector,
-			     fd_set *fds[XNSELECT_MAX_TYPES], int nfds)
+static int __cobalt_select_bind_all(struct xnselector *selector,
+				    fd_set *fds[XNSELECT_MAX_TYPES], int nfds)
 {
 	bool first_fd = true;
 	unsigned fd, type;

@@ -23,11 +23,6 @@
 #include <xenomai/posix/syscall.h>
 #include <cobalt/kernel/select.h>
 
-int __cobalt_first_fd_valid_p(fd_set *fds[XNSELECT_MAX_TYPES], int nfds);
-
-int __cobalt_select_bind_all(struct xnselector *selector,
-			     fd_set *fds[XNSELECT_MAX_TYPES], int nfds);
-
 int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 		    void __user *u_xfds, void __user *u_tv, bool compat);
 
