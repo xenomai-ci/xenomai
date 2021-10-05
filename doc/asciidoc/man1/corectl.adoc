@@ -8,7 +8,7 @@
 // Xenomai distribution.
 //
 //
-AUTOTUNE(1)
+CORECTL(1)
 ==========
 :doctype: manpage
 :revdate: 2015/02/14
