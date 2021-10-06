@@ -272,7 +272,12 @@ COBALT_IMPL(int, recvmmsg, (int fd, struct mmsghdr *msgvec, unsigned int vlen,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
+#ifdef __USE_TIME_BITS64
+	ret = XENOMAI_SYSCALL5(sc_cobalt_recvmmsg64, fd, msgvec,
+				vlen, flags, timeout);
+#else
 	ret = XENOMAI_SYSCALL5(sc_cobalt_recvmmsg, fd, msgvec, vlen, flags, timeout);
+#endif
 
 	pthread_setcanceltype(oldtype, NULL);
 
