@@ -32,7 +32,12 @@ static inline void fp_regs_set(int features, unsigned int val)
 		/* vldm %0!, {d0-d15},
 		   AKA fldmiax %0!, {d0-d15} */
 		__asm__ __volatile__("ldc p11, cr0, [%0],#32*4":
-				     "=r"(i): "0"(&e[0]): "memory");
+				     "=r"(i)
+				     : "0"(&e[0])
+				     : "d0", "d1", "d2", "d3", "d4", "d5",
+				       "d6", "d7", "d8", "d9", "d10", "d11",
+				       "d12", "d13", "d14", "d15",
+				       "memory");
 	}
 }
 
