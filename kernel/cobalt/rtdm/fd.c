@@ -28,6 +28,7 @@
 #include <cobalt/kernel/registry.h>
 #include <cobalt/kernel/lock.h>
 #include <cobalt/kernel/ppd.h>
+#include <cobalt/kernel/time.h>
 #include <pipeline/inband_work.h>
 #include <trace/events/cobalt-rtdm.h>
 #include <rtdm/fd.h>
@@ -689,7 +690,7 @@ int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		if (ret)
 			goto fail;
 
-		if ((unsigned long)ts.tv_nsec >= ONE_BILLION) {
+		if (!timespec64_valid(&ts)) {
 			ret = -EINVAL;
 			goto fail;
 		}
@@ -752,6 +753,24 @@ out:
 
 	return ret;
 }
+
+static inline int __rtdm_fetch_timeout64(struct timespec64 *ts,
+					 const void __user *u_ts)
+{
+	return u_ts == NULL ? -EFAULT : cobalt_get_timespec64(ts, u_ts);
+}
+
+int __rtdm_fd_recvmmsg64(int ufd, void __user *u_msgvec, unsigned int vlen,
+			 unsigned int flags, void __user *u_timeout,
+			 int (*get_mmsg)(struct mmsghdr *mmsg,
+					 void __user *u_mmsg),
+			 int (*put_mmsg)(void __user **u_mmsg_p,
+					 const struct mmsghdr *mmsg))
+{
+	return __rtdm_fd_recvmmsg(ufd, u_msgvec, vlen, flags, u_timeout,
+				  get_mmsg, put_mmsg, __rtdm_fetch_timeout64);
+}
+
 
 ssize_t rtdm_fd_sendmsg(int ufd, const struct user_msghdr *msg, int flags)
 {

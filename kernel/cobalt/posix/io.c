@@ -21,6 +21,7 @@
 #include <linux/fs.h>
 #include <cobalt/kernel/compat.h>
 #include <cobalt/kernel/ppd.h>
+#include <cobalt/kernel/time.h>
 #include <xenomai/rtdm/internal.h>
 #include "process.h"
 #include "internal.h"
@@ -119,6 +120,14 @@ COBALT_SYSCALL(recvmmsg, primary,
 {
 	return __rtdm_fd_recvmmsg(fd, u_msgvec, vlen, flags, u_timeout,
 				  get_mmsg, put_mmsg, get_timespec);
+}
+
+COBALT_SYSCALL(recvmmsg64, primary,
+	       (int fd, struct mmsghdr __user *u_msgvec, unsigned int vlen,
+		unsigned int flags, struct __kernel_timespec __user *u_timeout))
+{
+	return __rtdm_fd_recvmmsg64(fd, u_msgvec, vlen, flags, u_timeout,
+				    get_mmsg, put_mmsg);
 }
 
 COBALT_SYSCALL(sendmsg, handover,

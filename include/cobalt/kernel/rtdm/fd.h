@@ -382,6 +382,11 @@ int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		       int (*put_mmsg)(void __user **u_mmsg_p, const struct mmsghdr *mmsg),
 		       int (*get_timespec)(struct timespec64 *ts, const void __user *u_ts));
 
+int __rtdm_fd_recvmmsg64(int ufd, void __user *u_msgvec, unsigned int vlen,
+			 unsigned int flags, void __user *u_timeout,
+			 int (*get_mmsg)(struct mmsghdr *mmsg, void __user *u_mmsg),
+			 int (*put_mmsg)(void __user **u_mmsg_p, const struct mmsghdr *mmsg));
+
 ssize_t rtdm_fd_sendmsg(int ufd, const struct user_msghdr *msg,
 			int flags);
 

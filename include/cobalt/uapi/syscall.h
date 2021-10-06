@@ -134,6 +134,7 @@
 #define sc_cobalt_sigtimedwait64		111
 #define sc_cobalt_monitor_wait64		112
 #define sc_cobalt_event_wait64			113
+#define sc_cobalt_recvmmsg64			114
 
 #define __NR_COBALT_SYSCALLS			128 /* Power of 2 */
 

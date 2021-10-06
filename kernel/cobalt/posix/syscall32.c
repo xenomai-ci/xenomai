@@ -860,6 +860,15 @@ COBALT_SYSCALL32emu(recvmmsg, primary,
 				  get_timespec32);
 }
 
+COBALT_SYSCALL32emu(recvmmsg64, primary,
+		    (int ufd, struct compat_mmsghdr __user *u_msgvec,
+		     unsigned int vlen, unsigned int flags,
+		     struct __kernel_timespec *u_timeout))
+{
+	return __rtdm_fd_recvmmsg64(ufd, u_msgvec, vlen, flags, u_timeout,
+				    get_mmsg32, put_mmsg32);
+}
+
 COBALT_SYSCALL32emu(sendmsg, handover,
 		    (int fd, struct compat_msghdr __user *umsg, int flags))
 {

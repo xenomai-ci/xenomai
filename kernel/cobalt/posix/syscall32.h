@@ -253,6 +253,12 @@ COBALT_SYSCALL32emu_DECL(recvmmsg,
 			  unsigned int vlen,
 			  unsigned int flags, struct old_timespec32 *u_timeout));
 
+COBALT_SYSCALL32emu_DECL(recvmmsg64,
+			 (int fd, struct compat_mmsghdr __user *u_msgvec,
+			  unsigned int vlen,
+			  unsigned int flags,
+			  struct __kernel_timespec *u_timeout));
+
 COBALT_SYSCALL32emu_DECL(sendmsg,
 			 (int fd, struct compat_msghdr __user *umsg,
 			  int flags));

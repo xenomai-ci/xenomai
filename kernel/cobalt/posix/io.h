@@ -53,6 +53,11 @@ COBALT_SYSCALL_DECL(recvmmsg,
 		    (int fd, struct mmsghdr __user *u_msgvec, unsigned int vlen,
 		     unsigned int flags, struct __user_old_timespec __user *u_timeout));
 
+COBALT_SYSCALL_DECL(recvmmsg64,
+		    (int fd, struct mmsghdr __user *u_msgvec, unsigned int vlen,
+		     unsigned int flags,
+		     struct __kernel_timespec __user *u_timeout));
+
 COBALT_SYSCALL_DECL(sendmsg,
 		    (int fd, struct user_msghdr __user *umsg, int flags));
 
