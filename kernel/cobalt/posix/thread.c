@@ -398,6 +398,7 @@ static int pthread_create(struct cobalt_thread **thread_p,
 	if (ret) {
 		xnsynch_destroy(&thread->monitor_synch);
 		xnsynch_destroy(&thread->sigwait);
+		__xnthread_discard(&thread->threadbase);
 		xnfree(thread);
 		return ret;
 	}
