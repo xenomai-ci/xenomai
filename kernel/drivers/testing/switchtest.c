@@ -504,6 +504,8 @@ static int rtswitch_create_ktask(struct rtswitch_context *ctx,
 		sattr.entry = rtswitch_ktask;
 		sattr.cookie = &arg;
 		err = xnthread_start(&task->ktask, &sattr);
+		if (err)
+			__xnthread_discard(&task->ktask);
 	} else
 		/*
 		 * In order to avoid calling xnthread_cancel() for an
