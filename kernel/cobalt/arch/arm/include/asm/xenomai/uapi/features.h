@@ -22,7 +22,7 @@
 #define _COBALT_ARM_ASM_UAPI_FEATURES_H
 
 /* The ABI revision level we use on this arch. */
-#define XENOMAI_ABI_REV   17UL
+#define XENOMAI_ABI_REV   18UL
 
 #define XENOMAI_FEAT_DEP (__xn_feat_generic_mask)
 
