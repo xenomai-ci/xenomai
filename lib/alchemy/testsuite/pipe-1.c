@@ -23,7 +23,7 @@ struct pipe_message {
 static void realtime_task(void *arg)
 {
 	struct pipe_message m;
-	int ret, seq;
+	int ret, seq = 0;
 
 	traceobj_enter(&trobj);
 
