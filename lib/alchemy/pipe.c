@@ -310,6 +310,44 @@ out:
  *
  * @apitags{xthread-nowait, switch-primary}
  */
+ssize_t rt_pipe_read(RT_PIPE *pipe,
+		     void *buf, size_t size, RTIME timeout)
+{
+	struct alchemy_pipe *pcb;
+	int err = 0, flags;
+	struct timespec ts;
+	struct timeval tv;
+	ssize_t ret;
+
+	pcb = find_alchemy_pipe(pipe, &err);
+	if (pcb == NULL)
+		return err;
+
+	if (timeout == TM_NONBLOCK)
+		flags = MSG_DONTWAIT;
+	else {
+		if (!threadobj_current_p())
+			return -EPERM;
+		if (timeout != TM_INFINITE) {
+			clockobj_ticks_to_timespec(&alchemy_clock, timeout,
+						   &ts);
+			tv.tv_sec = ts.tv_sec;
+			tv.tv_usec = ts.tv_nsec / 1000;
+		} else {
+			tv.tv_sec = 0;
+			tv.tv_usec = 0;
+		}
+		__RT(setsockopt(pcb->sock, SOL_SOCKET,
+				SO_RCVTIMEO, &tv, sizeof(tv)));
+		flags = 0;
+	}
+
+	ret = __RT(recvfrom(pcb->sock, buf, size, flags, NULL, 0));
+	if (ret < 0)
+		ret = -errno;
+
+	return ret;
+}
 
 /**
  * @fn ssize_t rt_pipe_read_until(RT_PIPE *pipe, void *buf, size_t size, RTIME abs_timeout)
@@ -394,6 +432,7 @@ ssize_t rt_pipe_read_timed(RT_PIPE *pipe,
 			   void *buf, size_t size,
 			   const struct timespec *abs_timeout)
 {
+	struct timespec now, timeout;
 	struct alchemy_pipe *pcb;
 	int err = 0, flags;
 	struct timeval tv;
@@ -409,8 +448,10 @@ ssize_t rt_pipe_read_timed(RT_PIPE *pipe,
 		if (!threadobj_current_p())
 			return -EPERM;
 		if (abs_timeout) {
-			tv.tv_sec = abs_timeout->tv_sec;
-			tv.tv_usec = abs_timeout->tv_nsec / 1000;
+			__RT(clock_gettime(CLOCK_COPPERPLATE, &now));
+			timespec_sub(&timeout, abs_timeout, &now);
+			tv.tv_sec = timeout.tv_sec;
+			tv.tv_usec = timeout.tv_nsec / 1000;
 		} else {
 			tv.tv_sec = 0;
 			tv.tv_usec = 0;
