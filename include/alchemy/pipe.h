@@ -64,14 +64,8 @@ ssize_t rt_pipe_read_until(RT_PIPE *pipe,
 				  alchemy_abs_timeout(timeout, &ts));
 }
 
-static inline
 ssize_t rt_pipe_read(RT_PIPE *pipe,
-		     void *buf, size_t size, RTIME timeout)
-{
-	struct timespec ts;
-	return rt_pipe_read_timed(pipe, buf, size,
-				  alchemy_rel_timeout(timeout, &ts));
-}
+		     void *buf, size_t size, RTIME timeout);
 
 ssize_t rt_pipe_write(RT_PIPE *pipe,
 		      const void *buf, size_t size, int mode);
