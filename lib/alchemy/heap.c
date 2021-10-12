@@ -376,12 +376,12 @@ out:
  * case, the same block covering the entire heap space is returned to
  * all callers of this service.
  *
- * @param abs_timeout An absolute date expressed in clock ticks,
- * specifying a time limit to wait for a block of the requested size
- * to be available from the heap (see note). Passing NULL causes the
- * caller to block indefinitely until a block is available. Passing {
- * .tv_sec = 0, .tv_nsec = 0 } causes the service to return
- * immediately without blocking in case a block is not available.
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying a time limit to wait for a block
+ * of the requested size to be available from the heap. Passing NULL causes
+ * the caller to block indefinitely until a block is available. Passing
+ * { .tv_sec = 0, .tv_nsec = 0 } causes the service to return immediately
+ * without blocking in case a block is not available.
  *
  * @param blockp A pointer to a memory location which will be written
  * upon success with the address of the allocated block, or the start
@@ -420,10 +420,6 @@ out:
  * next page size. The allocation page size is currently 512 bytes
  * long (HOBJ_PAGE_SIZE), which means that any request larger than 1k
  * will be rounded up to the next 512 byte boundary.
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 int rt_heap_alloc_timed(RT_HEAP *heap,
 			size_t size, const struct timespec *abs_timeout,

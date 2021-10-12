@@ -336,12 +336,12 @@ out:
  *
  * @param sem The semaphore descriptor.
  *
- * @param abs_timeout An absolute date expressed in clock ticks,
- * specifying a time limit to wait for the request to be satisfied
- * (see note). Passing NULL causes the caller to block indefinitely
- * until the request is satisfied. Passing { .tv_sec = 0, .tv_nsec = 0
- * } causes the service to return without blocking in case the request
- * cannot be satisfied immediately.
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying a time limit to wait for the
+ * request to be satisfied. Passing NULL causes the caller to block
+ * indefinitely until the request is satisfied. Passing { .tv_sec = 0,
+ * .tv_nsec = 0 } causes the service to return without blocking in case
+ * the request cannot be satisfied immediately.
  *
  * @return Zero is returned upon success. Otherwise:
  *
@@ -365,10 +365,6 @@ out:
  * called from a Xenomai thread.
  *
  * @apitags{xthread-nowait, switch-primary}
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 int rt_sem_p_timed(RT_SEM *sem, const struct timespec *abs_timeout)
 {
