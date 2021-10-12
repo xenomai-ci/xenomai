@@ -396,12 +396,12 @@ out:
  * error value. However, short reads are allowed when a potential
  * deadlock situation is detected (see note below).
  *
- * @param abs_timeout An absolute date expressed in clock ticks,
- * specifying a time limit to wait for a message to be available from
- * the buffer (see note). Passing NULL causes the caller to block
- * indefinitely until enough data is available. Passing { .tv_sec = 0,
- * .tv_nsec = 0 } causes the service to return immediately without
- * blocking in case not enough data is available.
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying a time limit to wait for a
+ * message to be available from the buffer. Passing NULL causes the caller
+ * to block indefinitely until enough data is available. Passing
+ * { .tv_sec = 0, .tv_nsec = 0 } causes the service to return immediately
+ * without blocking in case not enough data is available.
  *
  * @return The number of bytes read from the buffer is returned upon
  * success. Otherwise:
@@ -449,10 +449,6 @@ out:
  * should likely be fixed, in order to eliminate such condition.
  *
  * @apitags{xthread-nowait, switch-primary}
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 ssize_t rt_buffer_read_timed(RT_BUFFER *bf,
 			     void *ptr, size_t size,
@@ -638,10 +634,10 @@ out:
  * value, in which case the buffer is left untouched, and zero is
  * returned to the caller.
  *
- * @param abs_timeout An absolute date expressed in clock ticks,
- * specifying a time limit to wait for enough buffer space to be
- * available to hold the message (see note). Passing NULL causes the
- * caller to block indefinitely until enough buffer space is
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying a time limit to wait for enough
+ * buffer space to be available to hold the message. Passing NULL causes
+ * the caller to block indefinitely until enough buffer space is
  * available. Passing { .tv_sec = 0, .tv_nsec = 0 } causes the service
  * to return immediately without blocking in case of buffer space
  * shortage.
@@ -672,10 +668,6 @@ out:
  * called from a Xenomai thread.
  *
  * @apitags{xthread-nowait, switch-primary}
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 ssize_t rt_buffer_write_timed(RT_BUFFER *bf,
 			      const void *ptr, size_t size,

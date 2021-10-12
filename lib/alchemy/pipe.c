@@ -393,12 +393,12 @@ ssize_t rt_pipe_read(RT_PIPE *pipe,
  * be lost. If @a size is zero, this call returns immediately with no
  * other action.
  *
- * @param abs_timeout An absolute date expressed in clock ticks,
- * specifying a time limit to wait for a message to be available from
- * the pipe (see note). Passing NULL causes the caller to block
- * indefinitely until a message is available. Passing { .tv_sec = 0,
- * .tv_nsec = 0 } causes the service to return immediately without
- * blocking in case no message is available.
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying a time limit to wait for a
+ * message to be available from the pipe. Passing NULL causes the caller
+ * to block indefinitely until a message is available. Passing
+ * { .tv_sec = 0, .tv_nsec = 0 } causes the service to return immediately
+ * without blocking in case no message is available.
  *
  * @return The number of bytes available from the received message is
  * returned upon success. Otherwise:
@@ -423,10 +423,6 @@ ssize_t rt_pipe_read(RT_PIPE *pipe,
  * called from a Xenomai thread.
  *
  * @apitags{xthread-nowait, switch-primary}
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 ssize_t rt_pipe_read_timed(RT_PIPE *pipe,
 			   void *buf, size_t size,

@@ -332,11 +332,11 @@ int rt_cond_broadcast(RT_COND *cond)
  * @param mutex The address of the mutex serializing the access to the
  * shared data.
  *
- * @param abs_timeout An absolute date expressed in clock ticks,
- * specifying a time limit to wait for the condition variable to be
- * signaled  (see note). Passing NULL causes the caller to
- * block indefinitely. Passing { .tv_sec = 0, .tv_nsec = 0 } causes
- * the caller to return immediately without block.
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying a time limit to wait for the
+ * condition variable to be signaled. Passing NULL causes the caller to
+ * block indefinitely. Passing { .tv_sec = 0, .tv_nsec = 0 } causes the
+ * caller to return immediately without block.
  *
  * @return Zero is returned upon success. Otherwise:
  *
@@ -360,10 +360,6 @@ int rt_cond_broadcast(RT_COND *cond)
  * called from a Xenomai thread.
  *
  * @apitags{xthread-only, switch-primary}
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 int rt_cond_wait_timed(RT_COND *cond, RT_MUTEX *mutex,
 		       const struct timespec *abs_timeout)
