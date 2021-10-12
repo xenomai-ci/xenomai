@@ -1678,13 +1678,13 @@ out:
  * Upon return, mcb_r->opcode will contain the status code sent back
  * from the remote task using rt_task_reply(), or zero if unspecified.
  *
- * @param abs_timeout An absolute date expressed in clock ticks,
- * specifying a time limit to wait for the recipient task to reply to
- * the initial message (see note). Passing NULL causes the caller to
- * block indefinitely until a reply is received.  Passing { .tv_sec =
- * 0, .tv_nsec = 0 } causes the service to return without blocking in
- * case the recipient task is not waiting for messages at the time of
- * the call.
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying a time limit to wait for the
+ * recipient task to reply to the initial message. Passing NULL causes
+ * the caller to block indefinitely until a reply is received. Passing
+ * { .tv_sec = 0, .tv_nsec = 0 } causes the service to return without
+ * blocking in case the recipient task is not waiting for messages at
+ * the time of the call.
  *
  * @return A positive value is returned upon success, representing the
  * length (in bytes) of the reply message returned by the remote
@@ -1714,10 +1714,6 @@ out:
  * task.
  *
  * @apitags{xthread-only, switch-primary}
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 ssize_t rt_task_send_timed(RT_TASK *task,
 			   RT_TASK_MCB *mcb_s, RT_TASK_MCB *mcb_r,
@@ -1892,8 +1888,9 @@ out:
  * Upon return, mcb_r->opcode will contain the operation code sent
  * from the remote task using rt_task_send().
  *
- * @param abs_timeout The number of clock ticks to wait for receiving
- * a message (see note). Passing NULL causes the caller to block
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying the time limit to wait for
+ * receiving a message. Passing NULL causes the caller to block
  * indefinitely until a remote task eventually sends a message.
  * Passing { .tv_sec = 0, .tv_nsec = 0 } causes the service to return
  * immediately without waiting if no remote task is currently waiting
@@ -1921,10 +1918,6 @@ out:
  * timeout.
  *
  * @apitags{xthread-only, switch-primary}
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 int rt_task_receive_timed(RT_TASK_MCB *mcb_r,
 			  const struct timespec *abs_timeout)

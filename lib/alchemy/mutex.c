@@ -261,10 +261,10 @@ out:
  *
  * @param mutex The mutex descriptor.
  *
- * @param abs_timeout An absolute date expressed in clock ticks,
- * specifying a time limit to wait for the mutex to be available (see
- * note). Passing NULL the caller to block indefinitely. Passing {
- * .tv_sec = 0, .tv_nsec = 0 } causes the service to return
+ * @param abs_timeout An absolute date expressed in seconds / nanoseconds,
+ * based on the Alchemy clock, specifying a time limit to wait for the
+ * mutex to be available. Passing NULL the caller to block indefinitely.
+ * Passing { .tv_sec = 0, .tv_nsec = 0 } causes the service to return
  * immediately without blocking in case @a mutex is already locked by
  * another task.
  *
@@ -294,10 +294,6 @@ out:
  * Over the Cobalt core, an Alchemy task with priority zero keeps
  * running in primary mode until it releases the mutex, at which point
  * it is switched back to secondary mode automatically.
- *
- * @note @a abs_timeout is interpreted as a multiple of the Alchemy
- * clock resolution (see --alchemy-clock-resolution option, defaults
- * to 1 nanosecond).
  */
 int rt_mutex_acquire_timed(RT_MUTEX *mutex,
 			   const struct timespec *abs_timeout)
