@@ -1381,7 +1381,7 @@ static int affinity_vfile_show(struct xnvfile_regular_iterator *it,
 
 static ssize_t affinity_vfile_store(struct xnvfile_input *input)
 {
-	cpumask_t affinity, set;
+	cpumask_t affinity;
 	ssize_t ret;
 	long val;
 	int cpu;
@@ -1396,21 +1396,21 @@ static ssize_t affinity_vfile_store(struct xnvfile_input *input)
 	else {
 		cpumask_clear(&affinity);
 		for (cpu = 0; cpu < BITS_PER_LONG; cpu++, val >>= 1) {
-			if (val & 1)
+			if (val & 1) {
+				/*
+				 * The new dynamic affinity must be a strict
+				 * subset of the static set of supported CPUs.
+				 */
+				if (!cpumask_test_cpu(cpu,
+						      &xnsched_realtime_cpus))
+					return -EINVAL;
 				cpumask_set_cpu(cpu, &affinity);
+			}
 		}
 	}
 
-	cpumask_and(&set, &affinity, cpu_online_mask);
-	if (cpumask_empty(&set))
-		return -EINVAL;
-
-	/*
-	 * The new dynamic affinity must be a strict subset of the
-	 * static set of supported CPUs.
-	 */
-	cpumask_or(&set, &affinity, &xnsched_realtime_cpus);
-	if (!cpumask_equal(&set, &xnsched_realtime_cpus))
+	cpumask_and(&affinity, &affinity, cpu_online_mask);
+	if (cpumask_empty(&affinity))
 		return -EINVAL;
 
 	xnlock_get_irqsave(&nklock, s);
