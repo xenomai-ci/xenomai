@@ -66,7 +66,7 @@ int __rtdm_anon_getfd(const char *name, int flags)
 
 void __rtdm_anon_putfd(int ufd)
 {
-	__close_fd(current->files, ufd);
+	close_fd(ufd);
 }
 
 static int create_instance(int ufd, struct rtdm_device *dev,
@@ -247,7 +247,7 @@ int __rtdm_dev_socket(int protocol_family, int socket_type,
 fail_socket:
 	cleanup_instance(dev, context);
 fail_create:
-	__close_fd(current->files, ufd);
+	close_fd(ufd);
 fail_getfd:
 	__rtdm_put_device(dev);
 
