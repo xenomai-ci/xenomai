@@ -40,6 +40,7 @@
 #include <linux/pci.h>
 #include <linux/crc32.h>
 #include <linux/if_vlan.h>
+#include <linux/ethtool.h>
 
 #include <rtnet_port.h>
 
