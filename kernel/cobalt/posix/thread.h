@@ -18,7 +18,7 @@
 #ifndef _COBALT_POSIX_THREAD_H
 #define _COBALT_POSIX_THREAD_H
 
-#include <stdarg.h>
+#include <linux/stdarg.h>
 #include <linux/types.h>
 #include <linux/time.h>
 #include <linux/signal.h>
