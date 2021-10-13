@@ -902,7 +902,7 @@ eadv:
 	 * rtdm_fd are still pending.
 	 */
 	__fd_close(ppd, idx, s);
-	__close_fd(current->files, ufd);
+	close_fd(ufd);
 
 	return 0;
 }

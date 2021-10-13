@@ -238,4 +238,8 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 }
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,14,0)
+#define close_fd(__ufd)	__close_fd(current->files, __ufd)
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
