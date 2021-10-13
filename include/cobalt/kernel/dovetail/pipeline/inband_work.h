@@ -19,11 +19,7 @@ struct pipeline_inband_work {
 
 #define PIPELINE_INBAND_WORK_INITIALIZER(__work, __handler)		\
 	{								\
-		.work = {						\
-			.func = (void (*)(struct irq_work *))		\
-			__handler,					\
-			.flags = ATOMIC_INIT(0),			\
-		},							\
+		.work = IRQ_WORK_INIT((void (*)(struct irq_work *))__handler), \
 	}
 
 #define pipeline_post_inband_work(__work)				\
