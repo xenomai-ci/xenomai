@@ -2008,8 +2008,8 @@ void __xnthread_propagate_schedparam(struct xnthread *curr)
 	 */
 	if (xnthread_test_state(curr, XNWEAK) && kprio == 0)
 		kpolicy = SCHED_NORMAL;
-	else if (kprio >= MAX_USER_RT_PRIO)
-		kprio = MAX_USER_RT_PRIO - 1;
+	else if (kprio >= MAX_RT_PRIO)
+		kprio = MAX_RT_PRIO - 1;
 
 	if (p->policy != kpolicy || (kprio > 0 && p->rt_priority != kprio)) {
 		param.sched_priority = kprio;
