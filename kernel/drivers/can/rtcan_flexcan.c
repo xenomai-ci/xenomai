@@ -604,7 +604,7 @@ static void flexcan_change_state(struct rtcan_device *dev,
 				CAN_ERR_CRTL_TX_WARNING :
 				CAN_ERR_CRTL_RX_WARNING;
 		}
-		/* fallthrough */
+		fallthrough;
 	case CAN_STATE_ERROR_WARNING:
 		/*
 		 * from: ERROR_ACTIVE, ERROR_WARNING

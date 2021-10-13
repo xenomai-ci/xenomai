@@ -493,7 +493,7 @@ static int peak_canfd_set_mode(struct rtcan_device *rdev, can_mode_t mode,
 		if (rdev->state == CAN_STATE_SLEEPING)
 			break;
 
-		/* fallthrough */
+		fallthrough;
 	default:
 		err = -EOPNOTSUPP;
 		break;

@@ -140,7 +140,7 @@ int xntimer_start(struct xntimer *timer,
 	case XN_REALTIME:
 		timer->status |= XNTIMER_REALTIME;
 		value -= xnclock_get_offset(clock);
-		/* fall through */
+		fallthrough;
 	default: /* XN_ABSOLUTE || XN_REALTIME */
 		date = xnclock_ns_to_ticks(clock, value);
 		if ((xnsticks_t)(date - now) <= 0) {

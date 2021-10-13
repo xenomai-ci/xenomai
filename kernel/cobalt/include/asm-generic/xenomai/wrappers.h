@@ -231,6 +231,14 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 	kernel_read_file(__file, 0, __buf, __buf_size, __file_size, __id)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
+#if __has_attribute(__fallthrough__)
+# define fallthrough			__attribute__((__fallthrough__))
+#else
+# define fallthrough			do {} while (0)  /* fallthrough */
+#endif
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,11,0)
 #define IRQ_WORK_INIT(_func) (struct irq_work) {	\
 	.flags = ATOMIC_INIT(0),			\

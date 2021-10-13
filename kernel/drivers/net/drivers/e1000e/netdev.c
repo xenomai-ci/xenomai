@@ -1239,7 +1239,7 @@ void e1000e_set_interrupt_capability(struct e1000_adapter *adapter)
 			e1000e_reset_interrupt_capability(adapter);
 		}
 		adapter->int_mode = E1000E_INT_MODE_MSI;
-		/* Fall through */
+		fallthrough;
 	case E1000E_INT_MODE_MSI:
 		if (!pci_enable_msi(adapter->pdev)) {
 			adapter->flags |= FLAG_MSI_ENABLED;
@@ -1248,7 +1248,7 @@ void e1000e_set_interrupt_capability(struct e1000_adapter *adapter)
 			e_err("Failed to initialize MSI interrupts.  Falling "
 			      "back to legacy interrupts.\n");
 		}
-		/* Fall through */
+		fallthrough;
 	case E1000E_INT_MODE_LEGACY:
 		/* Don't do anything; this is the system default */
 		break;

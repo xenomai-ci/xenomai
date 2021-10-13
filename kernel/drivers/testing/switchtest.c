@@ -432,7 +432,7 @@ static void rtswitch_ktask(void *cookie)
 			if (to == task->base.index)
 				++to;
 
-			/* Fall through. */
+			fallthrough;
 		case 2:
 			rtswitch_to_rt(ctx, task->base.index, to);
 		}

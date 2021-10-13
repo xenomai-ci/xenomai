@@ -424,7 +424,7 @@ int sys32_put_siginfo(void __user *u_si, const struct siginfo *si,
 	case SI_QUEUE:
 	case SI_MESGQ:
 		ret |= __xn_put_user(ptr_to_compat(si->si_ptr), &u_p->si_ptr);
-		/* fallthrough */
+		fallthrough;
 	case SI_USER:
 		ret |= __xn_put_user(si->si_pid, &u_p->si_pid);
 		ret |= __xn_put_user(si->si_uid, &u_p->si_uid);

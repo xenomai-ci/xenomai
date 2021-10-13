@@ -374,7 +374,7 @@ int rtcan_raw_ioctl_dev(struct rtdm_fd *fd, int request, void *arg)
     case SIOCGCANBAUDRATE:
     case SIOCGCANCUSTOMBITTIME:
 	    get = 1;
-	    /* fallthrough */
+	    fallthrough;
     case SIOCSCANMODE:
     case SIOCSCANCTRLMODE:
     case SIOCSCANBAUDRATE:
