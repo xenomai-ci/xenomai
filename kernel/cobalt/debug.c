@@ -249,13 +249,12 @@ void xndebug_trace_relax(int nr, unsigned long *backtrace,
 			continue;
 
 		/*
-		 * Hack. Unlike DSOs, executables and interpreters
-		 * (e.g. dynamic linkers) are protected against write
-		 * attempts. Use this to determine when $pc should be
-		 * fixed up by subtracting the mapping base address in
-		 * the DSO case.
+		 * Interpreter-generated executable mappings are not
+		 * file-backed. Use this to determine when $pc should be fixed
+		 * up by subtracting the mapping base address in the DSO case.
 		 */
-		if (!(vma->vm_flags & VM_DENYWRITE))
+		file = vma->vm_file;
+		if (file != NULL)
 			pc -= vma->vm_start;
 
 		spot.backtrace[depth].pc = pc;
@@ -265,7 +264,6 @@ void xndebug_trace_relax(int nr, unsigned long *backtrace,
 		 * record the PC value, which may still give some hint
 		 * downstream.
 		 */
-		file = vma->vm_file;
 		if (file == NULL)
 			goto next_frame;
 
