@@ -893,7 +893,7 @@ static int e1000_probe(struct pci_dev *pdev,
 				EEPROM_INIT_CONTROL3_PORT_B, 1, &eeprom_data);
 			break;
 		}
-		/* Fall Through */
+		fallthrough;
 	default:
 		e1000_read_eeprom(&adapter->hw,
 			EEPROM_INIT_CONTROL3_PORT_A, 1, &eeprom_data);

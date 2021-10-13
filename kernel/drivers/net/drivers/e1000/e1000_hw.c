@@ -126,7 +126,7 @@ e1000_set_phy_type(struct e1000_hw *hw)
             hw->phy_type = e1000_phy_igp;
             break;
         }
-        /* fallthrough */
+        fallthrough;
     case IGP03E1000_E_PHY_ID:
         hw->phy_type = e1000_phy_igp_3;
         break;
@@ -140,7 +140,7 @@ e1000_set_phy_type(struct e1000_hw *hw)
             hw->phy_type = e1000_phy_gg82563;
             break;
         }
-        /* fallthrough */
+        fallthrough;
     default:
         /* Should never have loaded on this device */
         hw->phy_type = e1000_phy_undefined;
@@ -373,12 +373,12 @@ e1000_set_mac_type(struct e1000_hw *hw)
         break;
     case e1000_80003es2lan:
         hw->swfw_sync_present = TRUE;
-        /* fall through */
+        fallthrough;
     case e1000_82571:
     case e1000_82572:
     case e1000_82573:
         hw->eeprom_semaphore_present = TRUE;
-        /* fall through */
+        fallthrough;
     case e1000_82541:
     case e1000_82547:
     case e1000_82541_rev_2:
@@ -611,7 +611,7 @@ e1000_reset_hw(struct e1000_hw *hw)
                 E1000_WRITE_REG(hw, CTRL_EXT, ctrl_ext);
                 E1000_WRITE_FLUSH(hw);
             }
-            /* fall through */
+            fallthrough;
         case e1000_82571:
         case e1000_82572:
         case e1000_ich8lan:
@@ -834,7 +834,7 @@ e1000_init_hw(struct e1000_hw *hw)
         reg_data = E1000_READ_REG_ARRAY(hw, FFLT, 0x0001);
         reg_data &= ~0x00100000;
         E1000_WRITE_REG_ARRAY(hw, FFLT, 0x0001, reg_data);
-        /* Fall through */
+        fallthrough;
     case e1000_82571:
     case e1000_82572:
     case e1000_ich8lan:
@@ -5870,7 +5870,7 @@ e1000_rar_set(struct e1000_hw *hw,
     case e1000_80003es2lan:
         if (hw->leave_av_bit_off == TRUE)
             break;
-        /* fallthrough */
+        fallthrough;
     default:
         /* Indicate to hardware the Address is Valid. */
         rar_high |= E1000_RAH_AV;
@@ -6062,7 +6062,7 @@ e1000_setup_led(struct e1000_hw *hw)
                                       ~IGP01E1000_GMII_SPD));
         if (ret_val)
             return ret_val;
-        /* Fall Through */
+        fallthrough;
     default:
         if (hw->media_type == e1000_media_type_fiber) {
             ledctl = E1000_READ_REG(hw, LEDCTL);
@@ -6150,7 +6150,7 @@ e1000_cleanup_led(struct e1000_hw *hw)
                                       hw->phy_spd_default);
         if (ret_val)
             return ret_val;
-        /* Fall Through */
+        fallthrough;
     default:
         if (hw->phy_type == e1000_phy_ife) {
             e1000_write_phy_reg(hw, IFE_PHY_SPECIAL_CONTROL_LED, 0);
@@ -8030,7 +8030,7 @@ e1000_get_phy_cfg_done(struct e1000_hw *hw)
         /* Separate *_CFG_DONE_* bit for each port */
         if (E1000_READ_REG(hw, STATUS) & E1000_STATUS_FUNC_1)
             cfg_mask = E1000_EEPROM_CFG_DONE_PORT_1;
-        /* Fall Through */
+        fallthrough;
     case e1000_82571:
     case e1000_82572:
         while (timeout) {

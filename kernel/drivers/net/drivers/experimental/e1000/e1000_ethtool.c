@@ -1565,7 +1565,7 @@ static void e1000_loopback_cleanup(struct e1000_adapter *adapter)
 			E1000_WRITE_REG(hw, E1000_CTRL_EXT, adapter->tx_fifo_head);
 			adapter->tx_fifo_head = 0;
 		}
-		/* fall through */
+		fallthrough;
 	case e1000_82571:
 	case e1000_82572:
 		if (hw->phy.media_type == e1000_media_type_fiber ||
@@ -1575,7 +1575,7 @@ static void e1000_loopback_cleanup(struct e1000_adapter *adapter)
 			msleep(10);
 			break;
 		}
-		/* Fall Through */
+		fallthrough;
 	case e1000_82545:
 	case e1000_82546:
 	case e1000_82545_rev_3:

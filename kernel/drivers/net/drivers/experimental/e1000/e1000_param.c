@@ -872,7 +872,7 @@ static void e1000_check_copper_options(struct e1000_adapter *adapter)
 	case SPEED_1000 + HALF_DUPLEX:
 		DPRINTK(PROBE, INFO,
 			"Half Duplex is not supported at 1000 Mbps\n");
-		/* fall through */
+		fallthrough;
 	case SPEED_1000 + FULL_DUPLEX:
 full_duplex_only:
 		DPRINTK(PROBE, INFO,

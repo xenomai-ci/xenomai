@@ -638,14 +638,14 @@ static void igb_cache_ring_register(struct igb_adapter *adapter)
 		 * In order to avoid collision we start at the first free queue
 		 * and continue consuming queues in the same sequence
 		 */
-		/* Fall through */
+		fallthrough;
 	case e1000_82575:
 	case e1000_82580:
 	case e1000_i350:
 	case e1000_i354:
 	case e1000_i210:
 	case e1000_i211:
-		/* Fall through */
+		fallthrough;
 	default:
 		for (; i < adapter->num_rx_queues; i++)
 			adapter->rx_ring[i]->reg_idx = rbase_offset + i;
@@ -1876,7 +1876,7 @@ void igb_set_fw_version(struct igb_adapter *adapter)
 				 fw.invm_img_type);
 			break;
 		}
-		/* fall through */
+		fallthrough;
 	default:
 		/* if option is rom valid, display its version too */
 		if (fw.or_valid) {
@@ -2514,7 +2514,7 @@ static void igb_init_queue_configuration(struct igb_adapter *adapter)
 		 * should pair the queues in order to conserve interrupts due
 		 * to limited supply.
 		 */
-		/* fall through */
+		fallthrough;
 	case e1000_82580:
 	case e1000_i350:
 	case e1000_i354:
@@ -3550,7 +3550,7 @@ bool igb_has_link(struct igb_adapter *adapter)
 	case e1000_media_type_copper:
 		if (!hw->mac.get_link_status)
 			return true;
-		/* fallthrough */
+		fallthrough;
 	case e1000_media_type_internal_serdes:
 		hw->mac.ops.check_for_link(hw);
 		link_active = !hw->mac.get_link_status;

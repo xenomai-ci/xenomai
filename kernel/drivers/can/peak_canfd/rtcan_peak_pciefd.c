@@ -698,7 +698,7 @@ static int pciefd_can_probe(struct pciefd_board *pciefd)
 		pciefd_can_writereg(priv, CANFD_CLK_SEL_80MHZ,
 				    PCIEFD_REG_CAN_CLK_SEL);
 
-		/* fallthrough */
+		fallthrough;
 	case CANFD_CLK_SEL_80MHZ:
 		priv->ucan.rdev->can_sys_clock = 80 * 1000 * 1000;
 		break;

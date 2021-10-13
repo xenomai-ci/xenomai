@@ -1314,7 +1314,7 @@ static int e1000_probe(struct pci_dev *pdev,
 				NVM_INIT_CONTROL3_PORT_B, 1, &eeprom_data);
 			break;
 		}
-		/* Fall Through */
+		fallthrough;
 	default:
 		e1000_read_nvm(&adapter->hw,
 			NVM_INIT_CONTROL3_PORT_A, 1, &eeprom_data);
@@ -1536,7 +1536,7 @@ static int e1000_sw_init(struct e1000_adapter *adapter)
 			adapter->num_rx_queues = 2;
 			break;
 		}
-		/* Fall through - remaining ICH SKUs do not support MQ */
+		fallthrough; /* remaining ICH SKUs do not support MQ */
 	default:
 		/* All hardware before 82571 only have 1 queue each for Rx/Tx.
 		 * However, the 82571 family does not have MSI-X, so multi-
@@ -2396,11 +2396,11 @@ static void e1000_setup_rctl(struct e1000_adapter *adapter)
 		case 3:
 			psrctl |= PAGE_SIZE <<
 				E1000_PSRCTL_BSIZE3_SHIFT;
-			/* fall through */
+			fallthrough;
 		case 2:
 			psrctl |= PAGE_SIZE <<
 				E1000_PSRCTL_BSIZE2_SHIFT;
-			/* fall through */
+			fallthrough;
 		case 1:
 			psrctl |= PAGE_SIZE >>
 				E1000_PSRCTL_BSIZE1_SHIFT;
@@ -3780,7 +3780,7 @@ static int e1000_xmit_frame_ring(struct sk_buff *skb,
 				 * into the next dword */
 				if ((unsigned long)(skb_tail_pointer(skb) - 1) & 4)
 					break;
-				/* fall through */
+				fallthrough;
 			case e1000_82571:
 			case e1000_82572:
 			case e1000_82573:
