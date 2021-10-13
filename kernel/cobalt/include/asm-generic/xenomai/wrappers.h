@@ -231,4 +231,11 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 	kernel_read_file(__file, 0, __buf, __buf_size, __file_size, __id)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,11,0)
+#define IRQ_WORK_INIT(_func) (struct irq_work) {	\
+	.flags = ATOMIC_INIT(0),			\
+	.func = (_func),				\
+}
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
