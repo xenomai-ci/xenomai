@@ -26,9 +26,9 @@ xenomai-y :=		\
 syscall_entries := $(srctree)/$(src)/gen-syscall-entries.sh
 
 quiet_cmd_syscall_entries = GEN     $@
-      cmd_syscall_entries = $(CONFIG_SHELL) '$(syscall_entries)' $^ > $@
+      cmd_syscall_entries = $(CONFIG_SHELL) '$(syscall_entries)' $(filter-out FORCE,$^) > $@
 
-$(obj)/syscall_entries.h: $(syscall_entries) $(wildcard $(srctree)/$(src)/*.c)
+$(obj)/syscall_entries.h: $(syscall_entries) $(wildcard $(srctree)/$(src)/*.c) FORCE
 	$(call if_changed,syscall_entries)
 
 target += syscall_entries.h
