@@ -42,7 +42,6 @@ static char *isa_board_name = "ISA-Board";
 
 MODULE_AUTHOR("Wolfgang Grandegger <wg@grandegger.com>");
 MODULE_DESCRIPTION("RTCAN board driver for standard ISA boards");
-MODULE_SUPPORTED_DEVICE("ISA board");
 MODULE_LICENSE("GPL");
 
 static u16 io[RTCAN_ISA_MAX_DEV];

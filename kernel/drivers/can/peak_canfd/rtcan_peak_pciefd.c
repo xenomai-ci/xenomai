@@ -35,7 +35,6 @@ static char *pciefd_board_name = "PEAK-PCIe FD";
 
 MODULE_AUTHOR("Stephane Grosjean <s.grosjean@peak-system.com>");
 MODULE_DESCRIPTION("RTCAN driver for PEAK PCAN PCIe/M.2 FD family cards");
-MODULE_SUPPORTED_DEVICE("PEAK PCAN PCIe/M.2 FD CAN controllers");
 MODULE_LICENSE("GPL v2");
 
 #define PEAK_PCI_VENDOR_ID	0x001c	/* The PCI device and vendor IDs */

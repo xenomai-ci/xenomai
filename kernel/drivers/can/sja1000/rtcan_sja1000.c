@@ -81,7 +81,6 @@ static char *sja_ctrl_name = "SJA1000";
 MODULE_AUTHOR("Sebastian.Smolorz@stud.uni-hannover.de");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("RT-Socket-CAN driver for SJA1000");
-MODULE_SUPPORTED_DEVICE("SJA1000 CAN controller");
 
 #ifndef CONFIG_XENO_DRIVERS_CAN_CALC_BITTIME_OLD
 static struct can_bittiming_const sja1000_bittiming_const = {

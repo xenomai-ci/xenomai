@@ -39,7 +39,6 @@ static char *ixxat_pci_board_name = "IXXAT-PCI";
 
 MODULE_AUTHOR("Wolfgang Grandegger <wg@grandegger.com>");
 MODULE_DESCRIPTION("RTCAN board driver for IXXAT-PCI cards");
-MODULE_SUPPORTED_DEVICE("IXXAT-PCI card CAN controller");
 MODULE_LICENSE("GPL");
 
 struct rtcan_ixxat_pci

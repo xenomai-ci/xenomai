@@ -45,7 +45,6 @@ static char *dongle_board_name = "PEAK-Dongle";
 
 MODULE_AUTHOR("Wolfgang Grandegger <wg@grandegger.com>");
 MODULE_DESCRIPTION("RTCAN board driver for PEAK-Dongle");
-MODULE_SUPPORTED_DEVICE("PEAK-Dongle CAN controller");
 MODULE_LICENSE("GPL");
 
 static char   *type[RTCAN_PEAK_DNG_MAX_DEV];

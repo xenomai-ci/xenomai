@@ -50,7 +50,6 @@ static char *mem_board_name = "mem mapped";
 
 MODULE_AUTHOR("Matthias Fuchs <matthias.fuchs@esd-electronics.com>");
 MODULE_DESCRIPTION("RTCAN driver for memory mapped SJA1000 controller");
-MODULE_SUPPORTED_DEVICE("mem mapped");
 MODULE_LICENSE("GPL");
 
 static u32 mem[RTCAN_MEM_MAX_DEV];

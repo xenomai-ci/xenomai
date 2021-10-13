@@ -41,7 +41,6 @@ static char *ems_pci_board_name = "EMS-CPC-PCI";
 
 MODULE_AUTHOR("Wolfgang Grandegger <wg@grandegger.com>");
 MODULE_DESCRIPTION("RTCAN board driver for EMS CPC-PCI/PCIe/104P CAN cards");
-MODULE_SUPPORTED_DEVICE("EMS CPC-PCI/PCIe/104P CAN card");
 MODULE_LICENSE("GPL v2");
 
 #define EMS_PCI_V1_MAX_CHAN 2
