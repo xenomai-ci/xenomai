@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#include <stdarg.h>
+#include <linux/stdarg.h>
 #include <linux/signal.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/synch.h>
