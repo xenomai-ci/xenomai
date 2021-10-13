@@ -43,7 +43,6 @@ static char *peak_pci_board_name = "PEAK-PCI";
 
 MODULE_AUTHOR("Wolfgang Grandegger <wg@grandegger.com>");
 MODULE_DESCRIPTION("RTCAN board driver for PEAK-PCI cards");
-MODULE_SUPPORTED_DEVICE("PEAK-PCI card CAN controller");
 MODULE_LICENSE("GPL");
 
 struct rtcan_peak_pci

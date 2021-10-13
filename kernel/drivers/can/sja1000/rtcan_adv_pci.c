@@ -43,7 +43,6 @@ static char *adv_pci_board_name = "ADV-PCI";
 
 MODULE_AUTHOR("Thierry Bultel <thierry.bultel@basystemes.fr>");
 MODULE_DESCRIPTION("RTCAN board driver for Advantech PCI cards");
-MODULE_SUPPORTED_DEVICE("ADV-PCI card CAN controller");
 MODULE_LICENSE("GPL");
 
 struct rtcan_adv_pci {
