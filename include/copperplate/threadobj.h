@@ -173,7 +173,11 @@ void threadobj_save_timeout(struct threadobj_corespec *corespec,
 #define __THREAD_M_SPARE6	(1 << 22)
 #define __THREAD_M_SPARE7	(1 << 23)
 
-#define THREADOBJ_IRQCONTEXT    ((struct threadobj *)-2UL)
+/*
+ * We need to use a valid address here. The object will never be dereferenced
+ * when it is identified as IRQ context, so the pthread key itself is fine.
+ */
+#define THREADOBJ_IRQCONTEXT	((struct threadobj *)&threadobj_tskey)
 
 struct traceobj;
 struct syncobj;
