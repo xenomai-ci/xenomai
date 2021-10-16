@@ -187,8 +187,12 @@ __weak int shm_unlink(const char *name)
 #endif	/* !HAVE_SHM_UNLINK */
 
 #ifndef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
-#define pthread_mutexattr_setrobust_np(__attr, __robust)	\
-	({ ENOSYS; })
+static inline
+int pthread_mutexattr_setrobust_np(const pthread_mutexattr_t *attr,
+				   int *robustness)
+{
+	return ENOSYS;
+}
 #endif /* !HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP */
 
 #if !defined(HAVE_PTHREAD_SETNAME_NP) && defined(CONFIG_XENO_MERCURY)
