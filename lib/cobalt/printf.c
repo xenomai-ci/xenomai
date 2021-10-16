@@ -729,7 +729,7 @@ done:
 	pthread_cond_init(&printer_wakeup, NULL);
 	spawn_printer_thread();
 	/* We just need a non-zero TSD to trigger the dtor upon unwinding. */
-	pthread_setspecific(cleanup_key, (void *)1);
+	pthread_setspecific(cleanup_key, &cleanup_key);
 
 	atexit(rt_print_flush_buffers);
 }
