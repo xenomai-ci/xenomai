@@ -131,8 +131,8 @@ int rt_mutex_create(RT_MUTEX *mutex, const char *name)
 	pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT);
 	pthread_mutexattr_setpshared(&mattr, mutex_scope_attribute);
 	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
-	/* pthread_mutexattr_setrobust_np() might not be implemented. */
-	pthread_mutexattr_setrobust_np(&mattr, PTHREAD_MUTEX_ROBUST_NP);
+	/* pthread_mutexattr_setrobust() might not be implemented. */
+	pthread_mutexattr_setrobust(&mattr, PTHREAD_MUTEX_ROBUST_NP);
 	ret = __RT(pthread_mutex_init(&mcb->lock, &mattr));
 	if (ret) {
 		xnfree(mcb);

@@ -542,6 +542,7 @@ AC_CHECK_FUNCS([pthread_mutexattr_setprotocol	\
 		pthread_mutexattr_getprotocol	\
 		pthread_mutexattr_getprioceiling \
 		pthread_mutexattr_setprioceiling \
+		pthread_mutexattr_setrobust	\
 		pthread_mutexattr_setrobust_np	\
 		pthread_mutex_getprioceiling	\
 		pthread_mutex_setprioceiling	\

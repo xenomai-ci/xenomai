@@ -243,14 +243,18 @@ __weak int shm_unlink(const char *name)
 }
 #endif	/* !HAVE_SHM_UNLINK */
 
-#ifndef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+#ifndef HAVE_PTHREAD_MUTEXATTR_SETROBUST
+#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
+#define pthread_mutexattr_setrobust	pthread_mutexattr_setrobust_np
+#else
 static inline
-int pthread_mutexattr_setrobust_np(const pthread_mutexattr_t *attr,
-				   int *robustness)
+int pthread_mutexattr_setrobust(const pthread_mutexattr_t *attr,
+				int *robustness)
 {
 	return ENOSYS;
 }
 #endif /* !HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP */
+#endif /* !HAVE_PTHREAD_MUTEXATTR_SETROBUST */
 
 #if !defined(HAVE_PTHREAD_SETNAME_NP) && defined(CONFIG_XENO_MERCURY)
 static inline
