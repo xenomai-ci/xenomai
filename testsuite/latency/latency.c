@@ -412,7 +412,7 @@ static void dump_histo_gnuplot(int32_t *histogram, time_t duration)
 		fputs(buf, ofp);
 	}
 
-	fclose(ifp);
+	pclose(ifp);
 
 dump_data:
 	for (n = 0; n < histogram_size && histogram[n] == 0; n++)
