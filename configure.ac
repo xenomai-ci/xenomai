@@ -489,6 +489,7 @@ save_LIBS="$LIBS"
 LIBS="$LIBS -lrt -lpthread"
 AC_CHECK_FUNCS([pthread_mutexattr_setprotocol	\
 		pthread_mutexattr_getprotocol	\
+		pthread_mutexattr_setrobust	\
 		pthread_mutexattr_setrobust_np	\
 		pthread_condattr_getclock	\
 		pthread_condattr_setclock	\
