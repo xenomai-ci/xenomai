@@ -1,0 +1,117 @@
+// ** The above line should force tbl to be a preprocessor **
+// Man page for chkkconf
+//
+// Copyright (C) 2015 Philippe Gerum <rpm@xenomai.org>
+//
+// You may distribute under the terms of the GNU General Public
+// License as specified in the file COPYING that comes with the
+// Xenomai distribution.
+//
+//
+CHKKCONF(1)
+==========
+:doctype: manpage
+:revdate: 2021/09/23
+:man source: Xenomai
+:man version: {xenover}
+:man manual: Xenomai Manual
+
+NAME
+----
+chkkconf - Check kernel .config
+
+SYNOPSIS
+---------
+*chkkconf* [ options ]
+
+DESCRIPTION
+------------
+*chkkconf* is a common utility to check kernel configuration based
+on specified checklist. The kernel configuration to verify is
+a regular .config file which contains all the settings for
+building a kernel image. The check list contains a series
+of single-line assertions which are tested against the
+contents of the kernel configuration. The default checklist
+file kconf-checklist under $datarootdir(/user/xenomai/share/
+by default) contains assertions that may influence latency
+for xenomai. When we use the default checklist, the utility checks
+a kernel configuration for common issues which may increase latency.
+
+
+OPTIONS
+--------
+*chkkconf* accepts the following options:
+
+*--file*:: Specify a regular .config file. If none is specified,
+the command defaults to reading /proc/config.gz on the current
+machine. If this fails because any of CONFIG_IKCONFIG or
+CONFIG_IKCONFIG_PROC was disabled in the running kernel, the
+command fails.
+
+*--check-list*:: Specify a file that contains a series of single-line
+assertions which are tested against the contents of the kernel
+configuration. If none is specified, a default check-list is loaded
+from $datarootdir/kconf-checklist(/user/xenomai/share/kconf-checklist
+by default). Each assertion follows the BNF-like syntax below:
+
+- assertion   : expr conditions
+            | "!" expr conditions
+
+- expr        : symbol /* matches =y and =m */
+            | symbol "=" tristate
+
+- tristate  : "y"
+          | "m"
+          | "n"
+
+- conditions  : dependency
+            | dependency arch
+
+- dependency  : "if" symbol       /* true if set as y/m */
+
+- arch        : "on" cputype
+
+- cputype     : $(uname -m)
+
+For instance:
+
+- CONFIG_FOO must be set whenever CONFIG_BAR is unset can be written as
+CONFIG_FOO if !CONFIG_BAR.
+
+- CONFIG_FOO must not be set can be written as !CONFIG_FOO, or
+conversely CONFIG_FOO=n.
+
+- CONFIG_FOO must be built as module on aarch32 or aarch64 can be
+written as CONFIG_FOO=m on aarch.
+
+- CONFIG_FOO must not be built-in on aarch64 if CONFIG_BAR is set can be
+written as !CONFIG_FOO=y if CONFIG_BAR on aarch.
+
+Assertions in the check list may apply to a particular CPU architecture.
+Normally, the command should be able to figure out which architecture
+the kernel configuration file applies to by inspecting the first lines,
+looking for the “Linux/” pattern. However, you might have to specify
+this information manually to the command using the -a option if the file
+referred to by the -f option does not contain such information.
+The architecture name (cputype) should match the output of $(uname -m)
+or some abbreviated portion of it. However, arm64 and arm are automatically
+translated to aarch64 and aarch32 when found in an assertion or passed to
+the -a option.
+
+*--arch*:: Specify CPU architecture that you want to check for.
+
+*--hash-size*:: Set the hash table size.
+
+*--quiet*:: Suppress output.
+
+*--help*::
+Display a short help.
+
+VERSIONS
+--------
+*chkkconf* appeared in Xenomai 3.2 for checking kernel .config.
+
+AUTHOR
+-------
+*chkkconf* was written by Philippe Gerum <rpm@xenomai.org> and ported
+by Hongzhan Chen <hongzhan.chen@intel.com> from xenomai4.

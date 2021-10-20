@@ -7,6 +7,7 @@ HTML_DOCS = 					\
 	html/asciidoc-icons			\
 	html/asciidoc-icons/callouts		\
 	html/man1/autotune			\
+	html/man1/chkkconf			\
 	html/man1/clocktest			\
 	html/man1/corectl			\
 	html/man1/dohell			\
@@ -36,6 +37,7 @@ TXT_DOCS =				\
 
 MAN1_DOCS = 			\
 	man1/autotune.1		\
+	man1/chkkconf.1 	\
 	man1/clocktest.1 	\
 	man1/corectl.1	 	\
 	man1/cyclictest.1 	\

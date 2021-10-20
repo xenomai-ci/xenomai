@@ -1,0 +1,51 @@
+# Kconfig check list for dovetail-based xenomai
+#
+# This file contains assertions testing a set of configuration
+# settings from a kernel .config file, which are fed to evl-check.
+# Any failed assertion is reported.
+#
+#
+# check_list  : assertion
+# 	      | check_list assertion
+#
+# assertion   : expr conditions
+# 	      | "!" expr conditions
+#
+# expr	    : symbol /* matches =y and =m */
+# 	    | symbol "=" tristate
+#
+# tristate  : "y"
+# 	    | "m"
+# 	    | "n"
+#
+# conditions  : dependency
+# 	      | dependency arch
+#
+# dependency  : "if" symbol	/* true if set as y/m */
+#
+# arch	    : "on" cputype
+#
+# cputype   : $(uname -m)
+#
+# <arch> should match $(uname -m) or some abbreviated portion
+# of it.
+#
+# e.g.
+# "CONFIG_FOO must be set whenever CONFIG_BAR is UNset"
+# translates to: CONFIG_FOO if !CONFIG_BAR
+# "CONFIG_FOO must not be set"
+# translates to: !CONFIG_FOO, or conversely CONFIG_FOO=n
+# "CONFIG_FOO must be built as module on aarch32 or aarch64"
+# translates to: CONFIG_FOO=m on aarch
+
+CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y if CONFIG_CPU_FREQ
+CONFIG_DEBUG_HARD_LOCKS=n
+CONFIG_ACPI_PROCESSOR_IDLE=n
+CONFIG_LOCKDEP=n
+CONFIG_DEBUG_LIST=n
+CONFIG_DEBUG_VM=n
+CONFIG_DEBUG_PER_CPU_MAPS=n
+CONFIG_KASAN=n
+CONFIG_DEBUG_ENTRY=n
+CONFIG_FTRACE=n
+CONFIG_MIGRATION=n

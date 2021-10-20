@@ -1018,6 +1018,7 @@ AC_CONFIG_FILES([ \
 	utils/net/rtnet \
 	utils/net/rtnet.conf \
 	utils/net/Makefile \
+	utils/chkkconf/Makefile \
 	demo/Makefile \
 	demo/posix/Makefile \
 	demo/posix/cyclictest/Makefile \
