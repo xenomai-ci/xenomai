@@ -1016,6 +1016,10 @@ static int test_sc_cobalt_recvmmsg64(void)
 	};
 
 	sock = smokey_check_errno(socket(AF_RTIPC, SOCK_DGRAM, IPCPROTO_XDDP));
+	if (sock == -EAFNOSUPPORT) {
+		smokey_note("recvmmsg64: skipped. (no kernel support)");
+		return 0;
+	}
 	if (sock < 0)
 		return sock;
 
