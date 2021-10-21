@@ -39,9 +39,19 @@ timer irq latency.
 EOF
 }
 
+start_timesyncd()
+{
+    if $timesyncd_was_running; then
+        systemctl start systemd-timesyncd
+        timesyncd_was_running=false
+    fi
+}
+trap start_timesyncd EXIT
+
 keep_going=
 run_on_vm=
 rt_load=false
+timesyncd_was_running=false
 
 while :; do
     case "$1" in
@@ -82,17 +92,14 @@ echo 0 > /proc/xenomai/latency || :
 
 testdir=@testdir@
 
-timesyncd_running=false
 if which systemctl > /dev/null && systemctl is-active --quiet systemd-timesyncd; then
-    timesyncd_running=true
+    timesyncd_was_running=true
     systemctl stop systemd-timesyncd
 fi
 
 $testdir/smokey --run $run_on_vm $keep_going random_alloc_rounds=64 pattern_check_rounds=64
 
-if $timesyncd_running; then
-    systemctl start systemd-timesyncd
-fi
+start_timesyncd
 
 $testdir/clocktest -D -T 30 -C CLOCK_HOST_REALTIME || $testdir/clocktest -T 30
 $testdir/switchtest -T 30
