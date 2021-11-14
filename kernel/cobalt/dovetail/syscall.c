@@ -19,8 +19,7 @@ int handle_pipelined_syscall(struct irq_stage *stage, struct pt_regs *regs)
 	return handle_head_syscall(stage == &inband_stage, regs);
 }
 
-void handle_oob_syscall(struct pt_regs *regs)
+int handle_oob_syscall(struct pt_regs *regs)
 {
-	int ret = handle_head_syscall(false, regs);
-	XENO_BUG_ON(COBALT, ret == KEVENT_PROPAGATE);
+	return handle_head_syscall(false, regs);
 }
