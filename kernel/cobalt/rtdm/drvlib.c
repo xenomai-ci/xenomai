@@ -1973,6 +1973,10 @@ int __rtdm_mmap_from_fdop(struct rtdm_fd *fd, size_t len, off_t offset,
  * vmalloc(). To map physical I/O memory to user-space use
  * rtdm_iomap_to_user() instead.
  *
+ * @note This service is provided only for use in .ioctl operation handlers.
+ * Otherwise RTDM drivers implementing a .mmap operation should use
+ * rtdm_mmap_kmem(), rtdm_mmap_vmem(), or rtdm_mmap_iomem().
+ *
  * @note RTDM supports two models for unmapping the memory area:
  * - manual unmapping via rtdm_munmap(), which may be issued from a
  * driver in response to an IOCTL call, or by a call to the regular
@@ -2084,7 +2088,7 @@ EXPORT_SYMBOL_GPL(rtdm_iomap_to_user);
 /**
  * Map a kernel logical memory range to a virtual user area.
  *
- * This routine is commonly used from a ->mmap() handler of a RTDM
+ * This routine is commonly used from a .mmap operation handler of a RTDM
  * driver, for mapping a virtual memory area with a direct physical
  * mapping over the user address space referred to by @a vma.
  *
@@ -2107,10 +2111,10 @@ int rtdm_mmap_kmem(struct vm_area_struct *vma, void *va)
 EXPORT_SYMBOL_GPL(rtdm_mmap_kmem);
 
 /**
- * Map a virtual memory range to a virtual user area.
+ * Map a kernel virtual memory range to a virtual user area.
  *
- * This routine is commonly used from a ->mmap() handler of a RTDM
- * driver, for mapping a purely virtual memory area over the user
+ * This routine is commonly used from a .mmap operation handler of a RTDM
+ * driver, for mapping a kernel virtual memory area over the user
  * address space referred to by @a vma.
  *
  * @param[in] vma The VMA descriptor to receive the mapping.
@@ -2138,7 +2142,7 @@ EXPORT_SYMBOL_GPL(rtdm_mmap_vmem);
 /**
  * Map an I/O memory range to a virtual user area.
  *
- * This routine is commonly used from a ->mmap() handler of a RTDM
+ * This routine is commonly used from a .mmap operation handler of a RTDM
  * driver, for mapping an I/O memory area over the user address space
  * referred to by @a vma.
  *
