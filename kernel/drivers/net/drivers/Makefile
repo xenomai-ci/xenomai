@@ -12,6 +12,8 @@ obj-$(CONFIG_XENO_DRIVERS_NET_DRV_TULIP) += tulip/
 
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_IGB) += igb/
 
+obj-$(CONFIG_XENO_DRIVERS_NET_FEC) += freescale/
+
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_8139) += rt_8139too.o
 
 rt_8139too-y := 8139too.o
@@ -39,10 +41,6 @@ rt_mpc8xx_enet-y := mpc8xx_enet.o
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_FEC_ENET) += rt_mpc8xx_fec.o
 
 rt_mpc8xx_fec-y := mpc8xx_fec.o
-
-obj-$(CONFIG_XENO_DRIVERS_NET_DRV_FEC) += rt_fec.o
-
-rt_fec-y := fec.o
 
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_NATSEMI) += rt_natsemi.o
 
