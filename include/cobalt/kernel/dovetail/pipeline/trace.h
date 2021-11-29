@@ -45,13 +45,14 @@ static inline int xntrace_max_reset(void)
 
 static inline int xntrace_user_start(void)
 {
-	TODO();
+	trace_cobalt_trigger("user-start");
 	return 0;
 }
 
 static inline int xntrace_user_stop(unsigned long v)
 {
-	TODO();
+	trace_cobalt_trace_longval(0, v);
+	trace_cobalt_trigger("user-stop");
 	return 0;
 }
 
