@@ -40,10 +40,7 @@ const char *pipeline_timer_name(void);
 
 static inline const char *pipeline_clock_name(void)
 {
-	/* Return the name of the current clock source. */
-	TODO();
-
-	return "?";
+	return "<Linux clocksource>";
 }
 
 static inline int pipeline_get_host_time(struct timespec64 *tp)
