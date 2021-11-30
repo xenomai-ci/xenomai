@@ -27,20 +27,17 @@
 
 static inline int xntrace_max_begin(unsigned long v)
 {
-	TODO();
-	return 0;
+	return -ENOSYS;
 }
 
 static inline int xntrace_max_end(unsigned long v)
 {
-	TODO();
-	return 0;
+	return -ENOSYS;
 }
 
 static inline int xntrace_max_reset(void)
 {
-	TODO();
-	return 0;
+	return -ENOSYS;
 }
 
 static inline int xntrace_user_start(void)
