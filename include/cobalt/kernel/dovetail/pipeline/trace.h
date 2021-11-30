@@ -91,18 +91,6 @@ static inline int xntrace_tick(unsigned long delay_ticks) /* ns */
 	return 0;
 }
 
-static inline int xntrace_panic_freeze(void)
-{
-	TODO();
-	return 0;
-}
-
-static inline int xntrace_panic_dump(void)
-{
-	TODO();
-	return 0;
-}
-
 static inline bool xntrace_enabled(void)
 {
 	return IS_ENABLED(CONFIG_DOVETAIL_TRACE);

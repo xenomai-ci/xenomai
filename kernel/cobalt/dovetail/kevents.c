@@ -64,14 +64,12 @@ void handle_oob_trap_entry(unsigned int trapnr, struct pt_regs *regs)
 	 */
 #if defined(CONFIG_XENO_OPT_DEBUG_COBALT) || defined(CONFIG_XENO_OPT_DEBUG_USER)
 	if (!user_mode(regs)) {
-		xntrace_panic_freeze();
 		printk(XENO_WARNING
 		       "switching %s to secondary mode after exception #%u in "
 		       "kernel-space at 0x%lx (pid %d)\n", thread->name,
 		       trapnr,
 		       xnarch_fault_pc(regs),
 		       xnthread_host_pid(thread));
-		xntrace_panic_dump();
 	} else if (xnarch_fault_notify(trapnr)) /* Don't report debug traps */
 		printk(XENO_WARNING
 		       "switching %s to secondary mode after exception #%u from "
