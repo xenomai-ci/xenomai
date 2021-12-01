@@ -55,8 +55,6 @@
 	do { } while (0)
 #endif
 
-#define TODO()    BUILD_BUG_ON(IS_ENABLED(CONFIG_XENO_TODO))
-
 #define primary_mode_only()	XENO_BUG_ON(CONTEXT, is_secondary_domain())
 #define secondary_mode_only()	XENO_BUG_ON(CONTEXT, !is_secondary_domain())
 #define interrupt_only()	XENO_BUG_ON(CONTEXT, !xnsched_interrupt_p())
