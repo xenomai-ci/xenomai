@@ -36,29 +36,15 @@
 static struct rtcan_device *rtcan_devices[RTCAN_MAX_DEVICES];
 static DEFINE_RTDM_LOCK(rtcan_devices_rt_lock);
 
-static int rtcan_global_init_done;
-
 DEFINE_SEMAPHORE(rtcan_devices_nrt_lock);
 
 /* Spinlock for all reception lists and also for some members in
  * struct rtcan_socket */
-rtdm_lock_t rtcan_socket_lock;
+DEFINE_RTDM_LOCK(rtcan_socket_lock);
 
 /* Spinlock for all reception lists and also for some members in
  * struct rtcan_socket */
-rtdm_lock_t rtcan_recv_list_lock;
-
-
-
-static inline void rtcan_global_init(void)
-{
-    if (!rtcan_global_init_done) {
-	rtdm_lock_init(&rtcan_socket_lock);
-	rtdm_lock_init(&rtcan_recv_list_lock);
-	rtcan_global_init_done = 1;
-    }
-}
-
+DEFINE_RTDM_LOCK(rtcan_recv_list_lock);
 
 static inline struct rtcan_device *__rtcan_dev_get_by_name(const char *name)
 {
@@ -225,8 +211,6 @@ int rtcan_dev_register(struct rtcan_device *dev)
     int ret;
 
     down(&rtcan_devices_nrt_lock);
-
-    rtcan_global_init();
 
     if ((ret = __rtcan_dev_new_index()) < 0) {
 	up(&rtcan_devices_nrt_lock);
