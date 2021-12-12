@@ -897,6 +897,7 @@ static int flexcan_irq(rtdm_irq_t *irq_handle)
 			      &priv->tx_mb->can_ctrl);
 		flexcan_write(FLEXCAN_IFLAG_MB(priv->tx_mb_idx), &regs->iflag1);
 		rtdm_sem_up(&dev->tx_sem);
+		dev->tx_count++;
 		if (rtcan_loopback_pending(dev))
 			rtcan_loopback(dev);
 		handled = RTDM_IRQ_HANDLED;

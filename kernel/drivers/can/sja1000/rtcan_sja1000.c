@@ -326,6 +326,7 @@ static int rtcan_sja_interrupt(rtdm_irq_t *irq_handle)
 	if (irq_source & SJA_IR_TI) {
 	    /* Wake up a sender */
 	    rtdm_sem_up(&dev->tx_sem);
+	    dev->tx_count++;
 
 	    if (rtcan_loopback_pending(dev)) {
 

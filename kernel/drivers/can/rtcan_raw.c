@@ -950,7 +950,6 @@ ssize_t rtcan_raw_sendmsg(struct rtdm_fd *fd,
 	goto send_out2;
     }
 
-    dev->tx_count++;
     ret = dev->hard_start_xmit(dev, frame);
 
     /* Return number of bytes sent upon successful completion */
