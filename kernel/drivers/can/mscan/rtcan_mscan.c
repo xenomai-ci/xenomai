@@ -217,6 +217,7 @@ static int rtcan_mscan_interrupt(rtdm_irq_t *irq_handle)
 		out_8(&regs->cantier, 0);
 		/* Wake up a sender */
 		rtdm_sem_up(&dev->tx_sem);
+		dev->tx_count++;
 
 		if (rtcan_loopback_pending(dev)) {
 

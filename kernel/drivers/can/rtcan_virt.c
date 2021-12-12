@@ -56,6 +56,7 @@ static int rtcan_virt_start_xmit(struct rtcan_device *tx_dev,
 
 	/* we can transmit immediately again */
 	rtdm_sem_up(&tx_dev->tx_sem);
+	tx_dev->tx_count++;
 
 	skb.rb_frame_size = EMPTY_RB_FRAME_SIZE;
 

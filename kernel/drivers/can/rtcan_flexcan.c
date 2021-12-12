@@ -563,6 +563,7 @@ static int flexcan_interrupt(rtdm_irq_t *irq_handle)
 
 		/* Wake up a sender */
 		rtdm_sem_up(&dev->tx_sem);
+		dev->tx_count++;
 		if (rtcan_loopback_pending(dev)) {
 			if (recv_lock_free) {
 				recv_lock_free = 0;
