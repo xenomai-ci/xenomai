@@ -73,17 +73,15 @@ dump_info ()
 	test x"$_version" = x || version="$_version"
     fi
     echo "Xenomai version: ${version}"
+    uname -a 2>/dev/null || echo "Cannot determine system information (uname?)"
+    echo "Kernel parameters: `cat /proc/cmdline`"
     if test -r /proc/ipipe/version; then
-	uname -a 2>/dev/null || echo "Cannot determine system information (uname?)"
-	echo "Kernel parameters: `cat /proc/cmdline`"
 	echo "I-pipe release #`cat /proc/ipipe/version` detected"
-	if test -r /proc/xenomai/version; then
-	    echo "Cobalt core `cat /proc/xenomai/version` detected"
-	else
-	    echo "Cobalt core disabled on this system"
-	fi
+    fi
+    if test -r /proc/xenomai/version; then
+	echo "Cobalt core `cat /proc/xenomai/version` detected"
     else
-	    echo "Cobalt core is NOT present on this system"
+	echo "Cobalt core disabled or not present on this system"
     fi
     echo "Compiler: @XENO_BUILD_COMPILER@"
     eval echo "Build args: @XENO_BUILD_ARGS@"
