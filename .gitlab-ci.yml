@@ -187,22 +187,6 @@ arm-5.10-head:
     PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
-arm-5.4-release:
-  extends: .build
-  variables:
-    ARCH: arm
-    PIPELINE_REV: ipipe-core-5.4..*-arm-.*
-    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm.git
-    KERNEL_DEFCONFIG: multi_v7_defconfig
-
-arm-4.19-release:
-  extends: .build
-  variables:
-    ARCH: arm
-    PIPELINE_REV: ipipe-core-4.19..*-arm-.*
-    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm.git
-    KERNEL_DEFCONFIG: multi_v7_defconfig
-
 arm64-5.10-head:
   extends: .build
   variables:
@@ -211,52 +195,12 @@ arm64-5.10-head:
     PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: defconfig
 
-arm64-5.4-release:
-  extends: .build
-  variables:
-    ARCH: arm64
-    PIPELINE_REV: ipipe-core-5.4..*-arm64-.*
-    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm64.git
-    KERNEL_DEFCONFIG: defconfig
-
-arm64-4.19-cip-release:
-  extends: .build
-  variables:
-    ARCH: arm64
-    PIPELINE_REV: ipipe-core-4.19..*cip.*-arm64-.*
-    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm64.git
-    KERNEL_DEFCONFIG: defconfig
-
 x86-5.10-head:
   extends: .build
   variables:
     ARCH: x86
     PIPELINE_REV: v5.10.y-dovetail-rebase
     PIPELINE_KERNEL: ${DOVETAIL_URL}
-    KERNEL_DEFCONFIG: x86_64_defconfig
-
-x86-5.4-head:
-  extends: .build
-  variables:
-    ARCH: x86
-    PIPELINE_REV: ipipe-x86-5.4.y
-    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-x86.git
-    KERNEL_DEFCONFIG: x86_64_defconfig
-
-x86-4.19-cip-head:
-  extends: .build
-  variables:
-    ARCH: x86
-    PIPELINE_REV: ipipe-x86-4.19.y-cip
-    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-x86.git
-    KERNEL_DEFCONFIG: x86_64_defconfig
-
-x86-4.19-cip-release:
-  extends: .build
-  variables:
-    ARCH: x86
-    PIPELINE_REV: ipipe-core-4.19..*cip.*-x86-.*
-    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-x86.git
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 i386-userland:
