@@ -285,9 +285,6 @@ while : ; do
    x86*|i*86|amd*)
       linux_arch=x86
       ;;
-   powerpc*|ppc*)
-      linux_arch=powerpc
-      ;;
    arm)
       linux_arch=arm
       ;;

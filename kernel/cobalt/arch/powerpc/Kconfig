@@ -1,8 +1,0 @@
-source "kernel/xenomai/Kconfig"
-source "drivers/xenomai/Kconfig"
-
-config XENO_ARCH_FPU
-	def_bool PPC_FPU
-
-config XENO_ARCH_SYS3264
-        def_bool n

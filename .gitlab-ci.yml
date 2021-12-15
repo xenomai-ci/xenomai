@@ -24,12 +24,12 @@ variables:
   DOVETAIL_URL: "https://source.denx.de/Xenomai/linux-dovetail.git"
   GCC_VERSION: "10"
   PACKAGES: "u-boot-tools git make bc bison libelf-dev autotools-dev \
-             autoconf autogen libtool pkg-config ccache flex libssl-dev"
-  PACKAGES_arm: "gcc-${GCC_VERSION} gcc-${GCC_VERSION}-arm-linux-gnueabihf libc6-dev-armhf-cross"
-  PACKAGES_arm64: "gcc-${GCC_VERSION} gcc-${GCC_VERSION}-aarch64-linux-gnu libc6-dev-arm64-cross"
-  PACKAGES_i386: "gcc-${GCC_VERSION} gcc-${GCC_VERSION}-i686-linux-gnu libc6-dev-i386-cross"
-  PACKAGES_powerpc: "gcc-8 gcc-8-powerpc-linux-gnu libc6-dev-powerpc-cross"
-  PACKAGES_x86: "gcc-${GCC_VERSION}"
+             autoconf autogen libtool pkg-config ccache flex libssl-dev \
+             gcc-${GCC_VERSION}"
+  PACKAGES_arm: "gcc-${GCC_VERSION}-arm-linux-gnueabihf libc6-dev-armhf-cross"
+  PACKAGES_arm64: "gcc-${GCC_VERSION}-aarch64-linux-gnu libc6-dev-arm64-cross"
+  PACKAGES_i386: "gcc-${GCC_VERSION}-i686-linux-gnu libc6-dev-i386-cross"
+  PACKAGES_x86: ""
   XENOMAI_IMAGES_BRANCH: "master"
 
 .build:
@@ -56,12 +56,6 @@ variables:
       export CROSS_COMPILE=i686-linux-gnu-;
       export CONFIGURE_OPTS="--host=i686-linux-gnu --with-cc=i686-linux-gnu-gcc";
       update-alternatives --install /usr/bin/i686-linux-gnu-gcc i686-linux-gnu-gcc /usr/bin/i686-linux-gnu-gcc-${GCC_VERSION} 800;
-      ;;
-      "powerpc")
-      export GCC_VERSION=8
-      export CROSS_COMPILE=powerpc-linux-gnu-;
-      export CONFIGURE_OPTS="--host=powerpc-linux-gnu --with-cc=powerpc-linux-gnu-gcc";
-      update-alternatives --install /usr/bin/powerpc-linux-gnu-gcc powerpc-linux-gnu-gcc /usr/bin/powerpc-linux-gnu-gcc-${GCC_VERSION} 800;
       ;;
       "x86")
       export CROSS_COMPILE=;
@@ -275,15 +269,6 @@ i386-userland:
     - ./configure --enable-smp ${CONFIGURE_OPTS}
     - make -j $(nproc)
     - ccache -s
-
-powerpc-4.19-release:
-  extends: .build
-  image: debian:buster
-  variables:
-    ARCH: powerpc
-    PIPELINE_REV: ipipe-core-4.19..*-ppc32-.*
-    PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-ppc32.git
-    KERNEL_DEFCONFIG: mpc5200_defconfig
 
 trigger-xenomai-images:
   stage: test

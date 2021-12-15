@@ -118,7 +118,6 @@ invocation.
 In order to cross-compile the Linux kernel, pass an ARCH and
 CROSS_COMPILE variable on make command line. See sections
 <<cobalt-core-arm,"Building a _Cobalt/arm_ kernel">>,
-<<cobalt-core-powerpc,"Building a _Cobalt/powerpc_ kernel">>,
 <<cobalt-core-x86,"Building a _Cobalt/x86_ kernel">>,
 for examples.
 
@@ -232,26 +231,6 @@ The remaining examples illustrate how to cross-compile a
 _Cobalt_-enabled kernel for various architectures. Of course, you would
 have to install the proper cross-compilation toolchain for the target
 system first.
-
-[[cobalt-core-powerpc]]
-Building a _Cobalt/powerpc_ kernel
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A typical cross-compilation setup, in order to build Xenomai for a
-ppc-6xx architecture running a 3.10.32 kernel. We use the DENX ELDK
-cross-compiler:
-
-------------------------------------------------------------------------------
-$ cd $linux_tree
-$ $xenomai_root/scripts/prepare-kernel.sh --arch=powerpc \
-  --ipipe=ipipe-core-3.10.32-powerpc-1.patch
-$ make ARCH=powerpc CROSS_COMPILE=ppc_6xx- xconfig/gconfig/menuconfig
-------------------------------------------------------------------------------
-...select the kernel and Xenomai options, save the configuration
-------------------------------------------------------------------------------
-$ make ARCH=powerpc CROSS_COMPILE=powerpc-linux- uImage modules
-------------------------------------------------------------------------------
-...manually install the kernel image and modules to the proper location
 
 [[cobalt-core-arm]]
 Building  _Cobalt/arm_ kernel
@@ -515,9 +494,9 @@ does exist on the target kernel.
 	Due to GCC bugs regarding this feature with some
 	release,architecture combinations, whether TLS is turned on by
 	default is a per-architecture decision. Currently, this
-	feature is enabled for x86 and powerpc by default, other
-	architectures will require `--enable-tls` to be passed to the
-	_configure_ script explicitly.
+	feature is enabled for x86 by default, other architectures will
+	require `--enable-tls` to be passed to the _configure_ script
+	explicitly.
 
 [normal]
 	Unless `--enable-dlopen-libs` is present, the _initial-exec_
@@ -649,11 +628,11 @@ i.e. the system running the _configure_ script.
 
 Since cross-compiling requires specific tools, such tools are
 generally prefixed with the host architecture name; for example, a
-compiler for the PowerPC architecture may be named
-`powerpc-linux-gcc`.
+compiler for the 64-bit ARM architecture may be named
+`aarch64-linux-gcc`.
 
-When passing `--host=powerpc-linux` to configure, it will
-automatically use `powerpc-linux-` as a prefix to all
+When passing `--host=aarch64-linux` to configure, it will
+automatically use `aarch64-linux-` as a prefix to all
 compilation tools names and infer the host architecture name from this
 prefix. If configure is unable to infer the architecture name from the
 cross-compilation tools prefix, you will have to manually pass the
@@ -728,21 +707,6 @@ applications.  This directory path defaults to `/usr/xenomai`.
 The remaining examples illustrate how to cross-compile Xenomai for
 various architectures. Of course, you would have to install the proper
 cross-compilation toolchain for the target system first.
-
-Building the PPC32 libraries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-A typical cross-compilation setup, in order to build the _Cobalt_
-libraries for a ppc-6xx architecture. In that example, we want the
-debug symbols to be generated for the executable, with no runtime
-overhead though. We use the DENX ELDK cross-compiler:
-
-------------------------------------------------------------------------------
-$ cd $build_root
-$ $xenomai_root/configure --host=powerpc-linux --with-core=cobalt \
-  --enable-debug=symbols
-$ make DESTDIR=$staging_dir install
-------------------------------------------------------------------------------
 
 Building the ARM libraries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

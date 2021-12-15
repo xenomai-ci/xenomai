@@ -72,7 +72,7 @@ application.
 
 *--arch*::
 Output the target CPU architecture Xenomai was compiled for, e.g. arm,
-x86, powerpc etc.  This may differ from the CPU architecture of the
+arm64, x86, etc.  This may differ from the CPU architecture of the
 current system, if cross-compiling.
 
 *--prefix*::
