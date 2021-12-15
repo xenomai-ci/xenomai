@@ -6,8 +6,6 @@ obj-$(CONFIG_XENO_DRIVERS_NET_DRV_E1000) += e1000/
 
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_E1000E) += e1000e/
 
-obj-$(CONFIG_XENO_DRIVERS_NET_DRV_MPC52XX_FEC) += mpc52xx_fec/
-
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_TULIP) += tulip/
 
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_IGB) += igb/
@@ -29,18 +27,6 @@ rt_eepro100-y := eepro100.o
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_LOOPBACK) += rt_loopback.o
 
 rt_loopback-y := loopback.o
-
-obj-$(CONFIG_XENO_DRIVERS_NET_DRV_FCC_ENET) += rt_mpc8260_fcc_enet.o
-
-rt_mpc8260_fcc_enet-y := mpc8260_fcc_enet.o
-
-obj-$(CONFIG_XENO_DRIVERS_NET_DRV_SCC_ENET) += rt_mpc8xx_enet.o
-
-rt_mpc8xx_enet-y := mpc8xx_enet.o
-
-obj-$(CONFIG_XENO_DRIVERS_NET_DRV_FEC_ENET) += rt_mpc8xx_fec.o
-
-rt_mpc8xx_fec-y := mpc8xx_fec.o
 
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_NATSEMI) += rt_natsemi.o
 

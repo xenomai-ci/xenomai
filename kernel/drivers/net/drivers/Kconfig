@@ -77,33 +77,6 @@ config XENO_DRIVERS_NET_DRV_R8169
     tristate "Realtek 8169 (Gigabit)"
 
 
-if PPC
-
-comment "Embedded MPC Drivers"
-    depends on XENO_DRIVERS_NET
-
-config XENO_DRIVERS_NET_DRV_FCC_ENET
-    depends on XENO_DRIVERS_NET
-    tristate "MPC8260 FCC Ethernet"
-
-
-config XENO_DRIVERS_NET_DRV_FEC_ENET
-    depends on XENO_DRIVERS_NET
-    tristate "MPC8xx FEC Ethernet"
-
-
-config XENO_DRIVERS_NET_DRV_SCC_ENET
-    depends on XENO_DRIVERS_NET
-    tristate "MPC8xx SCC Ethernet"
-
-
-config XENO_DRIVERS_NET_DRV_MPC52XX_FEC
-    depends on XENO_DRIVERS_NET
-    tristate "MPC52xx FEC Ethernet"
-
-endif
-
-
 comment "Misc Drivers"
 
 config XENO_DRIVERS_NET_DRV_LOOPBACK
