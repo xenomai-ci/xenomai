@@ -75,9 +75,6 @@ dump_info ()
     echo "Xenomai version: ${version}"
     uname -a 2>/dev/null || echo "Cannot determine system information (uname?)"
     echo "Kernel parameters: `cat /proc/cmdline`"
-    if test -r /proc/ipipe/version; then
-	echo "I-pipe release #`cat /proc/ipipe/version` detected"
-    fi
     if test -r /proc/xenomai/version; then
 	echo "Cobalt core `cat /proc/xenomai/version` detected"
     else

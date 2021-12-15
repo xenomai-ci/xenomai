@@ -61,17 +61,17 @@ as follows:
 
 ------------------------------------------------------------------------------
 $ scripts/prepare-kernel.sh [--linux=<linux-srctree>]
-[--ipipe=<ipipe-patch>] [--arch=<target-arch>]
+[--dovetail=<dovetail-patch>] [--arch=<target-arch>]
 ------------------------------------------------------------------------------
 
 `--linux`:: specifies the path of the target kernel source tree. Such
     kernel tree may be already configured or not, indifferently. This
     path defaults to $PWD.
 
-`--ipipe`:: specifies the path of the interrupt pipeline (aka I-pipe)
+`--dovetil`:: specifies the path of the interrupt pipeline (aka Dovetail)
     patch to apply against the kernel tree. Suitable patches are
-    available from the project's link:/downloads/ipipe/[download
-    area].  This parameter can be omitted if the I-pipe has already
+    available from the project's link:/downloads/dovetail/[download
+    area].  This parameter can be omitted if the Dovetail has already
     been patched in, or the script shall suggest an appropriate
     one. The script will detect whether the interrupt pipeline code is
     already present into the kernel tree, and skip this operation if
@@ -82,12 +82,12 @@ $ scripts/prepare-kernel.sh [--linux=<linux-srctree>]
     default.
 
 For instance, the following command would prepare the Linux tree
-located at `/home/me/linux-3.10-ipipe` in order to patch the Xenomai
+located at `/home/me/linux-dovetail` in order to patch the Xenomai
 support in:
 
 ------------------------------------------------------------------------------
 $ cd xenomai-3
-$ scripts/prepare-kernel.sh --linux=/home/me/linux-3.10
+$ scripts/prepare-kernel.sh --linux=/home/me/linux-dovetail
 ------------------------------------------------------------------------------
 
 Note: The script will infer the location of the Xenomai kernel code
@@ -182,7 +182,7 @@ typically run:
 ------------------------------------------------------------------------------
 $ cd $linux_tree
 $ $xenomai_root/scripts/prepare-kernel.sh --arch=x86 \
-  --ipipe=ipipe-core-X.Y.Z-x86-NN.patch
+  --dovetail=patch-X.Y.Z-dovetail.patch
 $ make [ARCH=i386] xconfig/gconfig/menuconfig
 ------------------------------------------------------------------------------
 ...configure the kernel (see also the recommended settings
@@ -200,7 +200,7 @@ typical steps would be as follows:
 ------------------------------------------------------------------------------
 $ cd $linux_tree
 $ $xenomai_root/scripts/prepare-kernel.sh --arch=i386 \
-  --ipipe=ipipe-core-X.Y.Z-x86-NN.patch
+  --dovetail=patch-X.Y.Z-dovetail.patch
 $ make xconfig/gconfig/menuconfig
 ------------------------------------------------------------------------------
 ...configure the kernel (see also the recommended settings
@@ -216,7 +216,7 @@ Similarly, for a 64bit platform, you would use:
 ------------------------------------------------------------------------------
 $ cd $linux_tree
 $ $xenomai_root/scripts/prepare-kernel.sh --arch=x86_64 \
-  --ipipe=ipipe-core-X.Y.Z-x86-NN.patch
+  --dovetail=patch-X.Y.Z-dovetail.patch
 $ make xconfig/gconfig/menuconfig
 ------------------------------------------------------------------------------
 ...configure the kernel (see also the recommended settings
@@ -243,7 +243,7 @@ will look like:
 ------------------------------------------------------------------------------
 $ cd $linux_tree
 $ $xenomai_root/scripts/prepare-kernel.sh --arch=arm \
-  --ipipe=ipipe-core-X.Y.Z-x86-NN.patch
+  --dovetail=patch-X.Y.Z-dovetail.patch
 $ mkdir -p $build_root/linux
 $ make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- O=$build_root/linux \
   csb637_defconfig
@@ -300,13 +300,11 @@ although this is not mandatory if building with `--disable-tls`.
 _Cobalt_-specific requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- The kernel version must be 3.10 or better.
+- The kernel version must be 5.10 or better.
 
-- An interrupt pipeline (I-pipe) patch must be available for your
+- An interrupt pipeline (Dovetail) patch must be available for your
   target kernel. You can find the official patches issued by the
-  Xenomai project link:/downloads/ipipe/[there].
-  Only patches from the *ipipe-core* series are appropriate, legacy
-  patches from the *adeos-ipipe* series are not.
+  Xenomai project link:/downloads/dovetail/[there].
 
 - A timestamp counter (TSC) is required from running on a x86_32
   hardware. Unlike with Xenomai 2.x, TSC-emulation using a PIT
@@ -774,8 +772,7 @@ messages like these:
 
 ------------------------------------------------------------------------------
 $ dmesg | grep -i xenomai
-I-pipe: head domain Xenomai registered.
-[Xenomai] Cobalt vX.Y.Z enabled
+[Xenomai] Cobalt vX.Y.Z
 ------------------------------------------------------------------------------
 
 

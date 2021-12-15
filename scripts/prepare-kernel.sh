@@ -147,7 +147,7 @@ generate_patch() {
 }
 
 
-usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>]|[--ipipe=<ipipe-patch>] [--arch=<arch>] [--outpatch=<file> [--filterkvers=y|n] [--filterarch=y|n]] [--forcelink] [--default] [--verbose]'
+usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--filterkvers=y|n] [--filterarch=y|n]] [--forcelink] [--default] [--verbose]'
 me=`basename $0`
 
 while test $# -gt 0; do
@@ -156,26 +156,11 @@ while test $# -gt 0; do
 	linux_tree=`echo $1|sed -e 's,^--linux=\\(.*\\)$,\\1,g'`
 	linux_tree=`eval "echo $linux_tree"`
 	;;
-    --adeos=*)
-	pipeline_patch=`echo $1|sed -e 's,^--adeos=\\(.*\\)$,\\1,g'`
-	pipeline_patch=`eval "echo $pipeline_patch"`
-	probe_header=include/linux/ipipe.h
-	arch_probe_header=include/asm/ipipe.h
-	pipeline_type=ipipe
-	;;
-    --ipipe=*)
-	pipeline_patch=`echo $1|sed -e 's,^--ipipe=\\(.*\\)$,\\1,g'`
-	pipeline_patch=`eval "echo $pipeline_patch"`
-	probe_header=include/linux/ipipe.h
-	arch_probe_header=include/asm/ipipe.h
-	pipeline_type=ipipe
-	;;
     --dovetail=*)
 	pipeline_patch=`echo $1|sed -e 's,^--dovetail=\\(.*\\)$,\\1,g'`
 	pipeline_patch=`eval "echo $pipeline_patch"`
 	probe_header=include/linux/dovetail.h
 	arch_probe_header=include/asm/dovetail.h
-	pipeline_type=dovetail
 	;;
     --arch=*)
 	linux_arch=`echo $1|sed -e 's,^--arch=\\(.*\\)$,\\1,g'`
@@ -315,18 +300,6 @@ eval linux_`grep '^VERSION =' $linux_tree/Makefile | sed -e 's, ,,g'`
 
 linux_version="$linux_VERSION.$linux_PATCHLEVEL.$linux_SUBLEVEL"
 
-if test x$pipeline_type = x; then
-    if test -r $linux_tree/include/linux/ipipe.h; then
-	probe_header=include/linux/ipipe.h
-	arch_probe_header=include/asm/ipipe.h
-	pipeline_type=ipipe
-    elif test -r $linux_tree/include/linux/dovetail.h; then
-	probe_header=include/linux/dovetail.h
-	arch_probe_header=include/asm/dovetail.h
-	pipeline_type=dovetail
-    fi
-fi
-
 if test x$verbose = x1; then
 echo "Preparing kernel $linux_version$linux_EXTRAVERSION in $linux_tree..."
 fi
@@ -404,9 +377,9 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 test "x$CONFIG_XENO_REVISION_LEVEL" = "x" && CONFIG_XENO_REVISION_LEVEL=0
 
     if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$linux_arch/Makefile; then
-	p="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/arch/\$(SRCARCH)/xenomai/$pipeline_type/include -I\$(srctree)/include/xenomai"
+	p="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/arch/\$(SRCARCH)/xenomai/dovetail/include -I\$(srctree)/include/xenomai"
 	(echo; echo $p) | patch_append arch/$linux_arch/Makefile
-	p="core-\$(CONFIG_XENOMAI)	+= arch/$linux_arch/xenomai/$pipeline_type/"
+	p="core-\$(CONFIG_XENOMAI)	+= arch/$linux_arch/xenomai/dovetail/"
 	echo $p | patch_append arch/$linux_arch/Makefile
     fi
 
@@ -432,7 +405,7 @@ esac
 patch_kernelversion_specific="n"
 patch_architecture_specific="y"
 patch_link r m kernel/cobalt/arch/$linux_arch arch/$linux_arch/xenomai
-patch_link n n kernel/cobalt/include/$pipeline_type arch/$linux_arch/include/$pipeline_type
+patch_link n n kernel/cobalt/include/dovetail arch/$linux_arch/include/dovetail
 patch_architecture_specific="n"
 patch_link n m kernel/cobalt kernel/xenomai
 patch_link n cobalt-core.h kernel/cobalt/trace include/trace/events
@@ -442,11 +415,11 @@ patch_link r n kernel/cobalt/include/asm-generic/xenomai include/asm-generic/xen
 patch_link r n kernel/cobalt/include/linux/xenomai include/linux/xenomai
 patch_link n m kernel/cobalt/posix kernel/xenomai/posix
 patch_link n m kernel/cobalt/rtdm kernel/xenomai/rtdm
-patch_link n m kernel/cobalt/$pipeline_type kernel/xenomai/pipeline
+patch_link n m kernel/cobalt/dovetail kernel/xenomai/pipeline
 patch_link r m kernel/drivers drivers/xenomai
 patch_link n n include/cobalt/kernel include/xenomai/cobalt/kernel
 patch_link r n include/cobalt/kernel/rtdm include/xenomai/rtdm
-patch_link r n include/cobalt/kernel/$pipeline_type/pipeline include/xenomai/pipeline
+patch_link r n include/cobalt/kernel/dovetail/pipeline include/xenomai/pipeline
 patch_link r n include/cobalt/uapi include/xenomai/cobalt/uapi
 patch_link r n include/rtdm/uapi include/xenomai/rtdm/uapi
 patch_link n version.h include/xenomai include/xenomai
