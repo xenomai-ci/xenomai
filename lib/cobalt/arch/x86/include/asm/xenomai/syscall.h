@@ -15,8 +15,8 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
-#ifndef _LIB_COBALT_POWERPC_SYSCALL_H
-#define _LIB_COBALT_POWERPC_SYSCALL_H
+#ifndef _LIB_COBALT_X86_SYSCALL_H
+#define _LIB_COBALT_X86_SYSCALL_H
 
 #include <xeno_config.h>
 #include <cobalt/uapi/syscall.h>
@@ -213,4 +213,4 @@ asm (".L__X'%ebx = 1\n\t"
 #define XENOMAI_SYSCALL4(op,a1,a2,a3,a4)	XENOMAI_DO_SYSCALL(4,op,a1,a2,a3,a4)
 #define XENOMAI_SYSCALL5(op,a1,a2,a3,a4,a5)	XENOMAI_DO_SYSCALL(5,op,a1,a2,a3,a4,a5)
 
-#endif /* !_LIB_COBALT_POWERPC_SYSCALL_H */
+#endif /* !_LIB_COBALT_X86_SYSCALL_H */
