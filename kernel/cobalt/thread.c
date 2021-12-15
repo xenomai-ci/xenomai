@@ -553,6 +553,7 @@ void __xnthread_discard(struct xnthread *thread)
 	xnthread_deregister(thread);
 	xnlock_put_irqrestore(&nklock, s);
 }
+EXPORT_SYMBOL_GPL(__xnthread_discard);
 
 /**
  * @fn void xnthread_init(struct xnthread *thread,const struct xnthread_init_attr *attr,struct xnsched_class *sched_class,const union xnsched_policy_param *sched_param)
