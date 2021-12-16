@@ -323,7 +323,7 @@ int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 	if (xnthread_test_localinfo(cur, XNSYSRST)) {
 		xnthread_clear_localinfo(cur, XNSYSRST);
 
-		restart = cobalt_get_restart_block(current);
+		restart = &current->restart_block;
 
 		if (restart->fn != cobalt_restart_syscall_placeholder) {
 			if (rmt) {
@@ -346,7 +346,7 @@ int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 
 	if (xnthread_test_info(cur, XNBREAK)) {
 		if (signal_pending(current)) {
-			restart = cobalt_get_restart_block(current);
+			restart = &current->restart_block;
 			restart->nanosleep.expires =
 				(flags & TIMER_ABSTIME) ? timeout :
 				    xntimer_get_timeout_stopped(&cur->rtimer);

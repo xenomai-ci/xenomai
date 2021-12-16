@@ -25,6 +25,7 @@
 #include <linux/signal.h>
 #include <linux/pid.h>
 #include <linux/sched.h>
+#include <uapi/linux/sched/types.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/timer.h>
 #include <cobalt/kernel/synch.h>

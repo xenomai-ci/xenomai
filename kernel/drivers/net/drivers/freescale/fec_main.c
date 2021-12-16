@@ -878,11 +878,7 @@ fec_stop(struct net_device *ndev)
 }
 
 static void
-#if LINUX_VERSION_CODE > KERNEL_VERSION(5,6,0)
 fec_timeout(struct net_device *ndev, unsigned int txqueue)
-#else
-fec_timeout(struct net_device *ndev)
-#endif
 {
 	struct fec_enet_private *fep = netdev_priv(ndev);
 
@@ -2318,10 +2314,8 @@ fec_enet_set_wol(struct net_device *ndev, struct ethtool_wolinfo *wol)
 }
 
 static const struct ethtool_ops fec_enet_ethtool_ops = {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(5,7,0)
 	.supported_coalesce_params = ETHTOOL_COALESCE_USECS |
 				     ETHTOOL_COALESCE_MAX_FRAMES,
-#endif
 	.get_drvinfo		= fec_enet_get_drvinfo,
 	.get_regs_len		= fec_enet_get_regs_len,
 	.get_regs		= fec_enet_get_regs,
@@ -2358,11 +2352,7 @@ static int fec_enet_ioctl(struct net_device *ndev, struct ifreq *rq, int cmd)
 		return -ENODEV;
 
 	if (fep->bufdesc_ex) {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(5,9,0)
 		bool use_fec_hwts = !phy_has_hwtstamp(phydev);
-#else
-		bool use_fec_hwts = true;
-#endif
 		if (cmd == SIOCSHWTSTAMP) {
 			if (use_fec_hwts)
 				return fec_ptp_set(ndev, rq);
@@ -3265,9 +3255,7 @@ fec_probe(struct platform_device *pdev)
 {
 	struct fec_enet_private *fep;
 	struct fec_platform_data *pdata;
-#if LINUX_VERSION_CODE > KERNEL_VERSION(5,5,0)
 	phy_interface_t interface;
-#endif
 	struct net_device *ndev;
 	int i, irq, ret = 0, eth_id;
 	const struct of_device_id *of_id;
@@ -3350,24 +3338,15 @@ fec_probe(struct platform_device *pdev)
 		phy_node = of_node_get(np);
 	}
 	fep->phy_node = phy_node;
-#if LINUX_VERSION_CODE > KERNEL_VERSION(5,5,0)
 	ret = of_get_phy_mode(pdev->dev.of_node, &interface);
 	if (ret) {
-#else
-	ret = of_get_phy_mode(pdev->dev.of_node);
-	if (ret < 0) {
-#endif
 		pdata = dev_get_platdata(&pdev->dev);
 		if (pdata)
 			fep->phy_interface = pdata->phy;
 		else
 			fep->phy_interface = PHY_INTERFACE_MODE_MII;
 	} else {
-#if LINUX_VERSION_CODE > KERNEL_VERSION(5,5,0)
 		fep->phy_interface = interface;
-#else
-		fep->phy_interface = ret;
-#endif
 	}
 
 	fep->clk_ipg = devm_clk_get(&pdev->dev, "ipg");

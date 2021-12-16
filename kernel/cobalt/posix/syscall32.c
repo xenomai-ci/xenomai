@@ -906,7 +906,7 @@ COBALT_SYSCALL32emu(mmap, lostage,
 	int ret;
 
 	if (u_crma == NULL ||
-	    !access_rok(u_crma, sizeof(*u_crma)) ||
+	    !access_ok(u_crma, sizeof(*u_crma)) ||
 	    __xn_get_user(rma.length, &u_crma->length) ||
 	    __xn_get_user(rma.offset, &u_crma->offset) ||
 	    __xn_get_user(rma.prot, &u_crma->prot) ||

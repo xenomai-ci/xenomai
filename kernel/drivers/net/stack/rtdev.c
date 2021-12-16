@@ -51,10 +51,6 @@ DEFINE_MUTEX(rtnet_devices_nrt_lock);
 
 static int rtdev_locked_xmit(struct rtskb *skb, struct rtnet_device *rtdev);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 19, 0)
-#define atomic_fetch_add_unless __atomic_add_unless
-#endif
-
 int rtdev_reference(struct rtnet_device *rtdev)
 {
 	smp_mb__before_atomic();

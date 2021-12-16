@@ -27,7 +27,7 @@ int sys32_get_timespec(struct timespec64 *ts,
 {
 	struct old_timespec32 cts;
 
-	if (u_cts == NULL || !access_rok(u_cts, sizeof(*u_cts)))
+	if (u_cts == NULL || !access_ok(u_cts, sizeof(*u_cts)))
 		return -EFAULT;
 
 	if (__xn_get_user(cts.tv_sec, &u_cts->tv_sec) ||
@@ -46,7 +46,7 @@ int sys32_put_timespec(struct old_timespec32 __user *u_cts,
 {
 	struct old_timespec32 cts;
 
-	if (u_cts == NULL || !access_wok(u_cts, sizeof(*u_cts)))
+	if (u_cts == NULL || !access_ok(u_cts, sizeof(*u_cts)))
 		return -EFAULT;
 
 	cts.tv_sec = ts->tv_sec;
@@ -82,7 +82,7 @@ int sys32_get_timeval(struct __kernel_old_timeval *tv,
 		      const struct old_timeval32 __user *ctv)
 {
 	return (ctv == NULL ||
-		!access_rok(ctv, sizeof(*ctv)) ||
+		!access_ok(ctv, sizeof(*ctv)) ||
 		__xn_get_user(tv->tv_sec, &ctv->tv_sec) ||
 		__xn_get_user(tv->tv_usec, &ctv->tv_usec)) ? -EFAULT : 0;
 }
@@ -92,7 +92,7 @@ int sys32_put_timeval(struct old_timeval32 __user *ctv,
 		      const struct __kernel_old_timeval *tv)
 {
 	return (ctv == NULL ||
-		!access_wok(ctv, sizeof(*ctv)) ||
+		!access_ok(ctv, sizeof(*ctv)) ||
 		__xn_put_user(tv->tv_sec, &ctv->tv_sec) ||
 		__xn_put_user(tv->tv_usec, &ctv->tv_usec)) ? -EFAULT : 0;
 }
@@ -113,7 +113,7 @@ int sys32_get_timex(struct __kernel_timex *tx,
 	tx->time.tv_sec = time.tv_sec;
 	tx->time.tv_usec = time.tv_usec;
 
-	if (!access_rok(ctx, sizeof(*ctx)) ||
+	if (!access_ok(ctx, sizeof(*ctx)) ||
 	    __xn_get_user(tx->modes, &ctx->modes) ||
 	    __xn_get_user(tx->offset, &ctx->offset) ||
 	    __xn_get_user(tx->freq, &ctx->freq) ||
@@ -151,7 +151,7 @@ int sys32_put_timex(struct old_timex32 __user *ctx,
 	if (ret)
 		return ret;
 
-	if (!access_wok(ctx, sizeof(*ctx)) ||
+	if (!access_ok(ctx, sizeof(*ctx)) ||
 	    __xn_put_user(tx->modes, &ctx->modes) ||
 	    __xn_put_user(tx->offset, &ctx->offset) ||
 	    __xn_put_user(tx->freq, &ctx->freq) ||
@@ -181,7 +181,7 @@ int sys32_get_fdset(fd_set *fds, const compat_fd_set __user *cfds,
 {
 	int rdpos, wrpos, rdlim = cfdsize / sizeof(compat_ulong_t);
 
-	if (cfds == NULL || !access_rok(cfds, cfdsize))
+	if (cfds == NULL || !access_ok(cfds, cfdsize))
 		return -EFAULT;
 
 	for (rdpos = 0, wrpos = 0; rdpos < rdlim; rdpos++, wrpos++)
@@ -196,7 +196,7 @@ int sys32_put_fdset(compat_fd_set __user *cfds, const fd_set *fds,
 {
 	int rdpos, wrpos, wrlim = fdsize / sizeof(long);
 
-	if (cfds == NULL || !access_wok(cfds, wrlim * sizeof(compat_ulong_t)))
+	if (cfds == NULL || !access_ok(cfds, wrlim * sizeof(compat_ulong_t)))
 		return -EFAULT;
 
 	for (rdpos = 0, wrpos = 0; wrpos < wrlim; rdpos++, wrpos++)
@@ -440,7 +440,7 @@ int sys32_get_msghdr(struct user_msghdr *msg,
 	compat_uptr_t tmp1, tmp2, tmp3;
 
 	if (u_cmsg == NULL ||
-	    !access_rok(u_cmsg, sizeof(*u_cmsg)) ||
+	    !access_ok(u_cmsg, sizeof(*u_cmsg)) ||
 	    __xn_get_user(tmp1, &u_cmsg->msg_name) ||
 	    __xn_get_user(msg->msg_namelen, &u_cmsg->msg_namelen) ||
 	    __xn_get_user(tmp2, &u_cmsg->msg_iov) ||
@@ -465,7 +465,7 @@ int sys32_get_mmsghdr(struct mmsghdr *mmsg,
 		      const struct compat_mmsghdr __user *u_cmmsg)
 {
 	if (u_cmmsg == NULL ||
-	    !access_rok(u_cmmsg, sizeof(*u_cmmsg)) ||
+	    !access_ok(u_cmmsg, sizeof(*u_cmmsg)) ||
 	    __xn_get_user(mmsg->msg_len, &u_cmmsg->msg_len))
 		return -EFAULT;
 
@@ -477,7 +477,7 @@ int sys32_put_msghdr(struct compat_msghdr __user *u_cmsg,
 		     const struct user_msghdr *msg)
 {
 	if (u_cmsg == NULL ||
-	    !access_wok(u_cmsg, sizeof(*u_cmsg)) ||
+	    !access_ok(u_cmsg, sizeof(*u_cmsg)) ||
 	    __xn_put_user(ptr_to_compat(msg->msg_name), &u_cmsg->msg_name) ||
 	    __xn_put_user(msg->msg_namelen, &u_cmsg->msg_namelen) ||
 	    __xn_put_user(ptr_to_compat(msg->msg_iov), &u_cmsg->msg_iov) ||
@@ -495,7 +495,7 @@ int sys32_put_mmsghdr(struct compat_mmsghdr __user *u_cmmsg,
 		     const struct mmsghdr *mmsg)
 {
 	if (u_cmmsg == NULL ||
-	    !access_wok(u_cmmsg, sizeof(*u_cmmsg)) ||
+	    !access_ok(u_cmmsg, sizeof(*u_cmmsg)) ||
 	    __xn_put_user(mmsg->msg_len, &u_cmmsg->msg_len))
 		return -EFAULT;
 

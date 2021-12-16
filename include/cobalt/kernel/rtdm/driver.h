@@ -1272,13 +1272,13 @@ int rtdm_munmap(void *ptr, size_t len);
 static inline int rtdm_read_user_ok(struct rtdm_fd *fd,
 				    const void __user *ptr, size_t size)
 {
-	return access_rok(ptr, size);
+	return access_ok(ptr, size);
 }
 
 static inline int rtdm_rw_user_ok(struct rtdm_fd *fd,
 				  const void __user *ptr, size_t size)
 {
-	return access_wok(ptr, size);
+	return access_ok(ptr, size);
 }
 
 static inline int rtdm_copy_from_user(struct rtdm_fd *fd,

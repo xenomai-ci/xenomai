@@ -322,7 +322,7 @@ int rtipc_get_length(struct rtdm_fd *fd, size_t *lenp,
 			return -EINVAL;
 		csz = arg;
 		return csz == NULL ||
-			!access_rok(csz, sizeof(*csz)) ||
+			!access_ok(csz, sizeof(*csz)) ||
 			__xn_get_user(*lenp, csz) ? -EFAULT : 0;
 	}
 #endif

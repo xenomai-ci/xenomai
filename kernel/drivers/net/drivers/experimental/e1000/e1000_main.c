@@ -3606,9 +3606,6 @@ static void e1000_tx_queue(struct e1000_adapter *adapter,
 	writel(i, adapter->hw.hw_addr + tx_ring->tdt);
 
     rtdm_lock_irqrestore(context);
-	/* we need this if more than one processor can write to our tail
-	 * at a time, it synchronizes IO on IA64/Altix systems */
-	mmiowb();
 }
 
 #define E1000_FIFO_HDR			0x10

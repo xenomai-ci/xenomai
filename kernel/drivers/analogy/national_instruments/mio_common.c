@@ -256,7 +256,6 @@ static inline void ni_set_bitfield(struct a4l_device *dev,
 		break;
 	}
 
-	mmiowb();
 	rtdm_lock_put_irqrestore(&devpriv->soft_reg_copy_lock, flags);
 }
 
@@ -324,7 +323,6 @@ static inline void ni_set_cdo_dma_channel(struct a4l_device * dev, int mite_chan
 			 CDO_DMA_Select_Shift) & CDO_DMA_Select_Mask;
 	}
 	ni_writeb(devpriv->cdio_dma_select_reg, M_Offset_CDIO_DMA_Select);
-	mmiowb();
 	rtdm_lock_put_irqrestore(&devpriv->soft_reg_copy_lock, flags);
 }
 

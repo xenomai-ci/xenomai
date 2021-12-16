@@ -590,7 +590,7 @@ static int match_gpio_chip(struct gpio_chip *gc, void *data)
 	struct gpiochip_match_data *d = data;
 	struct gpiochip_holder *h;
 
-	if (cobalt_gpiochip_dev(gc) == d->parent) {
+	if (gc->parent == d->parent) {
 		h = kmalloc(sizeof(*h), GFP_KERNEL);
 		if (h) {
 			h->chip = gc;

@@ -53,10 +53,6 @@
 #include <linux/aer.h>
 #include <linux/prefetch.h>
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,0)
-#include <linux/pci-aspm.h>
-#endif
-
 #include "e1000.h"
 
 #define RT_E1000E_NUM_RXD	64
@@ -2883,15 +2879,9 @@ static void e1000e_update_phy_task(struct work_struct *work)
  * Need to wait a few seconds after link up to get diagnostic information from
  * the phy
  */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0)
 static void e1000_update_phy_info(struct timer_list *t)
 {
 	struct e1000_adapter *adapter = from_timer(adapter, t, phy_info_timer);
-#else /* < 4.14 */
-static void e1000_update_phy_info(unsigned long data)
-{
-	struct e1000_adapter *adapter = (struct e1000_adapter *) data;
-#endif /* < 4.14 */
 
 	if (test_bit(__E1000_DOWN, &adapter->state))
 		return;
@@ -3037,15 +3027,9 @@ static void e1000e_check_82574_phy_workaround(struct e1000_adapter *adapter)
  * e1000_watchdog - Timer Call-back
  * @data: pointer to adapter cast into an unsigned long
  **/
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0)
 static void e1000_watchdog(struct timer_list *t)
 {
 	struct e1000_adapter *adapter = from_timer(adapter, t, watchdog_timer);
-#else /* < 4.14 */
-static void e1000_watchdog(unsigned long data)
-{
-	struct e1000_adapter *adapter = (struct e1000_adapter *) data;
-#endif /* < 4.14 */
 
 	/* Do the rest outside of interrupt context */
 	rtdm_schedule_nrt_work(&adapter->watchdog_task);
@@ -3357,7 +3341,6 @@ static void e1000_tx_queue(struct e1000_adapter *adapter,
 	 * we need this if more than one processor can write to our tail
 	 * at a time, it synchronizes IO on IA64/Altix systems
 	 */
-	mmiowb();
 }
 
 #define MINIMUM_DHCP_PACKET_SIZE 282
@@ -4095,18 +4078,8 @@ static int e1000_probe(struct pci_dev *pdev,
 
 	memcpy(netdev->dev_addr, adapter->hw.mac.addr, netdev->addr_len);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0)
 	timer_setup(&adapter->watchdog_timer, e1000_watchdog, 0);
 	timer_setup(&adapter->phy_info_timer, e1000_update_phy_info, 0);
-#else /* < 4.14 */
-	init_timer(&adapter->watchdog_timer);
-	adapter->watchdog_timer.function = e1000_watchdog;
-	adapter->watchdog_timer.data = (unsigned long) adapter;
-
-	init_timer(&adapter->phy_info_timer);
-	adapter->phy_info_timer.function = e1000_update_phy_info;
-	adapter->phy_info_timer.data = (unsigned long) adapter;
-#endif /* < 4.14 */
 
 	INIT_WORK(&adapter->reset_task, e1000_reset_task);
 	INIT_WORK(&adapter->watchdog_task, e1000_watchdog_task);

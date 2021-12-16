@@ -412,7 +412,6 @@ patch_link n cobalt-core.h kernel/cobalt/trace include/trace/events
 patch_link n cobalt-rtdm.h kernel/cobalt/trace include/trace/events
 patch_link n cobalt-posix.h kernel/cobalt/trace include/trace/events
 patch_link r n kernel/cobalt/include/asm-generic/xenomai include/asm-generic/xenomai
-patch_link r n kernel/cobalt/include/linux/xenomai include/linux/xenomai
 patch_link n m kernel/cobalt/posix kernel/xenomai/posix
 patch_link n m kernel/cobalt/rtdm kernel/xenomai/rtdm
 patch_link n m kernel/cobalt/dovetail kernel/xenomai/pipeline

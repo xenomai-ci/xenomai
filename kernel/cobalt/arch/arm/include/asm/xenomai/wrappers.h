@@ -21,7 +21,4 @@
 
 #include <asm-generic/xenomai/wrappers.h> /* Read the generic portion. */
 
-#define __put_user_inatomic __put_user
-#define __get_user_inatomic __get_user
-
 #endif /* _COBALT_ARM_ASM_WRAPPERS_H */

@@ -948,7 +948,7 @@ int __cobalt_mq_timedsend(mqd_t uqd, const void __user *u_buf, size_t len,
 		goto out;
 	}
 
-	if (len > 0 && !access_rok(u_buf, len)) {
+	if (len > 0 && !access_ok(u_buf, len)) {
 		ret = -EFAULT;
 		goto out;
 	}
@@ -1012,7 +1012,7 @@ int __cobalt_mq_timedreceive(mqd_t uqd, void __user *u_buf,
 	if (IS_ERR(mqd))
 		return PTR_ERR(mqd);
 
-	if (*lenp > 0 && !access_wok(u_buf, *lenp)) {
+	if (*lenp > 0 && !access_ok(u_buf, *lenp)) {
 		ret = -EFAULT;
 		goto fail;
 	}

@@ -34,6 +34,7 @@
 #include <linux/file.h>
 #include <linux/sched.h>
 #include <linux/signal.h>
+#include <linux/sched/mm.h>
 #include <pipeline/kevents.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/heap.h>
@@ -605,7 +606,7 @@ int cobalt_map_user(struct xnthread *thread, __u32 __user *u_winoff)
 	if (xnthread_current() || xnthread_test_state(thread, XNMAPPED))
 		return -EBUSY;
 
-	if (!access_wok(u_winoff, sizeof(*u_winoff)))
+	if (!access_ok(u_winoff, sizeof(*u_winoff)))
 		return -EFAULT;
 
 	ret = pipeline_prepare_current();

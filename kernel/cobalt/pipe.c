@@ -27,6 +27,7 @@
 #include <linux/spinlock.h>
 #include <linux/device.h>
 #include <linux/uaccess.h>
+#include <linux/compat.h>
 #include <asm/io.h>
 #include <asm/xenomai/syscall.h>
 #include <cobalt/kernel/sched.h>
@@ -798,7 +799,7 @@ static ssize_t xnpipe_read(struct file *file,
 	ssize_t ret;
 	spl_t s;
 
-	if (!access_wok(buf, count))
+	if (!access_ok(buf, count))
 		return -EFAULT;
 
 	xnlock_get_irqsave(&nklock, s);
@@ -906,7 +907,7 @@ static ssize_t xnpipe_write(struct file *file,
 	if (count == 0)
 		return 0;
 
-	if (!access_rok(buf, count))
+	if (!access_ok(buf, count))
 		return -EFAULT;
 
 	xnlock_get_irqsave(&nklock, s);

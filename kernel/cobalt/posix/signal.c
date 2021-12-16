@@ -259,7 +259,7 @@ static int signal_wait(sigset_t *set, xnticks_t timeout,
 	curr = cobalt_current_thread();
 	XENO_BUG_ON(COBALT, curr == NULL);
 
-	if (u_si && !access_wok(u_si, sizeof(*u_si)))
+	if (u_si && !access_ok(u_si, sizeof(*u_si)))
 		return -EFAULT;
 
 	xnlock_get_irqsave(&nklock, s);

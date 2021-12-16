@@ -171,14 +171,6 @@
 #define PCI_CAP_ID_EXP 0x10
 #endif
 
-#ifndef mmiowb
-#ifdef CONFIG_IA64
-#define mmiowb() asm volatile ("mf.a" ::: "memory")
-#else
-#define mmiowb()
-#endif
-#endif
-
 #ifndef SET_NETDEV_DEV
 #define SET_NETDEV_DEV(net, pdev)
 #endif

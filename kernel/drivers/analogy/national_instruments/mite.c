@@ -340,7 +340,6 @@ void a4l_mite_release_channel(struct mite_channel *mite_chan)
 		mite_dma_reset(mite_chan);
 		mite->channel_allocated[mite_chan->channel] = 0;
 		mite_chan->ring = NULL;
-		mmiowb();
 	}
 	rtdm_lock_put_irqrestore(&mite->lock, flags);
 }
@@ -360,7 +359,6 @@ void a4l_mite_dma_arm(struct mite_channel *mite_chan)
 	rtdm_lock_get_irqsave(&mite->lock, flags);
 	mite_chan->done = 0;
 	writel(chor, mite->mite_io_addr + MITE_CHOR(mite_chan->channel));
-	mmiowb();
 	rtdm_lock_put_irqrestore(&mite->lock, flags);
 }
 
@@ -621,7 +619,6 @@ u32 a4l_mite_get_status(struct mite_channel *mite_chan)
 		writel(CHOR_CLRDONE,
 		       mite->mite_io_addr + MITE_CHOR(mite_chan->channel));
 	}
-	mmiowb();
 	rtdm_lock_put_irqrestore(&mite->lock, flags);
 	return status;
 }

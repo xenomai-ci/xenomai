@@ -54,7 +54,7 @@ static ssize_t timerfd_read(struct rtdm_fd *fd, void __user *buf, size_t size)
 		return -EINVAL;
 
 	u_ticks = buf;
-	if (!access_wok(u_ticks, sizeof(*u_ticks)))
+	if (!access_ok(u_ticks, sizeof(*u_ticks)))
 		return -EFAULT;
 
 	aligned = (((unsigned long)buf) & (sizeof(ticks) - 1)) == 0;

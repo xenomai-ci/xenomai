@@ -250,9 +250,6 @@ static inline void rtnetproxy_kernel_recv(struct rtskb *rtskb)
 	/* the rtskb stamp is useless (different clock), get new one */
 	__net_timestamp(skb);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
-	dev->last_rx = jiffies;
-#endif
 	dev->stats.rx_bytes += skb->len;
 	dev->stats.rx_packets++;
 

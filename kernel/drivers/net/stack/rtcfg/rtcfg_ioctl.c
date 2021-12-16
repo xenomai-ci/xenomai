@@ -214,9 +214,9 @@ static int load_cfg_file(struct rtcfg_file *cfgfile, struct rtcfg_cmd *cmd)
 		cfgfile->buffer = vmalloc(1);
 	} else {
 		cfgfile->buffer = NULL; /* Leave allocation to the kernel. */
-		ret = read_file_from_kernel(filp, &cfgfile->buffer,
-					i_size_read(file_inode(filp)),
-					&file_size, READING_UNKNOWN);
+		ret = kernel_read_file(filp, 0, &cfgfile->buffer,
+				       i_size_read(file_inode(filp)),
+				       &file_size, READING_UNKNOWN);
 		if (ret < 0) {
 			fput(filp);
 			return ret;

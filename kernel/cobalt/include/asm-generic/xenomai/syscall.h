@@ -28,14 +28,6 @@
 #include <cobalt/uapi/asm-generic/syscall.h>
 #include <cobalt/uapi/kernel/types.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 0, 0)
-#define access_rok(addr, size)	access_ok((addr), (size))
-#define access_wok(addr, size)	access_ok((addr), (size))
-#else
-#define access_rok(addr, size)	access_ok(VERIFY_READ, (addr), (size))
-#define access_wok(addr, size)	access_ok(VERIFY_WRITE, (addr), (size))
-#endif
-
 #define __xn_copy_from_user(dstP, srcP, n)	raw_copy_from_user(dstP, srcP, n)
 #define __xn_copy_to_user(dstP, srcP, n)	raw_copy_to_user(dstP, srcP, n)
 #define __xn_put_user(src, dstP)		__put_user(src, dstP)
@@ -47,7 +39,7 @@ static inline int cobalt_copy_from_user(void *dst, const void __user *src,
 {
 	size_t remaining = size;
 
-	if (likely(access_rok(src, size)))
+	if (likely(access_ok(src, size)))
 		remaining = __xn_copy_from_user(dst, src, size);
 
 	if (unlikely(remaining > 0)) {
@@ -60,7 +52,7 @@ static inline int cobalt_copy_from_user(void *dst, const void __user *src,
 static inline int cobalt_copy_to_user(void __user *dst, const void *src,
 				      size_t size)
 {
-	if (unlikely(!access_wok(dst, size) ||
+	if (unlikely(!access_ok(dst, size) ||
 	    __xn_copy_to_user(dst, src, size)))
 		return -EFAULT;
 	return 0;
@@ -69,7 +61,7 @@ static inline int cobalt_copy_to_user(void __user *dst, const void *src,
 static inline int cobalt_strncpy_from_user(char *dst, const char __user *src,
 					   size_t count)
 {
-	if (unlikely(!access_rok(src, 1)))
+	if (unlikely(!access_ok(src, 1)))
 		return -EFAULT;
 
 	return __xn_strncpy_from_user(dst, src, count);

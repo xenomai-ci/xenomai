@@ -157,7 +157,6 @@ void ni_tio_set_bits_transient(struct ni_gpct *counter,
 	write_register(counter,
 		       counter_dev->regs[register_index] | transient_bit_values,
 		       register_index);
-	mmiowb();
 	rtdm_lock_put_irqrestore(&counter_dev->regs_lock, flags);
 }
 

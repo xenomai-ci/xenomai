@@ -247,7 +247,7 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 		if (xnthread_test_localinfo(curr, XNSYSRST)) {
 			xnthread_clear_localinfo(curr, XNSYSRST);
 
-			restart = cobalt_get_restart_block(current);
+			restart = &current->restart_block;
 			timeout = restart->nanosleep.expires;
 
 			if (restart->fn != cobalt_restart_syscall_placeholder) {
@@ -262,7 +262,7 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 			} else
 #endif
 			{
-				if (!access_wok(u_tv, sizeof(tv))
+				if (!access_ok(u_tv, sizeof(tv))
 				    || cobalt_copy_from_user(&tv, u_tv,
 							     sizeof(tv)))
 					return -EFAULT;
@@ -291,8 +291,8 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 			} else
 #endif
 			{
-				if (!access_wok((void __user *) ufd_sets[i],
-						sizeof(fd_set))
+				if (!access_ok((void __user *) ufd_sets[i],
+					       sizeof(fd_set))
 				    || cobalt_copy_from_user(in_fds[i],
 							     (void __user *)ufd_sets[i],
 							     fds_size))
@@ -335,7 +335,7 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 	if (err == -EINTR && signal_pending(current)) {
 		xnthread_set_localinfo(curr, XNSYSRST);
 
-		restart = cobalt_get_restart_block(current);
+		restart = &current->restart_block;
 		restart->fn = cobalt_restart_syscall_placeholder;
 		restart->nanosleep.expires = timeout;
 

@@ -858,7 +858,6 @@ void ni_660x_set_dma_channel(struct a4l_device *dev,
 			       dma_configuration_soft_copies
 			       [counter->chip_index] |
 			       dma_reset_bit(mite_channel), DMAConfigRegister);
-	mmiowb();
 	rtdm_lock_put_irqrestore(&private(dev)->soft_reg_copy_lock, flags);
 }
 
@@ -877,7 +876,6 @@ void ni_660x_unset_dma_channel(struct a4l_device *dev,
 			       private(dev)->
 			       dma_configuration_soft_copies
 			       [counter->chip_index], DMAConfigRegister);
-	mmiowb();
 	rtdm_lock_put_irqrestore(&private(dev)->soft_reg_copy_lock, flags);
 }
 

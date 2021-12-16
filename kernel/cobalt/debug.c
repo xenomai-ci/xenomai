@@ -23,6 +23,7 @@
 #include <linux/mm.h>
 #include <linux/signal.h>
 #include <linux/vmalloc.h>
+#include <linux/sched/mm.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/clock.h>
