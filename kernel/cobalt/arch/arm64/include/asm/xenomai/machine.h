@@ -4,8 +4,8 @@
  * Copyright (C) 2015 Dmitriy Cherkasov <dmitriy@mperpetuo.com>
  */
 
-#ifndef _COBALT_ARM64_DOVETAIL_MACHINE_H
-#define _COBALT_ARM64_DOVETAIL_MACHINE_H
+#ifndef _COBALT_ARM64_MACHINE_H
+#define _COBALT_ARM64_MACHINE_H
 
 #include <linux/version.h>
 #include <asm/byteorder.h>
@@ -30,4 +30,4 @@ static inline __attribute_const__ unsigned long ffnz(unsigned long ul)
 
 #include <asm-generic/xenomai/machine.h>
 
-#endif /* !_COBALT_ARM64_DOVETAIL_MACHINE_H */
+#endif /* !_COBALT_ARM64_MACHINE_H */

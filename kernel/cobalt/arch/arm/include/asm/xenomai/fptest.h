@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _COBALT_ARM_DOVETAIL_FPTEST_H
-#define _COBALT_ARM_DOVETAIL_FPTEST_H
+#ifndef _COBALT_ARM_FPTEST_H
+#define _COBALT_ARM_FPTEST_H
 
 #include <linux/errno.h>
 #include <asm/hwcap.h>
@@ -49,4 +49,4 @@ static inline int fp_detect(void)
 	return have_vfp ? __COBALT_HAVE_VFP : 0;
 }
 
-#endif /* _COBALT_ARM_DOVETAIL_FPTEST_H */
+#endif /* _COBALT_ARM_FPTEST_H */

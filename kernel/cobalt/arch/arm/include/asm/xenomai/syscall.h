@@ -19,8 +19,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _COBALT_ARM_DOVETAIL_SYSCALL_H
-#define _COBALT_ARM_DOVETAIL_SYSCALL_H
+#ifndef _COBALT_ARM_SYSCALL_H
+#define _COBALT_ARM_SYSCALL_H
 
 #include <linux/errno.h>
 #include <linux/uaccess.h>
@@ -98,4 +98,4 @@ static inline void pipeline_get_syscall_args(struct task_struct *task,
 	args[4] = regs->ARM_r5;
 }
 
-#endif /* !_COBALT_ARM_DOVETAIL_SYSCALL_H */
+#endif /* !_COBALT_ARM_SYSCALL_H */

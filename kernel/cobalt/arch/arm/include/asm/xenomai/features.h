@@ -19,12 +19,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _COBALT_ARM_DOVETAIL_FEATURES_H
-#define _COBALT_ARM_DOVETAIL_FEATURES_H
+#ifndef _COBALT_ARM_FEATURES_H
+#define _COBALT_ARM_FEATURES_H
 
 struct cobalt_featinfo;
 static inline void collect_arch_features(struct cobalt_featinfo *p) { }
 
 #include <asm/xenomai/uapi/features.h>
 
-#endif /* !_COBALT_ARM_DOVETAIL_FEATURES_H */
+#endif /* !_COBALT_ARM_FEATURES_H */

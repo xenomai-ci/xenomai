@@ -4,8 +4,8 @@
  * Copyright (C) 2006 Gilles Chanteperdrix <gilles.chanteperdrix@xenomai.org>
  */
 
-#ifndef _COBALT_ARM64_DOVETAIL_FPTEST_H
-#define _COBALT_ARM64_DOVETAIL_FPTEST_H
+#ifndef _COBALT_ARM64_FPTEST_H
+#define _COBALT_ARM64_FPTEST_H
 
 #include <linux/errno.h>
 #include <asm/xenomai/uapi/fptest.h>
@@ -32,4 +32,4 @@ static inline int fp_detect(void)
 	return have_fp ? __COBALT_HAVE_FPU : 0;
 }
 
-#endif /* !_COBALT_ARM64_DOVETAIL_FPTEST_H */
+#endif /* !_COBALT_ARM64_FPTEST_H */

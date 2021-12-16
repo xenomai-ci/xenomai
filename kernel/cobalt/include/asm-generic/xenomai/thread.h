@@ -6,8 +6,8 @@
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  */
-#ifndef _COBALT_ASM_GENERIC_DOVETAIL_THREAD_H
-#define _COBALT_ASM_GENERIC_DOVETAIL_THREAD_H
+#ifndef _COBALT_ASM_GENERIC_THREAD_H
+#define _COBALT_ASM_GENERIC_THREAD_H
 
 #include <linux/dovetail.h>
 
@@ -21,4 +21,4 @@ struct task_struct *xnarch_host_task(struct xnarchtcb *tcb)
 	return tcb->altsched.task;
 }
 
-#endif /* !_COBALT_ASM_GENERIC_DOVETAIL_THREAD_H */
+#endif /* !_COBALT_ASM_GENERIC_THREAD_H */

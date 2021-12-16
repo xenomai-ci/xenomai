@@ -5,8 +5,8 @@
  * Copyright (C) 2021 Philippe Gerum  <rpm@xenomai.org>
  */
 
-#ifndef _COBALT_ARM64_DOVETAIL_SYSCALL_H
-#define _COBALT_ARM64_DOVETAIL_SYSCALL_H
+#ifndef _COBALT_ARM64_SYSCALL_H
+#define _COBALT_ARM64_SYSCALL_H
 
 #include <linux/errno.h>
 #include <linux/uaccess.h>
@@ -60,4 +60,4 @@ int xnarch_local_syscall(unsigned long a1, unsigned long a2,
 	return -ENOSYS;
 }
 
-#endif /* !_COBALT_ARM64_DOVETAIL_SYSCALL_H */
+#endif /* !_COBALT_ARM64_SYSCALL_H */

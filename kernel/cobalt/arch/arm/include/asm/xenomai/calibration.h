@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2001-2013 Philippe Gerum <rpm@xenomai.org>.
- * Copyright (C) 2004-2006 Gilles Chanteperdrix <gilles.chanteperdrix@xenomai.org>.
+ * Copyright (C) 2001-2021 Philippe Gerum <rpm@xenomai.org>.
+ *
+ * ARM port
+ *   Copyright (C) 2005 Stelian Pop
  *
  * Xenomai is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -17,16 +19,22 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _COBALT_X86_ASM_THREAD_H
-#define _COBALT_X86_ASM_THREAD_H
+#ifndef _COBALT_ARM_CALIBRATION_H
+#define _COBALT_ARM_CALIBRATION_H
 
-#include <asm-generic/xenomai/dovetail/thread.h>
-#include <asm/traps.h>
+static inline void xnarch_get_latencies(struct xnclock_gravity *p)
+{
+	unsigned int sched_latency;
 
-#define xnarch_fault_pc(__regs)		((__regs)->ip)
-#define xnarch_fault_pf_p(__nr)		((__nr) == X86_TRAP_PF)
-#define xnarch_fault_bp_p(__nr)		((current->ptrace & PT_PTRACED) &&	\
-					 ((__nr) == X86_TRAP_DB || (__nr) == X86_TRAP_BP))
-#define xnarch_fault_notify(__nr)	(!xnarch_fault_bp_p(__nr))
+#if CONFIG_XENO_OPT_TIMING_SCHEDLAT != 0
+	sched_latency = CONFIG_XENO_OPT_TIMING_SCHEDLAT;
+#else
+	sched_latency = 5000;
+#endif
+	p->user = xnclock_ns_to_ticks(&nkclock, sched_latency);
+	p->kernel = xnclock_ns_to_ticks(&nkclock,
+					CONFIG_XENO_OPT_TIMING_KSCHEDLAT);
+	p->irq = xnclock_ns_to_ticks(&nkclock, CONFIG_XENO_OPT_TIMING_IRQLAT);
+}
 
-#endif /* !_COBALT_X86_ASM_THREAD_H */
+#endif /* !_COBALT_ARM_CALIBRATION_H */

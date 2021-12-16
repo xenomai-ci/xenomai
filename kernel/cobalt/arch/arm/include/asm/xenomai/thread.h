@@ -16,10 +16,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _COBALT_ARM_DOVETAIL_THREAD_H
-#define _COBALT_ARM_DOVETAIL_THREAD_H
+#ifndef _COBALT_ARM_THREAD_H
+#define _COBALT_ARM_THREAD_H
 
-#include <asm-generic/xenomai/dovetail/thread.h>
+#include <asm-generic/xenomai/thread.h>
 #include <asm/traps.h>
 
 #define xnarch_fault_pc(__regs)	((__regs)->ARM_pc - (thumb_mode(__regs) ? 2 : 4))
@@ -29,4 +29,4 @@
 						(__nr) == ARM_TRAP_UNDEFINSTR))
 #define xnarch_fault_notify(__nr) (!xnarch_fault_bp_p(__nr))
 
-#endif /* !_COBALT_ARM_DOVETAIL_THREAD_H */
+#endif /* !_COBALT_ARM_THREAD_H */

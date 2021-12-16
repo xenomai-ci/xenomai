@@ -20,8 +20,8 @@
  *   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  *   02111-1307, USA.
  */
-#ifndef _COBALT_ARM_DOVETAIL_MACHINE_H
-#define _COBALT_ARM_DOVETAIL_MACHINE_H
+#ifndef _COBALT_ARM_MACHINE_H
+#define _COBALT_ARM_MACHINE_H
 
 #include <linux/version.h>
 #include <asm/byteorder.h>
@@ -69,4 +69,4 @@ static inline __attribute_const__ unsigned long ffnz(unsigned long ul)
 
 #include <asm-generic/xenomai/machine.h>
 
-#endif /* !_COBALT_ARM_DOVETAIL_MACHINE_H */
+#endif /* !_COBALT_ARM_MACHINE_H */

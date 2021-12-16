@@ -4,8 +4,8 @@
  * Copyright (C) 2015 Philippe Gerum  <rpm@xenomai.org>
  */
 
-#ifndef _COBALT_ARM64_DOVETAIL_CALIBRATION_H
-#define _COBALT_ARM64_DOVETAIL_CALIBRATION_H
+#ifndef _COBALT_ARM64_CALIBRATION_H
+#define _COBALT_ARM64_CALIBRATION_H
 
 static inline void xnarch_get_latencies(struct xnclock_gravity *p)
 {
@@ -22,4 +22,4 @@ static inline void xnarch_get_latencies(struct xnclock_gravity *p)
 	p->irq = xnclock_ns_to_ticks(&nkclock, CONFIG_XENO_OPT_TIMING_IRQLAT);
 }
 
-#endif /* !_COBALT_ARM64_DOVETAIL_CALIBRATION_H */
+#endif /* !_COBALT_ARM64_CALIBRATION_H */

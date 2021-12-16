@@ -5,10 +5,10 @@
  * Copyright (C) 2021 Philippe Gerum  <rpm@xenomai.org>
  */
 
-#ifndef _COBALT_ARM64_DOVETAIL_THREAD_H
-#define _COBALT_ARM64_DOVETAIL_THREAD_H
+#ifndef _COBALT_ARM64_THREAD_H
+#define _COBALT_ARM64_THREAD_H
 
-#include <asm-generic/xenomai/dovetail/thread.h>
+#include <asm-generic/xenomai/thread.h>
 #include <asm/dovetail.h>
 
 #define xnarch_fault_pc(__regs)	((unsigned long)((__regs)->pc - 4)) /* XXX ? */
@@ -19,4 +19,4 @@
 
 #define xnarch_fault_notify(__nr) (!xnarch_fault_bp_p(__nr))
 
-#endif /* !_COBALT_ARM64_DOVETAIL_THREAD_H */
+#endif /* !_COBALT_ARM64_THREAD_H */
