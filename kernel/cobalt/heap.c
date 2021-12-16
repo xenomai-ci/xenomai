@@ -850,7 +850,7 @@ void *xnheap_vmalloc(size_t size)
 	 * software on a 32bit system had to be wrong in the first
 	 * place anyway.
 	 */
-	return vmalloc_kernel(size, 0);
+	return vmalloc(size);
 }
 EXPORT_SYMBOL_GPL(xnheap_vmalloc);
 

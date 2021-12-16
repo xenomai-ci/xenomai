@@ -197,23 +197,11 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
-#define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags, PAGE_KERNEL)
-#else
-#define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags)
-#endif
-
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,7,0)
 #define pci_aer_clear_nonfatal_status	pci_cleanup_aer_uncorrect_error_status
 #define old_timespec32    compat_timespec
 #define old_itimerspec32  compat_itimerspec
 #define old_timeval32     compat_timeval
-#endif
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
-#define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags, PAGE_KERNEL)
-#else
-#define vmalloc_kernel(__size, __flags)	__vmalloc(__size, GFP_KERNEL|__flags)
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,9,0)

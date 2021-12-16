@@ -324,7 +324,7 @@ int cobalt_umm_init(struct cobalt_umm *umm, u32 size,
 	BUG_ON(xnarch_cache_aliasing());
 
 	size = PAGE_ALIGN(size);
-	basemem = vmalloc_kernel(size, __GFP_ZERO);
+	basemem = vzalloc(size);
 	if (basemem == NULL)
 		return -ENOMEM;
 
