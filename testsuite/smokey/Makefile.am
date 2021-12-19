@@ -12,6 +12,7 @@ smokey_SOURCES = main.c
 COBALT_SUBDIRS = 	\
 	arith 		\
 	bufp		\
+	can		\
 	cpu-affinity	\
 	fpu-stress	\
 	gdb		\
@@ -49,6 +50,7 @@ MERCURY_SUBDIRS =	\
 DIST_SUBDIRS = 		\
 	arith 		\
 	bufp		\
+	can		\
 	cpu-affinity	\
 	dlopen		\
 	fpu-stress	\
