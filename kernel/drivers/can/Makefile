@@ -1,7 +1,7 @@
 
 ccflags-y += -I$(srctree)/drivers/xenomai/can -I$(srctree)/kernel/
 
-obj-$(CONFIG_XENO_DRIVERS_CAN) += xeno_can.o sja1000/ peak_canfd/
+obj-$(CONFIG_XENO_DRIVERS_CAN) += xeno_can.o sja1000/ peak_canfd/ c_can/
 obj-$(CONFIG_XENO_DRIVERS_CAN_FLEXCAN) += xeno_can_flexcan.o
 obj-$(CONFIG_XENO_DRIVERS_CAN_VIRT) += xeno_can_virt.o
 

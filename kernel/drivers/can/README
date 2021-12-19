@@ -20,6 +20,7 @@ devices:
    SJA1000 PEAK parallel port Dongle
    SJA1000 IXXAT PCI card
    MSCAN for MPC5200 boards
+   C_CAN/D_CAN for AM335x/AM437x Sitara processors and DRA7 SOC
 
 Utilities for RT-Socket-CAN are available in "src/utils/can".
 
