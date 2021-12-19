@@ -254,7 +254,11 @@ int smokey_barrier_timedwait(struct smokey_barrier *b,
 void smokey_barrier_release(struct smokey_barrier *b);
 
 int smokey_fork_exec(const char *path, const char *arg);
-	
+
+int smokey_modprobe(const char *name, bool silent);
+
+int smokey_rmmod(const char *name);
+
 #ifdef __cplusplus
 }
 #endif

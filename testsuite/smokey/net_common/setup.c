@@ -28,7 +28,6 @@
 struct module {
 	int option;
 	const char *name;
-	bool loaded;
 };
 
 #define TIMEOUT 10
@@ -141,81 +140,18 @@ static int do_down(const char *intf)
 static int smokey_net_modprobe(int modid, bool silent)
 {
 	struct module *m = modules + modid;
-	char buffer[128];
-	int err, len;
-	FILE *fp;
 
 	if (modid < 0)
 		return -EINVAL;
 
-	fp = fopen("/proc/modules", "r");
-	if (fp == NULL)
-		return -errno;
-
-	len = strlen(m->name);
-
-	while (fgets(buffer, sizeof(buffer), fp)) {
-		if (strncmp(buffer, m->name, len) == 0 &&
-		    len < sizeof(buffer) && buffer[len] == ' ') {
-			smokey_trace("%s module already loaded", m->name);
-			fclose(fp);
-			return 0;
-		}
-	}
-
-	fclose(fp);
-
-	smokey_trace("%s module not there: modprobing", m->name);
-
-	err = smokey_check_errno(
-		snprintf(buffer, sizeof(buffer), "modprobe %s %s", m->name,
-			 silent ? "2>/dev/null" : ""));
-	if (err < 0)
-		return err;
-
-	err = smokey_check_errno(system(buffer));
-	if (err < 0)
-		return err;
-
-	if (!WIFEXITED(err) || WEXITSTATUS(err) != 0) {
-		if (!silent)
-			smokey_warning("%s: abnormal exit", buffer);
-		return -EINVAL;
-	}
-
-	m->loaded = true;
-
-	return err;
+	return smokey_modprobe(m->name, silent);
 }
 
 static int smokey_net_rmmod(int modid)
 {
 	struct module *m = modules + modid;
-	char buffer[128];
-	int err;
 
-	if (!m->loaded) {
-		smokey_trace("%s module was there on entry, keeping it", m->name);
-		return 0;
-	}
-
-	smokey_trace("unloading %s module", m->name);
-
-	err = smokey_check_errno(
-		snprintf(buffer, sizeof(buffer), "rmmod %s", m->name));
-	if (err < 0)
-		return err;
-
-	err = smokey_check_errno(system(buffer));
-	if (err < 0)
-		return err;
-
-	if (!WIFEXITED(err) || WEXITSTATUS(err) != 0) {
-		smokey_warning("%s: abnormal exit", buffer);
-		return -EINVAL;
-	}
-
-	return err;
+	return smokey_rmmod(m->name);
 }
 
 static int smokey_net_setup_rtcfg_client(const char *intf, int net_config)

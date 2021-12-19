@@ -292,3 +292,106 @@ int smokey_fork_exec(const char *path, const char *arg)
 	return 1;
 
 }
+
+#define SMOKEY_MOD_NUM       32
+static char *smokey_modules[SMOKEY_MOD_NUM];
+
+int smokey_modprobe(const char *name, bool silent)
+{
+	char buffer[128];
+	int err, len, i, midx = -1;
+	FILE *fp;
+
+	if (!name)
+		return -EINVAL;
+
+	fp = fopen("/proc/modules", "r");
+	if (fp == NULL)
+		return -errno;
+
+	len = strlen(name);
+
+	while (fgets(buffer, sizeof(buffer), fp)) {
+		if (strncmp(buffer, name, len) == 0 &&
+		    len < sizeof(buffer) && buffer[len] == ' ') {
+			smokey_trace("%s module already loaded", name);
+			fclose(fp);
+			return 0;
+		}
+	}
+
+	fclose(fp);
+
+	for (i = 0; i < SMOKEY_MOD_NUM; i++) {
+		if (!smokey_modules[i]) {
+			midx = i;
+			break;
+		}
+	}
+
+	if (midx < 0)
+		return -EFAULT;
+
+	smokey_trace("%s module not there: modprobing", name);
+
+	err = smokey_check_errno(
+		snprintf(buffer, sizeof(buffer), "modprobe %s %s", name,
+			 silent ? "2>/dev/null" : ""));
+	if (err < 0)
+		return err;
+
+	err = smokey_check_errno(system(buffer));
+	if (err < 0)
+		return err;
+
+	if (!WIFEXITED(err) || WEXITSTATUS(err) != 0) {
+		if (!silent)
+			smokey_warning("%s: abnormal exit", buffer);
+		return -EINVAL;
+	}
+
+	smokey_modules[midx] = strdup(name);
+	return err;
+}
+
+int smokey_rmmod(const char *name)
+{
+	char buffer[128];
+	int i, midx = -1, err;
+
+	if (!name)
+		return -EINVAL;
+
+	for (i = 0; i < SMOKEY_MOD_NUM; i++) {
+		if (smokey_modules[i] && !strcmp(smokey_modules[i], name)) {
+			midx = i;
+			break;
+		}
+	}
+
+	if (midx < 0) {
+		smokey_trace("%s module was there on entry, keeping it", name);
+		return 0;
+	}
+
+	smokey_trace("unloading %s module", name);
+
+	err = smokey_check_errno(
+		snprintf(buffer, sizeof(buffer), "rmmod %s", name));
+	if (err < 0)
+		return err;
+
+	err = smokey_check_errno(system(buffer));
+	if (err < 0)
+		return err;
+
+	if (!WIFEXITED(err) || WEXITSTATUS(err) != 0) {
+		smokey_warning("%s: abnormal exit", buffer);
+		return -EINVAL;
+	}
+
+	free(smokey_modules[midx]);
+	smokey_modules[midx] = NULL;
+
+	return err;
+}
