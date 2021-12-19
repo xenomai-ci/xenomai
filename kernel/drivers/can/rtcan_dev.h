@@ -34,7 +34,7 @@
 #include <linux/semaphore.h>
 
 #include "rtcan_list.h"
-
+#include "rtcan_ethtool.h"
 
 /* Number of MSCAN devices the driver can handle */
 #define RTCAN_MAX_DEVICES    CONFIG_XENO_DRIVERS_CAN_MAX_DEVICES
@@ -136,6 +136,8 @@ struct rtcan_device {
 #ifdef CONFIG_XENO_DRIVERS_CAN_BUS_ERR
     void                (*do_enable_bus_err)(struct rtcan_device *dev);
 #endif
+
+    const struct rtcan_ethtool_ops *ethtool_ops;
 
     /* Reception list head. This list contains all filters which have been
      * registered via a bind call. */

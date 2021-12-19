@@ -354,6 +354,7 @@ static inline int rtcan_raw_ioctl_dev_set(struct rtcan_device *dev,
 int rtcan_raw_ioctl_dev(struct rtdm_fd *fd, int request, void *arg)
 {
     struct can_ifreq *ifr;
+    struct ifreq *ifreq;
     int ret = 0, get = 0;
     union {
 	    /*
@@ -414,7 +415,26 @@ int rtcan_raw_ioctl_dev(struct rtdm_fd *fd, int request, void *arg)
 		rtcan_dev_dereference(dev);
 	}
 	break;
+    case SIOCETHTOOL:
+	if (rtdm_fd_is_user(fd)) {
+	    /* Copy struct can_ifreq from userspace */
+	    if (!rtdm_read_user_ok(fd, arg, sizeof(*ifreq)) ||
+		rtdm_copy_from_user(fd, &ifr_buf, arg, sizeof(*ifreq)))
+		return -EFAULT;
 
+	    ifreq = &ifr_buf.ifr_legacy;
+	} else {
+	    ifreq = (struct ifreq *)arg;
+	}
+
+	/* Get interface index and data */
+	dev = rtcan_dev_get_by_name(ifreq->ifr_name);
+	if (dev == NULL)
+	    return -ENODEV;
+
+	ret = rtcan_ethtool(fd, dev, ifreq);
+	rtcan_dev_dereference(dev);
+	break;
     default:
 	ret = -EOPNOTSUPP;
 	break;
