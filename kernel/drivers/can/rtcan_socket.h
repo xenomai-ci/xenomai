@@ -76,7 +76,10 @@ struct rtcan_rb_frame {
     /* DLC (between 0 and 15) and mark if frame has got a timestamp. The
      * existence of a timestamp is indicated by the RTCAN_HAS_TIMESTAMP
      * bit. */
-    unsigned char       can_dlc;
+    union {
+        unsigned char   can_dlc;
+        unsigned char   len;
+    };
 
     /* Data bytes */
     uint8_t             data[8];

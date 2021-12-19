@@ -318,7 +318,10 @@ typedef struct can_frame {
 	can_id_t can_id;
 
 	/** Size of the payload in bytes */
-	uint8_t can_dlc;
+	union {
+		uint8_t can_dlc;
+		uint8_t len;
+	};
 
 	/** Payload data bytes */
 	uint8_t data[8] __attribute__ ((aligned(8)));
