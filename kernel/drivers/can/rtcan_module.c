@@ -35,6 +35,8 @@
 
 MODULE_LICENSE("GPL");
 
+void rtcan_corectl_register(void);
+void rtcan_corectl_unregister(void);
 
 const char rtcan_rtdm_provider_name[] =
     "(C) 2006 RT-Socket-CAN Development Team";
@@ -419,6 +421,8 @@ int __init rtcan_init(void)
 	goto out;
 #endif
 
+    rtcan_corectl_register();
+
  out:
     return err;
 }
@@ -426,6 +430,8 @@ int __init rtcan_init(void)
 
 void __exit rtcan_exit(void)
 {
+    rtcan_corectl_unregister();
+
     rtcan_raw_proto_unregister();
 #ifdef CONFIG_PROC_FS
     rtcan_proc_unregister();

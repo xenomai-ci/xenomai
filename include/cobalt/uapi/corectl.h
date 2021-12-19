@@ -62,6 +62,8 @@
 #   define _CC_COBALT_NET_CAP		0x00000800
 #   define _CC_COBALT_NET_PROXY		0x00001000
 
+#define _CC_COBALT_GET_CAN_CONFIG	10
+#   define _CC_COBALT_CAN		0x00000001
 
 enum cobalt_run_states {
 	COBALT_STATE_DISABLED,
