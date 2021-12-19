@@ -837,6 +837,7 @@ struct can_ifreq {
 #define CAN_ERR_CRTL_TX_WARNING	 0x08 /**< reached warning level for TX errors */
 #define CAN_ERR_CRTL_RX_PASSIVE	 0x10 /**< reached passive level for RX errors */
 #define CAN_ERR_CRTL_TX_PASSIVE	 0x20 /**< reached passive level for TX errors */
+#define CAN_ERR_CRTL_ACTIVE	 0x40 /**< recovered to error active state */
 /** @} */
 
 /*!
