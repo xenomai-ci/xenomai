@@ -222,7 +222,8 @@ COBALT_SYSCALL(sem_open, lostage,
 {
 	struct cobalt_sem_shadow __user *usm;
 
-	if (__xn_get_user(usm, u_addrp))
+	if (!access_ok(u_addrp, sizeof(*u_addrp)) ||
+	    __xn_get_user(usm, u_addrp))
 		return -EFAULT;
 
 	usm = __cobalt_sem_open(usm, u_name, oflags, mode, value);

@@ -113,7 +113,8 @@ COBALT_SYSCALL32emu(sem_open, lostage,
 	struct cobalt_sem_shadow __user *usm;
 	compat_uptr_t cusm;
 
-	if (__xn_get_user(cusm, u_addrp))
+	if (!access_ok(u_addrp, sizeof(*u_addrp)) ||
+	    __xn_get_user(cusm, u_addrp))
 		return -EFAULT;
 
 	usm = __cobalt_sem_open(compat_ptr(cusm), u_name, oflags, mode, value);
