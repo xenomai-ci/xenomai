@@ -111,11 +111,6 @@ config XENO_DRIVERS_NET_DRV_LOOPBACK
     tristate "Loopback"
     default y
 
-
-config XENO_DRIVERS_NET_DRV_SMC91111
-    depends on XENO_DRIVERS_NET
-    tristate "SMSC LAN91C111"
-
 if ARM
 
 config XENO_DRIVERS_NET_DRV_AT91_ETHER
