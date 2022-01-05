@@ -1,7 +1,7 @@
 #
 # Xenomai Real-Time System
 #
-# Copyright (c) Siemens AG, 2020-2021
+# Copyright (c) Siemens AG, 2020-2022
 #
 # Authors:
 #  Quirin Gylstorff <quirin.gylstorff@siemens.com>
@@ -20,7 +20,6 @@ variables:
   KDIR: "/tmp/kernel"
   USE_CCACHE: "1"
   CCACHE_MAXSIZE: "1G"
-  IPIPE_URL: "https://source.denx.de/Xenomai"
   DOVETAIL_URL: "https://source.denx.de/Xenomai/linux-dovetail.git"
   GCC_VERSION: "10"
   PACKAGES: "u-boot-tools git make bc bison libelf-dev autotools-dev \
@@ -74,7 +73,6 @@ variables:
     # Generic settings
     - ./scripts/config -d DEBUG_INFO
     # I-pipe and Xenomai settings
-    - ./scripts/config -e IPIPE
     - ./scripts/config -e DOVETAIL
     - ./scripts/config -e XENOMAI
     - ./scripts/config -e XENO_OPT_SCHED_CLASSES
