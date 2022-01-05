@@ -130,7 +130,6 @@ variables:
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_VIA_RHINE
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_IGB
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_R8169
-    - ./scripts/config -m XENO_DRIVERS_NET_DRV_SMC91111
     - ./scripts/config -e XENO_DRIVERS_NET_EXP_DRIVERS
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_3C59X
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_E1000_NEW

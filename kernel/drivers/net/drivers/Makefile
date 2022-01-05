@@ -36,10 +36,6 @@ obj-$(CONFIG_XENO_DRIVERS_NET_DRV_PCNET32) += rt_pcnet32.o
 
 rt_pcnet32-y := pcnet32.o
 
-obj-$(CONFIG_XENO_DRIVERS_NET_DRV_SMC91111) += rt_smc91111.o
-
-rt_smc91111-y := smc91111.o
-
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_MACB) += rt_macb.o
 
 rt_macb-y := macb.o
