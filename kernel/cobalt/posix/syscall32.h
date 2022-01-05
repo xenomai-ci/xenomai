@@ -105,14 +105,14 @@ COBALT_SYSCALL32emu_DECL(mutex_timedlock64,
 COBALT_SYSCALL32emu_DECL(cond_wait_prologue,
 			 (struct cobalt_cond_shadow __user *u_cnd,
 			  struct cobalt_mutex_shadow __user *u_mx,
-			  int *u_err,
+			  int __user *u_err,
 			  unsigned int timed,
 			  struct old_timespec32 __user *u_ts));
 
 COBALT_SYSCALL32emu_DECL(cond_wait_prologue64,
 			 (struct cobalt_cond_shadow __user *u_cnd,
 			  struct cobalt_mutex_shadow __user *u_mx,
-			  int *u_err,
+			  int __user *u_err,
 			  unsigned int timed,
 			  struct __kernel_timespec __user *u_ts));
 

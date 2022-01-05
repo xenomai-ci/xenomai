@@ -284,7 +284,7 @@ static inline int cond_fetch_timeout64(struct timespec64 *ts,
 
 int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 				struct cobalt_mutex_shadow __user *u_mx,
-				int *u_err,
+				int __user *u_err,
 				void __user *u_ts,
 				int (*fetch_timeout)(struct timespec64 *ts,
 						     const void __user *u_ts))
@@ -356,7 +356,7 @@ int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 
 int __cobalt_cond_wait_prologue64(struct cobalt_cond_shadow __user *u_cnd,
 				  struct cobalt_mutex_shadow __user *u_mx,
-				  int *u_err, unsigned int timed,
+				  int __user *u_err, unsigned int timed,
 				  void __user *u_ts)
 {
 	return __cobalt_cond_wait_prologue(u_cnd, u_mx, u_err, u_ts,
@@ -367,7 +367,7 @@ int __cobalt_cond_wait_prologue64(struct cobalt_cond_shadow __user *u_cnd,
 COBALT_SYSCALL(cond_wait_prologue, nonrestartable,
 	       (struct cobalt_cond_shadow __user *u_cnd,
 		struct cobalt_mutex_shadow __user *u_mx,
-		int *u_err,
+		int __user *u_err,
 		unsigned int timed,
 		struct __user_old_timespec __user *u_ts))
 {
@@ -378,7 +378,7 @@ COBALT_SYSCALL(cond_wait_prologue, nonrestartable,
 COBALT_SYSCALL(cond_wait_prologue64, nonrestartable,
 	       (struct cobalt_cond_shadow __user *u_cnd,
 		struct cobalt_mutex_shadow __user *u_mx,
-		int *u_err,
+		int __user *u_err,
 		unsigned int timed,
 		struct __kernel_timespec __user *u_ts))
 {

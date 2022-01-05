@@ -41,14 +41,14 @@ struct cobalt_cond {
 
 int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 				struct cobalt_mutex_shadow __user *u_mx,
-				int *u_err,
+				int __user *u_err,
 				void __user *u_ts,
 				int (*fetch_timeout)(struct timespec64 *ts,
 						     const void __user *u_ts));
 
 int __cobalt_cond_wait_prologue64(struct cobalt_cond_shadow __user *u_cnd,
 				  struct cobalt_mutex_shadow __user *u_mx,
-				  int *u_err, unsigned int timed,
+				  int __user *u_err, unsigned int timed,
 				  void __user *u_ts);
 
 COBALT_SYSCALL_DECL(cond_init,
@@ -61,14 +61,14 @@ COBALT_SYSCALL_DECL(cond_destroy,
 COBALT_SYSCALL_DECL(cond_wait_prologue,
 		    (struct cobalt_cond_shadow __user *u_cnd,
 		     struct cobalt_mutex_shadow __user *u_mx,
-		     int *u_err,
+		     int __user *u_err,
 		     unsigned int timed,
 		     struct __user_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(cond_wait_prologue64,
 		    (struct cobalt_cond_shadow __user *u_cnd,
 		     struct cobalt_mutex_shadow __user *u_mx,
-		     int *u_err,
+		     int __user *u_err,
 		     unsigned int timed,
 		     struct __kernel_timespec __user *u_ts));
 
