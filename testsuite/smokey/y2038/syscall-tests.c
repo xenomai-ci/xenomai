@@ -489,7 +489,8 @@ static int test_sc_cobalt_mutex_timedlock64(void)
 	struct xn_timespec64 ts64;
 	struct thread_context ctx = {0};
 
-	ret = pthread_mutex_init(&mutex, NULL);
+	if (!__T(ret, pthread_mutex_init(&mutex, NULL)))
+		return ret;
 
 	/* Make sure we don't crash because of NULL pointers */
 	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
