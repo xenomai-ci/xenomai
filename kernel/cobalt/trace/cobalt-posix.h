@@ -167,7 +167,8 @@
 		__cobalt_symbolic_syscall(sigtimedwait64),		\
 		__cobalt_symbolic_syscall(monitor_wait64),		\
 		__cobalt_symbolic_syscall(event_wait64),		\
-		__cobalt_symbolic_syscall(recvmmsg64))
+		__cobalt_symbolic_syscall(recvmmsg64),			\
+		__cobalt_symbolic_syscall(cond_wait_prologue64))
 
 DECLARE_EVENT_CLASS(cobalt_syscall_entry,
 	TP_PROTO(unsigned int nr),

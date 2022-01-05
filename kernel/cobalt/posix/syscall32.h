@@ -109,6 +109,13 @@ COBALT_SYSCALL32emu_DECL(cond_wait_prologue,
 			  unsigned int timed,
 			  struct old_timespec32 __user *u_ts));
 
+COBALT_SYSCALL32emu_DECL(cond_wait_prologue64,
+			 (struct cobalt_cond_shadow __user *u_cnd,
+			  struct cobalt_mutex_shadow __user *u_mx,
+			  int *u_err,
+			  unsigned int timed,
+			  struct __kernel_timespec __user *u_ts));
+
 COBALT_SYSCALL32emu_DECL(mq_open,
 			 (const char __user *u_name, int oflags,
 			  mode_t mode, struct compat_mq_attr __user *u_attr));
