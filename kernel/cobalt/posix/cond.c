@@ -133,8 +133,7 @@ static inline int cobalt_cond_timedwait_prologue(struct xnthread *cur,
 	xnlock_get_irqsave(&nklock, s);
 
 	/* If another thread waiting for cond does not use the same mutex */
-	if (!cobalt_obj_active(cond, COBALT_COND_MAGIC, struct cobalt_cond)
-	    || (cond->mutex && cond->mutex != mutex)) {
+	if ((cond->mutex && cond->mutex != mutex)) {
 		err = -EINVAL;
 		goto unlock_and_return;
 	}
@@ -294,9 +293,13 @@ int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 
 	handle = cobalt_get_handle_from_user(&u_cnd->handle);
 	cond = xnregistry_lookup(handle, NULL);
+	if (!cobalt_obj_active(cond, COBALT_COND_MAGIC, typeof(*cond)))
+		return -EINVAL;
 
 	handle = cobalt_get_handle_from_user(&u_mx->handle);
 	mx = xnregistry_lookup(handle, NULL);
+	if (!cobalt_obj_active(mx, COBALT_MUTEX_MAGIC, typeof(*mx)))
+		return -EINVAL;
 
 	if (cond->mutex == NULL) {
 		__xn_get_user(offset, &u_mx->state_offset);
@@ -306,9 +309,12 @@ int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 	if (fetch_timeout) {
 		err = fetch_timeout(&ts, u_ts);
 		if (err == 0) {
-			trace_cobalt_cond_timedwait(u_cnd, u_mx, &ts);
-			err = cobalt_cond_timedwait_prologue(cur, cond, mx,
-							     ts2ns(&ts) + 1);
+			if (timespec64_valid(&ts)) {
+				trace_cobalt_cond_timedwait(u_cnd, u_mx, &ts);
+				err = cobalt_cond_timedwait_prologue(
+					cur, cond, mx, ts2ns(&ts) + 1);
+			} else
+				err = -EINVAL;
 		}
 	} else {
 		trace_cobalt_cond_wait(u_cnd, u_mx);
@@ -327,9 +333,8 @@ int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 		d.err = 0;	/* epilogue should return 0. */
 		break;
 
+	case -EINVAL:
 	default:
-		/* Please gcc and handle the case which will never
-		   happen */
 		d.err = EINVAL;
 	}
 
@@ -366,9 +371,14 @@ COBALT_SYSCALL(cond_wait_epilogue, primary,
 
 	handle = cobalt_get_handle_from_user(&u_cnd->handle);
 	cond = xnregistry_lookup(handle, NULL);
+	if (!cobalt_obj_active(cond, COBALT_COND_MAGIC, typeof(*cond)))
+		return -EINVAL;
 
 	handle = cobalt_get_handle_from_user(&u_mx->handle);
 	mx = xnregistry_lookup(handle, NULL);
+	if (!cobalt_obj_active(mx, COBALT_MUTEX_MAGIC, typeof(*mx)))
+		return -EINVAL;
+
 	err = cobalt_cond_timedwait_epilogue(cur, cond, mx);
 
 	if (cond->mutex == NULL)
