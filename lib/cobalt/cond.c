@@ -227,6 +227,20 @@ static void __pthread_cond_cleanup(void *data)
 	c->mutex->lockcnt = c->count;
 }
 
+static inline int do_sc_cond_wait_prologue(struct cobalt_cond_shadow *cnd,
+					   struct cobalt_mutex_shadow *mx,
+					   int *err, int timed,
+					   const struct timespec *abstime)
+{
+#ifdef __USE_TIME_BITS64
+	long sc_nr = sc_cobalt_cond_wait_prologue64;
+#else
+	long sc_nr = sc_cobalt_cond_wait_prologue;
+#endif
+
+	return XENOMAI_SYSCALL5(sc_nr, cnd, mx, err, timed, abstime);
+}
+
 /**
  * Wait on a condition variable.
  *
@@ -310,8 +324,7 @@ COBALT_IMPL(int, pthread_cond_wait, (pthread_cond_t *cond, pthread_mutex_t *mute
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
-	err = XENOMAI_SYSCALL5(sc_cobalt_cond_wait_prologue,
-			       _cnd, _mx, &c.err, 0, NULL);
+	err = do_sc_cond_wait_prologue(_cnd, _mx, &c.err, 0, NULL);
 
 	pthread_setcanceltype(oldtype, NULL);
 
@@ -399,8 +412,8 @@ COBALT_IMPL(int, pthread_cond_timedwait, (pthread_cond_t *cond,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
-	err = XENOMAI_SYSCALL5(sc_cobalt_cond_wait_prologue,
-			       _cnd, _mx, &c.err, 1, abstime);
+	err = do_sc_cond_wait_prologue(_cnd, _mx, &c.err, 1, abstime);
+
 	pthread_setcanceltype(oldtype, NULL);
 
 	pthread_cleanup_pop(0);
