@@ -1570,7 +1570,9 @@ static int __init macb_probe(struct platform_device *pdev)
 	u32 config;
 	int err = -ENXIO;
 	struct pinctrl *pinctrl;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 13, 0)
 	const char *mac;
+#endif
 
 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!regs) {
@@ -1688,10 +1690,15 @@ static int __init macb_probe(struct platform_device *pdev)
 	config |= macb_dbw(bp);
 	macb_writel(bp, NCFGR, config);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 13, 0)
+	err = of_get_mac_address(pdev->dev.of_node, bp->dev->dev_addr);
+	if (err)
+#else
 	mac = of_get_mac_address(pdev->dev.of_node);
 	if (mac)
 		memcpy(bp->dev->dev_addr, mac, ETH_ALEN);
 	else
+#endif
 		rtmacb_get_hwaddr(bp);
 
 	err = of_get_phy_mode(pdev->dev.of_node);

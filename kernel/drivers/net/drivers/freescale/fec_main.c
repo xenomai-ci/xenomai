@@ -1267,9 +1267,15 @@ static void fec_get_mac(struct net_device *ndev)
 	if (!is_valid_ether_addr(iap)) {
 		struct device_node *np = fep->pdev->dev.of_node;
 		if (np) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 13, 0)
+			int err = of_get_mac_address(np, tmpaddr);
+			if (!err)
+				iap = tmpaddr;
+#else
 			const char *mac = of_get_mac_address(np);
 			if (!IS_ERR(mac))
 				iap = (unsigned char *) mac;
+#endif
 		}
 	}
 
