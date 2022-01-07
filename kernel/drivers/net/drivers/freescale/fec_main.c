@@ -2175,7 +2175,13 @@ static void fec_enet_itr_coal_set(struct net_device *ndev)
 }
 
 static int
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)
+fec_enet_get_coalesce(struct net_device *ndev, struct ethtool_coalesce *ec,
+		      struct kernel_ethtool_coalesce *kernel_coal,
+		      struct netlink_ext_ack *extack)
+#else
 fec_enet_get_coalesce(struct net_device *ndev, struct ethtool_coalesce *ec)
+#endif
 {
 	struct fec_enet_private *fep = netdev_priv(ndev);
 
@@ -2192,7 +2198,13 @@ fec_enet_get_coalesce(struct net_device *ndev, struct ethtool_coalesce *ec)
 }
 
 static int
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)
+fec_enet_set_coalesce(struct net_device *ndev, struct ethtool_coalesce *ec,
+		      struct kernel_ethtool_coalesce *kernel_coal,
+		      struct netlink_ext_ack *extack)
+#else
 fec_enet_set_coalesce(struct net_device *ndev, struct ethtool_coalesce *ec)
+#endif
 {
 	struct fec_enet_private *fep = netdev_priv(ndev);
 	struct device *dev = &fep->pdev->dev;
@@ -2244,7 +2256,11 @@ static void fec_enet_itr_coal_init(struct net_device *ndev)
 	ec.tx_coalesce_usecs = FEC_ITR_ICTT_DEFAULT;
 	ec.tx_max_coalesced_frames = FEC_ITR_ICFT_DEFAULT;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0)
+	fec_enet_set_coalesce(ndev, &ec, NULL, NULL);
+#else
 	fec_enet_set_coalesce(ndev, &ec);
+#endif
 }
 
 static int fec_enet_get_tunable(struct net_device *netdev,
