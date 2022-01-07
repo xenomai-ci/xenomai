@@ -303,7 +303,9 @@ static int __init at91ether_probe(struct platform_device *pdev)
 	struct macb *lp;
 	int res;
 	u32 reg;
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 13, 0)
 	const char *mac;
+#endif
 
 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!regs)
@@ -356,10 +358,15 @@ static int __init at91ether_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, dev);
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 13, 0))
+	res = of_get_mac_address(pdev->dev.of_node, lp->dev->dev_addr);
+	if (res)
+#else
 	mac = of_get_mac_address(pdev->dev.of_node);
 	if (mac)
 		memcpy(lp->dev->dev_addr, mac, ETH_ALEN);
 	else
+#endif
 		rtmacb_get_hwaddr(lp);
 
 	res = of_get_phy_mode(pdev->dev.of_node);
