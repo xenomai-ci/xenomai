@@ -293,34 +293,47 @@ int smokey_fork_exec(const char *path, const char *arg)
 
 }
 
-#define SMOKEY_MOD_NUM       32
-static char *smokey_modules[SMOKEY_MOD_NUM];
-
-int smokey_modprobe(const char *name, bool silent)
+static bool module_loaded(const char *name)
 {
+	bool result = false;
 	char buffer[128];
-	int err, len, i, midx = -1;
+	int len;
 	FILE *fp;
-
-	if (!name)
-		return -EINVAL;
 
 	fp = fopen("/proc/modules", "r");
 	if (fp == NULL)
-		return -errno;
+		return false;
 
 	len = strlen(name);
 
 	while (fgets(buffer, sizeof(buffer), fp)) {
 		if (strncmp(buffer, name, len) == 0 &&
 		    len < sizeof(buffer) && buffer[len] == ' ') {
-			smokey_trace("%s module already loaded", name);
-			fclose(fp);
-			return 0;
+			result = true;
+			break;
 		}
 	}
 
 	fclose(fp);
+
+	return result;
+}
+
+#define SMOKEY_MOD_NUM       32
+static char *smokey_modules[SMOKEY_MOD_NUM];
+
+int smokey_modprobe(const char *name, bool silent)
+{
+	char buffer[128];
+	int err, i, midx = -1;
+
+	if (!name)
+		return -EINVAL;
+
+	if (module_loaded(name)) {
+		smokey_trace("%s module already loaded", name);
+		return 0;
+	}
 
 	for (i = 0; i < SMOKEY_MOD_NUM; i++) {
 		if (!smokey_modules[i]) {
@@ -350,7 +363,9 @@ int smokey_modprobe(const char *name, bool silent)
 		return -EINVAL;
 	}
 
-	smokey_modules[midx] = strdup(name);
+	if (!err && module_loaded(name))
+		smokey_modules[midx] = strdup(name);
+
 	return err;
 }
 
