@@ -247,9 +247,8 @@ __weak int shm_unlink(const char *name)
 #ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
 #define pthread_mutexattr_setrobust	pthread_mutexattr_setrobust_np
 #else
-static inline
-int pthread_mutexattr_setrobust(const pthread_mutexattr_t *attr,
-				int *robustness)
+inline int pthread_mutexattr_setrobust(pthread_mutexattr_t *attr,
+				       int robustness)
 {
 	return ENOSYS;
 }
