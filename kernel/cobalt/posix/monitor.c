@@ -433,6 +433,7 @@ COBALT_SYSCALL(monitor_destroy, primary,
 		goto fail;
 	}
 
+	xnsynch_release(&mon->gate, curr);
 	cobalt_monitor_reclaim(&mon->resnode, s); /* drops lock */
 
 	xnsched_run();
