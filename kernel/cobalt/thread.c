@@ -2074,6 +2074,7 @@ void xnthread_relax(int notify, int reason)
 	 * We disable interrupts during the migration sequence, but
 	 * xnthread_suspend() has an interrupts-on section built in.
 	 */
+	splmax();
 	trace_cobalt_lostage_request("wakeup", p);
 	pipeline_post_inband_work(&wakework);
 	/*
@@ -2081,7 +2082,6 @@ void xnthread_relax(int notify, int reason)
 	 * manipulation with handle_sigwake_event. This lock will be
 	 * dropped by xnthread_suspend().
 	 */
-	splmax();
 	xnlock_get(&nklock);
 	xnthread_run_handler_stack(thread, relax_thread);
 	suspension = pipeline_leave_oob_prepare();
