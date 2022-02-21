@@ -63,5 +63,6 @@ __COBALT_CALL32emu_THUNK(recvmsg)
 __COBALT_CALL32emu_THUNK(sendmsg)
 __COBALT_CALL32emu_THUNK(mmap)
 __COBALT_CALL32emu_THUNK(backtrace)
+__COBALT_CALL32emu_THUNK(mq_timedreceive64)
 
 #endif /* !_COBALT_X86_ASM_SYSCALL32_TABLE_H */

@@ -1048,21 +1048,12 @@ fail:
 }
 
 int __cobalt_mq_timedreceive64(mqd_t uqd, void __user *u_buf,
-			       ssize_t __user *u_len,
+			       ssize_t *len,
 			       unsigned int __user *u_prio,
 			       const void __user *u_ts)
 {
-	ssize_t len;
-	int ret;
-
-	ret = cobalt_copy_from_user(&len, u_len, sizeof(len));
-	if (ret)
-		return ret;
-
-	ret = __cobalt_mq_timedreceive(uqd, u_buf, &len, u_prio, u_ts,
-				       u_ts ? mq_fetch_timeout64 : NULL);
-
-	return ret ?: cobalt_copy_to_user(u_len, &len, sizeof(*u_len));
+	return __cobalt_mq_timedreceive(uqd, u_buf, len, u_prio, u_ts,
+					u_ts ? mq_fetch_timeout64 : NULL);
 }
 
 COBALT_SYSCALL(mq_timedreceive, primary,
@@ -1089,5 +1080,14 @@ COBALT_SYSCALL(mq_timedreceive64, primary,
 		unsigned int __user *u_prio,
 		const struct __kernel_timespec __user *u_ts))
 {
-	return __cobalt_mq_timedreceive64(uqd, u_buf, u_len, u_prio, u_ts);
+	ssize_t len;
+	int ret;
+
+	ret = cobalt_copy_from_user(&len, u_len, sizeof(len));
+	if (ret)
+		return ret;
+
+	ret = __cobalt_mq_timedreceive64(uqd, u_buf, &len, u_prio, u_ts);
+
+	return ret ?: cobalt_copy_to_user(u_len, &len, sizeof(*u_len));
 }
