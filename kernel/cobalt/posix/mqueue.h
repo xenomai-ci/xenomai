@@ -51,7 +51,7 @@ int __cobalt_mq_timedreceive(mqd_t uqd, void __user *u_buf,
 						  const void __user *u_ts));
 
 int __cobalt_mq_timedreceive64(mqd_t uqd, void __user *u_buf,
-			       ssize_t __user *u_len,
+			       ssize_t *len,
 			       unsigned int __user *u_prio,
 			       const void __user *u_ts);
 

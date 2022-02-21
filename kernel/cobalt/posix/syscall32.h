@@ -140,7 +140,8 @@ COBALT_SYSCALL32emu_DECL(mq_timedreceive,
 			  const struct old_timespec32 __user *u_ts));
 
 COBALT_SYSCALL32emu_DECL(mq_timedreceive64,
-			 (mqd_t uqd, void __user *u_buf, ssize_t __user *u_len,
+			 (mqd_t uqd, void __user *u_buf,
+			  compat_ssize_t __user *u_len,
 			  unsigned int __user *u_prio,
 			  const struct __kernel_timespec __user *u_ts));
 
