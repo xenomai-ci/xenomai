@@ -79,6 +79,18 @@ AC_ARG_WITH(cc,
     ])
 AC_PROG_CC
 
+AC_ARG_WITH(cxx,
+    AS_HELP_STRING([--with-cxx=compiler],[use specific C++ compiler]),
+    [
+	case "$withval" in
+	"" | y | ye | yes | n | no)
+	    AC_MSG_ERROR([You must supply an argument to --with-cxx])
+	  ;;
+	esac
+	CXX="$withval"
+    ])
+AC_PROG_CXX
+
 # Do not let autoconf set the default value of CFLAGS
 if $XENO_EMPTY_CFLAGS; then
 	CFLAGS=""
