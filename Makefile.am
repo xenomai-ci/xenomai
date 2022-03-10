@@ -18,6 +18,9 @@ SUBDIRS += 		\
 	testsuite
 endif
 
+SUBDIRS +=		\
+	tracing
+
 EXTRA_DIST = kernel debian
 
 DIST_SUBDIRS =		\
@@ -26,6 +29,7 @@ DIST_SUBDIRS =		\
 	doc		\
 	include		\
 	lib 		\
+	tracing		\
 	scripts		\
 	testsuite	\
 	utils

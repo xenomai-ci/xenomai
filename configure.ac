@@ -975,6 +975,8 @@ AC_CONFIG_FILES([ \
 	scripts/Makefile \
 	scripts/xeno-config:scripts/xeno-config-$rtcore_type.in \
 	scripts/xeno \
+	tracing/Makefile \
+	tracing/kernelshark/Makefile \
 	lib/Makefile \
 	lib/boilerplate/Makefile \
 	lib/boilerplate/init/Makefile \
