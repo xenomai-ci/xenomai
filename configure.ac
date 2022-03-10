@@ -91,6 +91,8 @@ AC_ARG_WITH(cxx,
     ])
 AC_PROG_CXX
 
+PKG_PROG_PKG_CONFIG
+
 # Do not let autoconf set the default value of CFLAGS
 if $XENO_EMPTY_CFLAGS; then
 	CFLAGS=""
@@ -825,6 +827,36 @@ AC_ARG_WITH(demodir,
 	XENO_DEMO_DIR="$withval"
     ], [XENO_DEMO_DIR=$demodir])
 AC_MSG_RESULT($XENO_DEMO_DIR)
+
+kernelshark_plugin=
+AC_MSG_CHECKING(whether KernelShark plugin should be built)
+AC_ARG_ENABLE(kernelshark_plugin,
+	AS_HELP_STRING([--enable-kernelshark-plugin], [build KernelShark plugin]),
+	[case "$enableval" in
+	y | yes) kernelshark_plugin=y ;;
+	*) unset kernelshark_plugin ;;
+	esac])
+AC_MSG_RESULT(${kernelshark_plugin:-no})
+AM_CONDITIONAL(XENO_KSHARK_PLUGIN, [test x$kernelshark_plugin = xy])
+
+libtraceevent_plugin=
+AC_MSG_CHECKING(whether libtraceevent plugin should be built)
+AC_ARG_ENABLE(libtraceevent_plugin,
+	AS_HELP_STRING([--enable-libtraceevent-plugin], [build libtraceevent plugin]),
+	[case "$enableval" in
+	y | yes) libtraceevent_plugin=y ;;
+	*) unset libtraceevent_plugin ;;
+	esac])
+AC_MSG_RESULT(${libtraceevent_plugin:-no})
+AM_CONDITIONAL(XENO_LIBTRACEEVENT_PLUGIN, [test x$libtraceevent_plugin = xy])
+
+if test x$kernelshark_plugin = xy -o x$libtraceevent_plugin = xy; then
+	PKG_CHECK_MODULES(LIBTRACEEVENT, libtraceevent)
+fi
+
+if test x$kernelshark_plugin = xy; then
+	PKG_CHECK_MODULES(LIBKSHARK, libkshark)
+fi
 
 AC_MSG_CHECKING([for test source generation])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[ ]], [[ ]])],
