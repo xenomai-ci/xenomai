@@ -1,0 +1,84 @@
+
+What is it?
+=============
+
+  The modules under this folder is plugins implemented for Xenomai tracing.
+  kernelshark subdir includes plugin for KernelShark.
+  libtraceevent subduir includes plugin for libtraceevent.
+
+Dependencies
+================================
+
+  For KernelShark plugin:
+      Building standlone plugin for KernelShark depends on
+      following patchset after kernelshark-v2.1.0:
+         kernel-shark: Install missing headers (commit 5419186f4bbad68aa16849882a8f12fa9adb22c5)
+         kernel-shark: Add KsPluginsGUI.hpp/.cpp (commit 59b5763c7c52b703e3b8e05be801f7c85365c9d3)
+         kernel-shark: Load 'ctrl' interface for user plugins (commit e35970770b71f0cc849870512a806dff96bf19e1)
+
+      If you cannot confirm that your local installed KernelShark include these patches,
+      please refer to https://kernelshark.org/build.html to download updated code
+      and build & install again.
+
+How to build and install plugin?
+====================================
+
+    goto your xenomai folder
+    ./scripts/bootstrap
+    ./configure --enable-xxx-plugin
+    cd tracing/xxx/
+    make
+    sudo make install
+
+    Note: Please replace xxx with your module name that you want to build and install plugin.
+
+How to use plugin?
+====================================
+
+  For KernelShark plugin:
+
+      kernelshark -p your_path_of_libplugin_xenomai_cobalt_switch_events.so your_path_of_trace.dat
+
+  For libtraceevent plugin:
+
+      While libtracevent and its plugins is installed correctly, the plugins
+      would be loaded automatically by other module such as libtracecmd after
+      corresponding tracing tool such as KernelShark or trace-cmd run.
+
+What the difference is after plug works?
+===============================================
+
+  For KernelShark plugin:
+      1. For those trace log which does not include cobalt_switch_context event, you may
+         not expect that there is any difference after Xenomai plugin is loaded.
+
+      2. But when there is cobalt_switch_context event in trace log, the plugin would
+         analysis cobalt_switch_context event and visualize the OOB state.
+
+      3. How to check OOB state with cobalt blue hollow box?
+
+         3.1. Please check if there is cobalt_switch_context events existing in the
+              log using search boxes in the list area of kernelshark GUI.
+
+         3.2. When there is cobalt_switch_context events existing in the log, please goto
+              task plots dialog to choose tasks that you may want to check its OOB state by
+              clicking menu Plots->Tasks and then hit "Apply".
+
+         3.3. Selected tasks would be added to the bottom of the graph area as task plots.
+              You may zoom in to check if there is cobalt blue hollow box showing in
+              the corresponding task bar/plot if the time span is really large and
+              there is too much events.
+
+         3.4. When you double click the hollow box, there is two vertical lines
+              that marked as "Mark A" and "Mark B" which you may use to measure time of
+              running in OOB state between two cobalt_switch_context events.
+
+         Note:
+              Please refer to [1] about introduction of search boxes or task plot or  "Mark A" &
+              "Mark B" on Graph Control Area for more detailed info.
+
+  For libtraceevent plugin:
+
+      It would try to show sched_param_ex param correctly.
+
+[1]: https://kernelshark.org/Documentation.html

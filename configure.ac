@@ -977,6 +977,7 @@ AC_CONFIG_FILES([ \
 	scripts/xeno \
 	tracing/Makefile \
 	tracing/kernelshark/Makefile \
+	tracing/libtraceevent/Makefile \
 	lib/Makefile \
 	lib/boilerplate/Makefile \
 	lib/boilerplate/init/Makefile \
