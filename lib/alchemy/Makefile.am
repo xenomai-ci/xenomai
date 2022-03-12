@@ -43,6 +43,8 @@ libalchemy@CORE@_la_CPPFLAGS =				\
 	-I$(top_srcdir)/include				\
 	-I$(top_srcdir)/lib
 
+AM_LIBTOOLFLAGS = --silent
+
 EXTRA_DIST = testsuite
 
 SPARSE = sparse

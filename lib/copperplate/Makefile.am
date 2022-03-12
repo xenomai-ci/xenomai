@@ -51,6 +51,8 @@ libcopperplate@CORE@_la_SOURCES += heapobj-malloc.c
 endif
 endif
 
+AM_LIBTOOLFLAGS = --silent
+
 SUBDIRS = .
 
 if XENO_REGISTRY

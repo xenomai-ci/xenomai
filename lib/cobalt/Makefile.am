@@ -54,6 +54,8 @@ libmodechk_la_CPPFLAGS =		\
 	-I$(top_srcdir)/include/cobalt	\
 	-I$(top_srcdir)/include
 
+AM_LIBTOOLFLAGS = --silent
+
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(libdir)
 	$(INSTALL_DATA) $(srcdir)/cobalt.wrappers $(DESTDIR)$(libdir)

@@ -1,4 +1,3 @@
-
 lib_LTLIBRARIES = libtrank@CORE@.la
 
 libtrank@CORE@_la_LDFLAGS = @XENO_LIB_LDFLAGS@ -version-info 0:0:0
@@ -19,3 +18,5 @@ libtrank@CORE@_la_CPPFLAGS =		\
 	-D__XENO_COMPAT__	\
 	-I$(top_srcdir)/include	\
 	-I$(top_srcdir)/lib
+
+AM_LIBTOOLFLAGS = --silent

@@ -11,3 +11,5 @@ libsmokey@CORE@_la_CPPFLAGS =			\
 	@XENO_USER_CFLAGS@		\
 	-I$(top_srcdir)/include		\
 	-I$(top_srcdir)/lib
+
+AM_LIBTOOLFLAGS = --silent
