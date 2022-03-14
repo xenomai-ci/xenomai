@@ -1464,7 +1464,7 @@ static int affinity_vfile_show(struct xnvfile_regular_iterator *it,
 	unsigned long val = 0;
 	int cpu;
 
-	for (cpu = 0; cpu < BITS_PER_LONG; cpu++)
+	for (cpu = 0; cpu < nr_cpumask_bits; cpu++)
 		if (cpumask_test_cpu(cpu, &cobalt_cpu_affinity))
 			val |= (1UL << cpu);
 
@@ -1489,7 +1489,7 @@ static ssize_t affinity_vfile_store(struct xnvfile_input *input)
 		affinity = xnsched_realtime_cpus; /* Reset to default. */
 	else {
 		cpumask_clear(&affinity);
-		for (cpu = 0; cpu < BITS_PER_LONG; cpu++, val >>= 1) {
+		for (cpu = 0; cpu < nr_cpumask_bits; cpu++, val >>= 1) {
 			if (val & 1)
 				cpumask_set_cpu(cpu, &affinity);
 		}
