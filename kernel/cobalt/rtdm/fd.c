@@ -304,8 +304,7 @@ static void lostage_trigger_close(struct pipeline_inband_work *inband_work)
 static struct lostage_trigger_close {
 	struct pipeline_inband_work inband_work; /* Must be first. */
 } fd_closework =  {
-	.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(fd_closework,
-						lostage_trigger_close),
+	.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(lostage_trigger_close),
 };
 
 static void __put_fd(struct rtdm_fd *fd, spl_t s)

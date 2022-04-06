@@ -924,8 +924,7 @@ static inline void rtdm_nrtsig_init(rtdm_nrtsig_t *nrt_sig,
 				    rtdm_nrtsig_handler_t handler, void *arg)
 {
 	nrt_sig->inband_work = (struct pipeline_inband_work)
-		PIPELINE_INBAND_WORK_INITIALIZER(*nrt_sig,
-						 __rtdm_nrtsig_execute);
+		PIPELINE_INBAND_WORK_INITIALIZER(__rtdm_nrtsig_execute);
 	nrt_sig->handler = handler;
 	nrt_sig->arg = arg;
 }

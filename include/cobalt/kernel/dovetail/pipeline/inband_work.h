@@ -17,7 +17,7 @@ struct pipeline_inband_work {
 	struct irq_work work;
 };
 
-#define PIPELINE_INBAND_WORK_INITIALIZER(__work, __handler)		\
+#define PIPELINE_INBAND_WORK_INITIALIZER(__handler)			\
 	{								\
 		.work = IRQ_WORK_INIT((void (*)(struct irq_work *))__handler), \
 	}

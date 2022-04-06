@@ -1666,8 +1666,7 @@ static void lostage_schedule_work(struct pipeline_inband_work *inband_work)
 static struct lostage_trigger_work {
 	struct pipeline_inband_work inband_work; /* Must be first. */
 } nrt_work =  {
-	.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(nrt_work,
-							lostage_schedule_work),
+	.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(lostage_schedule_work),
 };
 
 /**

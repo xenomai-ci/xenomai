@@ -552,8 +552,7 @@ static void switch_irq_line(rtdm_irq_t *irqh, int enable, rtdm_event_t *done)
 		return;
 
 	rq->inband_work = (struct pipeline_inband_work)
-		PIPELINE_INBAND_WORK_INITIALIZER(*rq,
-					lostage_irqswitch_line);
+		PIPELINE_INBAND_WORK_INITIALIZER(lostage_irqswitch_line);
 	rq->irqh = irqh;
 	rq->enabled = enable;
 	rq->done = done;

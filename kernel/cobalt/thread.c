@@ -151,7 +151,7 @@ static int map_kthread(struct xnthread *thread, struct kthread_arg *ka)
 	trace_cobalt_lostage_request("wakeup", current);
 
 	ka->inband_work = (struct pipeline_inband_work)
-		PIPELINE_INBAND_WORK_INITIALIZER(*ka, do_parent_wakeup);
+		PIPELINE_INBAND_WORK_INITIALIZER(do_parent_wakeup);
 	pipeline_post_inband_work(ka);
 
 	xnlock_get_irqsave(&nklock, s);
@@ -2047,8 +2047,7 @@ void xnthread_relax(int notify, int reason)
 {
 	struct task_struct *p = current;
 	struct lostage_wakeup wakework = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(wakework,
-					lostage_task_wakeup),
+		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(lostage_task_wakeup),
 		.task = p,
 	};
 	struct xnthread *thread = xnthread_current();
@@ -2393,8 +2392,7 @@ void __xnthread_signal(struct xnthread *thread, int sig, int arg)
 		return;
 
 	sigwork->inband_work = (struct pipeline_inband_work)
-			PIPELINE_INBAND_WORK_INITIALIZER(*sigwork,
-							 lostage_task_signal);
+			PIPELINE_INBAND_WORK_INITIALIZER(lostage_task_signal);
 	sigwork->task = xnthread_host_task(thread);
 	sigwork->signo = sig;
 	sigwork->sigval = sig == SIGDEBUG ? arg | sigdebug_marker : arg;
