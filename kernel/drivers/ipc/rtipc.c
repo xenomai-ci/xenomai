@@ -428,7 +428,7 @@ static int rtipc_select(struct rtdm_fd *fd, struct xnselector *selector,
 	struct xnselect *block;
 	spl_t s;
 	int ret;
-	
+
 	if (type != XNSELECT_READ && type != XNSELECT_WRITE)
 		return -EINVAL;
 
@@ -480,7 +480,7 @@ static struct rtdm_driver rtipc_driver = {
 		.read_rt	=	rtipc_read,
 		.read_nrt	=	NULL,
 		.write_rt	=	rtipc_write,
-		.write_nrt	=	NULL,
+		.write_nrt	=	rtipc_write, /* MSG_DONTWAIT. */
 		.select		=	rtipc_select,
 	},
 };

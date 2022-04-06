@@ -255,7 +255,7 @@ static ssize_t __iddp_recvmsg(struct rtdm_fd *fd,
 	}
 
 	/* We want to pick one buffer from the queue. */
-	
+
 	for (;;) {
 		ret = rtdm_sem_timeddown(&sk->insem, timeout, toseq);
 		if (unlikely(ret)) {
@@ -522,11 +522,15 @@ static ssize_t iddp_write(struct rtdm_fd *fd,
 	struct rtipc_private *priv = rtdm_fd_to_private(fd);
 	struct iovec iov = { .iov_base = (void *)buf, .iov_len = len };
 	struct iddp_socket *sk = priv->state;
+	int flags = 0;
 
 	if (sk->peer.sipc_port < 0)
 		return -EDESTADDRREQ;
 
-	return __iddp_sendmsg(fd, &iov, 1, 0, &sk->peer);
+	if (is_secondary_domain())
+		flags = MSG_DONTWAIT;
+
+	return __iddp_sendmsg(fd, &iov, 1, flags, &sk->peer);
 }
 
 static int __iddp_bind_socket(struct rtdm_fd *fd,

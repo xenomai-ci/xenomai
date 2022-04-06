@@ -655,11 +655,15 @@ static ssize_t bufp_write(struct rtdm_fd *fd,
 	struct rtipc_private *priv = rtdm_fd_to_private(fd);
 	struct iovec iov = { .iov_base = (void *)buf, .iov_len = len };
 	struct bufp_socket *sk = priv->state;
+	int flags = 0;
 
 	if (sk->peer.sipc_port < 0)
 		return -EDESTADDRREQ;
 
-	return __bufp_sendmsg(fd, &iov, 1, 0, &sk->peer);
+	if (is_secondary_domain())
+		flags = MSG_DONTWAIT;
+
+	return __bufp_sendmsg(fd, &iov, 1, flags, &sk->peer);
 }
 
 static int __bufp_bind_socket(struct rtipc_private *priv,
@@ -682,7 +686,7 @@ static int __bufp_bind_socket(struct rtipc_private *priv,
 	    __test_and_set_bit(_BUFP_BINDING, &sk->status))
 		ret = -EADDRINUSE;
 	cobalt_atomic_leave(s);
-	
+
 	if (ret)
 		return ret;
 
