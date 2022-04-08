@@ -385,12 +385,9 @@ if test x$use_registry = xy; then
 fi
 AM_CONDITIONAL(XENO_REGISTRY,[test x$use_registry = xy])
 
-dnl SMP support (default: on for cobalt/x86, off otherwise)
+dnl SMP support (default: on)
 
-CONFIG_SMP=
-if test $target_cpu_arch = x86 -a $rtcore_type = cobalt; then
-	CONFIG_SMP=y
-fi
+CONFIG_SMP=y
 AC_MSG_CHECKING(for SMP support)
 AC_ARG_ENABLE(smp,
 	AS_HELP_STRING([--enable-smp], [Enable SMP support]),
