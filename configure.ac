@@ -169,6 +169,7 @@ esac
 
 AC_MSG_RESULT([$target_cpu_arch])
 XENO_TARGET_ARCH=$target_cpu_arch
+AM_CONDITIONAL(XENO_X86,[test x$target_cpu_arch = xx86])
 AC_ENABLE_SHARED
 AC_PROG_LIBTOOL
 
@@ -1041,6 +1042,7 @@ AC_CONFIG_FILES([ \
 	testsuite/smokey/gdb/Makefile \
 	testsuite/smokey/y2038/Makefile \
 	testsuite/smokey/can/Makefile
+	testsuite/smokey/x86io/Makefile
 	testsuite/clocktest/Makefile \
 	testsuite/xeno-test/Makefile \
 	utils/Makefile \

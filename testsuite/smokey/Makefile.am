@@ -82,12 +82,19 @@ DIST_SUBDIRS = 		\
 	xddp		\
 	y2038
 
+if XENO_X86
+DIST_SUBDIRS += x86io
+endif
+
 if XENO_COBALT
 if CONFIG_XENO_LIBS_DLOPEN
 COBALT_SUBDIRS += dlopen
 endif
 if XENO_PSHARED
 COBALT_SUBDIRS += memory-pshared
+endif
+if XENO_X86
+COBALT_SUBDIRS += x86io
 endif
 wrappers = $(XENO_POSIX_WRAPPERS)
 SUBDIRS = $(COBALT_SUBDIRS)
