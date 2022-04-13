@@ -17,7 +17,6 @@ CONFIG_OPTS = --prefix=/usr \
             --includedir=/usr/include/xenomai \
             --mandir=/usr/share/man \
             --with-testdir=/usr/lib/xenomai/testsuite \
-            --enable-smp \
             --enable-lazy-setsched \
             --enable-debug=symbols \
             --enable-dlopen-libs
