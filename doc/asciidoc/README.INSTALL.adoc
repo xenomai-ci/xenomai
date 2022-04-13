@@ -538,9 +538,9 @@ only reason to turn this feature on would be aimed at cancelling
 threads which run significantly long, syscall-less busy loops with no
 explicit exit condition, which should probably be revisited anyway.
 
-*--enable-smp*::
+*--disable-smp*::
 
-	Turns on SMP support for Xenomai libraries.
+	Turns off SMP support for Xenomai libraries.
 
 [CAUTION]
 SMP support must be enabled in Xenomai libraries when the
@@ -671,9 +671,6 @@ The examples in following sections use the following conventions:
  the host immediately updates the target system with the installed
  programs and libraries.
 
-CAUTION: In the examples below, make sure to add `--enable-smp` to the
-_configure_ script options if building for a SMP-enabled kernel.
-
 Building the x86 libraries (32/64bit)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -683,7 +680,7 @@ typically run:
 
 ------------------------------------------------------------------------------
 $ mkdir $build_root && cd $build_root
-$ $xenomai_root/configure --with-core=mercury --enable-smp --enable-pshared
+$ $xenomai_root/configure --with-core=mercury --enable-pshared
 $ make install
 ------------------------------------------------------------------------------
 
@@ -692,7 +689,7 @@ same feature set, for running on x86_32 could be:
 
 ------------------------------------------------------------------------------
 $ mkdir $build_root && cd $build_root
-$ $xenomai_root/configure --with-core=cobalt --enable-smp --enable-pshared \
+$ $xenomai_root/configure --with-core=cobalt --enable-pshared \
   --host=i686-linux CFLAGS="-m32 -O2" LDFLAGS="-m32"
 $ make install
 ------------------------------------------------------------------------------
@@ -743,10 +740,10 @@ for the supported SOCs:
 		gcc versions the flag for armv7
 		may be `-march=armv7-a` or
 		`-march=armv7a`]|
-|imx6q	     | `-march=armv7-a -mfpu=vfp3` footnoteref:[armv7] | --enable-smp
+|imx6q	     | `-march=armv7-a -mfpu=vfp3` footnoteref:[armv7] |
 |ixp4xx      | `-march=armv5 -msoft-float`         | `--enable-arm-tsc=ixp4xx`
 |omap3       | `-march=armv7-a -mfpu=vfp3` footnoteref:[armv7] |
-|omap4       | `-march=armv7-a -mfpu=vfp3` footnoteref:[armv7] | --enable-smp
+|omap4       | `-march=armv7-a -mfpu=vfp3` footnoteref:[armv7] |
 |orion       | `-march=armv5 -mfpu=vfp`            |
 |pxa         | `-march=armv5 -msoft-float`         |
 |pxa3xx      | `-march=armv5 -msoft-float`         | --enable-arm-quirks=xscale3
