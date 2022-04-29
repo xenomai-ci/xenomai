@@ -125,17 +125,17 @@ estimation. Although this delay may vary across hardware platforms,
 running for 30 seconds is common.
 
 Once the gravity values are known for a particular hardware, one may
-write them to +/proc/xenomai/clock/coreclck+ from some system init
+write them to +/proc/xenomai/clock/coreclk+ from some system init
 script to set up the Xenomai core clock accordingly, instead of
 running the auto-tuner after each boot e.g:
     
 ------------------------------------------------------
     /* change the user gravity to 1728 ns (default) */
-# echo 1728 > /proc/xenomai/clock/coreclck
+# echo 1728 > /proc/xenomai/clock/coreclk
     /* change the IRQ gravity to 129 ns */
-# echo 129i > /proc/xenomai/clock/coreclck
+# echo 129i > /proc/xenomai/clock/coreclk
     /* change the user and kernel gravities to 1728 and 907 ns resp. */
-# echo "1728u 907k" > /proc/xenomai/clock/coreclck
+# echo "1728u 907k" > /proc/xenomai/clock/coreclk
 ------------------------------------------------------
 
 Alternatively, the gravity values can be statically defined in the

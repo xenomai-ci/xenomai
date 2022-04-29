@@ -226,11 +226,11 @@ of the Xenomai core clock:
     
 ------------------------------------------------------
     /* change the user gravity (default) */
-# echo 3000 > /proc/xenomai/clock/coreclck
+# echo 3000 > /proc/xenomai/clock/coreclk
     /* change the IRQ gravity */
-# echo 1000i > /proc/xenomai/clock/coreclck
+# echo 1000i > /proc/xenomai/clock/coreclk
     /* change the user and kernel gravities */
-# echo "2000u 1000k" > /proc/xenomai/clock/coreclck
+# echo "2000u 1000k" > /proc/xenomai/clock/coreclk
 ------------------------------------------------------
 
 +interfaces+ removed::
