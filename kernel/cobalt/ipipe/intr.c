@@ -869,7 +869,7 @@ int xnintr_attach(struct xnintr *intr, void *cookie, const cpumask_t *cpumask)
 			return -EINVAL;
 	}
 	ret = ipipe_set_irq_affinity(intr->irq, *effective_mask);
-	if (ret)
+	if (ret < 0)
 		return ret;
 #endif /* CONFIG_SMP */
 
