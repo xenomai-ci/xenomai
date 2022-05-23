@@ -101,8 +101,6 @@ config XENO_DRIVERS_NET_DRV_MACB
 
 endif
 
-if ARM64
-
 config XENO_DRIVERS_NET_FEC
     depends on XENO_DRIVERS_NET
     tristate "Freescale FEC"
@@ -112,8 +110,6 @@ config XENO_DRIVERS_NET_FEC
     help
     For built-in 10/100 Fast ethernet controller on Freescale i.MX
     processors.
-
-endif
 
 source "drivers/xenomai/net/drivers/experimental/Kconfig"
 
