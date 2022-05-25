@@ -24,17 +24,6 @@
 #include <asm/xenomai/wrappers.h>
 #include <asm/xenomai/uapi/fptest.h>
 
-/*
- * We do NOT support out-of-band FPU operations in kernel space for a
- * reason: this is a mess. Out-of-band FPU is just fine and makes a
- * lot of sense for many real-time applications, but you have to do
- * that from userland.
- */
-static inline int fp_kernel_supported(void)
-{
-	return 0;
-}
-
 static inline int fp_linux_begin(void)
 {
 	kernel_fpu_begin();

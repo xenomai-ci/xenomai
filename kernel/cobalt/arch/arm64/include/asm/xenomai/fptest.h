@@ -13,11 +13,6 @@
 
 #define have_fp (ELF_HWCAP & HWCAP_FP)
 
-static inline int fp_kernel_supported(void)
-{
-	return 0;
-}
-
 static inline int fp_linux_begin(void)
 {
 	return -ENOSYS;

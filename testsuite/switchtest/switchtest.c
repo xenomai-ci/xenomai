@@ -832,7 +832,6 @@ static int task_create(struct cpu_tasks *cpu,
 	switch(param->type) {
 	case RTK:
 		param->swt.flags = (param->fp & AFP ? RTTST_SWTEST_FPU : 0)
-			| (param->fp & UFPP ? RTTST_SWTEST_USE_FPU : 0)
 			| (freeze_on_error ? RTTST_SWTEST_FREEZE : 0);
 
 		err=ioctl(cpu->fd,RTTST_RTIOC_SWTEST_CREATE_KTASK,&param->swt);

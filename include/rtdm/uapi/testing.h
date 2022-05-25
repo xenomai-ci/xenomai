@@ -68,7 +68,6 @@ struct rttst_swtest_task {
 
 /* Possible values for struct rttst_swtest_task::flags. */
 #define RTTST_SWTEST_FPU		0x1
-#define RTTST_SWTEST_USE_FPU		0x2 /* Only for kernel-space tasks. */
 #define RTTST_SWTEST_FREEZE		0x4 /* Only for kernel-space tasks. */
 
 struct rttst_swtest_dir {

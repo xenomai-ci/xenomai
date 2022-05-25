@@ -416,9 +416,6 @@ static void rtswitch_ktask(void *cookie)
 	rtswitch_pend_rt(ctx, task->base.index);
 
 	while (!rtdm_task_should_stop()) {
-		if (task->base.flags & RTTST_SWTEST_USE_FPU)
-			fp_regs_set(fp_features, task->base.index + i * 1000);
-
 		switch(i % 3) {
 		case 0:
 			/* to == from means "return to last task" */
@@ -437,17 +434,6 @@ static void rtswitch_ktask(void *cookie)
 			rtswitch_to_rt(ctx, task->base.index, to);
 		}
 
-		if (task->base.flags & RTTST_SWTEST_USE_FPU) {
-			expected = task->base.index + i * 1000;
-			fp_val = fp_regs_check(fp_features, expected, report);
-
-			if (fp_val != expected) {
-				if (task->base.flags & RTTST_SWTEST_FREEZE)
-					xntrace_user_freeze(0, 0);
-				handle_ktask_error(ctx, fp_val);
-			}
-		}
-
 		if (++i == 4000000)
 			i = 0;
 	}
@@ -464,15 +450,6 @@ static int rtswitch_create_ktask(struct rtswitch_context *ctx,
 	int init_flags;
 	char name[30];
 	int err;
-
-	/*
-	 * Silently disable FP tests in kernel if FPU is not supported
-	 * there. Typical case is math emulation support: we can use
-	 * it from userland as a synthetic FPU, but there is no sane
-	 * way to use it from kernel-based threads (Xenomai or Linux).
-	 */
-	if (!fp_kernel_supported())
-		ptask->flags &= ~RTTST_SWTEST_USE_FPU;
 
 	ptask->flags |= RTSWITCH_KERNEL;
 	err = rtswitch_register_task(ctx, ptask);

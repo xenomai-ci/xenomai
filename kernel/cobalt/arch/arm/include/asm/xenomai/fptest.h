@@ -30,11 +30,6 @@
 
 #include <asm/xenomai/uapi/fptest.h>
 
-static inline int fp_kernel_supported(void)
-{
-	return 0;
-}
-
 static inline int fp_linux_begin(void)
 {
 	return -ENOSYS;
