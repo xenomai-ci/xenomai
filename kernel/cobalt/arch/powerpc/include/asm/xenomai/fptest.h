@@ -41,6 +41,10 @@ static inline int fp_kernel_supported(void)
 #endif	/* !CONFIG_PPC_FPU */
 }
 
+static inline void fp_init(void)
+{
+}
+
 static inline int fp_linux_begin(void)
 {
 	return -ENOSYS;
