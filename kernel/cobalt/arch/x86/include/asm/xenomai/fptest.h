@@ -29,6 +29,11 @@ static inline int fp_kernel_supported(void)
 	return 1;
 }
 
+static inline void fp_init(void)
+{
+	__asm__ __volatile__("fninit");
+}
+
 static inline int fp_linux_begin(void)
 {
 #if defined(CONFIG_X86_USE_3DNOW) \
@@ -48,7 +53,7 @@ static inline int fp_linux_begin(void)
 	/* kernel_fpu_begin() does no re-initialize the fpu context, but
 	   fp_regs_set() implicitely expects an initialized fpu context, so
 	   initialize it here. */
-	__asm__ __volatile__("fninit");
+	fp_init();
 	return 0;
 }
 

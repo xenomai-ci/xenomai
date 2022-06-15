@@ -35,6 +35,10 @@ static inline int fp_kernel_supported(void)
 	return 1;
 }
 
+static inline void fp_init(void)
+{
+}
+
 static inline int fp_linux_begin(void)
 {
 	return -ENOSYS;

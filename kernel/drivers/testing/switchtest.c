@@ -416,8 +416,10 @@ static void rtswitch_ktask(void *cookie)
 	rtswitch_pend_rt(ctx, task->base.index);
 
 	while (!rtdm_task_should_stop()) {
-		if (task->base.flags & RTTST_SWTEST_USE_FPU)
+		if (task->base.flags & RTTST_SWTEST_USE_FPU) {
+			fp_init();
 			fp_regs_set(fp_features, task->base.index + i * 1000);
+		}
 
 		switch(i % 3) {
 		case 0:
