@@ -510,7 +510,9 @@ void xnarch_leave_root(struct xnthread *root)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0)
 	/* restore current's fpregs */
 	__cpu_invalidate_fpregs_state();
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,4,182)
+	switch_fpu_finish(current);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
 	switch_fpu_finish(&current->thread.fpu);
 #else
 	switch_fpu_finish(&current->thread.fpu, smp_processor_id());
