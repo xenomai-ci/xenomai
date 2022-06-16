@@ -38,6 +38,7 @@
 #include <linux/kallsyms.h>
 #include <linux/ipipe.h>
 #include <linux/ipipe_tickdev.h>
+#include <cobalt/kernel/init.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/heap.h>
 #include <cobalt/kernel/synch.h>
@@ -1278,7 +1279,7 @@ static inline int handle_clockfreq_event(unsigned int *p)
 {
 	unsigned int newfreq = *p;
 
-	xnclock_update_freq(newfreq);
+	cobalt_update_clockfreq(newfreq);
 
 	return KEVENT_PROPAGATE;
 }

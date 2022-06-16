@@ -53,6 +53,16 @@ module_param_named(timerfreq, timerfreq_arg, ulong, 0444);
 static unsigned long clockfreq_arg;
 module_param_named(clockfreq, clockfreq_arg, ulong, 0444);
 
+static bool passed_clockfreq;
+
+void cobalt_update_clockfreq(unsigned long freq)
+{
+	if (!passed_clockfreq) {
+		xnclock_update_freq(freq);
+		clockfreq_arg = freq;
+	}
+}
+
 #ifdef CONFIG_SMP
 static unsigned long supported_cpus_arg = -1;
 module_param_named(supported_cpus, supported_cpus_arg, ulong, 0444);
@@ -174,6 +184,8 @@ static int __init mach_setup(void)
 
 	if (clockfreq_arg == 0)
 		clockfreq_arg = sysinfo.sys_hrclock_freq;
+	else
+		passed_clockfreq = true;
 
 	if (clockfreq_arg == 0) {
 		printk(XENO_ERR "null clock frequency? Aborting.\n");
