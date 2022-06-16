@@ -51,4 +51,6 @@ void cobalt_remove_state_chain(struct notifier_block *nb);
 
 void cobalt_call_state_chain(enum cobalt_run_states newstate);
 
+void cobalt_update_clockfreq(unsigned long freq);
+
 #endif /* !_COBALT_KERNEL_INIT_H_ */
