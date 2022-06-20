@@ -17,7 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stddef.h>
+#include <linux/stddef.h>
 #include <linux/err.h>
 #include <cobalt/kernel/time.h>
 #include "internal.h"
