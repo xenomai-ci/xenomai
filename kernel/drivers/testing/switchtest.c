@@ -407,7 +407,7 @@ struct taskarg {
 static void rtswitch_ktask(void *cookie)
 {
 	struct taskarg *arg = (struct taskarg *) cookie;
-	unsigned int fp_val, expected, to, i = 0;
+	unsigned int to, i = 0;
 	struct rtswitch_context *ctx = arg->ctx;
 	struct rtswitch_task *task = arg->task;
 
