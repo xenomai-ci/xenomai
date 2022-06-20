@@ -92,7 +92,7 @@ int a4l_rdproc_devs(struct seq_file *p, void *data)
 
 static int a4l_proc_transfer_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, a4l_rdproc_transfer, PDE_DATA(inode));
+	return single_open(file, a4l_rdproc_transfer, pde_data(inode));
 }
 
 static const DEFINE_PROC_OPS(a4l_proc_transfer_ops,

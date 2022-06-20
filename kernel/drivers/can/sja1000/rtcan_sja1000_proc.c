@@ -47,7 +47,7 @@ static int rtcan_sja_proc_regs(struct seq_file *p, void *data)
 
 static int rtcan_sja_proc_regs_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, rtcan_sja_proc_regs, PDE_DATA(inode));
+	return single_open(file, rtcan_sja_proc_regs, pde_data(inode));
 }
 
 static const DEFINE_PROC_OPS(rtcan_sja_proc_regs_ops,
