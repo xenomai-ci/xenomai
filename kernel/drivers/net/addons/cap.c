@@ -263,9 +263,8 @@ static int tap_dev_open(struct net_device *dev)
 	if (err == 0)
 		return -EIDRM;
 
-	memcpy(dev->dev_addr,
-	       (*(struct rtnet_device **)netdev_priv(dev))->dev_addr,
-	       MAX_ADDR_LEN);
+	dev_addr_set(dev,
+		     (*(struct rtnet_device **)netdev_priv(dev))->dev_addr);
 
 	return 0;
 }

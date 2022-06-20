@@ -1315,11 +1315,14 @@ static void fec_get_mac(struct net_device *ndev)
 		return;
 	}
 
-	memcpy(ndev->dev_addr, iap, ETH_ALEN);
-
 	/* Adjust MAC if using macaddr */
-	if (iap == macaddr)
-		 ndev->dev_addr[ETH_ALEN-1] = macaddr[ETH_ALEN-1] + fep->dev_id;
+	if (iap == macaddr) {
+		memcpy(tmpaddr, macaddr, ETH_ALEN);
+		tmpaddr[ETH_ALEN-1] += fep->dev_id;
+		eth_hw_addr_set(ndev, tmpaddr);
+	} else {
+		eth_hw_addr_set(ndev, iap);
+	}
 }
 
 /* ------------------------------------------------------------------------- */
