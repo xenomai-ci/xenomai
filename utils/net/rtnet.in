@@ -15,15 +15,19 @@ debug_func() {
 usage() {
     cat << EOF
 Usage:
-    $0 [-cf <config-file>] [-v] [-c] {start|stop}
+    $0 [-cf <config-file>] [-d <delay>] [-v] [-c] {start|stop}
 	Start or stop station according to configuration file
 
-    $0 [-cf <config-file>] [-v] [-c] master <slave_ip1> [<slave_ip2> ...]
+    $0 [-cf <config-file>] [-d <delay>] [-v] [-c] master <slave_ip1> [<slave_ip2> ...]
 	Start station as master for given list of slaves
 
     $0 [-cf <config-file>] [-v] capture
 	Start only passive realtime capturing
 
+    The parameter -d allows to introduce a delay in seconds between the
+	"rtifconfig rtethX up" command and the TDMA start on the host
+	configured as master. Useful to avoid errors/card locks when the
+	RT NIC is slow to get the link up.
     The additional switch -v enables verbose output.
     The additional switch -c enables capturing mode to allow use of a network
 	analyzer such as Wireshark (if rtnet was built with --enable-rtcap).
@@ -75,6 +79,10 @@ submit_cfg() {
     case "$STATION_TYPE" in
 	master)
 	    $RTIFCONFIG rteth0 up "$STATION_IP"
+
+	    if [ -n "$UPDELAY" ]; then
+		sleep "$UPDELAY"
+	    fi
 
 	    $TDMACFG rteth0 master "$TDMA_CYCLE"
 	    eval "$TDMA_SLOTS"
@@ -143,6 +151,10 @@ start_master() {
 	#   + TDMA_OFFSET us / Slave 2 / + TDMA_OFFSET us / ... / Slave n
 
 	$RTIFCONFIG rteth0 up "$IPADDR" $NETMASK_OPT
+
+	if [ -n "$UPDELAY" ]; then
+	    sleep "$UPDELAY"
+	fi
 
 	$TDMACFG rteth0 master "$TDMA_CYCLE"
 	$TDMACFG rteth0 slot 0 0
@@ -256,6 +268,11 @@ if [ -r "$RTNETCFG" ]; then
 else
     echo "Could not read $RTNETCFG"
     exit 1
+fi
+
+if [ "$1" = "-d" ]; then
+    UPDELAY="$2"
+    shift 2
 fi
 
 if [ "$1" = "-v" ]; then
