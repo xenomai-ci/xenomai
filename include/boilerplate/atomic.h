@@ -78,7 +78,7 @@ static inline void atomic_set(atomic_t *ptr, long v)
 #define smp_wmb()	do { } while (0)
 #endif /* !CONFIG_SMP */
 
-#define ACCESS_ONCE(x) (*(volatile typeof(x) *)&(x))
+#define ACCESS_ONCE(x) (*(volatile __typeof__(x) *)&(x))
 
 #define compiler_barrier()	__asm__ __volatile__("": : :"memory")
 
