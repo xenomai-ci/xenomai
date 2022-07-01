@@ -426,7 +426,8 @@ static int CoBaLt_ni(void)
  *
  * --rpm
  */
-#define __syshand__(__name)	((cobalt_syshand)(CoBaLt_ ## __name))
+#define __syshand__(__name)	\
+	((cobalt_syshand)(void (*)(void))(CoBaLt_ ## __name))
 
 #define __COBALT_NI	__syshand__(ni)
 
