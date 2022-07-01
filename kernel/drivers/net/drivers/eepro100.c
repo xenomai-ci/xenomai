@@ -1070,8 +1070,9 @@ speedo_init_rx_ring(struct rtnet_device *rtdev)
 		rxf = (struct RxFD *)skb->tail;
 		sp->rx_ringp[i] = rxf;
 		sp->rx_ring_dma[i] =
-			pci_map_single(sp->pdev, rxf,
-					PKT_BUF_SZ + sizeof(struct RxFD), PCI_DMA_BIDIRECTIONAL);
+			dma_map_single(&sp->pdev->dev, rxf,
+				       PKT_BUF_SZ + sizeof(struct RxFD),
+				       DMA_BIDIRECTIONAL);
 		rtskb_reserve(skb, sizeof(struct RxFD));
 		if (last_rxf) {
 			last_rxf->link = cpu_to_le32(sp->rx_ring_dma[i]);
@@ -1139,8 +1140,8 @@ speedo_start_xmit(struct rtskb *skb, struct rtnet_device *rtdev)
 	/* The data region is always in one buffer descriptor. */
 	sp->tx_ring[entry].count = cpu_to_le32(sp->tx_threshold);
 	sp->tx_ring[entry].tx_buf_addr0 =
-		cpu_to_le32(pci_map_single(sp->pdev, skb->data,
-					   skb->len, PCI_DMA_TODEVICE));
+		cpu_to_le32(dma_map_single(&sp->pdev->dev, skb->data,
+					   skb->len, DMA_TO_DEVICE));
 	sp->tx_ring[entry].tx_buf_size0 = cpu_to_le32(skb->len);
 
 // *** RTnet ***
@@ -1206,9 +1207,9 @@ static void speedo_tx_buffer_gc(struct rtnet_device *rtdev)
 		if (sp->tx_skbuff[entry]) {
 			sp->stats.tx_packets++;	/* Count only user packets. */
 			sp->stats.tx_bytes += sp->tx_skbuff[entry]->len;
-			pci_unmap_single(sp->pdev,
-					le32_to_cpu(sp->tx_ring[entry].tx_buf_addr0),
-					sp->tx_skbuff[entry]->len, PCI_DMA_TODEVICE);
+			dma_unmap_single(&sp->pdev->dev,
+					 le32_to_cpu(sp->tx_ring[entry].tx_buf_addr0),
+					 sp->tx_skbuff[entry]->len, DMA_TO_DEVICE);
 
 			// *** RTnet ***
 			dev_kfree_rtskb(sp->tx_skbuff[entry]);
@@ -1394,8 +1395,9 @@ static inline struct RxFD *speedo_rx_alloc(struct rtnet_device *rtdev, int entry
 	rtskb_reserve(skb, 2);  /* IP header alignment */
 	rxf = sp->rx_ringp[entry] = (struct RxFD *)skb->tail;
 	sp->rx_ring_dma[entry] =
-		pci_map_single(sp->pdev, rxf,
-					   PKT_BUF_SZ + sizeof(struct RxFD), PCI_DMA_FROMDEVICE);
+		dma_map_single(&sp->pdev->dev, rxf,
+			       PKT_BUF_SZ + sizeof(struct RxFD),
+			       DMA_FROM_DEVICE);
 	rtskb_reserve(skb, sizeof(struct RxFD));
 	rxf->rx_buf_addr = 0xffffffff;
 	pci_dma_sync_single_for_device(sp->pdev, sp->rx_ring_dma[entry],
@@ -1538,8 +1540,10 @@ speedo_rx(struct rtnet_device *rtdev, int* packets, nanosecs_abs_t *time_stamp)
 				sp->rx_skbuff[entry] = NULL;
 				rtskb_put(skb, pkt_len);
 				sp->rx_ringp[entry] = NULL;
-				pci_unmap_single(sp->pdev, sp->rx_ring_dma[entry],
-						PKT_BUF_SZ + sizeof(struct RxFD), PCI_DMA_FROMDEVICE);
+				dma_unmap_single(&sp->pdev->dev,
+						 sp->rx_ring_dma[entry],
+						 PKT_BUF_SZ + sizeof(struct RxFD),
+						 DMA_FROM_DEVICE);
 			}
 			skb->protocol = rt_eth_type_trans(skb, rtdev);
 			//rtmac
@@ -1608,9 +1612,10 @@ speedo_close(struct rtnet_device *rtdev)
 		sp->rx_skbuff[i] = 0;
 		/* Clear the Rx descriptors. */
 		if (skb) {
-			pci_unmap_single(sp->pdev,
+			dma_unmap_single(&sp->pdev->dev,
 					 sp->rx_ring_dma[i],
-					 PKT_BUF_SZ + sizeof(struct RxFD), PCI_DMA_FROMDEVICE);
+					 PKT_BUF_SZ + sizeof(struct RxFD),
+					 DMA_FROM_DEVICE);
 			dev_kfree_rtskb(skb);
 		}
 	}
@@ -1620,9 +1625,9 @@ speedo_close(struct rtnet_device *rtdev)
 		sp->tx_skbuff[i] = 0;
 		/* Clear the Tx descriptors. */
 		if (skb) {
-			pci_unmap_single(sp->pdev,
+			dma_unmap_single(&sp->pdev->dev,
 					 le32_to_cpu(sp->tx_ring[i].tx_buf_addr0),
-					 skb->len, PCI_DMA_TODEVICE);
+					 skb->len, DMA_TO_DEVICE);
 
 			// *** RTnet ***
 			dev_kfree_rtskb(skb);

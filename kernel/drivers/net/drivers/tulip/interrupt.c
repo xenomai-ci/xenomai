@@ -78,8 +78,8 @@ int tulip_refill_rx(/*RTnet*/struct rtnet_device *rtdev)
 			if (skb == NULL)
 				break;
 
-			mapping = pci_map_single(tp->pdev, skb->tail, PKT_BUF_SZ,
-						 PCI_DMA_FROMDEVICE);
+			mapping = dma_map_single(&tp->pdev->dev, skb->tail,
+						 PKT_BUF_SZ, DMA_FROM_DEVICE);
 			tp->rx_buffers[entry].mapping = mapping;
 
 			tp->rx_ring[entry].buffer1 = cpu_to_le32(mapping);
@@ -168,8 +168,9 @@ static int tulip_rx(/*RTnet*/struct rtnet_device *rtdev, nanosecs_abs_t *time_st
 				}
 #endif
 
-				pci_unmap_single(tp->pdev, tp->rx_buffers[entry].mapping,
-						 PKT_BUF_SZ, PCI_DMA_FROMDEVICE);
+				dma_unmap_single(&tp->pdev->dev,
+						 tp->rx_buffers[entry].mapping,
+						 PKT_BUF_SZ, DMA_FROM_DEVICE);
 
 				tp->rx_buffers[entry].skb = NULL;
 				tp->rx_buffers[entry].mapping = 0;
@@ -247,10 +248,10 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 				if (tp->tx_buffers[entry].skb == NULL) {
 					/* test because dummy frames not mapped */
 					if (tp->tx_buffers[entry].mapping)
-						pci_unmap_single(tp->pdev,
+						dma_unmap_single(&tp->pdev->dev,
 							 tp->tx_buffers[entry].mapping,
 							 sizeof(tp->setup_frame),
-							 PCI_DMA_TODEVICE);
+							 DMA_TO_DEVICE);
 					continue;
 				}
 
@@ -275,9 +276,10 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 					tp->stats.tx_packets++;
 				}
 
-				pci_unmap_single(tp->pdev, tp->tx_buffers[entry].mapping,
+				dma_unmap_single(&tp->pdev->dev,
+						 tp->tx_buffers[entry].mapping,
 						 tp->tx_buffers[entry].skb->len,
-						 PCI_DMA_TODEVICE);
+						 DMA_TO_DEVICE);
 
 				/* Free the original skb. */
 				/*RTnet*/dev_kfree_rtskb(tp->tx_buffers[entry].skb);

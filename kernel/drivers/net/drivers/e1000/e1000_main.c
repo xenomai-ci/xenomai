@@ -1809,10 +1809,10 @@ e1000_unmap_and_free_tx_resource(struct e1000_adapter *adapter,
 			struct e1000_buffer *buffer_info)
 {
 	if (buffer_info->dma) {
-		pci_unmap_page(adapter->pdev,
-				buffer_info->dma,
-				buffer_info->length,
-				PCI_DMA_TODEVICE);
+		dma_unmap_page(&adapter->pdev->dev,
+			       buffer_info->dma,
+			       buffer_info->length,
+			       DMA_TO_DEVICE);
 	}
 	if (buffer_info->skb)
 		kfree_rtskb(buffer_info->skb);
@@ -1933,10 +1933,10 @@ e1000_clean_rx_ring(struct e1000_adapter *adapter,
 	for (i = 0; i < rx_ring->count; i++) {
 		buffer_info = &rx_ring->buffer_info[i];
 		if (buffer_info->skb) {
-			pci_unmap_single(pdev,
+			dma_unmap_single(&pdev->dev,
 					 buffer_info->dma,
 					 buffer_info->length,
-					 PCI_DMA_FROMDEVICE);
+					 DMA_FROM_DEVICE);
 
 			kfree_rtskb(buffer_info->skb);
 			buffer_info->skb = NULL;
@@ -2382,10 +2382,10 @@ e1000_tx_map(struct e1000_adapter *adapter, struct e1000_tx_ring *tx_ring,
 
 		buffer_info->length = size;
 		buffer_info->dma =
-			pci_map_single(adapter->pdev,
-				skb->data + offset,
-				size,
-				PCI_DMA_TODEVICE);
+			dma_map_single(&adapter->pdev->dev,
+				       skb->data + offset,
+				       size,
+				       DMA_TO_DEVICE);
 		buffer_info->time_stamp = jiffies;
 
 		len -= size;
@@ -2850,10 +2850,10 @@ e1000_clean_rx_irq(struct e1000_adapter *adapter,
 
 		cleaned = TRUE;
 		cleaned_count++;
-		pci_unmap_single(pdev,
+		dma_unmap_single(&pdev->dev,
 				 buffer_info->dma,
 				 buffer_info->length,
-				 PCI_DMA_FROMDEVICE);
+				 DMA_FROM_DEVICE);
 
 		length = le16_to_cpu(rx_desc->length);
 
@@ -2985,10 +2985,10 @@ e1000_alloc_rx_buffers(struct e1000_adapter *adapter,
 		buffer_info->skb = skb;
 		buffer_info->length = adapter->rx_buffer_len;
 map_skb:
-		buffer_info->dma = pci_map_single(pdev,
+		buffer_info->dma = dma_map_single(&pdev->dev,
 						  skb->data,
 						  adapter->rx_buffer_len,
-						  PCI_DMA_FROMDEVICE);
+						  DMA_FROM_DEVICE);
 
 		/* Fix for errata 23, can't cross 64kB boundary */
 		if (!e1000_check_64k_bound(adapter,
@@ -3001,9 +3001,9 @@ map_skb:
 			kfree_rtskb(skb);
 			buffer_info->skb = NULL;
 
-			pci_unmap_single(pdev, buffer_info->dma,
+			dma_unmap_single(&pdev->dev, buffer_info->dma,
 					 adapter->rx_buffer_len,
-					 PCI_DMA_FROMDEVICE);
+					 DMA_FROM_DEVICE);
 
 			break; /* while !buffer_info->skb */
 		}
