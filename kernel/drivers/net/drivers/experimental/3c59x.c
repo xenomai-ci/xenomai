@@ -1070,9 +1070,12 @@ static int vortex_probe1(struct pci_dev *pdev,
 	vp->pdev = pdev;
 
 	/* Makes sure rings are at least 16 byte aligned. */
-	vp->rx_ring = pci_alloc_consistent(pdev, sizeof(struct boom_rx_desc) * RX_RING_SIZE
-					+ sizeof(struct boom_tx_desc) * TX_RING_SIZE,
-					&vp->rx_ring_dma);
+	vp->rx_ring = dma_alloc_coherent(
+			&pdev->dev,
+			sizeof(struct boom_rx_desc) * RX_RING_SIZE
+			+ sizeof(struct boom_tx_desc) * TX_RING_SIZE,
+			&vp->rx_ring_dma,
+			GFP_ATOMIC);
 	retval = -ENOMEM;
 	if (vp->rx_ring == 0)
 		goto free_region;
@@ -1329,11 +1332,11 @@ static int vortex_probe1(struct pci_dev *pdev,
 	// *** RTnet ***
 
   free_ring:
-	pci_free_consistent(pdev,
-			sizeof(struct boom_rx_desc) * RX_RING_SIZE
-			+ sizeof(struct boom_tx_desc) * TX_RING_SIZE,
-			vp->rx_ring,
-			vp->rx_ring_dma);
+	dma_free_coherent(&pdev->dev,
+		    sizeof(struct boom_rx_desc) * RX_RING_SIZE
+		    + sizeof(struct boom_tx_desc) * TX_RING_SIZE,
+		    vp->rx_ring,
+		    vp->rx_ring_dma);
   free_region:
 	if (vp->must_free_region)
 		release_region(ioaddr, vci->io_size);
@@ -2698,7 +2701,7 @@ static void vortex_remove_one (struct pci_dev *pdev)
 			pci_restore_state(vp->pdev, vp->power_state);
 	}
 
-	pci_free_consistent(pdev,
+	dma_free_coherent(&pdev->dev,
 			sizeof(struct boom_rx_desc) * RX_RING_SIZE
 			+ sizeof(struct boom_tx_desc) * TX_RING_SIZE,
 			vp->rx_ring,

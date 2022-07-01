@@ -1081,11 +1081,13 @@ static void e1000_free_desc_rings(struct e1000_adapter *adapter)
 	}
 
 	if (tx_ring->desc) {
-		pci_free_consistent(pdev, tx_ring->size, tx_ring->desc, tx_ring->dma);
+		dma_free_coherent(&pdev->dev, tx_ring->size, tx_ring->desc,
+				  tx_ring->dma);
 		tx_ring->desc = NULL;
 	}
 	if (rx_ring->desc) {
-		pci_free_consistent(pdev, rx_ring->size, rx_ring->desc, rx_ring->dma);
+		dma_free_coherent(&pdev->dev, rx_ring->size, rx_ring->desc,
+				  rx_ring->dma);
 		rx_ring->desc = NULL;
 	}
 
@@ -1119,8 +1121,8 @@ static int e1000_setup_desc_rings(struct e1000_adapter *adapter)
 
 	tx_ring->size = tx_ring->count * sizeof(struct e1000_tx_desc);
 	tx_ring->size = ALIGN(tx_ring->size, 4096);
-	if (!(tx_ring->desc = pci_alloc_consistent(pdev, tx_ring->size,
-	                                           &tx_ring->dma))) {
+	if (!(tx_ring->desc = dma_alloc_coherent(&pdev->dev, tx_ring->size,
+	                                         &tx_ring->dma, GFP_ATOMIC))) {
 		ret_val = 2;
 		goto err_nomem;
 	}
@@ -1179,8 +1181,8 @@ static int e1000_setup_desc_rings(struct e1000_adapter *adapter)
 	}
 
 	rx_ring->size = rx_ring->count * sizeof(struct e1000_rx_desc);
-	if (!(rx_ring->desc = pci_alloc_consistent(pdev, rx_ring->size,
-	                                           &rx_ring->dma))) {
+	if (!(rx_ring->desc = dma_alloc_coherent(&pdev->dev, rx_ring->size,
+	                                         &rx_ring->dma, GFP_ATOMIC))) {
 		ret_val = 5;
 		goto err_nomem;
 	}

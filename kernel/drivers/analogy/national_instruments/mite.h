@@ -94,8 +94,8 @@ static inline void mite_free_ring(struct mite_dma_descriptor_ring *ring)
 {
 	if (ring) {
 		if (ring->descriptors) {
-			pci_free_consistent(
-				ring->pcidev,
+			dma_free_coherent(
+				&ring->pcidev->dev,
 				ring->n_links *
 				sizeof(struct mite_dma_descriptor),
 				ring->descriptors, ring->descriptors_dma_addr);

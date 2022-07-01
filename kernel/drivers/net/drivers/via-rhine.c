@@ -908,22 +908,23 @@ static int alloc_ring(struct rtnet_device* dev) /*** RTnet ***/
 	void *ring;
 	dma_addr_t ring_dma;
 
-	ring = pci_alloc_consistent(np->pdev,
-				    RX_RING_SIZE * sizeof(struct rx_desc) +
-				    TX_RING_SIZE * sizeof(struct tx_desc),
-				    &ring_dma);
+	ring = dma_alloc_coherent(&np->pdev->dev,
+				  RX_RING_SIZE * sizeof(struct rx_desc) +
+				  TX_RING_SIZE * sizeof(struct tx_desc),
+				  &ring_dma, GFP_ATOMIC);
 	if (!ring) {
 		printk(KERN_ERR "Could not allocate DMA memory.\n");
 		return -ENOMEM;
 	}
 	if (np->drv_flags & ReqTxAlign) {
-		np->tx_bufs = pci_alloc_consistent(np->pdev, PKT_BUF_SZ * TX_RING_SIZE,
-								   &np->tx_bufs_dma);
+		np->tx_bufs = dma_alloc_coherent(&np->pdev->dev,
+						 PKT_BUF_SZ * TX_RING_SIZE,
+						 &np->tx_bufs_dma, GFP_ATOMIC);
 		if (np->tx_bufs == NULL) {
-			pci_free_consistent(np->pdev,
-				    RX_RING_SIZE * sizeof(struct rx_desc) +
-				    TX_RING_SIZE * sizeof(struct tx_desc),
-				    ring, ring_dma);
+			dma_free_coherent(&np->pdev->dev,
+					  RX_RING_SIZE * sizeof(struct rx_desc) +
+					  TX_RING_SIZE * sizeof(struct tx_desc),
+					  ring, ring_dma);
 			return -ENOMEM;
 		}
 	}
@@ -940,15 +941,15 @@ void free_ring(struct rtnet_device* dev) /*** RTnet ***/
 {
 	struct netdev_private *np = dev->priv;
 
-	pci_free_consistent(np->pdev,
-			    RX_RING_SIZE * sizeof(struct rx_desc) +
-			    TX_RING_SIZE * sizeof(struct tx_desc),
-			    np->rx_ring, np->rx_ring_dma);
+	dma_free_coherent(&np->pdev->dev,
+			  RX_RING_SIZE * sizeof(struct rx_desc) +
+			  TX_RING_SIZE * sizeof(struct tx_desc),
+			  np->rx_ring, np->rx_ring_dma);
 	np->tx_ring = NULL;
 
 	if (np->tx_bufs)
-		pci_free_consistent(np->pdev, PKT_BUF_SZ * TX_RING_SIZE,
-							np->tx_bufs, np->tx_bufs_dma);
+		dma_free_coherent(&np->pdev->dev, PKT_BUF_SZ * TX_RING_SIZE,
+				  np->tx_bufs, np->tx_bufs_dma);
 
 	np->tx_bufs = NULL;
 

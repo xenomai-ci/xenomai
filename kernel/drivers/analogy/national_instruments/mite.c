@@ -379,9 +379,9 @@ int a4l_mite_buf_change(struct mite_dma_descriptor_ring *ring, struct a4l_subdev
 	int i;
 
 	if (ring->descriptors) {
-		pci_free_consistent(ring->pcidev,
-				    ring->n_links * sizeof(struct mite_dma_descriptor),
-				    ring->descriptors, ring->descriptors_dma_addr);
+		dma_free_coherent(&ring->pcidev->dev,
+				  ring->n_links * sizeof(struct mite_dma_descriptor),
+				  ring->descriptors, ring->descriptors_dma_addr);
 	}
 	ring->descriptors = NULL;
 	ring->descriptors_dma_addr = 0;
@@ -395,9 +395,9 @@ int a4l_mite_buf_change(struct mite_dma_descriptor_ring *ring, struct a4l_subdev
 	MDPRINTK("ring->pcidev=%p, n_links=0x%04x\n", ring->pcidev, n_links);
 
 	ring->descriptors =
-		pci_alloc_consistent(ring->pcidev,
-				     n_links * sizeof(struct mite_dma_descriptor),
-				     &ring->descriptors_dma_addr);
+		dma_alloc_coherent(&ring->pcidev->dev,
+				   n_links * sizeof(struct mite_dma_descriptor),
+				   &ring->descriptors_dma_addr, GFP_ATOMIC);
 	if (!ring->descriptors) {
 		printk("MITE: ring buffer allocation failed\n");
 		return -ENOMEM;

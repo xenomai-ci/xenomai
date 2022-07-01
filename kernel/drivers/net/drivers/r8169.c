@@ -1041,13 +1041,15 @@ static int rtl8169_open (struct rtnet_device *rtdev)
 	//2004-05-11
 	// Allocate tx/rx descriptor space
 	priv->sizeof_txdesc_space = NUM_TX_DESC * sizeof(struct TxDesc)+256;
-	priv->txdesc_space = pci_alloc_consistent( pdev, priv->sizeof_txdesc_space, &priv->txdesc_phy_dma_addr );
+	priv->txdesc_space = dma_alloc_coherent(&pdev->dev,
+		priv->sizeof_txdesc_space, &priv->txdesc_phy_dma_addr, GFP_ATOMIC);
 	if( priv->txdesc_space == NULL ){
 		printk("%s: Gigabit driver alloc txdesc_space failed.\n", rtdev->name );
 		return -ENOMEM;
 	}
 	priv->sizeof_rxdesc_space = NUM_RX_DESC * sizeof(struct RxDesc)+256;
-	priv->rxdesc_space = pci_alloc_consistent( pdev, priv->sizeof_rxdesc_space, &priv->rxdesc_phy_dma_addr );
+	priv->rxdesc_space = dma_alloc_coherent(&pdev->dev,
+		priv->sizeof_rxdesc_space, &priv->rxdesc_phy_dma_addr, GFP_ATOMIC);
 	if( priv->rxdesc_space == NULL ){
 		printk("%s: Gigabit driver alloc rxdesc_space failed.\n", rtdev->name );
 		return -ENOMEM;
@@ -1779,8 +1781,8 @@ static int rtl8169_close (struct rtnet_device *rtdev)
 
 	//2004-05-11
 	if(priv->txdesc_space != NULL){
-		pci_free_consistent(
-				priv->pci_dev,
+		dma_free_coherent(
+				&priv->pci_dev->dev,
 				priv->sizeof_txdesc_space,
 				priv->txdesc_space,
 				priv->txdesc_phy_dma_addr
@@ -1789,8 +1791,8 @@ static int rtl8169_close (struct rtnet_device *rtdev)
 	}
 
 	if(priv->rxdesc_space != NULL){
-		pci_free_consistent(
-				priv->pci_dev,
+		dma_free_coherent(
+				&priv->pci_dev->dev,
 				priv->sizeof_rxdesc_space,
 				priv->rxdesc_space,
 				priv->rxdesc_phy_dma_addr
