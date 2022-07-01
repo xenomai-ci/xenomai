@@ -662,7 +662,7 @@ static int via_rhine_init_one (struct pci_dev *pdev,
 		goto err_out;
 
 	/* this should always be supported */
-	if (pci_set_dma_mask(pdev, 0xffffffff)) {
+	if (dma_set_mask(&pdev->dev, DMA_BIT_MASK(32))) {
 		printk(KERN_ERR "32-bit PCI DMA addresses not supported by the card!?\n");
 		goto err_out;
 	}
