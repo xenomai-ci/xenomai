@@ -39,7 +39,7 @@ variables:
     - apt install -y ${PACKAGES} ${!ARCH_PACKAGES}
     - REV=$(git ls-remote --tags --head --refs ${PIPELINE_KERNEL} | sed -e "s/.*[[:space:]]refs\/\(tags\|heads\)\///" | grep "${PIPELINE_REV}" | sort -r -n -t - -k 5 -k 6 | head -1)
     - test -n "${REV}" || REV="${PIPELINE_REV}"
-    - test -n "${PIPELINE_KERNEL}" && git clone --depth 1 --branch ${REV} ${PIPELINE_KERNEL} ${KDIR}
+    - test -n "${PIPELINE_KERNEL}" && echo "Checking out ${REV}..." && git clone --depth 1 --branch ${REV} ${PIPELINE_KERNEL} ${KDIR}
     - case "${ARCH}" in
       "arm64")
       export CROSS_COMPILE=aarch64-linux-gnu-;
@@ -178,6 +178,14 @@ variables:
     paths:
       - .ccache
 
+arm-5.xx-latest:
+  extends: .build
+  variables:
+    ARCH: arm
+    PIPELINE_REV: "v5\\.[0-9][0-9].*-dovetail-rebase"
+    PIPELINE_KERNEL: ${DOVETAIL_URL}
+    KERNEL_DEFCONFIG: multi_v7_defconfig
+
 arm-5.15-head:
   extends: .build
   variables:
@@ -194,6 +202,14 @@ arm-5.10-head:
     PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
+arm64-5.xx-latest:
+  extends: .build
+  variables:
+    ARCH: arm64
+    PIPELINE_REV: "v5\\.[0-9][0-9].*-dovetail-rebase"
+    PIPELINE_KERNEL: ${DOVETAIL_URL}
+    KERNEL_DEFCONFIG: defconfig
+
 arm64-5.15-head:
   extends: .build
   variables:
@@ -209,6 +225,14 @@ arm64-5.10-head:
     PIPELINE_REV: v5.10.y-dovetail-rebase
     PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: defconfig
+
+x86-5.xx-latest:
+  extends: .build
+  variables:
+    ARCH: x86
+    PIPELINE_REV: "v5\\.[0-9][0-9].*-dovetail-rebase"
+    PIPELINE_KERNEL: ${DOVETAIL_URL}
+    KERNEL_DEFCONFIG: x86_64_defconfig
 
 x86-5.15-head:
   extends: .build
