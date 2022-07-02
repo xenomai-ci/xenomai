@@ -124,13 +124,19 @@ static int spi_device_probe(struct spi_device *spi)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,18,0)
+static void spi_device_remove(struct spi_device *spi)
+#else
 static int spi_device_remove(struct spi_device *spi)
+#endif
 {
 	struct rtdm_spi_remote_slave *slave = spi_get_drvdata(spi);
 
 	slave->master->ops->detach_slave(slave);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,18,0)
 	return 0;
+#endif
 }
 
 static const struct of_device_id spi_device_match[] = {
