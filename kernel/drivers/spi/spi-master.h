@@ -53,7 +53,7 @@ struct rtdm_spi_master_ops {
 struct rtdm_spi_master {
 	int subclass;
 	const struct rtdm_spi_master_ops *ops;
-	struct spi_master *kmaster;
+	struct spi_controller *controller;
 	struct {	/* Internal */
 		struct rtdm_driver driver;
 		struct class *devclass;

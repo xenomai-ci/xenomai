@@ -181,7 +181,7 @@ to_master_omap2_mcspi(struct rtdm_spi_remote_slave *slave)
 static inline struct device *
 master_to_kdev(struct rtdm_spi_master *master)
 {
-	return &master->kmaster->dev;
+	return &master->controller->dev;
 }
 
 static inline u32 mcspi_rd_reg(struct spi_master_omap2_mcspi *spim,
@@ -881,7 +881,7 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 {
 	struct spi_master_omap2_mcspi *spim;
 	struct rtdm_spi_master *master;
-	struct spi_master *kmaster;
+	struct spi_controller *ctlr;
 	struct resource *r;
 	int ret, irq;
 	u32 regs_offset = 0;
@@ -912,21 +912,21 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 	master->ops = &omap2_mcspi_master_ops;
 	platform_set_drvdata(pdev, master);
 
-	kmaster = master->kmaster;
+	ctlr = master->controller;
 	/* flags understood by this controller driver */
-	kmaster->mode_bits = OMAP2_MCSPI_SPI_MODE_BITS;
+	ctlr->mode_bits = OMAP2_MCSPI_SPI_MODE_BITS;
 	/* TODO: SPI_BPW_RANGE_MASK(4, 32); */
-	kmaster->bits_per_word_mask = SPI_BPW_MASK(8);
+	ctlr->bits_per_word_mask = SPI_BPW_MASK(8);
 	of_property_read_u32(pdev->dev.of_node, "ti,spi-num-cs", &num_cs);
-	kmaster->num_chipselect = num_cs;
+	ctlr->num_chipselect = num_cs;
 	if (of_get_property(pdev->dev.of_node,
 		"ti,pindir-d0-out-d1-in", NULL)) {
 		pin_dir = MCSPI_PINDIR_D0_OUT_D1_IN;
 	}
 
-	kmaster->max_speed_hz = OMAP2_MCSPI_MAX_FREQ;
-	kmaster->min_speed_hz = OMAP2_MCSPI_MAX_FREQ >> 15;
-	kmaster->dev.of_node = pdev->dev.of_node;
+	ctlr->max_speed_hz = OMAP2_MCSPI_MAX_FREQ;
+	ctlr->min_speed_hz = OMAP2_MCSPI_MAX_FREQ >> 15;
+	ctlr->dev.of_node = pdev->dev.of_node;
 
 	spim = container_of(master, struct spi_master_omap2_mcspi, master);
 	rtdm_event_init(&spim->transfer_done, 0);
@@ -987,7 +987,7 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 
 fail_unclk:
 fail:
-	spi_master_put(kmaster);
+	spi_controller_put(ctlr);
 
 	return ret;
 }
