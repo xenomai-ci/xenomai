@@ -27,9 +27,11 @@ RT_DRIVER_OPTIONS=""
 REBIND_RT_NICS=""
 
 # IP address and netmask of this station
-#   The TDMA_CONFIG file overrides these parameters for masters and backup
-#   masters. Leave blank if you do not use IP addresses or if this station is
+#   The TDMA_CONFIG file overrides the IPADDR parameter for masters.
+#   Leave blank if you do not use IP addresses or if this station is
 #   intended to retrieve its IP from the master based on its MAC address.
+#   If this station is a TDMA master, netmask is used also for slaves.
+#   If leaved blank, the default netmask for the IPADDR IP class will be used.
 IPADDR="10.0.0.1"
 NETMASK=""
 

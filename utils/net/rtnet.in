@@ -78,7 +78,7 @@ init_rtnet() {
 submit_cfg() {
     case "$STATION_TYPE" in
 	master)
-	    $RTIFCONFIG rteth0 up "$STATION_IP"
+	    $RTIFCONFIG rteth0 up "$STATION_IP" $NETMASK_OPT
 
 	    if [ -n "$UPDELAY" ]; then
 		sleep "$UPDELAY"
@@ -88,7 +88,6 @@ submit_cfg() {
 	    eval "$TDMA_SLOTS"
 
 	    IPADDR=$STATION_IP
-	    NETMASK_OPT=
 	    ;;
 	slave)
 	    if [ ! "$STATION_IP" = "" ]; then
@@ -101,7 +100,7 @@ submit_cfg() {
 		RTCFG_CLIENT="$STATION_MAC"
 	    fi
 
-	    ADD_STAGE1_CMDS="ifconfig vnic0 up $STATION_IP"
+	    ADD_STAGE1_CMDS="ifconfig vnic0 up $STATION_IP $NETMASK_OPT"
 
 	    echo "$TDMA_SLOTS$ADD_STAGE1_CMDS" | \
 		$RTCFG rteth0 add "$RTCFG_CLIENT" -stage1 -
@@ -117,7 +116,7 @@ submit_cfg() {
 		RTCFG_CLIENT="$STATION_MAC"
 	    fi
 
-	    ADD_STAGE1_CMDS="ifconfig vnic0 up $STATION_IP"
+	    ADD_STAGE1_CMDS="ifconfig vnic0 up $STATION_IP $NETMASK_OPT"
 
 	    STAGE_2_OPT=
 	    if [ ! "$STATION_STAGE_2_SRC" = "" ]; then
