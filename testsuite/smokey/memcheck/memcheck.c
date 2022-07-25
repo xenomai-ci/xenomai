@@ -80,9 +80,7 @@ static inline void swap(void *left, void *right, const size_t size)
 
 static void random_shuffle(void *vbase, size_t nmemb, const size_t size)
 {
-	struct {
-		char x[size];
-	} __attribute__((packed)) *base = vbase;
+	char *base = (char *)vbase;
 	unsigned int j, k;
 	double u;
 
@@ -92,7 +90,7 @@ static void random_shuffle(void *vbase, size_t nmemb, const size_t size)
 		k = (unsigned int)(j * u) + 1;
 		if (j == k)
 			continue;
-		swap(&base[j - 1], &base[k - 1], size);
+		swap(base + (j - 1) * size, base + (k - 1) * size, size);
 	}
 }
 
