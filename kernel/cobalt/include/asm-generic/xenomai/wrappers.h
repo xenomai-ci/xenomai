@@ -170,7 +170,9 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #define __kernel_old_timeval	timeval
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,4,208) || \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0) && \
+     LINUX_VERSION_CODE < KERNEL_VERSION(5,8,0))
 #define mmap_read_lock(__mm)	down_read(&mm->mmap_sem)
 #define mmap_read_unlock(__mm)	up_read(&mm->mmap_sem)
 #define mmap_write_lock(__mm)	down_write(&mm->mmap_sem)
