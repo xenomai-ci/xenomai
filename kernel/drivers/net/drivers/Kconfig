@@ -71,6 +71,9 @@ config XENO_DRIVERS_NET_DRV_IGB
     depends on XENO_DRIVERS_NET && PCI
     tristate "Intel(R) 82575 (Gigabit)"
 
+config XENO_DRIVERS_NET_DRV_IGC
+    depends on XENO_DRIVERS_NET && PCI
+    tristate "Intel(R) Ethernet Controller I225-LM/I225-V support"
 
 config XENO_DRIVERS_NET_DRV_R8169
     depends on XENO_DRIVERS_NET && PCI

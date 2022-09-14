@@ -10,6 +10,8 @@ obj-$(CONFIG_XENO_DRIVERS_NET_DRV_TULIP) += tulip/
 
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_IGB) += igb/
 
+obj-$(CONFIG_XENO_DRIVERS_NET_DRV_IGC) += igc/
+
 obj-$(CONFIG_XENO_DRIVERS_NET_FEC) += freescale/
 
 obj-$(CONFIG_XENO_DRIVERS_NET_DRV_8139) += rt_8139too.o
