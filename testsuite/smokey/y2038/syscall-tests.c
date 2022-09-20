@@ -1237,6 +1237,9 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 {
 	int ret;
 
+	smokey_note("y2038: sizeof(long) = %zu, sizeof(time_t) = %zu",
+		    sizeof(long), sizeof(time_t));
+
 	ret = check_kernel_version();
 	if (ret)
 		return (ret < 0) ? ret : 0; /* skip if no y2038 safe kernel */
