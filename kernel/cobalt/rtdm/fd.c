@@ -31,6 +31,7 @@
 #include <cobalt/kernel/time.h>
 #include <pipeline/inband_work.h>
 #include <trace/events/cobalt-rtdm.h>
+#include <rtdm/compat.h>
 #include <rtdm/fd.h>
 #include "internal.h"
 #include "posix/process.h"
@@ -997,6 +998,127 @@ int rtdm_fd_select(int ufd, struct xnselector *selector,
 
 	return ret;
 }
+
+int rtdm_fd_get_setsockaddr_args(struct rtdm_fd *fd,
+				 struct _rtdm_setsockaddr_args *dst,
+				 const void *src)
+{
+
+#ifdef CONFIG_XENO_ARCH_SYS3264
+	if (rtdm_fd_is_compat(fd)) {
+		struct compat_rtdm_setsockaddr_args cargs;
+		int ret;
+
+		if (!rtdm_read_user_ok(fd, src, sizeof(cargs)))
+			return -EFAULT;
+
+		ret = rtdm_copy_from_user(fd, &cargs, src, sizeof(cargs));
+		if (ret)
+			return ret;
+
+		dst->addr = compat_ptr(cargs.addr);
+		dst->addrlen = cargs.addrlen;
+
+		return 0;
+	}
+#endif
+
+	if (!rtdm_read_user_ok(fd, src, sizeof(*dst)))
+		return -EFAULT;
+
+	return rtdm_copy_from_user(fd, dst, src, sizeof(*dst));
+}
+EXPORT_SYMBOL_GPL(rtdm_fd_get_setsockaddr_args);
+
+int rtdm_fd_get_setsockopt_args(struct rtdm_fd *fd,
+				struct _rtdm_setsockopt_args *dst,
+				const void *src)
+{
+
+#ifdef CONFIG_XENO_ARCH_SYS3264
+	if (rtdm_fd_is_compat(fd)) {
+		struct compat_rtdm_setsockopt_args cargs;
+		int ret;
+
+		if (!rtdm_read_user_ok(fd, src, sizeof(cargs)))
+			return -EFAULT;
+
+		ret = rtdm_copy_from_user(fd, &cargs, src, sizeof(cargs));
+		if (ret)
+			return ret;
+
+		dst->optlen = cargs.optlen;
+		dst->optval = compat_ptr(cargs.optval);
+		dst->optname = cargs.optname;
+		dst->level = cargs.level;
+
+		return 0;
+	}
+#endif
+
+	if (!rtdm_read_user_ok(fd, src, sizeof(*dst)))
+		return -EFAULT;
+
+	return rtdm_copy_from_user(fd, dst, src, sizeof(*dst));
+}
+EXPORT_SYMBOL_GPL(rtdm_fd_get_setsockopt_args);
+
+int rtdm_fd_get_iovec(struct rtdm_fd *fd, struct iovec *iov,
+		      const struct user_msghdr *msg, bool rw)
+{
+	size_t sz;
+
+#ifdef CONFIG_XENO_ARCH_SYS3264
+	sz = rtdm_fd_is_compat(fd) ? sizeof(struct compat_iovec) : sizeof(*iov);
+#else
+	sz = sizeof(*iov);
+#endif
+
+	sz *= msg->msg_iovlen;
+
+	if (!rw && !rtdm_read_user_ok(fd, msg->msg_iov, sz))
+		return -EFAULT;
+
+	if (rw && !rtdm_rw_user_ok(fd, msg->msg_iov, sz))
+		return -EFAULT;
+
+#ifdef CONFIG_XENO_ARCH_SYS3264
+	if (rtdm_fd_is_compat(fd))
+		return sys32_get_iovec(
+			iov, (struct compat_iovec __user *)msg->msg_iov,
+			(int)msg->msg_iovlen);
+#endif
+
+	return rtdm_copy_from_user(fd, iov, msg->msg_iov, sz);
+}
+EXPORT_SYMBOL_GPL(rtdm_fd_get_iovec);
+
+int rtdm_fd_put_iovec(struct rtdm_fd *fd, const struct iovec *iov,
+		      const struct user_msghdr *msg)
+{
+	size_t sz;
+
+#ifdef CONFIG_XENO_ARCH_SYS3264
+	sz = rtdm_fd_is_compat(fd) ? sizeof(struct compat_iovec) : sizeof(*iov);
+#else
+	sz = sizeof(*iov);
+#endif
+
+	sz *= msg->msg_iovlen;
+
+	if (!rtdm_rw_user_ok(fd, msg->msg_iov, sz))
+		return -EFAULT;
+
+#ifdef CONFIG_XENO_ARCH_SYS3264
+	if (rtdm_fd_is_compat(fd))
+		return sys32_put_iovec(
+			(struct compat_iovec __user *)msg->msg_iov, iov,
+			(int)msg->msg_iovlen);
+#endif
+
+	return rtdm_copy_to_user(fd, msg->msg_iov, iov, sz);
+}
+EXPORT_SYMBOL_GPL(rtdm_fd_put_iovec);
 
 static void destroy_fd(void *cookie, struct xnid *id)
 {

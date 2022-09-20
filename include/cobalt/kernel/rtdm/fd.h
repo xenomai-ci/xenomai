@@ -29,6 +29,8 @@
 struct vm_area_struct;
 struct rtdm_fd;
 struct _rtdm_mmap_request;
+struct _rtdm_setsockaddr_args;
+struct _rtdm_setsockopt_args;
 struct xnselector;
 struct cobalt_ppd;
 struct rtdm_device;
@@ -402,6 +404,20 @@ int rtdm_fd_valid_p(int ufd);
 
 int rtdm_fd_select(int ufd, struct xnselector *selector,
 		   unsigned int type);
+
+int rtdm_fd_get_setsockaddr_args(struct rtdm_fd *fd,
+				 struct _rtdm_setsockaddr_args *dst,
+				 const void *src);
+
+int rtdm_fd_get_setsockopt_args(struct rtdm_fd *fd,
+				struct _rtdm_setsockopt_args *dst,
+				const void *src);
+
+int rtdm_fd_get_iovec(struct rtdm_fd *fd, struct iovec *iov,
+		      const struct user_msghdr *msg, bool rw);
+
+int rtdm_fd_put_iovec(struct rtdm_fd *fd, const struct iovec *iov,
+		      const struct user_msghdr *msg);
 
 int rtdm_device_new_fd(struct rtdm_fd *fd, int ufd,
 		struct rtdm_device *dev);
