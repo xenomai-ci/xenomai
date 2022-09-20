@@ -31,6 +31,7 @@
 #include <linux/tcp.h>
 #include <linux/list.h>
 
+#include <rtdm/compat.h>
 #include <rtskb.h>
 #include <rtnet_internal.h>
 #include <rtnet_checksum.h>
@@ -355,25 +356,27 @@ void rt_udp_close(struct rtdm_fd *fd)
 int rt_udp_ioctl(struct rtdm_fd *fd, unsigned int request, void __user *arg)
 {
 	struct rtsocket *sock = rtdm_fd_to_private(fd);
-	const struct _rtdm_setsockaddr_args *setaddr;
-	struct _rtdm_setsockaddr_args _setaddr;
+	struct _rtdm_setsockaddr_args args;
+	bool do_bind = false;
+	int ret;
 
 	/* fast path for common socket IOCTLs */
 	if (_IOC_TYPE(request) == RTIOC_TYPE_NETWORK)
 		return rt_socket_common_ioctl(fd, request, arg);
 
 	switch (request) {
-	case _RTIOC_BIND:
-	case _RTIOC_CONNECT:
-		setaddr = rtnet_get_arg(fd, &_setaddr, arg, sizeof(_setaddr));
-		if (IS_ERR(setaddr))
-			return PTR_ERR(setaddr);
-		if (request == _RTIOC_BIND)
-			return rt_udp_bind(fd, sock, setaddr->addr,
-					   setaddr->addrlen);
+	COMPAT_CASE(_RTIOC_BIND):
+		do_bind = true;
+		fallthrough;
+	COMPAT_CASE(_RTIOC_CONNECT):
+		ret = rtdm_fd_get_setsockaddr_args(fd, &args, arg);
+		if (ret)
+			return ret;
 
-		return rt_udp_connect(fd, sock, setaddr->addr,
-				      setaddr->addrlen);
+		if (do_bind)
+			return rt_udp_bind(fd, sock, args.addr, args.addrlen);
+
+		return rt_udp_connect(fd, sock, args.addr, args.addrlen);
 
 	default:
 		return rt_ip_ioctl(fd, request, arg);
