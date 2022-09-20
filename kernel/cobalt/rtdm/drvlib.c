@@ -2212,14 +2212,7 @@ int rtdm_get_iovec(struct rtdm_fd *fd, struct iovec **iovp,
 		return 0;
 	}
 
-#ifdef CONFIG_XENO_ARCH_SYS3264
-	if (rtdm_fd_is_compat(fd))
-		return sys32_get_iovec(iov,
-			       (struct compat_iovec __user *)msg->msg_iov,
-			       msg->msg_iovlen);
-#endif
-
-	return rtdm_copy_from_user(fd, iov, msg->msg_iov, len);
+	return rtdm_fd_get_iovec(fd, iov, msg, false);
 }
 EXPORT_SYMBOL_GPL(rtdm_get_iovec);
 
@@ -2234,13 +2227,7 @@ int rtdm_put_iovec(struct rtdm_fd *fd, struct iovec *iov,
 		memcpy(msg->msg_iov, iov, len);
 		ret = 0;
 	} else
-#ifdef CONFIG_XENO_ARCH_SYS3264
-		if (rtdm_fd_is_compat(fd))
-			ret = sys32_put_iovec((struct compat_iovec __user *)msg->msg_iov,
-					      iov, msg->msg_iovlen);
-		else
-#endif
-			ret = rtdm_copy_to_user(fd, msg->msg_iov, iov, len);
+		ret = rtdm_fd_put_iovec(fd, iov, msg);
 
 	if (iov != iov_fast)
 		xnfree(iov);
