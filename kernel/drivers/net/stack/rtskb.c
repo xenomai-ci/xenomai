@@ -497,10 +497,11 @@ EXPORT_SYMBOL_GPL(rtskb_clone);
 
 int rtskb_pools_init(void)
 {
-	rtskb_slab_pool = kmem_cache_create("rtskb_slab_pool",
-					    ALIGN_RTSKB_STRUCT_LEN +
+	rtskb_slab_pool = kmem_cache_create_usercopy("rtskb_slab_pool",
+						ALIGN_RTSKB_STRUCT_LEN +
 						    SKB_DATA_ALIGN(RTSKB_SIZE),
-					    0, SLAB_HWCACHE_ALIGN, NULL);
+						0, SLAB_HWCACHE_ALIGN,
+						0, SKB_DATA_ALIGN(RTSKB_SIZE), NULL);
 	if (rtskb_slab_pool == NULL)
 		return -ENOMEM;
 
