@@ -209,29 +209,6 @@ void xnarch_switch_to(struct xnthread *out, struct xnthread *in)
 #ifndef IPIPE_X86_FPU_EAGER
 	stts();
 #endif /* ! IPIPE_X86_FPU_EAGER */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
-	/* 
-	 * Refresh 'in', we switch the stacks. However, there might be no
-	 * current thread at this point.
-	 */
-	in = xnthread_current();
-	if (in && !xnthread_test_state(in, XNROOT) &&
-	    test_thread_flag(TIF_NEED_FPU_LOAD)) {
-		/*
-		 * This is open-coded switch_fpu_return but without a test for
-		 * PF_KTHREAD, i.e including kernel threads.
-		 */
-		struct fpu *fpu = &current->thread.fpu;
-		int cpu = raw_smp_processor_id();
-
-		if (!fpregs_state_valid(fpu, cpu)) {
-			copy_kernel_to_fpregs(&fpu->state);
-			fpregs_activate(fpu);
-			fpu->last_cpu = cpu;
-		}
-		clear_thread_flag(TIF_NEED_FPU_LOAD);
-	}
-#endif
 }
 
 #ifndef IPIPE_X86_FPU_EAGER
@@ -443,15 +420,32 @@ void xnarch_switch_fpu(struct xnthread *from, struct xnthread *to)
 {
 	struct xnarchtcb *const to_tcb = xnthread_archtcb(to);
 
-	if (!tcb_used_kfpu(to_tcb))
-		return;
-
-	copy_kernel_to_fpregs(&to_tcb->kfpu->state);
+	if (tcb_used_kfpu(to_tcb)) {
+		copy_kernel_to_fpregs(&to_tcb->kfpu->state);
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
-	/* redo the invalidation done by kernel_fpu_begin */
-	__cpu_invalidate_fpregs_state();
+		/* redo the invalidation done by kernel_fpu_begin */
+		__cpu_invalidate_fpregs_state();
 #endif
-	kernel_fpu_disable();
+		kernel_fpu_disable();
+	}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,2,0)
+	else if (!xnthread_test_state(to, XNROOT) &&
+		 test_thread_flag(TIF_NEED_FPU_LOAD)) {
+		/*
+		 * This is open-coded switch_fpu_return but without a test for
+		 * PF_KTHREAD, i.e including kernel threads.
+		 */
+		struct fpu *fpu = &current->thread.fpu;
+		int cpu = raw_smp_processor_id();
+
+		if (!fpregs_state_valid(fpu, cpu)) {
+			copy_kernel_to_fpregs(&fpu->state);
+			fpregs_activate(fpu);
+			fpu->last_cpu = cpu;
+		}
+		clear_thread_flag(TIF_NEED_FPU_LOAD);
+	}
+#endif
 }
 #endif /* ! IPIPE_X86_FPU_EAGER */
 
