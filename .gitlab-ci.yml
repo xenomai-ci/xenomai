@@ -34,6 +34,7 @@ variables:
 .build:
   stage: build
   rules:
+    - if: $CI_COMMIT_BRANCH != "master"
     - if: $CI_COMMIT_TAG
       when: never
   before_script:
@@ -74,7 +75,6 @@ variables:
     - ln -s /usr/lib/ccache/${CROSS_COMPILE}gcc-${GCC_VERSION} /usr/lib/ccache/${CROSS_COMPILE}gcc
     - export PATH=/usr/lib/ccache:$PATH
     - ${CROSS_COMPILE}gcc --version
-
   script:
     - export CCACHE_DIR=$(pwd)/.ccache
     - pushd ${KDIR}
