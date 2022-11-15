@@ -33,6 +33,8 @@ variables:
 
 .build:
   stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH != "master"
   before_script:
     - apt update
     - ARCH_PACKAGES="PACKAGES_${ARCH}"
@@ -65,7 +67,6 @@ variables:
     - ln -s /usr/lib/ccache/${CROSS_COMPILE}gcc-${GCC_VERSION} /usr/lib/ccache/${CROSS_COMPILE}gcc
     - export PATH=/usr/lib/ccache:$PATH
     - ${CROSS_COMPILE}gcc --version
-
   script:
     - export CCACHE_DIR=$(pwd)/.ccache
     - pushd ${KDIR}
