@@ -20,7 +20,7 @@ variables:
   KDIR: "/tmp/kernel"
   USE_CCACHE: "1"
   CCACHE_MAXSIZE: "1G"
-  DOVETAIL_URL: "https://source.denx.de/Xenomai/linux-dovetail.git"
+  PIPELINE_KERNEL: "https://source.denx.de/Xenomai/linux-dovetail.git"
   GCC_VERSION: "10"
   PACKAGES: "u-boot-tools git make bc bison libelf-dev autotools-dev \
              autoconf autogen libtool pkg-config ccache flex libssl-dev \
@@ -184,7 +184,6 @@ arm-6.xx-latest:
   variables:
     ARCH: arm
     PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
 arm-5.15-head:
@@ -192,7 +191,6 @@ arm-5.15-head:
   variables:
     ARCH: arm
     PIPELINE_REV: v5.15.y-dovetail-rebase
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
 arm-5.10-head:
@@ -200,7 +198,6 @@ arm-5.10-head:
   variables:
     ARCH: arm
     PIPELINE_REV: v5.10.y-dovetail-rebase
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
 arm64-6.xx-latest:
@@ -208,7 +205,6 @@ arm64-6.xx-latest:
   variables:
     ARCH: arm64
     PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: defconfig
 
 arm64-5.15-head:
@@ -216,7 +212,6 @@ arm64-5.15-head:
   variables:
     ARCH: arm64
     PIPELINE_REV: v5.15.y-dovetail-rebase
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: defconfig
 
 arm64-5.10-head:
@@ -224,7 +219,6 @@ arm64-5.10-head:
   variables:
     ARCH: arm64
     PIPELINE_REV: v5.10.y-dovetail-rebase
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: defconfig
 
 x86-6.xx-latest:
@@ -232,7 +226,6 @@ x86-6.xx-latest:
   variables:
     ARCH: x86
     PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 x86-5.15-head:
@@ -240,7 +233,6 @@ x86-5.15-head:
   variables:
     ARCH: x86
     PIPELINE_REV: v5.15.y-dovetail-rebase
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 x86-5.10-head:
@@ -248,7 +240,6 @@ x86-5.10-head:
   variables:
     ARCH: x86
     PIPELINE_REV: v5.10.y-dovetail-rebase
-    PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 i386-userland:
