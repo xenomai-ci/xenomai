@@ -53,6 +53,8 @@ static struct runstats *statistics;
 
 static int nrstats;
 
+static unsigned int random_seed;
+
 static inline void breathe(int loops)
 {
 	if ((loops % 1000) == 0)
@@ -68,6 +70,12 @@ static inline void do_swap(void *left, void *right)
 	memcpy(right, trans, sizeof(struct chunk));
 }
 
+static inline unsigned int pseudo_random(void)
+{
+	random_seed = random_seed * 1664525 + 1013904223;
+	return random_seed;
+}
+
 static void random_shuffle(void *vbase, size_t nmemb)
 {
 	struct {
@@ -76,7 +84,7 @@ static void random_shuffle(void *vbase, size_t nmemb)
 	unsigned int j, k;
 
 	for (j = nmemb; j > 0; j--) {
-		k = (unsigned int)(prandom_u32() % nmemb) + 1;
+		k = (unsigned int)(pseudo_random() % nmemb) + 1;
 		if (j == k)
 			continue;
 		do_swap(&base[j - 1], &base[k - 1]);
@@ -166,6 +174,8 @@ static int test_seq(size_t heap_size, size_t block_size, int flags)
 	bool done_frag;
 	void *mem, *p;
 
+	random_seed = get_random_u32();
+
 	maxblocks = heap_size / block_size;
 
 	mem = vmalloc(heap_size);
@@ -224,7 +234,7 @@ static int test_seq(size_t heap_size, size_t block_size, int flags)
 		}
 		chunks[n].ptr = p;
 		if (flags & RTTST_HEAPCHECK_PATTERN) {
-			chunks[n].pattern = (enum pattern)(prandom_u32() % 3);
+			chunks[n].pattern = (enum pattern)(pseudo_random() % 3);
 			fill_pattern(chunks[n].ptr, block_size, chunks[n].pattern);
 		}
 		breathe(n);
