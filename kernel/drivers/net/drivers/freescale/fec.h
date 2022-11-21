@@ -571,7 +571,6 @@ struct fec_enet_private {
 	int	wol_flag;
 	u32	quirks;
 
-	struct	napi_struct napi;
 	int	csum_flags;
 
 	struct work_struct tx_timeout_work;
