@@ -1227,25 +1227,6 @@ fec_rt_interrupt(rtdm_irq_t *irqh)
 	return ret;
 }
 
-static int fec_enet_rx_napi(struct napi_struct *napi, int budget)
-{
-	struct net_device *ndev = napi->dev;
-	struct fec_enet_private *fep = netdev_priv(ndev);
-	int done = 0;
-
-	do {
-		done += fec_enet_rx(ndev, budget - done);
-		fec_enet_tx(ndev);
-	} while ((done < budget) && fec_enet_collect_events(fep));
-
-	if (done < budget) {
-		napi_complete_done(napi, done);
-		writel(FEC_DEFAULT_IMASK, fep->hwp + FEC_IMASK);
-	}
-
-	return done;
-}
-
 /* ------------------------------------------------------------------------- */
 static void fec_get_mac(struct net_device *ndev)
 {
@@ -2661,7 +2642,6 @@ __fec_enet_open(struct net_device *ndev)
 	if (fep->quirks & FEC_QUIRK_ERR006687)
 		imx6q_cpuidle_fec_irqs_used();
 
-	napi_enable(&fep->napi);
 	phy_start(ndev->phydev);
 	netif_tx_start_all_queues(ndev);
 
@@ -2712,7 +2692,6 @@ fec_enet_close(struct net_device *ndev)
 	phy_stop(ndev->phydev);
 
 	if (netif_device_present(ndev)) {
-		napi_disable(&fep->napi);
 		netif_tx_disable(ndev);
 		fec_stop(ndev);
 	}
@@ -3045,7 +3024,6 @@ static int fec_enet_init(struct net_device *ndev)
 	ndev->ethtool_ops = &fec_enet_ethtool_ops;
 
 	writel(FEC_RX_DISABLED_IMASK, fep->hwp + FEC_IMASK);
-	netif_napi_add(ndev, &fep->napi, fec_enet_rx_napi, NAPI_POLL_WEIGHT);
 
 	if (fep->quirks & FEC_QUIRK_HAS_VLAN)
 		/* enable hw VLAN support */
