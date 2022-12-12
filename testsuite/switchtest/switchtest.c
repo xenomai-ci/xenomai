@@ -297,6 +297,24 @@ static int printout(const char *fmt, ...)
 #define check_fp_result(__expected)	\
 	fp_regs_check(fp_features, __expected, printout)
 
+static void switch_to_primary_mode(void)
+{
+	cobalt_thread_harden();
+	if (cobalt_thread_mode() & (XNRELAX|XNWEAK)) {
+		perror("Switch to primary mode failed.");
+		clean_exit(EXIT_FAILURE);
+	}
+}
+
+static void switch_to_secondary_mode(void)
+{
+	cobalt_thread_relax();
+	if (!(cobalt_thread_mode() & XNRELAX)) {
+		perror("Switch to secondary mode failed.");
+		clean_exit(EXIT_FAILURE);
+	}
+}
+
 static void *sleeper_switcher(void *cookie)
 {
 	struct task_params *param = (struct task_params *) cookie;
@@ -440,18 +458,6 @@ static void *fpu_stress(void *cookie)
 	return NULL;
 }
 
-static void set_mode(const char *prefix, int fd, unsigned mode)
-{
-	switch (mode) {
-	case 1:
-		cobalt_thread_harden();
-		return;
-
-	case 2:
-		cobalt_thread_relax();
-	}
-}
-
 static void *rtup(void *cookie)
 {
 	struct task_params *param = (struct task_params *) cookie;
@@ -475,7 +481,7 @@ static void *rtup(void *cookie)
 	   allowed when suspended in ioctl. */
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
-	set_mode("rtup", fd, 1);
+	switch_to_primary_mode();
 
 	do {
 		err = ioctl(fd, RTTST_RTIOC_SWTEST_PEND, &param->swt);
@@ -556,7 +562,7 @@ static void *rtus(void *cookie)
 	   allowed when suspended in ioctl. */
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
-	set_mode("rtus", fd, 2);
+	switch_to_secondary_mode();
 
 	do {
 		err = ioctl(fd, RTTST_RTIOC_SWTEST_PEND, &param->swt);
@@ -637,8 +643,9 @@ static void *rtuo(void *cookie)
 	   allowed when suspended in ioctl. */
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
-	mode = 1;
-	set_mode("rtuo", fd, mode);
+	switch_to_primary_mode();
+	mode = COBALT_PRIMARY;
+
 	do {
 		err = ioctl(fd, RTTST_RTIOC_SWTEST_PEND, &param->swt);
 	} while (err == -1 && errno == EINTR);
@@ -668,8 +675,10 @@ static void *rtuo(void *cookie)
 		}
 
 		expected = rtsw.from + i * 1000;
-		if ((mode && param->fp & UFPP) || (!mode && param->fp & UFPS))
+		if ((mode == COBALT_PRIMARY && param->fp & UFPP) ||
+		    (mode == COBALT_SECONDARY && param->fp & UFPS)) {
 			fp_regs_set(fp_features, expected);
+		}
 		err = ioctl(fd, RTTST_RTIOC_SWTEST_SWITCH_TO, &rtsw);
 		while (err == -1 && errno == EINTR)
 			err = ioctl(fd, RTTST_RTIOC_SWTEST_PEND, &param->swt);
@@ -682,16 +691,23 @@ static void *rtuo(void *cookie)
 		case -1:
 			clean_exit(EXIT_FAILURE);
 		}
-		if ((mode && param->fp & UFPP) || (!mode && param->fp & UFPS)) {
+
+		if ((mode == COBALT_PRIMARY && param->fp & UFPP) ||
+		    (mode == COBALT_SECONDARY && param->fp & UFPS)) {
 			fp_val = check_fp_result(expected);
 			if (fp_val != expected)
 				handle_bad_fpreg(param->cpu, fp_val);
 		}
 
-		/* Switch mode. */
+		/* Switch between primary and secondary mode */
 		if (i % 3 == 2) {
-			mode = 3 - mode;
-			set_mode("rtuo", fd, mode);
+			if (mode == COBALT_PRIMARY) {
+				switch_to_secondary_mode();
+				mode = COBALT_SECONDARY;
+			} else {
+				switch_to_primary_mode();
+				mode = COBALT_PRIMARY;
+			}
 		}
 
 		if(++i == 4000000)
