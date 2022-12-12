@@ -34,7 +34,9 @@
 #include <semaphore.h>
 #include <setjmp.h>
 #include <getopt.h>
+#include <asm/unistd.h>
 #include <asm/xenomai/features.h>
+#include <asm/xenomai/syscall.h>
 #include <asm/xenomai/uapi/fptest.h>
 #include <cobalt/trace.h>
 #include <rtdm/testing.h>
@@ -74,6 +76,14 @@ typedef enum {
 	UFPP = 2,	 /* use the FPU while in primary mode. */
 	UFPS = 4	 /* use the FPU while in secondary mode. */
 } fpflags;
+
+#define TASK_SWITCH_MODES 3
+
+enum task_switch_mode {
+	TASK_SWITCH_PREVIOUS = 0,
+	TASK_SWITCH_NEXT = 1,
+	TASK_SWITCH_MODE = 2
+};
 
 struct cpu_tasks;
 
@@ -297,23 +307,56 @@ static int printout(const char *fmt, ...)
 #define check_fp_result(__expected)	\
 	fp_regs_check(fp_features, __expected, printout)
 
+static void _assert_primary_mode(char const *calling_func)
+{
+	if (cobalt_thread_mode() & (XNRELAX|XNWEAK)) {
+		fprintf(stderr,
+			"Switch to primary mode failed in %s.",
+			calling_func);
+		clean_exit(EXIT_FAILURE);
+	}
+}
+
+#define assert_primary_mode() _assert_primary_mode(__func__)
+
+static void _assert_secondary_mode(char const *calling_func)
+{
+	if (!(cobalt_thread_mode() & XNRELAX)) {
+		fprintf(stderr,
+			"Switch to secondary mode failed in %s.",
+			calling_func);
+		clean_exit(EXIT_FAILURE);
+	}
+}
+
+#define assert_secondary_mode() _assert_secondary_mode(__func__)
+
 static void switch_to_primary_mode(void)
 {
 	cobalt_thread_harden();
-	if (cobalt_thread_mode() & (XNRELAX|XNWEAK)) {
-		perror("Switch to primary mode failed.");
-		clean_exit(EXIT_FAILURE);
-	}
+	assert_primary_mode();
 }
 
 static void switch_to_secondary_mode(void)
 {
 	cobalt_thread_relax();
-	if (!(cobalt_thread_mode() & XNRELAX)) {
-		perror("Switch to secondary mode failed.");
-		clean_exit(EXIT_FAILURE);
-	}
+	assert_secondary_mode();
 }
+
+static void switch_to_secondary_mode_by_using_linux_syscall(void)
+{
+	syscall(__NR_gettid);
+	assert_secondary_mode();
+}
+
+#define SWITCH_FUNC_COUNT 4
+
+static void (*switch_funcs[SWITCH_FUNC_COUNT]) (void) = {
+	switch_to_secondary_mode,
+	switch_to_primary_mode,
+	switch_to_secondary_mode_by_using_linux_syscall,
+	switch_to_primary_mode,
+};
 
 static void *sleeper_switcher(void *cookie)
 {
@@ -372,13 +415,13 @@ static void *sleeper_switcher(void *cookie)
 		if (tasks_count == 1)
 			continue;
 
-		switch (i % 3) {
-		case 0:
+		switch (i % TASK_SWITCH_MODES) {
+		case TASK_SWITCH_PREVIOUS:
 			/* to == from means "return to last task" */
 			rtsw.to = rtsw.from;
 			break;
 
-		case 1:
+		case TASK_SWITCH_NEXT:
 			if (++to == rtsw.from)
 				++to;
 			if (to > tasks_count - 1)
@@ -493,13 +536,13 @@ static void *rtup(void *cookie)
 	for (;;) {
 		unsigned expected, fp_val;
 
-		switch (i % 3) {
-		case 0:
+		switch (i % TASK_SWITCH_MODES) {
+		case TASK_SWITCH_PREVIOUS:
 			/* to == from means "return to last task" */
 			rtsw.to = rtsw.from;
 			break;
 
-		case 1:
+		case TASK_SWITCH_NEXT:
 			if (++to == rtsw.from)
 				++to;
 			if (to > tasks_count - 1)
@@ -574,13 +617,13 @@ static void *rtus(void *cookie)
 	for (;;) {
 		unsigned expected, fp_val;
 
-		switch (i % 3) {
-		case 0:
+		switch (i % TASK_SWITCH_MODES) {
+		case TASK_SWITCH_PREVIOUS:
 			/* to == from means "return to last task" */
 			rtsw.to = rtsw.from;
 			break;
 
-		case 1:
+		case TASK_SWITCH_NEXT:
 			if (++to == rtsw.from)
 				++to;
 			if (to > tasks_count - 1)
@@ -656,13 +699,13 @@ static void *rtuo(void *cookie)
 	for (;;) {
 		unsigned expected, fp_val;
 
-		switch (i % 3) {
-		case 0:
+		switch (i % TASK_SWITCH_MODES) {
+		case TASK_SWITCH_PREVIOUS:
 			/* to == from means "return to last task" */
 			rtsw.to = rtsw.from;
 			break;
 
-		case 1:
+		case TASK_SWITCH_NEXT:
 			if (++to == rtsw.from)
 				++to;
 			if (to > tasks_count - 1)
@@ -679,6 +722,7 @@ static void *rtuo(void *cookie)
 		    (mode == COBALT_SECONDARY && param->fp & UFPS)) {
 			fp_regs_set(fp_features, expected);
 		}
+
 		err = ioctl(fd, RTTST_RTIOC_SWTEST_SWITCH_TO, &rtsw);
 		while (err == -1 && errno == EINTR)
 			err = ioctl(fd, RTTST_RTIOC_SWTEST_PEND, &param->swt);
@@ -700,14 +744,11 @@ static void *rtuo(void *cookie)
 		}
 
 		/* Switch between primary and secondary mode */
-		if (i % 3 == 2) {
-			if (mode == COBALT_PRIMARY) {
-				switch_to_secondary_mode();
-				mode = COBALT_SECONDARY;
-			} else {
-				switch_to_primary_mode();
-				mode = COBALT_PRIMARY;
-			}
+		if (i % TASK_SWITCH_MODES == TASK_SWITCH_MODE) {
+			uint switch_iteration = (i / TASK_SWITCH_MODES %
+				SWITCH_FUNC_COUNT);
+			switch_funcs[switch_iteration]();
+			mode = !mode;
 		}
 
 		if(++i == 4000000)
