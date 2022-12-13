@@ -622,6 +622,10 @@ static int rtswitch_ioctl_nrt(struct rtdm_fd *fd,
 				    arg,
 				    sizeof(fromto));
 
+		if (fromto.switch_mode) {
+			xnthread_harden();
+			return rtswitch_to_rt(ctx, fromto.from, fromto.to);
+		}
 		return rtswitch_to_nrt(ctx, fromto.from, fromto.to);
 
 	case RTTST_RTIOC_SWTEST_GET_SWITCHES_COUNT:
@@ -676,6 +680,10 @@ static int rtswitch_ioctl_rt(struct rtdm_fd *fd,
 				    arg,
 				    sizeof(fromto));
 
+		if (fromto.switch_mode) {
+			xnthread_relax(0, 0);
+			return rtswitch_to_nrt(ctx, fromto.from, fromto.to);
+		}
 		return rtswitch_to_rt(ctx, fromto.from, fromto.to);
 
 	case RTTST_RTIOC_SWTEST_GET_LAST_ERROR:

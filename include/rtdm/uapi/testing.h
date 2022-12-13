@@ -70,9 +70,23 @@ struct rttst_swtest_task {
 #define RTTST_SWTEST_FPU		0x1
 #define RTTST_SWTEST_FREEZE		0x4 /* Only for kernel-space tasks. */
 
+/**
+ * @brief parameter for the RTTST_RTIOC_SWTEST_SWITCH_TO syscall
+ * @anchor rttst_swtest_dir
+ *
+ * This structure is used to tell the RTTST_RTIOC_SWTEST_SWITCH_TO syscall
+ * which threads should be exchanged and if the mode (primary/secondary) of the
+ * from thread should be switched.
+ */
 struct rttst_swtest_dir {
+	/** Index of the thread that should be replaced. */
 	unsigned int from;
+
+	/** Index of the thread that should run. */
 	unsigned int to;
+
+	/** If the mode should be switched: 0 for no switch, 1 for switch. */
+	unsigned int switch_mode;
 };
 
 struct rttst_swtest_error {
