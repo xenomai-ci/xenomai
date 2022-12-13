@@ -358,6 +358,9 @@ static void (*switch_funcs[SWITCH_FUNC_COUNT]) (void) = {
 	switch_to_primary_mode,
 };
 
+/* Switch two times: primary to secondary and back from secondary to primary */
+#define MODE_SWITCHES_KERNEL 2
+
 static void *sleeper_switcher(void *cookie)
 {
 	struct task_params *param = (struct task_params *) cookie;
@@ -377,6 +380,7 @@ static void *sleeper_switcher(void *cookie)
 		clean_exit(EXIT_FAILURE);
 	}
 
+	rtsw.switch_mode = 0;
 	rtsw.from = param->swt.index;
 	to = param->swt.index;
 
@@ -517,6 +521,7 @@ static void *rtup(void *cookie)
 		clean_exit(EXIT_FAILURE);
 	}
 
+	rtsw.switch_mode = 0;
 	rtsw.from = param->swt.index;
 	to = param->swt.index;
 
@@ -598,6 +603,7 @@ static void *rtus(void *cookie)
 		clean_exit(EXIT_FAILURE);
 	}
 
+	rtsw.switch_mode = 0;
 	rtsw.from = param->swt.index;
 	to = param->swt.index;
 
@@ -679,6 +685,7 @@ static void *rtuo(void *cookie)
 		clean_exit(EXIT_FAILURE);
 	}
 
+	rtsw.switch_mode = 0;
 	rtsw.from = param->swt.index;
 	to = param->swt.index;
 
@@ -727,6 +734,9 @@ static void *rtuo(void *cookie)
 		while (err == -1 && errno == EINTR)
 			err = ioctl(fd, RTTST_RTIOC_SWTEST_PEND, &param->swt);
 
+		/* Return to default: do not switch in syscall */
+		rtsw.switch_mode = 0;
+
 		switch (err) {
 		case 0:
 			break;
@@ -746,8 +756,16 @@ static void *rtuo(void *cookie)
 		/* Switch between primary and secondary mode */
 		if (i % TASK_SWITCH_MODES == TASK_SWITCH_MODE) {
 			uint switch_iteration = (i / TASK_SWITCH_MODES %
-				SWITCH_FUNC_COUNT);
-			switch_funcs[switch_iteration]();
+				(SWITCH_FUNC_COUNT + MODE_SWITCHES_KERNEL));
+
+			if (switch_iteration < SWITCH_FUNC_COUNT) {
+				switch_funcs[switch_iteration]();
+			} else {
+				/* Switch mode on next
+				 * RTTST_RTIOC_SWTEST_SWITCH_TO syscall */
+				rtsw.switch_mode = 1;
+			}
+
 			mode = !mode;
 		}
 
