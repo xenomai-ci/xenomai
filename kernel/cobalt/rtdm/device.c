@@ -137,7 +137,11 @@ struct rtdm_device *__rtdm_get_protodev(int protocol_family, int socket_type)
  * @{
  */
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0)
+static char *rtdm_devnode(const struct device *dev, umode_t *mode)
+#else
 static char *rtdm_devnode(struct device *dev, umode_t *mode)
+#endif
 {
 	return kasprintf(GFP_KERNEL, "rtdm/%s", dev_name(dev));
 }

@@ -338,7 +338,11 @@ static int spi_master_mmap(struct rtdm_fd *fd, struct vm_area_struct *vma)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0)
+static char *spi_slave_devnode(const struct device *dev, umode_t *mode)
+#else
 static char *spi_slave_devnode(struct device *dev, umode_t *mode)
+#endif
 {
 	return kasprintf(GFP_KERNEL, "rtdm/%s/%s",
 			 dev->class->name,

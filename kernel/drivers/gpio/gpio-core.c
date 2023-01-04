@@ -399,7 +399,11 @@ fail_name:
 	return ret;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0)
+static char *gpio_pin_devnode(const struct device *dev, umode_t *mode)
+#else
 static char *gpio_pin_devnode(struct device *dev, umode_t *mode)
+#endif
 {
 	return kasprintf(GFP_KERNEL, "rtdm/%s/%s",
 			 dev->class->name,
