@@ -43,7 +43,7 @@ void cobalt_timer_handler(struct xntimer *xntimer)
 EXPORT_SYMBOL_GPL(cobalt_timer_handler);
 
 static inline struct cobalt_thread *
-timer_init(struct cobalt_timer *timer,
+cobalt_timer_init(struct cobalt_timer *timer,
 	   const struct sigevent *__restrict__ evp) /* nklocked, IRQs off. */
 {
 	struct cobalt_thread *owner = cobalt_current_thread(), *target = NULL;
@@ -88,7 +88,7 @@ init:
 	return target;
 }
 
-static inline int timer_alloc_id(struct cobalt_process *cc)
+static inline int cobalt_timer_alloc_id(struct cobalt_process *cc)
 {
 	int id;
 
@@ -101,7 +101,7 @@ static inline int timer_alloc_id(struct cobalt_process *cc)
 	return id;
 }
 
-static inline void timer_free_id(struct cobalt_process *cc, int id)
+static inline void cobalt_timer_free_id(struct cobalt_process *cc, int id)
 {
 	__set_bit(id, cc->timers_map);
 }
@@ -118,9 +118,9 @@ cobalt_timer_by_id(struct cobalt_process *cc, timer_t timer_id)
 	return cc->timers[timer_id];
 }
 
-static inline int timer_create(clockid_t clockid,
-			       const struct sigevent *__restrict__ evp,
-			       timer_t * __restrict__ timerid)
+static int cobalt_timer_create_internal(clockid_t clockid,
+					const struct sigevent *__restrict__ evp,
+					timer_t * __restrict__ timerid)
 {
 	struct cobalt_process *cc;
 	struct cobalt_thread *target;
@@ -146,7 +146,7 @@ static inline int timer_create(clockid_t clockid,
 
 	xnlock_get_irqsave(&nklock, s);
 
-	ret = timer_alloc_id(cc);
+	ret = cobalt_timer_alloc_id(cc);
 	if (ret < 0)
 		goto out;
 
@@ -172,7 +172,7 @@ static inline int timer_create(clockid_t clockid,
 	timer->sigp.si.si_tid = timer_id;
 	timer->id = timer_id;
 
-	target = timer_init(timer, evp);
+	target = cobalt_timer_init(timer, evp);
 	if (target == NULL) {
 		ret = -EPERM;
 		goto fail;
@@ -192,7 +192,7 @@ static inline int timer_create(clockid_t clockid,
 
 	return 0;
 fail:
-	timer_free_id(cc, timer_id);
+	cobalt_timer_free_id(cc, timer_id);
 out:
 	xnlock_put_irqrestore(&nklock, s);
 
@@ -201,19 +201,19 @@ out:
 	return ret;
 }
 
-static void timer_cleanup(struct cobalt_process *p, struct cobalt_timer *timer)
+static void cobalt_timer_cleanup(struct cobalt_process *p,
+				 struct cobalt_timer *timer)
 {
 	xntimer_destroy(&timer->timerbase);
 
 	if (!list_empty(&timer->sigp.next))
 		list_del(&timer->sigp.next);
 
-	timer_free_id(p, cobalt_timer_id(timer));
+	cobalt_timer_free_id(p, cobalt_timer_id(timer));
 	p->timers[cobalt_timer_id(timer)] = NULL;
 }
 
-static inline int
-timer_delete(timer_t timerid)
+static int cobalt_timer_delete_internal(timer_t timerid)
 {
 	struct cobalt_process *cc;
 	struct cobalt_timer *timer;
@@ -248,7 +248,7 @@ timer_delete(timer_t timerid)
 	else
 		ret = 0;
 
-	timer_cleanup(cc, timer);
+	cobalt_timer_cleanup(cc, timer);
 	xnlock_put_irqrestore(&nklock, s);
 	xnfree(timer);
 
@@ -273,9 +273,8 @@ void __cobalt_timer_getval(struct xntimer *__restrict__ timer,
 	}
 }
 
-static inline void
-timer_gettimeout(struct cobalt_timer *__restrict__ timer,
-		 struct itimerspec64 *__restrict__ value)
+static void cobalt_timer_gettimeout(struct cobalt_timer *__restrict__ timer,
+				    struct itimerspec64 *__restrict__ value)
 {
 	int ret = 0;
 
@@ -311,8 +310,9 @@ int __cobalt_timer_setval(struct xntimer *__restrict__ timer, int clock_flag,
 	return xntimer_start(timer, start, period, clock_flag);
 }
 
-static inline int timer_set(struct cobalt_timer *timer, int flags,
-			    const struct itimerspec64 *__restrict__ value)
+static inline int 
+cobalt_timer_set(struct cobalt_timer *timer, int flags,
+		 const struct itimerspec64 *__restrict__ value)
 {				/* nklocked, IRQs off. */
 	struct cobalt_thread *thread;
 	int ret = 0;
@@ -344,7 +344,7 @@ static inline int timer_set(struct cobalt_timer *timer, int flags,
 }
 
 static inline void
-timer_deliver_late(struct cobalt_process *cc, timer_t timerid)
+cobalt_timer_deliver_late(struct cobalt_process *cc, timer_t timerid)
 {
 	struct cobalt_timer *timer;
 	spl_t s;
@@ -382,9 +382,9 @@ int __cobalt_timer_settime(timer_t timerid, int flags,
 	}
 
 	if (ovalue)
-		timer_gettimeout(timer, ovalue);
+		cobalt_timer_gettimeout(timer, ovalue);
 
-	ret = timer_set(timer, flags, value);
+	ret = cobalt_timer_set(timer, flags, value);
 	if (ret == -ETIMEDOUT) {
 		/*
 		 * Time has already passed, deliver a notification
@@ -393,7 +393,7 @@ int __cobalt_timer_settime(timer_t timerid, int flags,
 		 * break the atomic section temporarily.
 		 */
 		xnlock_put_irqrestore(&nklock, s);
-		timer_deliver_late(cc, timerid);
+		cobalt_timer_deliver_late(cc, timerid);
 		return 0;
 	}
 out:
@@ -418,7 +418,7 @@ int __cobalt_timer_gettime(timer_t timerid, struct itimerspec64 *value)
 	if (timer == NULL)
 		goto fail;
 
-	timer_gettimeout(timer, value);
+	cobalt_timer_gettimeout(timer, value);
 
 	xnlock_put_irqrestore(&nklock, s);
 
@@ -431,7 +431,7 @@ fail:
 
 COBALT_SYSCALL(timer_delete, current, (timer_t timerid))
 {
-	return timer_delete(timerid);
+	return cobalt_timer_delete_internal(timerid);
 }
 
 int __cobalt_timer_create(clockid_t clock,
@@ -441,12 +441,12 @@ int __cobalt_timer_create(clockid_t clock,
 	timer_t timerid = 0;
 	int ret;
 
-	ret = timer_create(clock, sev, &timerid);
+	ret = cobalt_timer_create_internal(clock, sev, &timerid);
 	if (ret)
 		return ret;
 
 	if (cobalt_copy_to_user(u_tm, &timerid, sizeof(timerid))) {
-		timer_delete(timerid);
+		cobalt_timer_delete_internal(timerid);
 		return -EFAULT;
 	}
 
@@ -578,7 +578,7 @@ void cobalt_timer_reclaim(struct cobalt_process *p)
 			continue;
 
 		cobalt_call_extension(timer_cleanup, &timer->extref, ret);
-		timer_cleanup(p, timer);
+		cobalt_timer_cleanup(p, timer);
 		xnlock_put_irqrestore(&nklock, s);
 		xnfree(timer);
 		xnlock_get_irqsave(&nklock, s);
