@@ -135,7 +135,8 @@ struct backtrace_data {
 
 static inline int bad_pointer(const void *ptr)
 {
-	return ptr == NULL || ((intptr_t)ptr & (sizeof(intptr_t)-1)) != 0;
+	return ptr == NULL ||
+		((intptr_t)ptr & (intptr_t)(sizeof(intptr_t)-1)) != 0;
 }
 
 #endif /* _BOILERPLATE_DEBUG_H */
