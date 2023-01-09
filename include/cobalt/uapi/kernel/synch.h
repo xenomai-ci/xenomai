@@ -48,7 +48,7 @@ static inline xnhandle_t xnsynch_fast_ceiling(xnhandle_t handle)
 static inline int
 xnsynch_fast_owner_check(atomic_t *fastlock, xnhandle_t ownerh)
 {
-	return (xnhandle_get_id(atomic_read(fastlock)) == ownerh) ?
+	return (xnhandle_get_id((xnhandle_t)atomic_read(fastlock)) == ownerh) ?
 		0 : -EPERM;
 }
 
@@ -57,7 +57,7 @@ int xnsynch_fast_acquire(atomic_t *fastlock, xnhandle_t new_ownerh)
 {
 	xnhandle_t h;
 
-	h = atomic_cmpxchg(fastlock, XN_NO_HANDLE, new_ownerh);
+	h = (xnhandle_t)atomic_cmpxchg(fastlock, XN_NO_HANDLE, new_ownerh);
 	if (h != XN_NO_HANDLE) {
 		if (xnhandle_get_id(h) == new_ownerh)
 			return -EBUSY;
