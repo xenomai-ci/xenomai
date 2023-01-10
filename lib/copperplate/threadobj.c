@@ -1770,6 +1770,13 @@ int threadobj_set_schedprio(struct threadobj *thobj, int priority)
 	return threadobj_set_schedparam(thobj, policy, &param_ex);
 }
 
+#ifdef CONFIG_XENO_PSHARED
+static void main_exit(void)
+{
+	threadobj_free(threadobj_current());
+}
+#endif
+
 static inline int main_overlay(void)
 {
 	struct threadobj_init_data idata;
@@ -1805,6 +1812,10 @@ static inline int main_overlay(void)
 	tcb->status = __THREAD_S_STARTED|__THREAD_S_ACTIVE;
 	threadobj_prologue(tcb, NULL);
 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
+#ifdef CONFIG_XENO_PSHARED
+	atexit(main_exit);
+#endif
 
 	return 0;
 }
