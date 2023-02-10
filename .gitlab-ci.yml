@@ -1,7 +1,7 @@
 #
 # Xenomai Real-Time System
 #
-# Copyright (c) Siemens AG, 2020-2022
+# Copyright (c) Siemens AG, 2020-2023
 #
 # Authors:
 #  Quirin Gylstorff <quirin.gylstorff@siemens.com>
@@ -188,11 +188,11 @@ arm-6.xx-latest:
     PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
-arm-5.15-head:
+arm-6.1-head:
   extends: .build
   variables:
     ARCH: arm
-    PIPELINE_REV: v5.15.y-dovetail-rebase
+    PIPELINE_REV: v6.1.y-dovetail-rebase
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
 arm-5.10-head:
@@ -209,11 +209,11 @@ arm64-6.xx-latest:
     PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
     KERNEL_DEFCONFIG: defconfig
 
-arm64-5.15-head:
+arm64-6.1-head:
   extends: .build
   variables:
     ARCH: arm64
-    PIPELINE_REV: v5.15.y-dovetail-rebase
+    PIPELINE_REV: v6.1.y-dovetail-rebase
     KERNEL_DEFCONFIG: defconfig
 
 arm64-5.10-head:
@@ -230,11 +230,11 @@ x86-6.xx-latest:
     PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
     KERNEL_DEFCONFIG: x86_64_defconfig
 
-x86-5.15-head:
+x86-6.1-head:
   extends: .build
   variables:
     ARCH: x86
-    PIPELINE_REV: v5.15.y-dovetail-rebase
+    PIPELINE_REV: v6.1.y-dovetail-rebase
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 x86-5.10-head:
