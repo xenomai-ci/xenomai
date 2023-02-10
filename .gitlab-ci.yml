@@ -1,7 +1,7 @@
 #
 # Xenomai Real-Time System
 #
-# Copyright (c) Siemens AG, 2020-2021
+# Copyright (c) Siemens AG, 2020-2023
 #
 # Authors:
 #  Quirin Gylstorff <quirin.gylstorff@siemens.com>
@@ -185,11 +185,11 @@ variables:
     paths:
       - .ccache
 
-arm-5.15-head:
+arm-6.1-head:
   extends: .build
   variables:
     ARCH: arm
-    PIPELINE_REV: v5.15.y-dovetail-rebase
+    PIPELINE_REV: v6.1.y-dovetail-rebase
     PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
@@ -217,11 +217,11 @@ arm-4.19-release:
     PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm.git
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
-arm64-5.15-head:
+arm64-6.1-head:
   extends: .build
   variables:
     ARCH: arm64
-    PIPELINE_REV: v5.15.y-dovetail-rebase
+    PIPELINE_REV: v6.1.y-dovetail-rebase
     PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: defconfig
 
@@ -249,11 +249,11 @@ arm64-4.19-cip-release:
     PIPELINE_KERNEL: ${IPIPE_URL}/ipipe-arm64.git
     KERNEL_DEFCONFIG: defconfig
 
-x86-5.15-head:
+x86-6.1-head:
   extends: .build
   variables:
     ARCH: x86
-    PIPELINE_REV: v5.15.y-dovetail-rebase
+    PIPELINE_REV: v6.1.y-dovetail-rebase
     PIPELINE_KERNEL: ${DOVETAIL_URL}
     KERNEL_DEFCONFIG: x86_64_defconfig
 
