@@ -163,7 +163,7 @@ static double run_quota(int quota)
 	struct timespec req;
 	int ret, tgid, n;
 	double percent;
-	char label[8];
+	char label[12];
 
 	cf.quota.op = sched_quota_add;
 	cf.quota.add.pshared = 0;
@@ -184,7 +184,7 @@ static double run_quota(int quota)
 		     tgid, cf.quota.info.quota_sum);
 
 	for (n = 0; n < nrthreads; n++) {
-		sprintf(label, "t%d", n);
+		snprintf(label, sizeof(label), "t%d", n);
 		create_quota_thread(threads[n], label, tgid, counts[n]);
 		sem_wait(&ready);
 	}
@@ -228,7 +228,7 @@ static unsigned long long calibrate(void)
 	unsigned long long ns, lps;
 	unsigned long count;
 	struct timespec req;
-	char label[8];
+	char label[12];
 	int n;
 
 	count = 0;
@@ -241,7 +241,7 @@ static unsigned long long calibrate(void)
 	crunch_per_sec = (unsigned long long)((double)ONE_BILLION / (double)ns * crunch_loops);
 
 	for (n = 0; n < nrthreads; n++) {
-		sprintf(label, "t%d", n);
+		snprintf(label, sizeof(label), "t%d", n);
 		create_fifo_thread(threads[n], label, counts[n]);
 		sem_wait(&ready);
 	}
