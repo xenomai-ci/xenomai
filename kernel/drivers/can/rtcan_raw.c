@@ -41,6 +41,7 @@
 #include <rtdm/driver.h>
 
 #include <rtdm/can.h>
+#include <rtdm/compat.h>
 #include "rtcan_version.h"
 #include "rtcan_socket.h"
 #include "rtcan_list.h"
@@ -411,17 +412,15 @@ int rtcan_raw_ioctl(struct rtdm_fd *fd,
     int ret = 0;
 
     switch (request) {
-    case _RTIOC_BIND: {
+    COMPAT_CASE(_RTIOC_BIND): {
+
 	struct _rtdm_setsockaddr_args *setaddr, setaddr_buf;
 	struct sockaddr_can *sockaddr, sockaddr_buf;
 
 	if (rtdm_fd_is_user(fd)) {
-	    /* Copy argument structure from userspace */
-	    if (!rtdm_read_user_ok(fd, arg,
-				   sizeof(struct _rtdm_setsockaddr_args)) ||
-		rtdm_copy_from_user(fd, &setaddr_buf, arg,
-				    sizeof(struct _rtdm_setsockaddr_args)))
-		return -EFAULT;
+	    ret = rtdm_fd_get_setsockaddr_args(fd, &setaddr_buf, arg);
+	    if (ret)
+		return ret;
 
 	    setaddr = &setaddr_buf;
 
@@ -447,16 +446,14 @@ int rtcan_raw_ioctl(struct rtdm_fd *fd,
 	break;
     }
 
-    case _RTIOC_SETSOCKOPT: {
+    COMPAT_CASE(_RTIOC_SETSOCKOPT): {
 	struct _rtdm_setsockopt_args *setopt;
 	struct _rtdm_setsockopt_args setopt_buf;
 
 	if (rtdm_fd_is_user(fd)) {
-	    if (!rtdm_read_user_ok(fd, arg,
-				   sizeof(struct _rtdm_setsockopt_args)) ||
-		rtdm_copy_from_user(fd, &setopt_buf, arg,
-				    sizeof(struct _rtdm_setsockopt_args)))
-		return -EFAULT;
+	    ret = rtdm_fd_get_setsockopt_args(fd, &setopt_buf, arg);
+	    if (ret)
+		    return ret;
 
 	    setopt = &setopt_buf;
 	} else
@@ -575,11 +572,9 @@ ssize_t rtcan_raw_recvmsg(struct rtdm_fd *fd,
 
     if (rtdm_fd_is_user(fd)) {
 	/* Copy IO vector from userspace */
-	if (!rtdm_rw_user_ok(fd, msg->msg_iov,
-			     sizeof(struct iovec)) ||
-	    rtdm_copy_from_user(fd, &iov_buf, msg->msg_iov,
-				sizeof(struct iovec)))
-	    return -EFAULT;
+	ret = rtdm_fd_get_iovec(fd, &iov_buf, msg, true);
+	if (ret)
+		return -EFAULT;
 
 	iov = &iov_buf;
     }
@@ -716,9 +711,9 @@ ssize_t rtcan_raw_recvmsg(struct rtdm_fd *fd,
 	iov->iov_base += sizeof(can_frame_t);
 	iov->iov_len -= sizeof(can_frame_t);
 	/* ... and copy it, too. */
-	if (rtdm_copy_to_user(fd, msg->msg_iov, iov,
-			      sizeof(struct iovec)))
-	    return -EFAULT;
+	ret = rtdm_fd_put_iovec(fd, iov, msg);
+	if (ret)
+		return -EFAULT;
 
 	/* Copy timestamp if existent and wanted */
 	if (msg->msg_controllen) {
@@ -832,10 +827,7 @@ ssize_t rtcan_raw_sendmsg(struct rtdm_fd *fd,
 
     if (rtdm_fd_is_user(fd)) {
 	/* Copy IO vector from userspace */
-	if (!rtdm_rw_user_ok(fd, msg->msg_iov,
-			     sizeof(struct iovec)) ||
-	    rtdm_copy_from_user(fd, &iov_buf, msg->msg_iov,
-				sizeof(struct iovec)))
+	if (rtdm_fd_get_iovec(fd, &iov_buf, msg, false))
 	    return -EFAULT;
 
 	iov = &iov_buf;
