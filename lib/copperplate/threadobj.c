@@ -1773,7 +1773,10 @@ int threadobj_set_schedprio(struct threadobj *thobj, int priority)
 #ifdef CONFIG_XENO_PSHARED
 static void main_exit(void)
 {
-	threadobj_free(threadobj_current());
+	struct threadobj *thobj = threadobj_current();
+
+	sysgroup_remove(thread, &thobj->memspec);
+	threadobj_free(thobj);
 }
 #endif
 
