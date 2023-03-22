@@ -9,7 +9,7 @@ bin_PROGRAMS = \
 	insn_bits \
 	wf_generate
 
-CPPFLAGS = 						\
+AM_CPPFLAGS = 						\
 	@XENO_USER_CFLAGS@ 				\
 	-ggdb						\
 	-I$(top_srcdir)/include                         \

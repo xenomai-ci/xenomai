@@ -1,6 +1,6 @@
 sbin_PROGRAMS = rtps
 
-CPPFLAGS = 						\
+AM_CPPFLAGS = 						\
 	@XENO_USER_CFLAGS@				\
 	-I$(top_srcdir)/include
 

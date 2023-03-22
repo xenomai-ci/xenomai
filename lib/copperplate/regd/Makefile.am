@@ -1,12 +1,12 @@
 sbin_PROGRAMS = sysregd
 
-CPPFLAGS = 			\
+AM_CPPFLAGS = 			\
 	@XENO_USER_CFLAGS@	\
 	@XENO_FUSE_CFLAGS@	\
 	-I$(top_srcdir)/lib	\
 	-I$(top_srcdir)/include
 
-LDFLAGS = $(XENO_POSIX_WRAPPERS)
+AM_LDFLAGS = $(XENO_POSIX_WRAPPERS)
 
 LDADD = 			\
 	../libcopperplate.la	\
