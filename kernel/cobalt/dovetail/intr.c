@@ -100,9 +100,11 @@ int xnintr_attach(struct xnintr *intr, void *cookie, const cpumask_t *cpumask)
 		if (cpumask_empty(effective_mask))
 			return -EINVAL;
 	}
+#ifdef CONFIG_SMP
 	ret = irq_set_affinity_hint(intr->irq, effective_mask);
 	if (ret)
 		return ret;
+#endif
 
 	return request_irq(intr->irq, xnintr_irq_handler, IRQF_OOB,
 			intr->name, intr);
@@ -112,7 +114,9 @@ EXPORT_SYMBOL_GPL(xnintr_attach);
 void xnintr_detach(struct xnintr *intr)
 {
 	secondary_mode_only();
+#ifdef CONFIG_SMP
 	irq_set_affinity_hint(intr->irq, NULL);
+#endif
 	free_irq(intr->irq, intr);
 }
 EXPORT_SYMBOL_GPL(xnintr_detach);
