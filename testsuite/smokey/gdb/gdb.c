@@ -75,8 +75,12 @@ static void handle_sigchld(int signum)
 	int status;
 
 	wait(&status);
-	check("gdb execution", WEXITSTATUS(status), 0);
+	if (WEXITSTATUS(status) == ESRCH)
+		smokey_note("gdb: skipped (gdb not available)");
+	else
+		check("gdb execution", WEXITSTATUS(status), 0);
 	child_terminated = 1;
+	close(pipe_out[0]);
 }
 
 static void wait_for_pattern(const char *string)
@@ -279,6 +283,8 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 
 		default:
 			wait_for_pattern("(gdb) ");
+			if (child_terminated)
+				break;
 			send_command("b breakpoint_target\n", 1);
 			send_command("r\n", 1);
 
