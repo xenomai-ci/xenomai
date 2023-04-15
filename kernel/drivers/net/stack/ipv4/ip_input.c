@@ -21,6 +21,7 @@
  *
  */
 
+#include <linux/bitops.h>
 #include <net/checksum.h>
 #include <net/ip.h>
 
