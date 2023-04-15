@@ -106,6 +106,7 @@ endif
 
 config XENO_DRIVERS_NET_FEC
     depends on XENO_DRIVERS_NET
+    depends on BROKEN || $(VERSION) < 6 || ($(VERSION) = 6 && $(PATCHLEVEL) < 3)
     tristate "Freescale FEC"
     depends on ARCH_MXC || SOC_IMX28
     select PHYLIB
