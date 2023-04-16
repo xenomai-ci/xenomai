@@ -133,7 +133,7 @@ int rt_mutex_create(RT_MUTEX *mutex, const char *name)
 	pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
 	/* pthread_mutexattr_setrobust() might not be implemented. */
 	pthread_mutexattr_setrobust(&mattr, PTHREAD_MUTEX_ROBUST_NP);
-	ret = __RT(pthread_mutex_init(&mcb->lock, &mattr));
+	ret = -__RT(pthread_mutex_init(&mcb->lock, &mattr));
 	if (ret) {
 		xnfree(mcb);
 		goto out;
