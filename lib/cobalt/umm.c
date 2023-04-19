@@ -59,6 +59,7 @@ static void *__map_umm(const char *name, uint32_t *size_r)
 
 	ret = __RT(ioctl(fd, MEMDEV_RTIOC_STAT, &statbuf));
 	if (ret) {
+		__RT(close(fd));
 		early_warning("failed getting status of %s: %s",
 			      name, strerror(errno));
 		return MAP_FAILED;
