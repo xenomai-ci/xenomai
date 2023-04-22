@@ -33,6 +33,9 @@ libregistry_la_SOURCES = registry.c
 libregistry_la_CPPFLAGS =		\
 	$(libcopperplate_la_CPPFLAGS)	\
 	@XENO_FUSE_CFLAGS@
+
+libregistry_la_LIBADD =			\
+	@FUSE_LIBS@
 endif
 
 if XENO_PSHARED
