@@ -29,4 +29,4 @@ install-data-local:
 	$(INSTALL_DATA) $(call get_pic_object) $(DESTDIR)$(libdir)/xenomai/bootstrap-pic.o || true
 
 uninstall-local:
-	$(RM) -r $(DESTDIR)$(libdir)/xenomai
+	$(RM) $(DESTDIR)$(libdir)/xenomai/bootstrap*.o
