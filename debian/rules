@@ -72,8 +72,6 @@ install: build
 	for f in $(CURDIR)/kernel/cobalt/udev/*.rules ; do \
 	    cat $$f >> $(CURDIR)/debian/libxenomai1/etc/udev/xenomai.rules ; \
 	done
-	# xeno-config should be only in libxenomai-dev
-	rm -f $(CURDIR)/debian/xenomai-runtime/usr/bin/xeno-config
 	install -m 644 debian/libxenomai1.modprobe $(CURDIR)/debian/libxenomai1/etc/modprobe.d/xenomai.conf
 	# remove empty directory
 	rm -rf $(CURDIR)/debian/xenomai-doc/usr/share/doc/xenomai-doc/ps

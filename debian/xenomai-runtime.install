@@ -1,3 +1,7 @@
-usr/bin
+usr/bin/cmd_*
+usr/bin/insn_*
+usr/bin/rtcan*
+usr/bin/wf_generate
+usr/bin/wrap-link.sh
+usr/bin/xeno
 usr/sbin
-usr/lib/xenomai

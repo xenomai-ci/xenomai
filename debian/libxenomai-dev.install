@@ -6,3 +6,4 @@ usr/lib/*.so
 usr/lib/modechk.wrappers
 usr/lib/cobalt.wrappers
 usr/lib/dynlist.ld
+usr/lib/xenomai/bootstrap*.o

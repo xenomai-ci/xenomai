@@ -9,7 +9,7 @@ Homepage: http://www.xenomai.org/
 Package: xenomai-runtime
 Section: devel
 Architecture: amd64 arm armeb armel armhf arm64 i386
-Depends: ${shlibs:Depends}, ${misc:Depends}, psmisc, netcat
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: xenomai-kernel-source
 Replaces: xenomai
 Conflicts: xenomai
@@ -20,8 +20,7 @@ Description: Xenomai runtime utilities
  environment. Xenomai provides its own API and emulation layers ("skins") to
  make migration from other RTOS easier. Examples are: pSOS+, VxWorks, POSIX.
  .
- This package contains the runtime programs and the testsuite for the Xenomai
- realtime system.
+ This package contains the runtime programs for the Xenomai realtime system.
 
 Package: xenomai-kernel-source
 Section: kernel
@@ -75,3 +74,16 @@ Description: Headers and static libs for Xenomai
  .
  This package contains development files (header files), the static libraries
  and scripts used to compile realtime applications.
+
+Package: xenomai-testsuite
+Section: devel
+Architecture: amd64 arm armeb armel armhf arm64 i386
+Depends: ${shlibs:Depends}, ${misc:Depends}, psmisc, netcat, gdb
+Description: Xenomai testsuite
+ Xenomai is a real-time development framework cooperating with the Linux
+ kernel in order to provide a pervasive, interface-agnostic, hard real-time
+ support to user-space applications, seamlessly integrated into the GNU/Linux
+ environment. Xenomai provides its own API and emulation layers ("skins") to
+ make migration from other RTOS easier. Examples are: pSOS+, VxWorks, POSIX.
+ .
+ This package contains the testsuite for the Xenomai realtime system.
