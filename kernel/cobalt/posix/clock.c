@@ -93,8 +93,8 @@ COBALT_SYSCALL(clock_getres, current,
 	return 0;
 }
 
-int __cobalt_clock_getres64(clockid_t clock_id,
-			struct __kernel_timespec __user *u_ts)
+COBALT_SYSCALL(clock_getres64, current,
+	       (clockid_t clock_id, struct __kernel_timespec __user *u_ts))
 {
 	struct timespec64 ts;
 	int ret;
@@ -109,12 +109,6 @@ int __cobalt_clock_getres64(clockid_t clock_id,
 	trace_cobalt_clock_getres(clock_id, &ts);
 
 	return 0;
-}
-
-COBALT_SYSCALL(clock_getres64, current,
-	       (clockid_t clock_id, struct __kernel_timespec __user *u_ts))
-{
-	return __cobalt_clock_getres64(clock_id, u_ts);
 }
 
 int __cobalt_clock_gettime(clockid_t clock_id, struct timespec64 *ts)
