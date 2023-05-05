@@ -354,15 +354,6 @@ int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 	return err == 0 ? perr : err;
 }
 
-int __cobalt_cond_wait_prologue64(struct cobalt_cond_shadow __user *u_cnd,
-				  struct cobalt_mutex_shadow __user *u_mx,
-				  int __user *u_err, unsigned int timed,
-				  void __user *u_ts)
-{
-	return __cobalt_cond_wait_prologue(u_cnd, u_mx, u_err, u_ts,
-					   timed ? cond_fetch_timeout64 : NULL);
-}
-
 /* pthread_cond_wait_prologue(cond, mutex, count_ptr, timed, timeout) */
 COBALT_SYSCALL(cond_wait_prologue, nonrestartable,
 	       (struct cobalt_cond_shadow __user *u_cnd,
@@ -382,7 +373,8 @@ COBALT_SYSCALL(cond_wait_prologue64, nonrestartable,
 		unsigned int timed,
 		struct __kernel_timespec __user *u_ts))
 {
-	return __cobalt_cond_wait_prologue64(u_cnd, u_mx, u_err, timed, u_ts);
+	return __cobalt_cond_wait_prologue(u_cnd, u_mx, u_err, u_ts,
+					   timed ? cond_fetch_timeout64 : NULL);
 }
 
 COBALT_SYSCALL(cond_wait_epilogue, primary,

@@ -46,11 +46,6 @@ int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 				int (*fetch_timeout)(struct timespec64 *ts,
 						     const void __user *u_ts));
 
-int __cobalt_cond_wait_prologue64(struct cobalt_cond_shadow __user *u_cnd,
-				  struct cobalt_mutex_shadow __user *u_mx,
-				  int __user *u_err, unsigned int timed,
-				  void __user *u_ts);
-
 COBALT_SYSCALL_DECL(cond_init,
 		    (struct cobalt_cond_shadow __user *u_cnd,
 		     const struct cobalt_condattr __user *u_attr));
