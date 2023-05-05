@@ -103,9 +103,6 @@ int __cobalt_clock_getres64(clockid_t clock_id,
 int __cobalt_clock_gettime(clockid_t clock_id,
 			   struct timespec64 *ts);
 
-int __cobalt_clock_gettime64(clockid_t clock_id,
-			struct __kernel_timespec __user *u_ts);
-
 int __cobalt_clock_settime(clockid_t clock_id,
 			   const struct timespec64 *ts);
 

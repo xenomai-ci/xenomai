@@ -172,13 +172,6 @@ COBALT_SYSCALL32emu(clock_gettime, current,
 	return sys32_put_timespec(u_ts, &ts);
 }
 
-COBALT_SYSCALL32emu(clock_gettime64, current,
-		    (clockid_t clock_id,
-		     struct __kernel_timespec __user *u_ts))
-{
-	return __cobalt_clock_gettime64(clock_id, u_ts);
-}
-
 COBALT_SYSCALL32emu(clock_settime, current,
 		    (clockid_t clock_id,
 		     const struct old_timespec32 __user *u_ts))

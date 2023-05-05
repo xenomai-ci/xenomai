@@ -162,8 +162,8 @@ COBALT_SYSCALL(clock_gettime, current,
 	return 0;
 }
 
-int __cobalt_clock_gettime64(clockid_t clock_id,
-			struct __kernel_timespec __user *u_ts)
+COBALT_SYSCALL(clock_gettime64, current,
+	       (clockid_t clock_id, struct __kernel_timespec __user *u_ts))
 {
 	struct timespec64 ts;
 	int ret;
@@ -176,12 +176,6 @@ int __cobalt_clock_gettime64(clockid_t clock_id,
 		return -EFAULT;
 
 	return 0;
-}
-
-COBALT_SYSCALL(clock_gettime64, current,
-	       (clockid_t clock_id, struct __kernel_timespec __user *u_ts))
-{
-	return __cobalt_clock_gettime64(clock_id, u_ts);
 }
 
 int __cobalt_clock_settime(clockid_t clock_id, const struct timespec64 *ts)
