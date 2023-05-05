@@ -1117,7 +1117,7 @@ out:
 	return ret;
 }
 
-static int test_sc_cobalt_cond_wait_prologue(void)
+static int test_sc_cobalt_cond_wait_prologue64(void)
 {
 	int ret = 0;
 	int err = 0;
@@ -1142,7 +1142,8 @@ static int test_sc_cobalt_cond_wait_prologue(void)
 	if (ret == -ENOSYS) {
 		smokey_note(
 			"cond_wait_prologue64: skipped. (no kernel support)");
-		return 0; // Not implemented, nothing to test, success
+		ret = 0;
+		goto out; // Not implemented, nothing to test, success
 	}
 	if (!smokey_assert(ret == -EINVAL))
 		return ret ? ret : -EINVAL;
@@ -1296,7 +1297,7 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 	if (ret)
 		return ret;
 
-	ret = test_sc_cobalt_cond_wait_prologue();
+	ret = test_sc_cobalt_cond_wait_prologue64();
 	if (ret)
 		return ret;
 
