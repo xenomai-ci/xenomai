@@ -40,9 +40,6 @@ int __cobalt_mutex_timedlock_break(struct cobalt_mutex_shadow __user *u_mx,
 				   int (*fetch_timeout)(struct timespec64 *ts,
 							const void __user *u_ts));
 
-int __cobalt_mutex_timedlock64(struct cobalt_mutex_shadow __user *u_mx,
-				   const void __user *u_ts);
-
 int __cobalt_mutex_acquire_unchecked(struct xnthread *cur,
 				     struct cobalt_mutex *mutex,
 				     const struct timespec64 *ts);

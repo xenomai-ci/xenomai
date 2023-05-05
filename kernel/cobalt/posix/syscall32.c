@@ -225,13 +225,6 @@ COBALT_SYSCALL32emu(mutex_timedlock, primary,
 	return __cobalt_mutex_timedlock_break(u_mx, u_ts, sys32_fetch_timeout);
 }
 
-COBALT_SYSCALL32emu(mutex_timedlock64, primary,
-		    (struct cobalt_mutex_shadow __user *u_mx,
-		     const struct __kernel_timespec __user *u_ts))
-{
-	return __cobalt_mutex_timedlock64(u_mx, u_ts);
-}
-
 COBALT_SYSCALL32emu(cond_wait_prologue, nonrestartable,
 		    (struct cobalt_cond_shadow __user *u_cnd,
 		     struct cobalt_mutex_shadow __user *u_mx,
