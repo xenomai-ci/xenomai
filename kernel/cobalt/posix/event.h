@@ -41,11 +41,6 @@ int __cobalt_event_wait(struct cobalt_event_shadow __user *u_event,
 			unsigned int __user *u_bits_r,
 			int mode, const struct timespec64 *ts);
 
-int __cobalt_event_wait64(struct cobalt_event_shadow __user *u_event,
-			  unsigned int bits, unsigned int __user *u_bits_r,
-			  int mode,
-			  const struct __kernel_timespec __user *u_ts);
-
 COBALT_SYSCALL_DECL(event_init,
 		    (struct cobalt_event_shadow __user *u_evtsh,
 		     unsigned int value,

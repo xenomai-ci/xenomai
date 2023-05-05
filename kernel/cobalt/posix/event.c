@@ -190,24 +190,6 @@ out:
 	return ret;
 }
 
-int __cobalt_event_wait64(struct cobalt_event_shadow __user *u_event,
-			  unsigned int bits,
-			  unsigned int __user *u_bits_r,
-			  int mode, const struct __kernel_timespec __user *u_ts)
-{
-	struct timespec64 ts, *tsp = NULL;
-	int ret;
-
-	if (u_ts) {
-		tsp = &ts;
-		ret = cobalt_get_timespec64(&ts, u_ts);
-		if (ret)
-			return ret;
-	}
-
-	return __cobalt_event_wait(u_event, bits, u_bits_r, mode, tsp);
-}
-
 COBALT_SYSCALL(event_wait, primary,
 	       (struct cobalt_event_shadow __user *u_event,
 		unsigned int bits,
@@ -233,7 +215,17 @@ COBALT_SYSCALL(event_wait64, primary,
 		unsigned int __user *u_bits_r,
 		int mode, const struct __kernel_timespec __user *u_ts))
 {
-	return __cobalt_event_wait64(u_event, bits, u_bits_r, mode, u_ts);
+	struct timespec64 ts, *tsp = NULL;
+	int ret;
+
+	if (u_ts) {
+		tsp = &ts;
+		ret = cobalt_get_timespec64(&ts, u_ts);
+		if (ret)
+			return ret;
+	}
+
+	return __cobalt_event_wait(u_event, bits, u_bits_r, mode, tsp);
 }
 
 COBALT_SYSCALL(event_sync, current,

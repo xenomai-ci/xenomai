@@ -201,13 +201,6 @@ COBALT_SYSCALL32emu_DECL(event_wait,
 			  unsigned int __user *u_bits_r,
 			  int mode, const struct old_timespec32 __user *u_ts));
 
-COBALT_SYSCALL32emu_DECL(event_wait64,
-			 (struct cobalt_event_shadow __user *u_event,
-			  unsigned int bits,
-			  unsigned int __user *u_bits_r,
-			  int mode,
-			  const struct __kernel_timespec __user *u_ts));
-
 COBALT_SYSCALL32emu_DECL(select,
 			 (int nfds,
 			  compat_fd_set __user *u_rfds,
