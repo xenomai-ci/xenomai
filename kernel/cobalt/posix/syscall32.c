@@ -232,15 +232,6 @@ COBALT_SYSCALL32emu(clock_nanosleep, primary,
 	return ret;
 }
 
-COBALT_SYSCALL32emu(clock_nanosleep64, nonrestartable,
-		    (clockid_t clock_id, int flags,
-		     const struct __kernel_timespec __user *u_rqt,
-		     struct __kernel_timespec __user *u_rmt))
-{
-	return __cobalt_clock_nanosleep64(clock_id, flags, u_rqt, u_rmt);
-}
-
-
 COBALT_SYSCALL32emu(mutex_timedlock, primary,
 		    (struct cobalt_mutex_shadow __user *u_mx,
 		     const struct old_timespec32 __user *u_ts))
