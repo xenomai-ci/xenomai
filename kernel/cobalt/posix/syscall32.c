@@ -285,14 +285,6 @@ COBALT_SYSCALL32emu(mq_timedsend, primary,
 				     u_ts, u_ts ? sys32_fetch_timeout : NULL);
 }
 
-COBALT_SYSCALL32emu(mq_timedsend64, primary,
-		    (mqd_t uqd, const void __user *u_buf, size_t len,
-		     unsigned int prio,
-		     const struct __kernel_timespec __user *u_ts))
-{
-	return __cobalt_mq_timedsend64(uqd, u_buf, len, prio, u_ts);
-}
-
 COBALT_SYSCALL32emu(mq_timedreceive, primary,
 		    (mqd_t uqd, void __user *u_buf,
 		     compat_ssize_t __user *u_len,
