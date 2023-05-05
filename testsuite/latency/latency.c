@@ -322,12 +322,12 @@ static void *display(void *cookie)
 				time_t now, dt;
 				time(&now);
 				dt = now - start - WARMUP_TIME;
-				printf
-				    ("RTT|  %.2ld:%.2ld:%.2ld  (%s, %Ld us period, "
-				     "priority %d)\n", dt / 3600,
-				     (dt / 60) % 60, dt % 60,
-				     test_mode_names[test_mode],
-				     period_ns / 1000, priority);
+				printf("RTT|  %.2lld:%.2lld:%.2lld  (%s, %lld us period, priority %d)\n",
+				       (long long)(dt / 3600),
+				       (long long)((dt / 60) % 60),
+				       (long long)(dt % 60),
+				       test_mode_names[test_mode],
+				       period_ns / 1000, priority);
 				printf("RTH|%11s|%11s|%11s|%8s|%6s|%11s|%11s\n",
 				       "----lat min", "----lat avg",
 				       "----lat max", "-overrun", "---msw",
@@ -386,9 +386,10 @@ static void dump_histo_gnuplot(int32_t *histogram, time_t duration)
 			return;
 	}
 
-	fprintf(ofp, "# %.2ld:%.2ld:%.2ld (%s, %Ld us period, priority %d)\n",
-		duration / 3600, (duration / 60) % 60, duration % 60,
-		test_mode_names[test_mode],
+	fprintf(ofp,
+		"# %.2lld:%.2lld:%.2lld (%s, %lld us period, priority %d)\n",
+		(long long)duration / 3600, (long long)((duration / 60) % 60),
+		(long long)(duration % 60), test_mode_names[test_mode],
 		period_ns / 1000, priority);
 	fprintf(ofp, "# %11s|%11s|%11s|%8s|%6s|\n",
 		"----lat min", "----lat avg",
@@ -515,13 +516,14 @@ static void cleanup(void)
 	if (need_histo())
 		dump_hist_stats(actual_duration);
 
-	printf
-	    ("---|-----------|-----------|-----------|--------|------|-------------------------\n"
-	     "RTS|%11.3f|%11.3f|%11.3f|%8d|%6u|    %.2ld:%.2ld:%.2ld/%.2d:%.2d:%.2d\n",
-	     (double)gminjitter / 1000, (double)gavgjitter / 1000, (double)gmaxjitter / 1000,
-	     goverrun, max_relaxed, actual_duration / 3600, (actual_duration / 60) % 60,
-	     actual_duration % 60, test_duration / 3600,
-	     (test_duration / 60) % 60, test_duration % 60);
+	printf("---|-----------|-----------|-----------|--------|------|-------------------------\n"
+	       "RTS|%11.3f|%11.3f|%11.3f|%8d|%6u|    %.2lld:%.2lld:%.2lld/%.2d:%.2d:%.2d\n",
+	       (double)gminjitter / 1000, (double)gavgjitter / 1000,
+	       (double)gmaxjitter / 1000, goverrun, max_relaxed,
+	       (long long)(actual_duration / 3600),
+	       (long long)((actual_duration / 60) % 60),
+	       (long long)(actual_duration % 60), test_duration / 3600,
+	       (test_duration / 60) % 60, test_duration % 60);
 	if (max_relaxed > 0)
 		printf(
 "Warning! some latency peaks may have been due to involuntary mode switches.\n"
