@@ -26,6 +26,6 @@ int cobalt_get_timespec64(struct timespec64 *ts,
  * @return 0 on success, -EFAULT otherwise
  */
 int cobalt_put_timespec64(const struct timespec64 *ts,
-			   struct __kernel_timespec __user *uts);
+			  struct __kernel_timespec __user *uts);
 
 #endif //_COBALT_KERNEL_TIME_H
