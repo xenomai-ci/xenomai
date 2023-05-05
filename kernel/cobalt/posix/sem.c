@@ -360,18 +360,6 @@ int __cobalt_sem_timedwait(struct cobalt_sem_shadow __user *u_sem,
 	return ret;
 }
 
-int __cobalt_sem_timedwait64(struct cobalt_sem_shadow __user *u_sem,
-			     const struct __kernel_timespec __user *u_ts)
-{
-	int ret = 1;
-	struct timespec64 ts64;
-
-	if (u_ts)
-		ret = cobalt_get_timespec64(&ts64, u_ts);
-
-	return __cobalt_sem_timedwait(u_sem, ret ? NULL : &ts64);
-}
-
 static int sem_post(xnhandle_t handle)
 {
 	struct cobalt_sem *sem;
@@ -472,8 +460,8 @@ COBALT_SYSCALL(sem_timedwait, primary,
 	       (struct cobalt_sem_shadow __user *u_sem,
 		const struct __user_old_timespec __user *u_ts))
 {
-	int ret = 1;
 	struct timespec64 ts64;
+	int ret = 1;
 
 	if (u_ts)
 		ret = cobalt_get_u_timespec(&ts64, u_ts);
@@ -485,7 +473,13 @@ COBALT_SYSCALL(sem_timedwait64, primary,
 	       (struct cobalt_sem_shadow __user *u_sem,
 		const struct __kernel_timespec __user *u_ts))
 {
-	return __cobalt_sem_timedwait64(u_sem, u_ts);
+	struct timespec64 ts64;
+	int ret = 1;
+
+	if (u_ts)
+		ret = cobalt_get_timespec64(&ts64, u_ts);
+
+	return __cobalt_sem_timedwait(u_sem, ret ? NULL : &ts64);
 }
 
 COBALT_SYSCALL(sem_trywait, primary,

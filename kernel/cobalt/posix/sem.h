@@ -66,9 +66,6 @@ __cobalt_sem_open(struct cobalt_sem_shadow __user *usm,
 int __cobalt_sem_timedwait(struct cobalt_sem_shadow __user *u_sem,
 			   const struct timespec64 *ts);
 
-int __cobalt_sem_timedwait64(struct cobalt_sem_shadow __user *u_sem,
-			     const struct __kernel_timespec __user *u_ts);
-
 int __cobalt_sem_destroy(xnhandle_t handle);
 
 void cobalt_nsem_reclaim(struct cobalt_process *process);
