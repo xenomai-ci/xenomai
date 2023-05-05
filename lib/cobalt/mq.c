@@ -289,6 +289,18 @@ COBALT_IMPL(int, mq_setattr, (mqd_t mqd,
 	return -1;
 }
 
+static inline int __do_mq_timesend(mqd_t q, const char *buffer, size_t len,
+				   unsigned int prio, const struct timespec *to)
+{
+#ifdef __USE_TIME_BITS64
+	long sc_nr = sc_cobalt_mq_timedsend64;
+#else
+	long sc_nr = sc_cobalt_mq_timedsend;
+#endif
+
+	return XENOMAI_SYSCALL5(sc_nr, q, buffer, len, prio, to);
+}
+
 /**
  * Send a message to a message queue.
  *
@@ -332,13 +344,7 @@ COBALT_IMPL(int, mq_send, (mqd_t q, const char *buffer, size_t len, unsigned pri
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
-#ifdef __USE_TIME_BITS64
-	err = XENOMAI_SYSCALL5(sc_cobalt_mq_timedsend64,
-			       q, buffer, len, prio, NULL);
-#else
-	err = XENOMAI_SYSCALL5(sc_cobalt_mq_timedsend,
-			       q, buffer, len, prio, NULL);
-#endif
+	err = __do_mq_timesend(q, buffer, len, prio, NULL);
 
 	pthread_setcanceltype(oldtype, NULL);
 
@@ -397,8 +403,7 @@ COBALT_IMPL(int, mq_timedsend, (mqd_t q,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
-	err = XENOMAI_SYSCALL5(sc_cobalt_mq_timedsend,
-			       q, buffer, len, prio, timeout);
+	err = __do_mq_timesend(q, buffer, len, prio, timeout);
 
 	pthread_setcanceltype(oldtype, NULL);
 
