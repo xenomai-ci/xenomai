@@ -414,6 +414,19 @@ COBALT_IMPL(int, mq_timedsend, (mqd_t q,
 	return -1;
 }
 
+static inline int __do_mq_timedreceive(mqd_t q, char *buffer, ssize_t *len,
+				       unsigned int *prio,
+				       const struct timespec *timeout)
+{
+#ifdef __USE_TIME_BITS64
+	long sc_nr = sc_cobalt_mq_timedreceive64;
+#else
+	long sc_nr = sc_cobalt_mq_timedreceive;
+#endif
+
+	return XENOMAI_SYSCALL5(sc_nr, q, buffer, len, prio, timeout);
+}
+
 /**
  * Receive a message from a message queue.
  *
@@ -461,8 +474,7 @@ COBALT_IMPL(ssize_t, mq_receive, (mqd_t q, char *buffer, size_t len, unsigned *p
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
-	err = XENOMAI_SYSCALL5(sc_cobalt_mq_timedreceive,
-			       q, buffer, &rlen, prio, NULL);
+	err = __do_mq_timedreceive(q, buffer, &rlen, prio, NULL);
 
 	pthread_setcanceltype(oldtype, NULL);
 
@@ -526,13 +538,7 @@ COBALT_IMPL(ssize_t, mq_timedreceive, (mqd_t q,
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
-#ifdef __USE_TIME_BITS64
-	err = XENOMAI_SYSCALL5(sc_cobalt_mq_timedreceive64,
-			       q, buffer, &rlen, prio, timeout);
-#else
-	err = XENOMAI_SYSCALL5(sc_cobalt_mq_timedreceive,
-			       q, buffer, &rlen, prio, timeout);
-#endif
+	err = __do_mq_timedreceive(q, buffer, &rlen, prio, timeout);
 
 	pthread_setcanceltype(oldtype, NULL);
 
