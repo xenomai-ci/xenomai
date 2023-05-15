@@ -534,6 +534,19 @@ COBALT_SYSCALL(timer_gettime, current,
 	return cobalt_put_u_itimerspec(u_val, &val);
 }
 
+COBALT_SYSCALL(timer_gettime64, current,
+	       (timer_t tm, struct __kernel_itimerspec __user *u_val))
+{
+	struct itimerspec64 val;
+	int ret;
+
+	ret = __cobalt_timer_gettime(tm, &val);
+	if (ret)
+		return ret;
+
+	return cobalt_put_itimerspec64(u_val, &val);
+}
+
 COBALT_SYSCALL(timer_getoverrun, current, (timer_t timerid))
 {
 	struct cobalt_timer *timer;

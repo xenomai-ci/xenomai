@@ -86,6 +86,9 @@ COBALT_SYSCALL_DECL(timer_settime64,
 COBALT_SYSCALL_DECL(timer_gettime,
 		    (timer_t tm, struct __user_old_itimerspec __user *u_val));
 
+COBALT_SYSCALL_DECL(timer_gettime64,
+		    (timer_t tm, struct __kernel_itimerspec __user *u_val));
+
 COBALT_SYSCALL_DECL(timer_getoverrun, (timer_t tm));
 
 #endif /* !_COBALT_POSIX_TIMER_H */
