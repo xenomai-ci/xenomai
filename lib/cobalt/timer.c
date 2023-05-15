@@ -214,7 +214,13 @@ COBALT_IMPL(int, timer_gettime, (timer_t timerid, struct itimerspec *value))
 {
 	int ret;
 
-	ret = -XENOMAI_SYSCALL2(sc_cobalt_timer_gettime, timerid, value);
+#ifdef __USE_TIME_BITS64
+	long sc_nr = sc_cobalt_timer_gettime64;
+#else
+	long sc_nr = sc_cobalt_timer_gettime;
+#endif
+
+	ret = -XENOMAI_SYSCALL2(sc_nr, timerid, value);
 	if (ret == 0)
 		return 0;
 
