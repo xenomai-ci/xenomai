@@ -1397,6 +1397,52 @@ out:
 	return ret;
 }
 
+static int test_sc_cobalt_timerfd_gettime64(void)
+{
+	long sc_nr = sc_cobalt_timerfd_gettime64;
+	struct xn_itimerspec64 its = { 0 };
+	uint64_t buf = 0;
+	int ret;
+	int fd;
+
+	fd = timerfd_create(CLOCK_REALTIME, 0);
+	if (fd == -1)
+		return -errno;
+
+	/* Make sure we don't crash because of NULL pointers */
+	ret = XENOMAI_SYSCALL2(sc_nr, fd, NULL);
+	if (ret == -ENOSYS) {
+		smokey_note(
+			"cobalt_timerfd_gettime64: skipped. (no kernel support)");
+		ret = 0;
+		goto out; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EFAULT)) {
+		ret = ret ?: -EINVAL;
+		goto out;
+	}
+
+	/*
+	 * Set some random values, allows us to detect that the kernel has
+	 * written the time
+	 */
+	its.value.tv_sec = 123;
+	its.value.tv_nsec = 456;
+
+	/* Fetch the time from the timer, should succeed */
+	ret = XENOMAI_SYSCALL2(sc_nr, fd, &its);
+	if (!smokey_assert(!ret))
+		goto out;
+
+	smokey_assert(buf == 0);
+	smokey_assert(its.value.tv_sec == 0);
+	smokey_assert(its.value.tv_nsec == 0);
+out:
+	smokey_check_errno(close(fd));
+
+	return ret;
+}
+
 static int check_kernel_version(void)
 {
 	int ret, major, minor;
@@ -1495,6 +1541,10 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	ret = test_sc_cobalt_timerfd_settime64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_timerfd_gettime64();
 	if (ret)
 		return ret;
 
