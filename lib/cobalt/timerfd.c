@@ -35,14 +35,19 @@ COBALT_IMPL(int, timerfd_create, (int clockid, int flags))
 	return fd;
 }
 
-COBALT_IMPL(int, timerfd_settime, (int fd, int flags,
-		const struct itimerspec *new_value,
-		struct itimerspec *old_value))
+COBALT_IMPL(int, timerfd_settime,
+	    (int fd, int flags, const struct itimerspec *new_value,
+	     struct itimerspec *old_value))
 {
 	int ret;
-	
-	ret = -XENOMAI_SYSCALL4(sc_cobalt_timerfd_settime,
-				fd, flags, new_value, old_value);
+
+#ifdef __USE_TIME_BITS64
+	long sc_nr = sc_cobalt_timerfd_settime64;
+#else
+	long sc_nr = sc_cobalt_timerfd_settime;
+#endif
+
+	ret = -XENOMAI_SYSCALL4(sc_nr, fd, flags, new_value, old_value);
 	if (ret == 0)
 		return ret;
 	
