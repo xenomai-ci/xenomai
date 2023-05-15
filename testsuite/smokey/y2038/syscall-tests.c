@@ -11,6 +11,7 @@
  */
 #include <asm/xenomai/syscall.h>
 #include <smokey/smokey.h>
+#include <sys/timerfd.h>
 #include <sys/utsname.h>
 #include <mqueue.h>
 #include <rtdm/ipc.h>
@@ -1339,6 +1340,63 @@ out:
 	return ret;
 }
 
+static int test_sc_cobalt_timerfd_settime64(void)
+{
+	long sc_nr = sc_cobalt_timerfd_settime64;
+	struct xn_itimerspec64 its = { 0 };
+	uint64_t buf = 0;
+	ssize_t sz;
+	int ret;
+	int fd;
+
+	fd = smokey_check_errno(timerfd_create(CLOCK_REALTIME, 0));
+	if (fd < 0)
+		return fd;
+
+	/* Make sure we don't crash because of NULL pointers */
+	ret = XENOMAI_SYSCALL4(sc_nr, fd, 0, NULL, NULL);
+	if (ret == -ENOSYS) {
+		smokey_note(
+			"cobalt_timerfd_settime64: skipped. (no kernel support)");
+		ret = 0;
+		goto out; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EFAULT)) {
+		ret = ret ?: -EINVAL;
+		goto out;
+	}
+
+	its.value.tv_sec = -1;
+	its.value.tv_nsec = 100000;
+
+	/* Provide an invalid expiration time, should deliver -EINVAL */
+	ret = XENOMAI_SYSCALL4(sc_nr, fd, 0, &its, NULL);
+	if (!smokey_assert(ret == -EINVAL)) {
+		ret = ret ?: -EINVAL;
+		goto out;
+	}
+
+	/* Provide a valid expiration time, should succeed */
+	its.value.tv_sec = 0;
+	ret = XENOMAI_SYSCALL4(sc_nr, fd, 0, &its, NULL);
+	if (!smokey_assert(!ret))
+		goto out;
+
+	ret = XENOMAI_SYSCALL4(sc_nr, fd, 0, &its, NULL);
+	if (!smokey_assert(!ret))
+		goto out;
+
+	sz = smokey_check_errno(read(fd, &buf, sizeof(buf)));
+	if (sz != sizeof(buf))
+		goto out;
+
+	smokey_assert(buf == 1);
+out:
+	smokey_check_errno(close(fd));
+
+	return ret;
+}
+
 static int check_kernel_version(void)
 {
 	int ret, major, minor;
@@ -1433,6 +1491,10 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	ret = test_sc_cobalt_timer_gettime64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_timerfd_settime64();
 	if (ret)
 		return ret;
 
