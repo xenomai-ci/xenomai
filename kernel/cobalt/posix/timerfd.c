@@ -359,3 +359,14 @@ COBALT_SYSCALL(timerfd_gettime, current,
 
 	return ret ?: cobalt_put_u_itimerspec(curr_value, &value);
 }
+
+COBALT_SYSCALL(timerfd_gettime64, current,
+	       (int fd, struct __kernel_itimerspec __user *curr_value))
+{
+	struct itimerspec64 value;
+	int ret;
+
+	ret = __cobalt_timerfd_gettime(fd, &value);
+
+	return ret ?: cobalt_put_itimerspec64(curr_value, &value);
+}

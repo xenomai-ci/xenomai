@@ -44,4 +44,7 @@ COBALT_SYSCALL_DECL(timerfd_settime64,
 COBALT_SYSCALL_DECL(timerfd_gettime,
 		    (int fd, struct __user_old_itimerspec __user *curr_value));
 
+COBALT_SYSCALL_DECL(timerfd_gettime64,
+		    (int fd, struct __kernel_itimerspec __user *curr_value));
+
 #endif /* TIMERFD_H */
