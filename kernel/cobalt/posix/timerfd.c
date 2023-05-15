@@ -18,6 +18,7 @@
 
 #include <linux/timerfd.h>
 #include <linux/err.h>
+#include <cobalt/kernel/time.h>
 #include <cobalt/kernel/timer.h>
 #include <cobalt/kernel/select.h>
 #include <rtdm/fd.h>
@@ -295,7 +296,33 @@ COBALT_SYSCALL(timerfd_settime, primary,
 		return ret;
 
 	if (old_value) {
-		ret = cobalt_copy_to_user(old_value, &ovalue, sizeof(ovalue));
+		ret = cobalt_put_u_itimerspec(old_value, &ovalue);
+		value.it_value.tv_sec = 0;
+		value.it_value.tv_nsec = 0;
+		__cobalt_timerfd_settime(fd, flags, &value, NULL);
+	}
+
+	return ret;
+}
+
+COBALT_SYSCALL(timerfd_settime64, primary,
+	       (int fd, int flags,
+		const struct __kernel_itimerspec __user *new_value,
+		struct __kernel_itimerspec __user *old_value))
+{
+	struct itimerspec64 ovalue, value;
+	int ret;
+
+	ret = cobalt_get_itimerspec64(&value, new_value);
+	if (ret)
+		return ret;
+
+	ret = __cobalt_timerfd_settime(fd, flags, &value, &ovalue);
+	if (ret)
+		return ret;
+
+	if (old_value) {
+		ret = cobalt_put_itimerspec64(old_value, &ovalue);
 		value.it_value.tv_sec = 0;
 		value.it_value.tv_nsec = 0;
 		__cobalt_timerfd_settime(fd, flags, &value, NULL);
