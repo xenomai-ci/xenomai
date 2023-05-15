@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <cobalt/kernel/time.h>
 #include <linux/module.h>
 #include <linux/cred.h>
 #include <linux/err.h>
@@ -488,6 +489,32 @@ COBALT_SYSCALL(timer_settime, primary,
 		return ret;
 
 	if (oldvp && cobalt_put_u_itimerspec(u_oldval, oldvp)) {
+		__cobalt_timer_settime(tm, flags, oldvp, NULL);
+		return -EFAULT;
+	}
+
+	return 0;
+}
+
+COBALT_SYSCALL(timer_settime64, primary,
+	       (timer_t tm, int flags,
+		const struct __kernel_itimerspec __user *u_newval,
+		struct __kernel_itimerspec __user *u_oldval))
+{
+	struct itimerspec64 newv, oldv, *oldvp = &oldv;
+	int ret;
+
+	if (u_oldval == NULL)
+		oldvp = NULL;
+
+	if (cobalt_get_itimerspec64(&newv, u_newval))
+		return -EFAULT;
+
+	ret = __cobalt_timer_settime(tm, flags, &newv, oldvp);
+	if (ret)
+		return ret;
+
+	if (oldvp && cobalt_put_itimerspec64(u_oldval, oldvp)) {
 		__cobalt_timer_settime(tm, flags, oldvp, NULL);
 		return -EFAULT;
 	}
