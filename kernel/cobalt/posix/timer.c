@@ -296,9 +296,8 @@ int __cobalt_timer_setval(struct xntimer *__restrict__ timer, int clock_flag,
 		return 0;
 	}
 
-	if ((unsigned long)value->it_value.tv_nsec >= ONE_BILLION ||
-	    ((unsigned long)value->it_interval.tv_nsec >= ONE_BILLION &&
-	     (value->it_value.tv_sec != 0 || value->it_value.tv_nsec != 0)))
+	if (!timespec64_valid(&value->it_interval) ||
+	    !timespec64_valid(&value->it_value))
 		return -EINVAL;
 
 	start = ts2ns(&value->it_value) + 1;
