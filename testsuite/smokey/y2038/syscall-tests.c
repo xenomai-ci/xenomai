@@ -25,6 +25,11 @@ struct xn_timespec64 {
 	int64_t tv_nsec;
 };
 
+struct xn_itimerspec64 {
+	struct xn_timespec64 interval;
+	struct xn_timespec64 value;
+};
+
 struct xn_timex_timeval {
 	int64_t tv_sec;
 	int64_t	tv_usec;
@@ -1212,6 +1217,69 @@ out_mutex:
 	return ret;
 }
 
+static int test_sc_cobalt_timer_settime64(void)
+{
+	long sc_nr = sc_cobalt_timer_settime64;
+	struct xn_itimerspec64 its;
+	struct sigevent sev;
+	sigset_t sigset;
+	timer_t t;
+	int sig;
+	int ret;
+
+	sig = SIGUSR1;
+	sigemptyset(&sigset);
+	sigaddset(&sigset, sig);
+
+	memset(&sev, 0, sizeof(sev));
+	memset(&its, 0, sizeof(its));
+
+	sev.sigev_signo = sig;
+	sev.sigev_notify = SIGEV_THREAD_ID | SIGEV_SIGNAL;
+	sev.sigev_notify_thread_id = gettid();
+
+	ret = smokey_check_errno(timer_create(CLOCK_REALTIME, &sev, &t));
+	if (ret)
+		return ret;
+
+	/* Make sure we don't crash because of NULL pointers */
+	ret = XENOMAI_SYSCALL4(sc_nr, t, 0, NULL, NULL);
+	if (ret == -ENOSYS) {
+		smokey_note(
+			"cobalt_timer_settime64: skipped. (no kernel support)");
+		ret = 0;
+		goto out; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EFAULT)) {
+		ret = ret ?: -EINVAL;
+		goto out;
+	}
+
+	its.value.tv_sec = -1;
+	its.value.tv_nsec = 100000;
+
+	/* Provide an invalid expiration time, should deliver -EINVAL */
+	ret = XENOMAI_SYSCALL4(sc_nr, t, 0, &its, NULL);
+	if (!smokey_assert(ret == -EINVAL)) {
+		ret = ret ?: -EINVAL;
+		goto out;
+	}
+
+	/* Provide a valid expiration time, should succeed */
+	its.value.tv_sec = 0;
+	ret = XENOMAI_SYSCALL4(sc_nr, t, 0, &its, NULL);
+	if (!smokey_assert(!ret))
+		goto out;
+
+	/* Wait for the timer to deliver the signal */
+	sigwait(&sigset, &sig);
+
+out:
+	timer_delete(t);
+
+	return ret;
+}
+
 static int check_kernel_version(void)
 {
 	int ret, major, minor;
@@ -1298,6 +1366,10 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	ret = test_sc_cobalt_cond_wait_prologue64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_timer_settime64();
 	if (ret)
 		return ret;
 
