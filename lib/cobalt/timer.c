@@ -166,8 +166,13 @@ COBALT_IMPL(int, timer_settime, (timer_t timerid,
 {
 	int ret;
 
-	ret = -XENOMAI_SYSCALL4(sc_cobalt_timer_settime, timerid,
-				flags, value, ovalue);
+#ifdef __USE_TIME_BITS64
+	long sc_nr = sc_cobalt_timer_settime64;
+#else
+	long sc_nr = sc_cobalt_timer_settime;
+#endif
+
+	ret = -XENOMAI_SYSCALL4(sc_nr, timerid, flags, value, ovalue);
 	if (ret == 0)
 		return 0;
 
