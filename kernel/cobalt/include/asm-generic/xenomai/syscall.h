@@ -138,6 +138,28 @@ static inline int cobalt_put_u_itimerspec(
 	return cobalt_copy_to_user(dst, &u_its, sizeof(*dst));
 }
 
+static inline struct timespec64
+cobalt_timeval_to_timespec64(const struct __kernel_old_timeval *src)
+{
+	struct timespec64 ts;
+
+	ts.tv_sec = src->tv_sec + (src->tv_usec / USEC_PER_SEC);
+	ts.tv_nsec = (src->tv_usec % USEC_PER_SEC) * NSEC_PER_USEC;
+
+	return ts;
+}
+
+static inline struct __kernel_old_timeval
+cobalt_timespec64_to_timeval(const struct timespec64 *src)
+{
+	struct __kernel_old_timeval tv;
+
+	tv.tv_sec = src->tv_sec + (src->tv_nsec / NSEC_PER_SEC);
+	tv.tv_usec = (src->tv_nsec % NSEC_PER_SEC) / NSEC_PER_USEC;
+
+	return tv;
+}
+
 /* 32bit syscall emulation */
 #define __COBALT_COMPAT_BIT	0x1
 /* 32bit syscall emulation - extended form */

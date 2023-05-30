@@ -221,7 +221,7 @@ static int __cobalt_select_bind_all(struct xnselector *selector,
 }
 
 int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
-		    void __user *u_xfds, void __user *u_tv, bool compat)
+		    void __user *u_xfds, struct timespec64 *to, bool compat)
 {
 	void __user *ufd_sets[XNSELECT_MAX_TYPES] = {
 		[XNSELECT_READ] = u_rfds,
@@ -237,13 +237,12 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 	xntmode_t mode = XN_RELATIVE;
 	struct xnselector *selector;
 	struct xnthread *curr;
-	struct __kernel_old_timeval tv;
 	size_t fds_size;
 	int i, err;
 
 	curr = xnthread_current();
 
-	if (u_tv) {
+	if (to) {
 		if (xnthread_test_localinfo(curr, XNSYSRST)) {
 			xnthread_clear_localinfo(curr, XNSYSRST);
 
@@ -255,23 +254,11 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 				goto out;
 			}
 		} else {
-#ifdef CONFIG_XENO_ARCH_SYS3264
-			if (compat) {
-				if (sys32_get_timeval(&tv, u_tv))
-					return -EFAULT;
-			} else
-#endif
-			{
-				if (!access_ok(u_tv, sizeof(tv))
-				    || cobalt_copy_from_user(&tv, u_tv,
-							     sizeof(tv)))
-					return -EFAULT;
-			}
 
-			if (tv.tv_usec >= 1000000)
+			if (!timespec64_valid(to))
 				return -EINVAL;
 
-			timeout = clock_get_ticks(CLOCK_MONOTONIC) + tv2ns(&tv);
+			timeout = clock_get_ticks(CLOCK_MONOTONIC) + ts2ns(to);
 		}
 
 		mode = XN_ABSOLUTE;
@@ -343,23 +330,12 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 	}
 
 out:
-	if (u_tv && (err > 0 || err == -EINTR)) {
+	if (to && (err > 0 || err == -EINTR)) {
 		xnsticks_t diff = timeout - clock_get_ticks(CLOCK_MONOTONIC);
 		if (diff > 0)
-			ticks2tv(&tv, diff);
+			ticks2ts64(to, diff);
 		else
-			tv.tv_sec = tv.tv_usec = 0;
-
-#ifdef CONFIG_XENO_ARCH_SYS3264
-		if (compat) {
-			if (sys32_put_timeval(u_tv, &tv))
-				return -EFAULT;
-		} else
-#endif
-		{
-			if (cobalt_copy_to_user(u_tv, &tv, sizeof(tv)))
-				return -EFAULT;
-		}
+			to->tv_sec = to->tv_nsec = 0;
 	}
 
 	if (err >= 0)
@@ -390,5 +366,30 @@ COBALT_SYSCALL(select, primary,
 		fd_set __user *u_xfds,
 		struct __kernel_old_timeval __user *u_tv))
 {
-	return __cobalt_select(nfds, u_rfds, u_wfds, u_xfds, u_tv, false);
+	struct timespec64 ts64, *to = NULL;
+	struct __kernel_old_timeval tv;
+	int ret;
+
+	if (u_tv && (!access_ok(u_tv, sizeof(tv)) ||
+		     cobalt_copy_from_user(&tv, u_tv, sizeof(tv))))
+		return -EFAULT;
+
+	if (u_tv) {
+		ts64 = cobalt_timeval_to_timespec64(&tv);
+		to = &ts64;
+	}
+
+	ret = __cobalt_select(nfds, u_rfds, u_wfds, u_xfds, to, false);
+
+	if (u_tv) {
+		tv = cobalt_timespec64_to_timeval(to);
+		/*
+		 * Writing to u_tv might fail. We ignore a possible error here
+		 * to report back the number of changed fds (or the error).
+		 * This is aligned with the Linux select() implementation.
+		 */
+		cobalt_copy_to_user(u_tv, &tv, sizeof(tv));
+	}
+
+	return ret;
 }

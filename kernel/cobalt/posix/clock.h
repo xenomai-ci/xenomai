@@ -68,12 +68,12 @@ static inline xnticks_t tv2ns(const struct __kernel_old_timeval *tv)
 	return nsecs;
 }
 
-static inline void ticks2tv(struct __kernel_old_timeval *tv, xnticks_t ticks)
+static inline void ticks2ts64(struct timespec64 *ts, xnticks_t ticks)
 {
 	unsigned long nsecs;
 
-	tv->tv_sec = xnclock_divrem_billion(ticks, &nsecs);
-	tv->tv_usec = nsecs / 1000;
+	ts->tv_sec = xnclock_divrem_billion(ticks, &nsecs);
+	ts->tv_nsec = nsecs;
 }
 
 static inline xnticks_t clock_get_ticks(clockid_t clock_id)

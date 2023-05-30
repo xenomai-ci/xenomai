@@ -749,7 +749,28 @@ COBALT_SYSCALL32emu(select, primary,
 		     compat_fd_set __user *u_xfds,
 		     struct old_timeval32 __user *u_tv))
 {
-	return __cobalt_select(nfds, u_rfds, u_wfds, u_xfds, u_tv, true);
+	struct timespec64 ts64, *to = NULL;
+	struct __kernel_old_timeval tv;
+	int ret;
+
+	if (u_tv &&
+	    (!access_ok(u_tv, sizeof(tv)) || sys32_get_timeval(&tv, u_tv)))
+		return -EFAULT;
+
+	if (u_tv) {
+		ts64 = cobalt_timeval_to_timespec64(&tv);
+		to = &ts64;
+	}
+
+	ret = __cobalt_select(nfds, u_rfds, u_wfds, u_xfds, to, true);
+
+	if (u_tv) {
+		tv = cobalt_timespec64_to_timeval(to);
+		/* See CoBaLt_select() */
+		sys32_put_timeval(u_tv, &tv);
+	}
+
+	return ret;
 }
 
 COBALT_SYSCALL32emu(recvmsg, handover,
