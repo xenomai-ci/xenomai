@@ -24,7 +24,7 @@
 #include <cobalt/kernel/select.h>
 
 int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
-		    void __user *u_xfds, void __user *u_tv, bool compat);
+		    void __user *u_xfds, struct timespec64 *to, bool compat);
 
 COBALT_SYSCALL_DECL(open,
 		    (const char __user *u_path, int oflag));
@@ -75,5 +75,11 @@ COBALT_SYSCALL_DECL(select,
 		     fd_set __user *u_wfds,
 		     fd_set __user *u_xfds,
 		     struct __kernel_old_timeval __user *u_tv));
+
+COBALT_SYSCALL_DECL(pselect64, (int nfds,
+				fd_set __user *u_rfds,
+				fd_set __user *u_wfds,
+				fd_set __user *u_xfds,
+				struct __kernel_timespec __user *u_tv));
 
 #endif /* !_COBALT_POSIX_IO_H */

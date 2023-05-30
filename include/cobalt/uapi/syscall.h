@@ -140,6 +140,7 @@
 #define sc_cobalt_timer_gettime64		117
 #define sc_cobalt_timerfd_settime64		118
 #define sc_cobalt_timerfd_gettime64		119
+#define sc_cobalt_pselect64			120
 
 #define __NR_COBALT_SYSCALLS			128 /* Power of 2 */
 

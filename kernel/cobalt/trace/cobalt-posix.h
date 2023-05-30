@@ -172,7 +172,8 @@
 		__cobalt_symbolic_syscall(timer_settime64),		\
 		__cobalt_symbolic_syscall(timer_gettime64),		\
 		__cobalt_symbolic_syscall(timerfd_settime64),		\
-		__cobalt_symbolic_syscall(timerfd_gettime64))
+		__cobalt_symbolic_syscall(timerfd_gettime64),		\
+		__cobalt_symbolic_syscall(pselect64))
 
 DECLARE_EVENT_CLASS(cobalt_syscall_entry,
 	TP_PROTO(unsigned int nr),

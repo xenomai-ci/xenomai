@@ -393,3 +393,35 @@ COBALT_SYSCALL(select, primary,
 
 	return ret;
 }
+
+COBALT_SYSCALL(pselect64, primary,
+	       (int nfds,
+		fd_set __user *u_rfds,
+		fd_set __user *u_wfds,
+		fd_set __user *u_xfds,
+		struct __kernel_timespec __user *u_ts))
+{
+	struct timespec64 ts64, *to = NULL;
+	int ret = 0;
+
+	if (u_ts) {
+		ret = cobalt_get_timespec64(&ts64, u_ts);
+		to = &ts64;
+	}
+
+	if (ret)
+		return ret;
+
+	ret = __cobalt_select(nfds, u_rfds, u_wfds, u_xfds, to, false);
+
+	/*
+	 * Normally pselect() would not write back the modified timeout. As we
+	 * only use it for keeping select() y2038 safe we do it here as well.
+	 *
+	 * See CoBaLt_select() for some notes about error handling.
+	 */
+	if (u_ts)
+		cobalt_put_timespec64(&ts64, u_ts);
+
+	return ret;
+}
