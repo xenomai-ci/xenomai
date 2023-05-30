@@ -1443,6 +1443,72 @@ out:
 	return ret;
 }
 
+static int test_sc_cobalt_pselect64(void)
+{
+	long sc_nr = sc_cobalt_pselect64;
+	struct xn_timespec64 t1, t2;
+	struct timespec ts_nat;
+	int ret;
+
+	/* Supplying an invalid timeout should deliver -EINVAL */
+	t1.tv_sec = -1;
+	t1.tv_nsec = 0;
+	ret = XENOMAI_SYSCALL5(sc_nr, NULL, NULL, NULL, NULL, &t1);
+	if (ret == -ENOSYS) {
+		smokey_note("cobalt_pselect64: skipped. (no kernel support)");
+		ret = 0;
+		goto out; // Not implemented, nothing to test, success
+	}
+	if (!smokey_assert(ret == -EINVAL)) {
+		ret = ret ?: -EINVAL;
+		goto out;
+	}
+
+	/* Supplying an invalid address should deliver -EFAULT */
+	ret = XENOMAI_SYSCALL5(sc_nr, NULL, NULL, NULL, NULL,
+			       (void *)0xdeadbeefUL);
+	if (!smokey_assert(ret == -EFAULT)) {
+		ret = ret ?: -EINVAL;
+		goto out;
+	}
+
+	/*
+	 * Providing a valid timeout, waiting for it to time out and check
+	 * that we didn't come back to early.
+	 */
+	ret = smokey_check_errno(clock_gettime(CLOCK_MONOTONIC, &ts_nat));
+	if (ret)
+		goto out;
+
+	t1.tv_sec = 0;
+	t1.tv_nsec = 500000;
+
+	ret = XENOMAI_SYSCALL5(sc_nr, NULL, NULL, NULL, NULL, &t1);
+	if (!smokey_assert(!ret)) {
+		ret = ret ? ret : -EINVAL;
+		goto out;
+	}
+
+	t1.tv_sec = ts_nat.tv_sec;
+	t1.tv_nsec = ts_nat.tv_nsec;
+
+	ret = smokey_check_errno(clock_gettime(CLOCK_MONOTONIC, &ts_nat));
+	if (ret)
+		goto out;
+
+	t2.tv_sec = ts_nat.tv_sec;
+	t2.tv_nsec = ts_nat.tv_nsec;
+
+	if (ts_less(&t2, &t1))
+		smokey_warning("pselect64 returned to early!\n"
+			       "Expected wakeup at: %lld sec %lld nsec\n"
+			       "Back at           : %lld sec %lld nsec\n",
+			       t1.tv_sec, t1.tv_nsec, t2.tv_sec, t2.tv_nsec);
+
+out:
+	return ret;
+}
+
 static int check_kernel_version(void)
 {
 	int ret, major, minor;
@@ -1545,6 +1611,10 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	ret = test_sc_cobalt_timerfd_gettime64();
+	if (ret)
+		return ret;
+
+	ret = test_sc_cobalt_pselect64();
 	if (ret)
 		return ret;
 
