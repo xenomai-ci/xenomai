@@ -123,6 +123,7 @@ static inline bool ts_less(const struct xn_timespec64 *a,
  */
 struct thread_context {
 	int sc_nr;
+	int sock;
 	pthread_mutex_t *mutex;
 	struct xn_timespec64 *ts;
 	bool timedwait_timecheck;
@@ -1443,6 +1444,94 @@ out:
 	return ret;
 }
 
+static void pselect64_sig_handler(int sig)
+{
+	smokey_trace("pselect64: signal received");
+}
+
+static void *pselect64_waiting_thread(void *arg)
+{
+	struct thread_context *ctx = (struct thread_context *)arg;
+	struct xn_timespec64 ts;
+	int sock = ctx->sock;
+	struct sigaction sa;
+	fd_set rfds;
+	int ret;
+
+	FD_ZERO(&rfds);
+	FD_SET(ctx->sock, &rfds);
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_handler = pselect64_sig_handler;
+
+	ret = smokey_check_errno(sigaction(SIGUSR1, &sa, NULL));
+	if (ret)
+		goto out;
+
+	/* Waiting for 1sec should be enough to get a signal */
+	ts.tv_sec = 1;
+	ts.tv_nsec = 0;
+	ret = XENOMAI_SYSCALL5(ctx->sc_nr, sock + 1, &rfds, NULL, NULL, &ts);
+	if (!smokey_assert(ret == -EINTR)) {
+		ret = ret ?: -EINVAL;
+		goto out;
+	}
+
+	/* The remaining timeout has to be less than 1 sec */
+	if (!smokey_assert(ts.tv_sec == 0 && ts.tv_nsec > 0)) {
+		ret = -EINVAL;
+		goto out;
+	}
+
+out:
+	return (void *)(long)ret;
+}
+
+static int test_pselect64_interruption(void)
+{
+	struct timespec ts = { .tv_sec = 0, .tv_nsec = 100000 };
+	struct thread_context ctx = { 0 };
+	void *w_ret = NULL;
+	pthread_t w;
+	int sock;
+	int ret;
+
+	sock = smokey_check_errno(socket(AF_RTIPC, SOCK_DGRAM, IPCPROTO_XDDP));
+	if (sock == -EAFNOSUPPORT) {
+		smokey_note("pselect64: skipped timeout write back test");
+		return 0;
+	}
+	if (sock < 0)
+		return sock;
+
+	ctx.sock = sock;
+	ctx.sc_nr = sc_cobalt_pselect64;
+
+	ret = smokey_check_status(
+		pthread_create(&w, NULL, pselect64_waiting_thread, &ctx));
+	if (ret)
+		goto out_sock;
+
+	/* Allow the waiting thread to enter the pselect64() syscall */
+	nanosleep(&ts, NULL);
+
+	/* Send a signal to interrupt the syscall and trigger -EINTR */
+	__STD(pthread_kill(w, SIGUSR1));
+
+	ret = smokey_check_status(pthread_join(w, &w_ret));
+	if (ret)
+		goto out_sock;
+
+	ret = smokey_assert((long)w_ret == -EINTR);
+	if (ret)
+		w_ret = NULL;
+
+out_sock:
+	close(sock);
+	return (int)(long)w_ret;
+}
+
 static int test_sc_cobalt_pselect64(void)
 {
 	long sc_nr = sc_cobalt_pselect64;
@@ -1506,7 +1595,10 @@ static int test_sc_cobalt_pselect64(void)
 			       t1.tv_sec, t1.tv_nsec, t2.tv_sec, t2.tv_nsec);
 
 out:
-	return ret;
+	if (ret)
+		return ret;
+
+	return test_pselect64_interruption();
 }
 
 static int check_kernel_version(void)

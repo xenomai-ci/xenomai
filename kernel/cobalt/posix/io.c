@@ -319,6 +319,15 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 		}
 	} while (err == -ECHRNG);
 
+out:
+	if (to && (err > 0 || err == -EINTR)) {
+		xnsticks_t diff = timeout - clock_get_ticks(CLOCK_MONOTONIC);
+		if (diff > 0)
+			ticks2ts64(to, diff);
+		else
+			to->tv_sec = to->tv_nsec = 0;
+	}
+
 	if (err == -EINTR && signal_pending(current)) {
 		xnthread_set_localinfo(curr, XNSYSRST);
 
@@ -327,15 +336,6 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 		restart->nanosleep.expires = timeout;
 
 		return -ERESTARTSYS;
-	}
-
-out:
-	if (to && (err > 0 || err == -EINTR)) {
-		xnsticks_t diff = timeout - clock_get_ticks(CLOCK_MONOTONIC);
-		if (diff > 0)
-			ticks2ts64(to, diff);
-		else
-			to->tv_sec = to->tv_nsec = 0;
 	}
 
 	if (err >= 0)
