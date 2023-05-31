@@ -22,6 +22,7 @@
 #include <linux/irq.h>
 #include <linux/slab.h>
 #include <linux/err.h>
+#include <linux/gpio/driver.h>
 #include <rtdm/gpio.h>
 
 struct rtdm_gpio_chan {
@@ -78,7 +79,7 @@ static int request_gpio_irq(unsigned int gpio, struct rtdm_gpio_pin *pin,
 	}
 
 	chan->has_direction = true;
-	gpio_export(gpio, true);
+	gpiod_export(pin->desc, true);
 
 	rtdm_event_clear(&pin->event);
 
