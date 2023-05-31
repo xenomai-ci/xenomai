@@ -30,8 +30,8 @@
 #ifdef __KERNEL__
 
 #include <asm/atomic.h>
+#include <linux/mutex.h>
 #include <linux/netdevice.h>
-#include <linux/semaphore.h>
 
 #include "rtcan_list.h"
 #include "rtcan_ethtool.h"
@@ -169,7 +169,7 @@ struct rtcan_device {
 };
 
 
-extern struct semaphore rtcan_devices_nrt_lock;
+extern struct mutex rtcan_devices_nrt_lock;
 
 
 void rtcan_dev_free(struct rtcan_device *dev);

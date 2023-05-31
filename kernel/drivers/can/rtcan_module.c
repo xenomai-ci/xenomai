@@ -125,7 +125,7 @@ static int rtcan_read_proc_devices(struct seq_file *p, void *data)
     struct rtcan_device *dev;
     char state_name[20], baudrate_name[20];
 
-    if (down_interruptible(&rtcan_devices_nrt_lock))
+    if (mutex_lock_interruptible(&rtcan_devices_nrt_lock))
 	return -ERESTARTSYS;
 
     /* Name___________ _Baudrate State___ _TX_Counts _TX_Counts ____Errors
@@ -149,7 +149,7 @@ static int rtcan_read_proc_devices(struct seq_file *p, void *data)
 	}
     }
 
-    up(&rtcan_devices_nrt_lock);
+    mutex_unlock(&rtcan_devices_nrt_lock);
 
     return 0;
 }
@@ -175,7 +175,7 @@ static int rtcan_read_proc_sockets(struct seq_file *p, void *data)
     rtdm_lockctx_t lock_ctx;
     int ifindex;
 
-    if (down_interruptible(&rtcan_devices_nrt_lock))
+    if (mutex_lock_interruptible(&rtcan_devices_nrt_lock))
 	return -ERESTARTSYS;
 
     /* Name___________ Filter ErrMask RX_Timeout TX_Timeout RX_BufFull TX_Lo
@@ -211,7 +211,7 @@ static int rtcan_read_proc_sockets(struct seq_file *p, void *data)
 
     rtdm_lock_put_irqrestore(&rtcan_recv_list_lock, lock_ctx);
 
-    up(&rtcan_devices_nrt_lock);
+    mutex_unlock(&rtcan_devices_nrt_lock);
 
     return 0;
 }
@@ -233,7 +233,7 @@ static int rtcan_read_proc_info(struct seq_file *p, void *data)
     char state_name[20], baudrate_name[20];
     char ctrlmode_name[80], bittime_name[80];
 
-    if (down_interruptible(&rtcan_devices_nrt_lock))
+    if (mutex_lock_interruptible(&rtcan_devices_nrt_lock))
 	return -ERESTARTSYS;
 
     rtcan_dev_get_state_name(dev->state,
@@ -260,7 +260,7 @@ static int rtcan_read_proc_info(struct seq_file *p, void *data)
     seq_printf(p, "Refcount   %d\n", atomic_read(&dev->refcount));
 #endif
 
-    up(&rtcan_devices_nrt_lock);
+    mutex_unlock(&rtcan_devices_nrt_lock);
 
     return 0;
 }

@@ -36,7 +36,7 @@
 static struct rtcan_device *rtcan_devices[RTCAN_MAX_DEVICES];
 static DEFINE_RTDM_LOCK(rtcan_devices_rt_lock);
 
-DEFINE_SEMAPHORE(rtcan_devices_nrt_lock);
+DEFINE_MUTEX(rtcan_devices_nrt_lock);
 
 /* Spinlock for all reception lists and also for some members in
  * struct rtcan_socket */
@@ -210,10 +210,10 @@ int rtcan_dev_register(struct rtcan_device *dev)
     rtdm_lockctx_t context;
     int ret;
 
-    down(&rtcan_devices_nrt_lock);
+    mutex_lock(&rtcan_devices_nrt_lock);
 
     if ((ret = __rtcan_dev_new_index()) < 0) {
-	up(&rtcan_devices_nrt_lock);
+	mutex_unlock(&rtcan_devices_nrt_lock);
 	return ret;
     }
     dev->ifindex = ret;
@@ -222,7 +222,7 @@ int rtcan_dev_register(struct rtcan_device *dev)
 	rtcan_dev_alloc_name(dev, dev->name);
 
     if (__rtcan_dev_get_by_name(dev->name) != NULL) {
-	up(&rtcan_devices_nrt_lock);
+	mutex_unlock(&rtcan_devices_nrt_lock);
 	return -EEXIST;
     }
 
@@ -233,7 +233,7 @@ int rtcan_dev_register(struct rtcan_device *dev)
     rtdm_lock_put_irqrestore(&rtcan_devices_rt_lock, context);
     rtcan_dev_create_proc(dev);
 
-    up(&rtcan_devices_nrt_lock);
+    mutex_unlock(&rtcan_devices_nrt_lock);
 
     printk("rtcan: registered %s\n", dev->name);
 
@@ -254,7 +254,7 @@ int rtcan_dev_unregister(struct rtcan_device *dev)
     if (CAN_STATE_OPERATING(dev->state))
 	return -EBUSY;
 
-    down(&rtcan_devices_nrt_lock);
+    mutex_lock(&rtcan_devices_nrt_lock);
 
     rtcan_dev_remove_proc(dev);
 
@@ -263,21 +263,21 @@ int rtcan_dev_unregister(struct rtcan_device *dev)
 #ifdef RTCAN_USE_REFCOUNT
     while (atomic_read(&dev->refcount) > 0) {
 	rtdm_lock_put_irqrestore(&rtcan_devices_rt_lock, context);
-	up(&rtcan_devices_nrt_lock);
+	mutex_unlock(&rtcan_devices_nrt_lock);
 
 	RTCAN_DBG("RTCAN: unregistering %s deferred (refcount = %d)\n",
 		  dev->name, atomic_read(&dev->refcount));
 	set_current_state(TASK_UNINTERRUPTIBLE);
 	schedule_timeout(1*HZ); /* wait a second */
 
-	down(&rtcan_devices_nrt_lock);
+	mutex_lock(&rtcan_devices_nrt_lock);
 	rtdm_lock_get_irqsave(&rtcan_devices_rt_lock, context);
     }
 #endif
     rtcan_devices[dev->ifindex - 1] = NULL;
 
     rtdm_lock_put_irqrestore(&rtcan_devices_rt_lock, context);
-    up(&rtcan_devices_nrt_lock);
+    mutex_unlock(&rtcan_devices_nrt_lock);
 
 #ifdef RTCAN_USE_REFCOUNT
     RTCAN_ASSERT(atomic_read(&dev->refcount) == 0,
