@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <linux/mutex.h>
 #include <linux/slab.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/heap.h>
@@ -209,7 +210,7 @@ void xnregistry_cleanup(void)
 
 #ifdef CONFIG_XENO_OPT_VFILE
 
-static DEFINE_SEMAPHORE(export_mutex);
+static DEFINE_MUTEX(export_mutex);
 
 /*
  * The following stuff implements the mechanism for delegating
@@ -232,7 +233,7 @@ static void proc_callback(struct work_struct *work)
 	int ret;
 	spl_t s;
 
-	down(&export_mutex);
+	mutex_lock(&export_mutex);
 
 	xnlock_get_irqsave(&nklock, s);
 
@@ -324,7 +325,7 @@ static void proc_callback(struct work_struct *work)
 
 	xnlock_put_irqrestore(&nklock, s);
 
-	up(&export_mutex);
+	mutex_unlock(&export_mutex);
 }
 
 static irqreturn_t registry_proc_schedule(int virq, void *dev_id)
