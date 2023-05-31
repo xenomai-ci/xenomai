@@ -1149,7 +1149,11 @@ int xnpipe_mount(void)
 		state->nroutq = 0;
 	}
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+	xnpipe_class = class_create("rtpipe");
+#else
 	xnpipe_class = class_create(THIS_MODULE, "rtpipe");
+#endif
 	if (IS_ERR(xnpipe_class)) {
 		printk(XENO_ERR "error creating rtpipe class, err=%ld\n",
 		       PTR_ERR(xnpipe_class));

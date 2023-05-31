@@ -630,7 +630,11 @@ int __init rtdm_init(void)
 {
 	xntree_init(&protocol_devices);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+	rtdm_class = class_create("rtdm");
+#else
 	rtdm_class = class_create(THIS_MODULE, "rtdm");
+#endif
 	if (IS_ERR(rtdm_class)) {
 		printk(XENO_ERR "cannot create RTDM sysfs class\n");
 		return PTR_ERR(rtdm_class);

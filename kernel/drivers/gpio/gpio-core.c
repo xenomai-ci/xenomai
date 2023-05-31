@@ -415,7 +415,11 @@ int rtdm_gpiochip_add(struct rtdm_gpio_chip *rgc,
 {
 	int ret;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+	rgc->devclass = class_create(gc->label);
+#else
 	rgc->devclass = class_create(gc->owner, gc->label);
+#endif
 	if (IS_ERR(rgc->devclass)) {
 		printk(XENO_ERR "cannot create sysfs class\n");
 		return PTR_ERR(rgc->devclass);

@@ -324,7 +324,11 @@ int __init rtnet_init(void)
 	printk("\n*** RTnet for Xenomai v" XENO_VERSION_STRING " ***\n\n");
 	printk("RTnet: initialising real-time networking\n");
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+	rtnet_class = class_create("rtnet");
+#else
 	rtnet_class = class_create(THIS_MODULE, "rtnet");
+#endif
 	if (IS_ERR(rtnet_class))
 		return PTR_ERR(rtnet_class);
 

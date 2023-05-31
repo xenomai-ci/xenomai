@@ -372,8 +372,11 @@ int __rtdm_spi_setup_driver(struct rtdm_spi_master *master)
 {
 	master->classname = kstrdup(
 		dev_name(&master->controller->dev), GFP_KERNEL);
-	master->devclass = class_create(THIS_MODULE,
-		master->classname);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+	master->devclass = class_create(master->classname);
+#else
+	master->devclass = class_create(THIS_MODULE, master->classname);
+#endif
 	if (IS_ERR(master->devclass)) {
 		kfree(master->classname);
 		printk(XENO_ERR "cannot create sysfs class\n");
