@@ -153,8 +153,8 @@ static int run_rtdm(struct smokey_test *t, int argc, char *const argv[])
 {
 	int dev, dev2, status;
 
-	status = system("modprobe -q xeno_rtdmtest");
-	if (status < 0 || WEXITSTATUS(status))
+	status = smokey_modprobe("xeno_rtdmtest", true);
+	if (status)
 		return -ENOSYS;
 
 	if (access(devname, 0) < 0 && errno == ENOENT)
@@ -195,7 +195,8 @@ static int run_rtdm(struct smokey_test *t, int argc, char *const argv[])
 	check("ioctl", ioctl(dev, RTTST_RTIOC_RTDM_DEFER_CLOSE,
 			     RTTST_RTDM_DEFER_CLOSE_CONTEXT), 0);
 	check("close", close(dev), 0);
-	check("rmmod", system("rmmod xeno_rtdmtest"), 0);
+
+	smokey_rmmod("xeno_rtdmtest");
 
 	return 0;
 }
