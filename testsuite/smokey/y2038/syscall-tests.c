@@ -124,6 +124,7 @@ static inline bool ts_less(const struct xn_timespec64 *a,
 struct thread_context {
 	int sc_nr;
 	int sock;
+	sem_t *sem;
 	pthread_mutex_t *mutex;
 	struct xn_timespec64 *ts;
 	bool timedwait_timecheck;
@@ -1472,6 +1473,7 @@ static void *pselect64_waiting_thread(void *arg)
 	/* Waiting for 1sec should be enough to get a signal */
 	ts.tv_sec = 1;
 	ts.tv_nsec = 0;
+	sem_post(ctx->sem);
 	ret = XENOMAI_SYSCALL5(ctx->sc_nr, sock + 1, &rfds, NULL, NULL, &ts);
 	if (!smokey_assert(ret == -EINTR)) {
 		ret = ret ?: -EINVAL;
@@ -1494,6 +1496,7 @@ static int test_pselect64_interruption(void)
 	struct thread_context ctx = { 0 };
 	void *w_ret = NULL;
 	pthread_t w;
+	sem_t sem;
 	int sock;
 	int ret;
 
@@ -1505,13 +1508,21 @@ static int test_pselect64_interruption(void)
 	if (sock < 0)
 		return sock;
 
+	ret = smokey_check_errno(sem_init(&sem, 0, 0));
+	if (ret)
+		return ret;
+
 	ctx.sock = sock;
 	ctx.sc_nr = sc_cobalt_pselect64;
+	ctx.sem = &sem;
 
 	ret = smokey_check_status(
 		pthread_create(&w, NULL, pselect64_waiting_thread, &ctx));
 	if (ret)
 		goto out_sock;
+
+	/* Wait for the waiting thread to be ready */
+	sem_wait(&sem);
 
 	/* Allow the waiting thread to enter the pselect64() syscall */
 	nanosleep(&ts, NULL);
@@ -1528,6 +1539,7 @@ static int test_pselect64_interruption(void)
 		w_ret = NULL;
 
 out_sock:
+	sem_destroy(&sem);
 	close(sock);
 	return (int)(long)w_ret;
 }
