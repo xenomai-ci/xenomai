@@ -156,7 +156,7 @@ static int run_thread(void *(*thread)(void *), void *arg, int exp_result)
 
 	res = (long)status;
 
-	return (res == exp_result) ? 0 : ret;
+	return (res == exp_result) ? 0 : res;
 }
 
 static int test_sc_cobalt_sem_timedwait64(void)
@@ -529,13 +529,13 @@ static int test_sc_cobalt_mutex_timedlock64(void)
 		return ret;
 
 	/*
-	 * mutex still locked, second thread has to fail with -EINVAL when
+	 * mutex still locked, second thread has to fail with -EFAULT when
 	 * submitting NULL as timeout
 	 */
 	ctx.sc_nr = sc_nr;
 	ctx.mutex = &mutex;
 	ctx.ts = NULL;
-	if (!__T(ret, run_thread(timedlock64_thread, &ctx, -EINVAL)))
+	if (!__T(ret, run_thread(timedlock64_thread, &ctx, -EFAULT)))
 		return ret;
 
 	/*
@@ -547,12 +547,12 @@ static int test_sc_cobalt_mutex_timedlock64(void)
 		return ret;
 
 	/*
-	 * mutex still locked, second thread has to fail with -EFAULT when
+	 * mutex still locked, second thread has to fail with -EINVAL when
 	 * submitting an invalid timeout (while the address is valid)
 	 */
 	ts64.tv_sec = -1;
 	ctx.ts = &ts64;
-	if (!__T(ret, run_thread(timedlock64_thread, &ctx, -EFAULT)))
+	if (!__T(ret, run_thread(timedlock64_thread, &ctx, -EINVAL)))
 		return ret;
 
 	/*
