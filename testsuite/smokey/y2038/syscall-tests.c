@@ -69,7 +69,7 @@ struct xn_timex64 {
 static void ts_normalise(struct xn_timespec64 *ts)
 {
 	while (ts->tv_nsec >= NSEC_PER_SEC) {
-		ts->tv_nsec += 1;
+		ts->tv_sec += 1;
 		ts->tv_nsec -= NSEC_PER_SEC;
 	}
 
