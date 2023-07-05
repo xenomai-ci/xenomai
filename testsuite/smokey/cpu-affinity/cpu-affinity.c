@@ -73,10 +73,10 @@ out:
 static int load_test_module(void)
 {
 	int fd, status;
-	
-	status = system("modprobe -q xeno_rtdmtest");
-	if (status < 0 || WEXITSTATUS(status))
-		return -ENOSYS;
+
+	status = smokey_modprobe("xeno_rtdmtest", true);
+	if (status)
+		return status;
 
 	/* Open the RTDM actor device. */
 	fd = open("/dev/rtdm/rtdmx", O_RDWR);
@@ -88,11 +88,8 @@ static int load_test_module(void)
 
 static void unload_test_module(int fd)
 {
-	int status;
-	
 	close(fd);
-	status = system("rmmod xeno_rtdmtest");
-	(void)status;
+	smokey_rmmod("xeno_rtdmtest");
 }
 
 static void *__run_cpu_affinity(void *arg)
