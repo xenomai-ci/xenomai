@@ -50,7 +50,7 @@ static void background_task(void *arg)
 {
 	char c = 'A', s[3];
 	ssize_t ret;
-	int n = 0;
+	unsigned int n = 0;
 
 	traceobj_enter(&trobj);
 
