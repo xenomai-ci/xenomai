@@ -1045,9 +1045,9 @@ AC_CONFIG_FILES([ \
 	testsuite/smokey/x86io/Makefile \
 	testsuite/smokey/alchemytests/Makefile \
 	testsuite/smokey/psostests/Makefile \
+	testsuite/smokey/vxworkstests/Makefile \
 	testsuite/clocktest/Makefile \
 	testsuite/xeno-test/Makefile \
-	testsuite/vxworkstests/Makefile \
 	utils/Makefile \
 	utils/hdb/Makefile \
 	utils/can/Makefile \
