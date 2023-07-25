@@ -45,17 +45,17 @@ static void foreground_task(void *arg)
 
 	traceobj_mark(&trobj, 4);
 
-	ret = rt_sem_v(&sem);
-	traceobj_check(&trobj, ret, 0);
-
-	traceobj_mark(&trobj, 5);
-
 	ret = rt_task_inquire(NULL, &info);
 	traceobj_assert(&trobj, ret == 0 && info.prio == 21);
 
-	traceobj_mark(&trobj, 6);
+	traceobj_mark(&trobj, 5);
 
 	ret = rt_task_set_priority(&t_bgnd, info.prio);
+	traceobj_check(&trobj, ret, 0);
+
+	traceobj_mark(&trobj, 6);
+
+	ret = rt_sem_v(&sem);
 	traceobj_check(&trobj, ret, 0);
 
 	traceobj_mark(&trobj, 7);
