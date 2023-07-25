@@ -49,11 +49,13 @@ static void realtime_task(void *arg)
 static void *regular_thread(void *arg)
 {
 	struct pipe_message m;
-	int fd, seq = 0;
+	int fd, res, seq = 0;
 	ssize_t ret;
 	char *rtp;
 
-	asprintf(&rtp, "/dev/rtp%d", minor);
+	res = asprintf(&rtp, "/dev/rtp%d", minor);
+	if (res < 0)
+		return NULL;
 
 	fd = open(rtp, O_RDWR);
 	free(rtp);
