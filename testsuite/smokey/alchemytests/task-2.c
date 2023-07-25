@@ -29,8 +29,10 @@ static void background_task(void *arg)
 
 	traceobj_mark(&trobj, 2);
 
-	while (--safety > 0)
+	while (--safety > 0) {
+		compiler_barrier();
 		count++;
+	}
 
 	traceobj_exit(&trobj);
 }
