@@ -11,7 +11,7 @@ static RT_TASK t_test;
 
 #define ONE_SECOND  1000000000ULL
 
-void sighandler(int sig)
+static void sighandler(int sig)
 {
 	/* nop */
 }
