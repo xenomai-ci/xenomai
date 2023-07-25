@@ -1041,10 +1041,13 @@ AC_CONFIG_FILES([ \
 	testsuite/smokey/cpu-affinity/Makefile \
 	testsuite/smokey/gdb/Makefile \
 	testsuite/smokey/y2038/Makefile \
-	testsuite/smokey/can/Makefile
-	testsuite/smokey/x86io/Makefile
+	testsuite/smokey/can/Makefile \
+	testsuite/smokey/x86io/Makefile \
+	testsuite/smokey/alchemytests/Makefile \
 	testsuite/clocktest/Makefile \
 	testsuite/xeno-test/Makefile \
+	testsuite/psostests/Makefile \
+	testsuite/vxworkstests/Makefile \
 	utils/Makefile \
 	utils/hdb/Makefile \
 	utils/can/Makefile \

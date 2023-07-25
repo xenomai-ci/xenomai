@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0
 #include <stdio.h>
 #include <stdlib.h>
 #include <copperplate/traceobj.h>
@@ -7,7 +8,7 @@
 static struct traceobj trobj;
 
 static int tseq[] = {
-	8, 1, 9, 4, 10, 5, 11, 2, 6, 7
+	8, 1, 9, 4, 10, 2, 11, 12, 3, 5, 13
 };
 
 static RT_TASK t_bgnd, t_fgnd;
@@ -16,7 +17,6 @@ static RT_SEM sem;
 
 static void background_task(void *arg)
 {
-	unsigned int safety = 100000000, count = 0;
 	int ret;
 
 	traceobj_enter(&trobj);
@@ -28,8 +28,17 @@ static void background_task(void *arg)
 
 	traceobj_mark(&trobj, 2);
 
-	while (--safety > 0)
-		count++;
+	ret = rt_task_suspend(&t_fgnd);
+	traceobj_check(&trobj, ret, 0);
+
+	rt_task_sleep(20000000ULL);
+
+	traceobj_mark(&trobj, 3);
+
+	ret = rt_task_resume(&t_fgnd);
+	traceobj_check(&trobj, ret, 0);
+
+	traceobj_mark(&trobj, 13);
 
 	traceobj_exit(&trobj);
 }
@@ -47,15 +56,6 @@ static void foreground_task(void *arg)
 
 	traceobj_mark(&trobj, 5);
 
-	rt_task_sleep(20000000ULL);
-
-	traceobj_mark(&trobj, 6);
-
-	ret = rt_task_delete(&t_bgnd);
-	traceobj_check(&trobj, ret, 0);
-
-	traceobj_mark(&trobj, 7);
-
 	traceobj_exit(&trobj);
 }
 
@@ -65,7 +65,7 @@ int main(int argc, char *const argv[])
 
 	traceobj_init(&trobj, argv[0], sizeof(tseq) / sizeof(int));
 
-	ret = rt_sem_create(&sem, "SEMA", 0, S_PRIO);
+	ret = rt_sem_create(&sem, "SEMA", 0, S_FIFO);
 	traceobj_check(&trobj, ret, 0);
 
 	traceobj_mark(&trobj, 8);
@@ -93,6 +93,8 @@ int main(int argc, char *const argv[])
 
 	ret = rt_sem_v(&sem);
 	traceobj_check(&trobj, ret, 0);
+
+	traceobj_mark(&trobj, 12);
 
 	traceobj_join(&trobj);
 
