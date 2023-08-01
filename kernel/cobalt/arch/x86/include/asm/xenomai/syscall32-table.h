@@ -24,9 +24,6 @@
  * table. Only preprocessor stuff and syscall entries here.
  */
 
-__COBALT_CALL32emu_THUNK(thread_create)
-__COBALT_CALL32emu_THUNK(thread_setschedparam_ex)
-__COBALT_CALL32emu_THUNK(thread_getschedparam_ex)
 __COBALT_CALL32emu_THUNK(thread_setschedprio)
 __COBALT_CALL32emu_THUNK(sem_open)
 __COBALT_CALL32emu_THUNK(sem_timedwait)
@@ -41,11 +38,6 @@ __COBALT_CALL32emu_THUNK(mq_getattr)
 __COBALT_CALL32emu_THUNK(mq_timedsend)
 __COBALT_CALL32emu_THUNK(mq_timedreceive)
 __COBALT_CALL32emu_THUNK(mq_notify)
-__COBALT_CALL32emu_THUNK(sched_weightprio)
-__COBALT_CALL32emu_THUNK(sched_setconfig_np)
-__COBALT_CALL32emu_THUNK(sched_getconfig_np)
-__COBALT_CALL32emu_THUNK(sched_setscheduler_ex)
-__COBALT_CALL32emu_THUNK(sched_getscheduler_ex)
 __COBALT_CALL32emu_THUNK(timer_create)
 __COBALT_CALL32emu_THUNK(timer_settime)
 __COBALT_CALL32emu_THUNK(timer_gettime)

@@ -26,25 +26,6 @@ struct cobalt_cond_shadow;
 struct cobalt_sem_shadow;
 struct cobalt_monitor_shadow;
 
-COBALT_SYSCALL32emu_DECL(thread_create,
-			 (compat_ulong_t pth,
-			  int policy,
-			  const struct compat_sched_param_ex __user *u_param_ex,
-			  int xid,
-			  __u32 __user *u_winoff));
-
-COBALT_SYSCALL32emu_DECL(thread_setschedparam_ex,
-			 (compat_ulong_t pth,
-			  int policy,
-			  const struct compat_sched_param_ex __user *u_param,
-			  __u32 __user *u_winoff,
-			  int __user *u_promoted));
-
-COBALT_SYSCALL32emu_DECL(thread_getschedparam_ex,
-			 (compat_ulong_t pth,
-			  int __user *u_policy,
-			  struct compat_sched_param_ex __user *u_param));
-
 COBALT_SYSCALL32emu_DECL(thread_setschedprio,
 			 (compat_ulong_t pth,
 			  int prio,
@@ -109,32 +90,6 @@ COBALT_SYSCALL32emu_DECL(mq_timedreceive64,
 
 COBALT_SYSCALL32emu_DECL(mq_notify,
 			 (mqd_t fd, const struct compat_sigevent *__user u_cev));
-
-COBALT_SYSCALL32emu_DECL(sched_weightprio,
-			 (int policy,
-			  const struct compat_sched_param_ex __user *u_param));
-
-COBALT_SYSCALL32emu_DECL(sched_setconfig_np,
-			 (int cpu, int policy,
-			  union compat_sched_config __user *u_config,
-			  size_t len));
-
-COBALT_SYSCALL32emu_DECL(sched_getconfig_np,
-			 (int cpu, int policy,
-			  union compat_sched_config __user *u_config,
-			  size_t len));
-
-COBALT_SYSCALL32emu_DECL(sched_setscheduler_ex,
-			 (compat_pid_t pid,
-			  int policy,
-			  const struct compat_sched_param_ex __user *u_param,
-			  __u32 __user *u_winoff,
-			  int __user *u_promoted));
-
-COBALT_SYSCALL32emu_DECL(sched_getscheduler_ex,
-			 (compat_pid_t pid,
-			  int __user *u_policy,
-			  struct compat_sched_param_ex __user *u_param));
 
 COBALT_SYSCALL32emu_DECL(timer_create,
 			 (clockid_t clock,
