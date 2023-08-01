@@ -242,6 +242,9 @@ typedef struct rtser_config {
 
 	/** enable RS485 mode, see @ref RTSER_RS485_xxx */
 	__s32		rs485;
+
+	/* anonymous padding for compat support */
+	int: 32;
 } rtser_config_t;
 
 /**
