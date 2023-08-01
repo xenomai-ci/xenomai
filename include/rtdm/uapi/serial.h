@@ -23,6 +23,8 @@
 #ifndef _RTDM_UAPI_SERIAL_H
 #define _RTDM_UAPI_SERIAL_H
 
+#include <linux/types.h>
+
 #define RTSER_PROFILE_VER		3
 
 /*!
@@ -198,27 +200,27 @@
  */
 typedef struct rtser_config {
 	/** mask specifying valid fields, see @ref RTSER_SET_xxx */
-	int		config_mask;
+	__s32		config_mask;
 
 	/** baud rate, default @ref RTSER_DEF_BAUD */
-	int		baud_rate;
+	__s32		baud_rate;
 
 	/** number of parity bits, see @ref RTSER_xxx_PARITY */
-	int		parity;
+	__s32		parity;
 
 	/** number of data bits, see @ref RTSER_xxx_BITS */
-	int		data_bits;
+	__s32		data_bits;
 
 	/** number of stop bits, see @ref RTSER_xxx_STOPB */
-	int		stop_bits;
+	__s32		stop_bits;
 
 	/** handshake mechanisms, see @ref RTSER_xxx_HAND */
-	int		handshake;
+	__s32		handshake;
 
 	/** reception FIFO interrupt threshold, see @ref RTSER_FIFO_xxx */
-	int		fifo_depth;
+	__s32		fifo_depth;
 
-	int		reserved;
+	__s32		reserved;
 
 	/** reception timeout, see @ref RTSER_TIMEOUT_xxx for special
 	 *  values */
@@ -232,14 +234,14 @@ typedef struct rtser_config {
 	nanosecs_rel_t	event_timeout;
 
 	/** enable timestamp history, see @ref RTSER_xxx_TIMESTAMP_HISTORY */
-	int		timestamp_history;
+	__s32		timestamp_history;
 
 	/** event mask to be used with @ref RTSER_RTIOC_WAIT_EVENT, see
 	 *  @ref RTSER_EVENT_xxx */
-	int		event_mask;
+	__s32		event_mask;
 
 	/** enable RS485 mode, see @ref RTSER_RS485_xxx */
-	int		rs485;
+	__s32		rs485;
 } rtser_config_t;
 
 /**
@@ -247,10 +249,10 @@ typedef struct rtser_config {
  */
 typedef struct rtser_status {
 	/** line status register, see @ref RTSER_LSR_xxx */
-	int		line_status;
+	__s32		line_status;
 
 	/** modem status register, see @ref RTSER_MSR_xxx */
-	int		modem_status;
+	__s32		modem_status;
 } rtser_status_t;
 
 /**
@@ -258,10 +260,10 @@ typedef struct rtser_status {
  */
 typedef struct rtser_event {
 	/** signalled events, see @ref RTSER_EVENT_xxx */
-	int		events;
+	__s32		events;
 
 	/** number of pending input characters */
-	int		rx_pending;
+	__s32		rx_pending;
 
 	/** last interrupt timestamp */
 	nanosecs_abs_t	last_timestamp;
