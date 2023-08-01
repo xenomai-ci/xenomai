@@ -33,11 +33,6 @@ static inline void ns2ts(struct timespec64 *ts, xnticks_t nsecs)
 	ts->tv_sec = xnclock_divrem_billion(nsecs, &ts->tv_nsec);
 }
 
-static inline void u_ns2ts(struct __user_old_timespec *ts, xnticks_t nsecs)
-{
-	ts->tv_sec = xnclock_divrem_billion(nsecs, &ts->tv_nsec);
-}
-
 static inline xnticks_t ts2ns(const struct timespec64 *ts)
 {
 	xnticks_t nsecs = ts->tv_nsec;
@@ -48,7 +43,7 @@ static inline xnticks_t ts2ns(const struct timespec64 *ts)
 	return nsecs;
 }
 
-static inline xnticks_t u_ts2ns(const struct __user_old_timespec *ts)
+static inline xnticks_t xnts64_2ns(const struct xn_ts64 *ts)
 {
 	xnticks_t nsecs = ts->tv_nsec;
 
@@ -69,6 +64,14 @@ static inline xnticks_t tv2ns(const struct __kernel_old_timeval *tv)
 }
 
 static inline void ticks2ts64(struct timespec64 *ts, xnticks_t ticks)
+{
+	unsigned long nsecs;
+
+	ts->tv_sec = xnclock_divrem_billion(ticks, &nsecs);
+	ts->tv_nsec = nsecs;
+}
+
+static inline void ticks2xnts64(struct xn_ts64 *ts, xnticks_t ticks)
 {
 	unsigned long nsecs;
 

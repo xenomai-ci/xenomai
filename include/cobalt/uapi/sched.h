@@ -33,15 +33,17 @@
 
 struct __sched_ss_param {
 	int __sched_low_priority;
-	struct __user_old_timespec __sched_repl_period;
-	struct __user_old_timespec __sched_init_budget;
+	int: 32;
+	struct xn_ts64 __sched_repl_period;
+	struct xn_ts64 __sched_init_budget;
 	int __sched_max_repl;
+	int: 32;
 };
 
 #define sched_rr_quantum	sched_u.rr.__sched_rr_quantum
 
 struct __sched_rr_param {
-	struct __user_old_timespec __sched_rr_quantum;
+	struct xn_ts64 __sched_rr_quantum;
 };
 
 #ifndef SCHED_TP
@@ -54,9 +56,10 @@ struct __sched_tp_param {
 };
 
 struct sched_tp_window {
-	struct __user_old_timespec offset;
-	struct __user_old_timespec duration;
+	struct xn_ts64 offset;
+	struct xn_ts64 duration;
 	int ptid;
+	int: 32;
 };
 
 enum {
@@ -122,6 +125,7 @@ struct __sched_config_quota {
 
 struct sched_param_ex {
 	int sched_priority;
+	int: 32;
 	union {
 		struct __sched_ss_param ss;
 		struct __sched_rr_param rr;

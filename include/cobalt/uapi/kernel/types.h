@@ -57,6 +57,11 @@ static inline xnhandle_t xnhandle_get_id(xnhandle_t handle)
 	return handle & ~XN_HANDLE_TRANSIENT_MASK;
 }
 
+struct xn_ts64 {
+	__s64 tv_sec;
+	__s64 tv_nsec;
+};
+
 /*
  * Our representation of time specs at the kernel<->user interface
  * boundary at the moment, until we have fully transitioned to a

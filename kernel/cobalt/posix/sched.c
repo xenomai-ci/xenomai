@@ -73,7 +73,7 @@ cobalt_sched_policy_param(union xnsched_policy_param *param,
 		break;
 	case SCHED_RR:
 		/* if unspecified, use current one. */
-		tslice = u_ts2ns(&param_ex->sched_rr_quantum);
+		tslice = xnts64_2ns(&param_ex->sched_rr_quantum);
 		if (tslice == XN_INFINITE && tslice_r)
 			tslice = *tslice_r;
 		fallthrough;
@@ -92,8 +92,8 @@ cobalt_sched_policy_param(union xnsched_policy_param *param,
 		param->pss.normal_prio = param_ex->sched_priority;
 		param->pss.low_prio = param_ex->sched_ss_low_priority;
 		param->pss.current_prio = param->pss.normal_prio;
-		param->pss.init_budget = u_ts2ns(&param_ex->sched_ss_init_budget);
-		param->pss.repl_period = u_ts2ns(&param_ex->sched_ss_repl_period);
+		param->pss.init_budget = xnts64_2ns(&param_ex->sched_ss_init_budget);
+		param->pss.repl_period = xnts64_2ns(&param_ex->sched_ss_repl_period);
 		param->pss.max_repl = param_ex->sched_ss_max_repl;
 		sched_class = &xnsched_class_sporadic;
 		break;
@@ -280,11 +280,11 @@ int set_tp_config(int cpu, union sched_config *config, size_t len)
 		 * be defined using windows assigned to the pseudo
 		 * partition #-1.
 		 */
-		offset = u_ts2ns(&p->offset);
+		offset = xnts64_2ns(&p->offset);
 		if (offset != next_offset)
 			goto cleanup_and_fail;
 
-		duration = u_ts2ns(&p->duration);
+		duration = xnts64_2ns(&p->duration);
 		if (duration <= 0)
 			goto cleanup_and_fail;
 
@@ -357,11 +357,11 @@ ssize_t get_tp_config(int cpu, void __user *u_config, size_t len,
 	config->tp.nr_windows = gps->pwin_nr;
 	for (n = 0, pp = p = config->tp.windows, pw = w = gps->pwins;
 	     n < gps->pwin_nr; pp = p, p++, pw = w, w++, n++) {
-		u_ns2ts(&p->offset, w->w_offset);
-		u_ns2ts(&pp->duration, w->w_offset - pw->w_offset);
+		ticks2xnts64(&p->offset, w->w_offset);
+		ticks2xnts64(&pp->duration, w->w_offset - pw->w_offset);
 		p->ptid = w->w_part;
 	}
-	u_ns2ts(&pp->duration, gps->tf_duration - pw->w_offset);
+	ticks2xnts64(&pp->duration, gps->tf_duration - pw->w_offset);
 	ret = put_config(SCHED_TP, u_config, len, config, elen);
 	xnfree(config);
 out:

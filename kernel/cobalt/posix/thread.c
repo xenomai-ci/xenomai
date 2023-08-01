@@ -302,7 +302,7 @@ int __cobalt_thread_getschedparam_ex(struct cobalt_thread *thread,
 
 	if (base_class == &xnsched_class_rt) {
 		if (xnthread_test_state(base_thread, XNRRB)) {
-			u_ns2ts(&param_ex->sched_rr_quantum, base_thread->rrperiod);
+			ticks2xnts64(&param_ex->sched_rr_quantum, base_thread->rrperiod);
 			*policy_r = SCHED_RR;
 		}
 		goto out;
@@ -318,8 +318,8 @@ int __cobalt_thread_getschedparam_ex(struct cobalt_thread *thread,
 #ifdef CONFIG_XENO_OPT_SCHED_SPORADIC
 	if (base_class == &xnsched_class_sporadic) {
 		param_ex->sched_ss_low_priority = base_thread->pss->param.low_prio;
-		u_ns2ts(&param_ex->sched_ss_repl_period, base_thread->pss->param.repl_period);
-		u_ns2ts(&param_ex->sched_ss_init_budget, base_thread->pss->param.init_budget);
+		ticks2xnts64(&param_ex->sched_ss_repl_period, base_thread->pss->param.repl_period);
+		ticks2xnts64(&param_ex->sched_ss_init_budget, base_thread->pss->param.init_budget);
 		param_ex->sched_ss_max_repl = base_thread->pss->param.max_repl;
 		goto out;
 	}
@@ -930,7 +930,7 @@ const char *cobalt_trace_parse_sched_params(struct trace_seq *p, int policy,
 		break;
 	case SCHED_SPORADIC:
 		trace_seq_printf(p, "priority=%d, low_priority=%d, "
-				 "budget=(%ld.%09ld), period=(%ld.%09ld), "
+				 "budget=(%lld.%09lld), period=(%lld.%09lld), "
 				 "maxrepl=%d",
 				 params->sched_priority,
 				 params->sched_ss_low_priority,
