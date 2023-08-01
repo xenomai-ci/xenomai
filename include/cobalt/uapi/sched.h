@@ -32,11 +32,11 @@
 #endif	/* !SCHED_SPORADIC */
 
 struct __sched_ss_param {
-	int __sched_low_priority;
+	__s32 __sched_low_priority;
 	int: 32;
 	struct xn_ts64 __sched_repl_period;
 	struct xn_ts64 __sched_init_budget;
-	int __sched_max_repl;
+	__s32 __sched_max_repl;
 	int: 32;
 };
 
@@ -52,13 +52,13 @@ struct __sched_rr_param {
 #endif	/* !SCHED_TP */
 
 struct __sched_tp_param {
-	int __sched_partition;
+	__s32 __sched_partition;
 };
 
 struct sched_tp_window {
 	struct xn_ts64 offset;
 	struct xn_ts64 duration;
-	int ptid;
+	__s32 ptid;
 	int: 32;
 };
 
@@ -70,8 +70,8 @@ enum {
 };
 	
 struct __sched_config_tp {
-	int op;
-	int nr_windows;
+	__s32 op;
+	__s32 nr_windows;
 	struct sched_tp_window windows[0];
 };
 
@@ -84,7 +84,7 @@ struct __sched_config_tp {
 #endif	/* !SCHED_QUOTA */
 
 struct __sched_quota_param {
-	int __sched_group;
+	__s32 __sched_group;
 };
 
 enum {
@@ -96,35 +96,35 @@ enum {
 };
 
 struct __sched_config_quota {
-	int op;
+	__s32 op;
 	union {
 		struct {
-			int pshared;
+			__s32 pshared;
 		} add;
 		struct {
-			int tgid;
+			__s32 tgid;
 		} remove;
 		struct {
-			int tgid;
-			int quota;
-			int quota_peak;
+			__s32 tgid;
+			__s32 quota;
+			__s32 quota_peak;
 		} set;
 		struct {
-			int tgid;
+			__s32 tgid;
 		} get;
 	};
 	struct __sched_quota_info {
-		int tgid;
-		int quota;
-		int quota_peak;
-		int quota_sum;
+		__s32 tgid;
+		__s32 quota;
+		__s32 quota_peak;
+		__s32 quota_sum;
 	} info;
 };
 
 #define sched_quota_confsz()  sizeof(struct __sched_config_quota)
 
 struct sched_param_ex {
-	int sched_priority;
+	__s32 sched_priority;
 	int: 32;
 	union {
 		struct __sched_ss_param ss;

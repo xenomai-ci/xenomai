@@ -45,9 +45,9 @@ struct cobalt_event_shadow {
 };
 
 struct cobalt_event_info {
-	unsigned int value;
-	int flags;
-	int nrwait;
+	__u32 value;
+	__s32 flags;
+	__s32 nrwait;
 };
 
 typedef struct cobalt_event_shadow cobalt_event_t;

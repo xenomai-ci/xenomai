@@ -46,8 +46,8 @@ struct cobalt_threadstat {
 	__u64 xsc;
 	__u32 status;
 	__u32 pf;
-	int cpu;
-	int cprio;
+	__s32 cpu;
+	__s32 cprio;
 	char name[XNOBJECT_NAME_LEN];
 	char personality[XNOBJECT_NAME_LEN];
 };

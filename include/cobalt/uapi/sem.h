@@ -40,9 +40,9 @@ union cobalt_sem_union {
 };
 
 struct cobalt_sem_info {
-	unsigned int value;
-	int flags;
-	int nrwait;
+	__u32 value;
+	__s32 flags;
+	__s32 nrwait;
 };
 
 #define SEM_FIFO       0x1
