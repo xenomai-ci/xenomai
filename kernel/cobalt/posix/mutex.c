@@ -355,7 +355,7 @@ COBALT_SYSCALL(mutex_lock, primary,
 static inline int mutex_fetch_timeout(struct timespec64 *ts,
 				      const void __user *u_ts)
 {
-	return u_ts == NULL ? -EFAULT : cobalt_get_u_timespec(ts, u_ts);
+	return u_ts == NULL ? -EFAULT : cobalt_get_old_timespec(ts, u_ts);
 }
 
 static inline int mutex_fetch_timeout64(struct timespec64 *ts,
@@ -366,7 +366,7 @@ static inline int mutex_fetch_timeout64(struct timespec64 *ts,
 
 COBALT_SYSCALL(mutex_timedlock, primary,
 	       (struct cobalt_mutex_shadow __user *u_mx,
-		const struct __user_old_timespec __user *u_ts))
+		const struct __kernel_old_timespec __user *u_ts))
 {
 	return __cobalt_mutex_timedlock_break(u_mx, u_ts, mutex_fetch_timeout);
 }

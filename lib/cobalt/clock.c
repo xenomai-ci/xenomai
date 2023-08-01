@@ -309,7 +309,7 @@ COBALT_IMPL(int, clock_adjtime, (clockid_t clock_id, struct timex *tx))
 {
 	int ret;
 
-#ifdef __USE_TIME_BITS64
+#ifdef XN_USE_TIME64_SYSCALL
 	ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_adjtime64, clock_id, tx);
 #else
 	ret = -XENOMAI_SYSCALL2(sc_cobalt_clock_adjtime, clock_id, tx);

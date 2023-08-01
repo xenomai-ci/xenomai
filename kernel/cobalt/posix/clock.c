@@ -76,7 +76,7 @@ int __cobalt_clock_getres(clockid_t clock_id, struct timespec64 *ts)
 }
 
 COBALT_SYSCALL(clock_getres, current,
-	       (clockid_t clock_id, struct __user_old_timespec __user *u_ts))
+	       (clockid_t clock_id, struct __kernel_old_timespec __user *u_ts))
 {
 	struct timespec64 ts;
 	int ret;
@@ -85,7 +85,7 @@ COBALT_SYSCALL(clock_getres, current,
 	if (ret)
 		return ret;
 
-	if (u_ts && cobalt_put_u_timespec(u_ts, &ts))
+	if (u_ts && cobalt_put_old_timespec(u_ts, &ts))
 		return -EFAULT;
 
 	trace_cobalt_clock_getres(clock_id, &ts);
@@ -141,7 +141,7 @@ int __cobalt_clock_gettime(clockid_t clock_id, struct timespec64 *ts)
 }
 
 COBALT_SYSCALL(clock_gettime, current,
-	       (clockid_t clock_id, struct __user_old_timespec __user *u_ts))
+	       (clockid_t clock_id, struct __kernel_old_timespec __user *u_ts))
 {
 	struct timespec64 ts;
 	int ret;
@@ -150,7 +150,7 @@ COBALT_SYSCALL(clock_gettime, current,
 	if (ret)
 		return ret;
 
-	if (cobalt_put_u_timespec(u_ts, &ts))
+	if (cobalt_put_old_timespec(u_ts, &ts))
 		return -EFAULT;
 
 	return 0;
@@ -216,11 +216,11 @@ int __cobalt_clock_adjtime(clockid_t clock_id, struct __kernel_timex *tx)
 }
 
 COBALT_SYSCALL(clock_settime, current,
-	       (clockid_t clock_id, const struct __user_old_timespec __user *u_ts))
+	       (clockid_t clock_id, const struct __kernel_old_timespec __user *u_ts))
 {
 	struct timespec64 ts;
 
-	if (cobalt_get_u_timespec(&ts, u_ts))
+	if (cobalt_get_old_timespec(&ts, u_ts))
 		return -EFAULT;
 
 	return __cobalt_clock_settime(clock_id, &ts);
@@ -238,8 +238,9 @@ COBALT_SYSCALL(clock_settime64, current,
 	return __cobalt_clock_settime(clock_id, &ts64);
 }
 
+/* Only used by 32 bit applications without time64_t support */
 COBALT_SYSCALL(clock_adjtime, current,
-	       (clockid_t clock_id, struct __user_old_timex __user *u_tx))
+	       (clockid_t clock_id, struct old_timex32 __user *u_tx))
 {
 	struct __kernel_timex tx;
 	int ret;
@@ -349,8 +350,8 @@ int __cobalt_clock_nanosleep(clockid_t clock_id, int flags,
 
 COBALT_SYSCALL(clock_nanosleep, primary,
 	       (clockid_t clock_id, int flags,
-		const struct __user_old_timespec __user *u_rqt,
-		struct __user_old_timespec __user *u_rmt))
+		const struct __kernel_old_timespec __user *u_rqt,
+		struct __kernel_old_timespec __user *u_rmt))
 {
 	struct timespec64 rqt, rmt, *rmtp = NULL;
 	int ret;
@@ -358,12 +359,12 @@ COBALT_SYSCALL(clock_nanosleep, primary,
 	if (u_rmt)
 		rmtp = &rmt;
 
-	if (cobalt_get_u_timespec(&rqt, u_rqt))
+	if (cobalt_get_old_timespec(&rqt, u_rqt))
 		return -EFAULT;
 
 	ret = __cobalt_clock_nanosleep(clock_id, flags, &rqt, rmtp);
 	if (ret == -EINTR && flags == 0 && rmtp) {
-		if (cobalt_put_u_timespec(u_rmt, rmtp))
+		if (cobalt_put_old_timespec(u_rmt, rmtp))
 			return -EFAULT;
 	}
 

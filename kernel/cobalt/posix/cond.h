@@ -58,7 +58,7 @@ COBALT_SYSCALL_DECL(cond_wait_prologue,
 		     struct cobalt_mutex_shadow __user *u_mx,
 		     int __user *u_err,
 		     unsigned int timed,
-		     struct __user_old_timespec __user *u_ts));
+		     struct __kernel_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(cond_wait_prologue64,
 		    (struct cobalt_cond_shadow __user *u_cnd,

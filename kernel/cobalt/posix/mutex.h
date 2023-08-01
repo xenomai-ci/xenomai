@@ -62,7 +62,7 @@ COBALT_SYSCALL_DECL(mutex_lock,
 
 COBALT_SYSCALL_DECL(mutex_timedlock,
 		    (struct cobalt_mutex_shadow __user *u_mx,
-		     const struct __user_old_timespec __user *u_ts));
+		     const struct __kernel_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(mutex_timedlock64,
 		    (struct cobalt_mutex_shadow __user *u_mx,

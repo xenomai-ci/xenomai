@@ -458,13 +458,13 @@ COBALT_SYSCALL(sem_wait, primary,
 
 COBALT_SYSCALL(sem_timedwait, primary,
 	       (struct cobalt_sem_shadow __user *u_sem,
-		const struct __user_old_timespec __user *u_ts))
+		const struct __kernel_old_timespec __user *u_ts))
 {
 	struct timespec64 ts64;
 	int ret = 1;
 
 	if (u_ts)
-		ret = cobalt_get_u_timespec(&ts64, u_ts);
+		ret = cobalt_get_old_timespec(&ts64, u_ts);
 
 	return __cobalt_sem_timedwait(u_sem, ret ? NULL : &ts64);
 }

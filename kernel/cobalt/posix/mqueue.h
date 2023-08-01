@@ -66,7 +66,7 @@ COBALT_SYSCALL_DECL(mq_getattr, (mqd_t uqd, struct mq_attr __user *u_attr));
 
 COBALT_SYSCALL_DECL(mq_timedsend,
 		    (mqd_t uqd, const void __user *u_buf, size_t len,
-		     unsigned int prio, const struct __user_old_timespec __user *u_ts));
+		     unsigned int prio, const struct __kernel_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(mq_timedsend64,
 		    (mqd_t uqd, const void __user *u_buf, size_t len,
@@ -76,7 +76,7 @@ COBALT_SYSCALL_DECL(mq_timedsend64,
 COBALT_SYSCALL_DECL(mq_timedreceive,
 		    (mqd_t uqd, void __user *u_buf, ssize_t __user *u_len,
 		     unsigned int __user *u_prio,
-		     const struct __user_old_timespec __user *u_ts));
+		     const struct __kernel_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(mq_timedreceive64,
 		    (mqd_t uqd, void __user *u_buf, ssize_t __user *u_len,

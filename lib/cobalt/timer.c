@@ -166,7 +166,7 @@ COBALT_IMPL(int, timer_settime, (timer_t timerid,
 {
 	int ret;
 
-#ifdef __USE_TIME_BITS64
+#ifdef XN_USE_TIME64_SYSCALL
 	long sc_nr = sc_cobalt_timer_settime64;
 #else
 	long sc_nr = sc_cobalt_timer_settime;
@@ -214,7 +214,7 @@ COBALT_IMPL(int, timer_gettime, (timer_t timerid, struct itimerspec *value))
 {
 	int ret;
 
-#ifdef __USE_TIME_BITS64
+#ifdef XN_USE_TIME64_SYSCALL
 	long sc_nr = sc_cobalt_timer_gettime64;
 #else
 	long sc_nr = sc_cobalt_timer_gettime;

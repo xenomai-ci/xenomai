@@ -58,7 +58,7 @@ COBALT_SYSCALL_DECL(monitor_exit,
 
 COBALT_SYSCALL_DECL(monitor_wait,
 		    (struct cobalt_monitor_shadow __user *u_monsh,
-		     int event, const struct __user_old_timespec __user *u_ts,
+		     int event, const struct __kernel_old_timespec __user *u_ts,
 		     int __user *u_ret));
 
 COBALT_SYSCALL_DECL(monitor_wait64,

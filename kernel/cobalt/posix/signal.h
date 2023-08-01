@@ -94,7 +94,7 @@ COBALT_SYSCALL_DECL(sigwait,
 COBALT_SYSCALL_DECL(sigtimedwait,
 		    (const sigset_t __user *u_set,
 		     struct siginfo __user *u_si,
-		     const struct __user_old_timespec __user *u_timeout));
+		     const struct __kernel_old_timespec __user *u_timeout));
 
 COBALT_SYSCALL_DECL(sigtimedwait64,
 		    (const sigset_t __user *u_set,

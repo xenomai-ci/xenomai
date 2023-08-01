@@ -296,7 +296,7 @@ out:
 
 COBALT_SYSCALL(monitor_wait, nonrestartable,
 	       (struct cobalt_monitor_shadow __user *u_mon,
-	       int event, const struct __user_old_timespec __user *u_ts,
+	       int event, const struct __kernel_old_timespec __user *u_ts,
 	       int __user *u_ret))
 {
 	struct timespec64 ts, *tsp = NULL;
@@ -304,7 +304,7 @@ COBALT_SYSCALL(monitor_wait, nonrestartable,
 
 	if (u_ts) {
 		tsp = &ts;
-		ret = cobalt_get_u_timespec(&ts, u_ts);
+		ret = cobalt_get_old_timespec(&ts, u_ts);
 		if (ret)
 			return ret;
 	}

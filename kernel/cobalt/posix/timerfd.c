@@ -279,15 +279,16 @@ out:
 	return ret;
 }
 
+/* Only used by 32 bit applications without time64_t support */
 COBALT_SYSCALL(timerfd_settime, primary,
 	       (int fd, int flags,
-		const struct __user_old_itimerspec __user *new_value,
-		struct __user_old_itimerspec __user *old_value))
+		const struct old_itimerspec32 __user *new_value,
+		struct old_itimerspec32 __user *old_value))
 {
 	struct itimerspec64 ovalue, value;
 	int ret;
 
-	ret = cobalt_get_u_itimerspec(&value, new_value);
+	ret = cobalt_get_itimerspec32(&value, new_value);
 	if (ret)
 		return ret;
 
@@ -296,7 +297,7 @@ COBALT_SYSCALL(timerfd_settime, primary,
 		return ret;
 
 	if (old_value) {
-		ret = cobalt_put_u_itimerspec(old_value, &ovalue);
+		ret = cobalt_put_itimerspec32(old_value, &ovalue);
 		value.it_value.tv_sec = 0;
 		value.it_value.tv_nsec = 0;
 		__cobalt_timerfd_settime(fd, flags, &value, NULL);
@@ -349,15 +350,16 @@ int __cobalt_timerfd_gettime(int fd, struct itimerspec64 *value)
 	return 0;
 }
 
+/* Only used by 32 bit applications without time64_t support */
 COBALT_SYSCALL(timerfd_gettime, current,
-	       (int fd, struct __user_old_itimerspec __user *curr_value))
+	       (int fd, struct old_itimerspec32 __user *curr_value))
 {
 	struct itimerspec64 value;
 	int ret;
 
 	ret = __cobalt_timerfd_gettime(fd, &value);
 
-	return ret ?: cobalt_put_u_itimerspec(curr_value, &value);
+	return ret ?: cobalt_put_itimerspec32(curr_value, &value);
 }
 
 COBALT_SYSCALL(timerfd_gettime64, current,

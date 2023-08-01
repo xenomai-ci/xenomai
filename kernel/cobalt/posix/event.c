@@ -194,14 +194,14 @@ COBALT_SYSCALL(event_wait, primary,
 	       (struct cobalt_event_shadow __user *u_event,
 		unsigned int bits,
 		unsigned int __user *u_bits_r,
-		int mode, const struct __user_old_timespec __user *u_ts))
+		int mode, const struct __kernel_old_timespec __user *u_ts))
 {
 	struct timespec64 ts, *tsp = NULL;
 	int ret;
 
 	if (u_ts) {
 		tsp = &ts;
-		ret = cobalt_get_u_timespec(&ts, u_ts);
+		ret = cobalt_get_old_timespec(&ts, u_ts);
 		if (ret)
 			return ret;
 	}

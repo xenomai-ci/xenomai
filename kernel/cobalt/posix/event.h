@@ -51,7 +51,7 @@ COBALT_SYSCALL_DECL(event_wait,
 		     unsigned int bits,
 		     unsigned int __user *u_bits_r,
 		     int mode,
-		     const struct __user_old_timespec __user *u_ts));
+		     const struct __kernel_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(event_wait64,
 		    (struct cobalt_event_shadow __user *u_evtsh,

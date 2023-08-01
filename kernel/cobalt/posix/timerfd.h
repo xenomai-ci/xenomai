@@ -33,8 +33,8 @@ COBALT_SYSCALL_DECL(timerfd_create,
 
 COBALT_SYSCALL_DECL(timerfd_settime,
 		    (int fd, int flags,
-		     const struct __user_old_itimerspec __user *new_value,
-		     struct __user_old_itimerspec __user *old_value));
+		     const struct old_itimerspec32 __user *new_value,
+		     struct old_itimerspec32 __user *old_value));
 
 COBALT_SYSCALL_DECL(timerfd_settime64,
 		    (int fd, int flags,
@@ -42,7 +42,7 @@ COBALT_SYSCALL_DECL(timerfd_settime64,
 		     struct __kernel_itimerspec __user *old_value));
 
 COBALT_SYSCALL_DECL(timerfd_gettime,
-		    (int fd, struct __user_old_itimerspec __user *curr_value));
+		    (int fd, struct old_itimerspec32 __user *curr_value));
 
 COBALT_SYSCALL_DECL(timerfd_gettime64,
 		    (int fd, struct __kernel_itimerspec __user *curr_value));

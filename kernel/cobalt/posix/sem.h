@@ -89,7 +89,7 @@ COBALT_SYSCALL_DECL(sem_wait,
 
 COBALT_SYSCALL_DECL(sem_timedwait,
 		    (struct cobalt_sem_shadow __user *u_sem,
-		     const struct __user_old_timespec __user *u_ts));
+		     const struct __kernel_old_timespec __user *u_ts));
 
 COBALT_SYSCALL_DECL(sem_timedwait64,
 		    (struct cobalt_sem_shadow __user *u_sem,

@@ -73,10 +73,11 @@ static inline int cobalt_strncpy_from_user(char *dst, const char __user *src,
  * sys32_get_*(), sys32_put_*() instead.
  */
 
-static inline int cobalt_get_u_timespec(struct timespec64 *dst,
-			const struct __user_old_timespec __user *src)
+static inline int
+cobalt_get_old_timespec(struct timespec64 *dst,
+			const struct __kernel_old_timespec __user *src)
 {
-	struct __user_old_timespec u_ts;
+	struct __kernel_old_timespec u_ts;
 	int ret;
 
 	ret = cobalt_copy_from_user(&u_ts, src, sizeof(u_ts));
@@ -89,11 +90,11 @@ static inline int cobalt_get_u_timespec(struct timespec64 *dst,
 	return 0;
 }
 
-static inline int cobalt_put_u_timespec(
-	struct __user_old_timespec __user *dst,
-	const struct timespec64 *src)
+static inline int
+cobalt_put_old_timespec(struct __kernel_old_timespec __user *dst,
+			const struct timespec64 *src)
 {
-	struct __user_old_timespec u_ts;
+	struct __kernel_old_timespec u_ts;
 	int ret;
 
 	u_ts.tv_sec = src->tv_sec;
@@ -106,10 +107,11 @@ static inline int cobalt_put_u_timespec(
 	return 0;
 }
 
-static inline int cobalt_get_u_itimerspec(struct itimerspec64 *dst,
-			const struct __user_old_itimerspec __user *src)
+static inline int
+cobalt_get_itimerspec32(struct itimerspec64 *dst,
+			const struct old_itimerspec32 __user *src)
 {
-	struct __user_old_itimerspec u_its;
+	struct old_itimerspec32 u_its;
 	int ret;
 
 	ret = cobalt_copy_from_user(&u_its, src, sizeof(u_its));
@@ -124,11 +126,10 @@ static inline int cobalt_get_u_itimerspec(struct itimerspec64 *dst,
 	return 0;
 }
 
-static inline int cobalt_put_u_itimerspec(
-	struct __user_old_itimerspec __user *dst,
-	const struct itimerspec64 *src)
+static inline int cobalt_put_itimerspec32(struct old_itimerspec32 __user *dst,
+					  const struct itimerspec64 *src)
 {
-	struct __user_old_itimerspec u_its;
+	struct old_itimerspec32 u_its;
 
 	u_its.it_interval.tv_sec = src->it_interval.tv_sec;
 	u_its.it_interval.tv_nsec = src->it_interval.tv_nsec;
