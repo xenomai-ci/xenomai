@@ -40,12 +40,18 @@ COBALT_SUBDIRS = 	\
 	tsc		\
 	vdso-access 	\
 	xddp		\
-	y2038
+	y2038		\
+	alchemytests	\
+	vxworkstests	\
+	psostests
 
 MERCURY_SUBDIRS =	\
 	memory-heapmem	\
 	memory-tlsf	\
-	memcheck
+	memcheck	\
+	alchemytests	\
+	vxworkstests	\
+	psostests
 
 DIST_SUBDIRS = 		\
 	arith 		\
@@ -80,7 +86,10 @@ DIST_SUBDIRS = 		\
 	tsc		\
 	vdso-access 	\
 	xddp		\
-	y2038
+	y2038		\
+	alchemytests	\
+	vxworkstests	\
+	psostests
 
 if XENO_X86
 DIST_SUBDIRS += x86io
