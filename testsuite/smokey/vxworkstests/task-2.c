@@ -21,7 +21,7 @@ static int tseq[] = {
 
 static TASK_ID btid, ftid;
 
-static SEM_ID sem_id;
+static SEM_ID sem_id, fdone_sem_id;
 
 static void backgroundTask(long arg, ...)
 {
@@ -71,6 +71,9 @@ static void foregroundTask(long arg, ...)
 
 	traceobj_mark(&trobj, 7);
 
+	ret = semGive(fdone_sem_id);
+	traceobj_assert(&trobj, ret == OK);
+
 	traceobj_exit(&trobj);
 }
 
@@ -82,6 +85,9 @@ int main(int argc, char *const argv[])
 
 	sem_id = semCCreate(SEM_Q_PRIORITY, 0);
 	traceobj_assert(&trobj, sem_id != 0);
+
+	fdone_sem_id = semCCreate(SEM_Q_PRIORITY, 0);
+	traceobj_assert(&trobj, fdone_sem_id != 0);
 
 	traceobj_mark(&trobj, 8);
 
@@ -105,6 +111,9 @@ int main(int argc, char *const argv[])
 
 	ret = semGive(sem_id);
 
+	traceobj_assert(&trobj, ret == OK);
+
+	ret = semTake(fdone_sem_id, WAIT_FOREVER);
 	traceobj_assert(&trobj, ret == OK);
 
 	traceobj_mark(&trobj, 12);
