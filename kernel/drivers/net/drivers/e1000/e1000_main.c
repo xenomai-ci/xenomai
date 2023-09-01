@@ -705,10 +705,10 @@ static int e1000_probe(struct pci_dev *pdev,
 	if ((err = pci_enable_device(pdev)))
 		return err;
 
-	if ((err = pci_set_dma_mask(pdev, DMA_BIT_MASK(64))) ||
-	    (err = pci_set_consistent_dma_mask(pdev, DMA_BIT_MASK(64)))) {
-		if ((err = pci_set_dma_mask(pdev, DMA_BIT_MASK(32))) &&
-		    (err = pci_set_consistent_dma_mask(pdev, DMA_BIT_MASK(32)))) {
+	if ((err = dma_set_mask(&pdev->dev, DMA_BIT_MASK(64))) ||
+	    (err = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(64)))) {
+		if ((err = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32))) &&
+		    (err = dma_set_coherent_mask(&pdev->dev, DMA_BIT_MASK(32)))) {
 			E1000_ERR("No usable DMA configuration, aborting\n");
 			return err;
 		}

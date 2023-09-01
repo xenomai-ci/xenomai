@@ -1184,8 +1184,8 @@ int rt2x00_pci_probe(struct pci_dev *pci_dev, const struct pci_device_id *id)
 
 	pci_set_master(pci_dev);
 
-	if (pci_set_dma_mask(pci_dev, DMA_BIT_MASK(64)) &&
-	    pci_set_dma_mask(pci_dev, DMA_BIT_MASK(32))) {
+	if (dma_set_mask(&pci_dev->dev, DMA_BIT_MASK(64)) &&
+	    dma_set_mask(&pci_dev->dev, DMA_BIT_MASK(32))) {
 		ERROR("PCI DMA not supported\n");
 		status = -EIO;
 		goto exit_disable_device;
