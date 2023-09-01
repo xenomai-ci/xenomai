@@ -40,8 +40,10 @@
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,2,0)
 #include <asm/i387.h>
 #include <asm/fpu-internal.h>
-#else
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(4,2,0) && \
+      LINUX_VERSION_CODE < KERNEL_VERSION(5,16,0)
 #include <asm/fpu/internal.h>
+#else
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4,0,0)
