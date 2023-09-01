@@ -27,6 +27,7 @@
 #include <linux/spinlock.h>
 #include <linux/device.h>
 #include <linux/uaccess.h>
+#include <linux/compat.h>
 #include <asm/io.h>
 #include <asm/xenomai/syscall.h>
 #include <cobalt/kernel/sched.h>
