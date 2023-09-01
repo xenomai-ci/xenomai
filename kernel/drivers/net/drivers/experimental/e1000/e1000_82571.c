@@ -200,7 +200,7 @@ static s32 e1000_init_nvm_params_82571(struct e1000_hw *hw)
 			E1000_WRITE_REG(hw, E1000_EECD, eecd);
 			break;
 		}
-		/* Fall Through */
+		fallthrough;
 	default:
 		nvm->type	= e1000_nvm_eeprom_spi;
 		size = (u16)((eecd & E1000_EECD_SIZE_EX_MASK) >>
