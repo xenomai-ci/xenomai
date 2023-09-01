@@ -265,7 +265,7 @@ static int rtcan_read_proc_info(struct seq_file *p, void *data)
 
 static int rtcan_proc_info_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, rtcan_read_proc_info, PDE_DATA(inode));
+	return single_open(file, rtcan_read_proc_info, pde_data(inode));
 }
 
 static const DEFINE_PROC_OPS(rtcan_proc_info_ops,
@@ -310,7 +310,7 @@ static int rtcan_read_proc_filter(struct seq_file *p, void *data)
 
 static int rtcan_proc_filter_open(struct inode *inode, struct file *file)
 {
-	return single_open(file, rtcan_read_proc_filter, PDE_DATA(inode));
+	return single_open(file, rtcan_read_proc_filter, pde_data(inode));
 }
 
 static const DEFINE_PROC_OPS(rtcan_proc_filter_ops,

@@ -146,7 +146,7 @@ static void vfile_snapshot_free(struct xnvfile_snapshot_iterator *it, void *buf)
 
 static int vfile_snapshot_open(struct inode *inode, struct file *file)
 {
-	struct xnvfile_snapshot *vfile = PDE_DATA(inode);
+	struct xnvfile_snapshot *vfile = pde_data(inode);
 	struct xnvfile_snapshot_ops *ops = vfile->ops;
 	struct xnvfile_snapshot_iterator *it;
 	int revtag, ret, nrdata;
@@ -318,7 +318,7 @@ ssize_t vfile_snapshot_write(struct file *file, const char __user *buf,
 			     size_t size, loff_t *ppos)
 {
 	struct xnvfile_snapshot *vfile =
-		PDE_DATA(file->f_path.dentry->d_inode);
+		pde_data(file->f_path.dentry->d_inode);
 	struct xnvfile_input input;
 	ssize_t ret;
 
@@ -497,7 +497,7 @@ static struct seq_operations vfile_regular_ops = {
 
 static int vfile_regular_open(struct inode *inode, struct file *file)
 {
-	struct xnvfile_regular *vfile = PDE_DATA(inode);
+	struct xnvfile_regular *vfile = pde_data(inode);
 	struct xnvfile_regular_ops *ops = vfile->ops;
 	struct xnvfile_regular_iterator *it;
 	struct seq_file *seq;
@@ -566,7 +566,7 @@ ssize_t vfile_regular_write(struct file *file, const char __user *buf,
 			    size_t size, loff_t *ppos)
 {
 	struct xnvfile_regular *vfile =
-		PDE_DATA(file->f_path.dentry->d_inode);
+		pde_data(file->f_path.dentry->d_inode);
 	struct xnvfile_input input;
 	ssize_t ret;
 
