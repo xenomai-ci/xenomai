@@ -520,7 +520,6 @@ struct irqswitch_work {
 	rtdm_irq_t *irqh;
 	int enabled;
 	rtdm_event_t *done;
-	struct irqswitch_work *self; /* Revisit: I-pipe requirement */
 };
 
 static void lostage_irqswitch_line(struct pipeline_inband_work *inband_work)
@@ -540,7 +539,7 @@ static void lostage_irqswitch_line(struct pipeline_inband_work *inband_work)
 	if (rq->done)
 		rtdm_event_signal(rq->done);
 
-	xnfree(rq->self);
+	xnfree(rq);
 }
 
 static void switch_irq_line(rtdm_irq_t *irqh, int enable, rtdm_event_t *done)
@@ -556,7 +555,6 @@ static void switch_irq_line(rtdm_irq_t *irqh, int enable, rtdm_event_t *done)
 	rq->irqh = irqh;
 	rq->enabled = enable;
 	rq->done = done;
-	rq->self = rq;	/* Revisit: I-pipe requirement */
 
 	/*
 	 * Not pretty, but we may not traverse the kernel code for
