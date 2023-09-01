@@ -1289,7 +1289,7 @@ static void rtl8169_init_ring (struct rtnet_device *rtdev)
 
 	for (i=0 ; i<NUM_TX_DESC ; i++){
 		priv->Tx_skbuff[i]=NULL;
-		priv->txdesc_array_dma_addr[i] = pci_map_single(pdev, &priv->TxDescArray[i], sizeof(struct TxDesc), PCI_DMA_TODEVICE);
+		priv->txdesc_array_dma_addr[i] = dma_map_single(&pdev->dev, &priv->TxDescArray[i], sizeof(struct TxDesc), DMA_TO_DEVICE);
 	}
 
 	for (i=0; i <NUM_RX_DESC; i++) {
@@ -1302,7 +1302,7 @@ static void rtl8169_init_ring (struct rtnet_device *rtdev)
 
 		{//-----------------------------------------------------------------------
 			skb = priv->Rx_skbuff[i];
-			priv->rx_skbuff_dma_addr[i] = pci_map_single(pdev, skb->data, priv->rx_buf_size /* MAX_RX_SKBDATA_SIZE */, PCI_DMA_FROMDEVICE);	/*** <kk> ***/
+			priv->rx_skbuff_dma_addr[i] = dma_map_single(&pdev->dev, skb->data, priv->rx_buf_size /* MAX_RX_SKBDATA_SIZE */, DMA_FROM_DEVICE);	/*** <kk> ***/
 
 			if( skb != NULL ){
 				priv->RxDescArray[i].buf_addr = cpu_to_le32(priv->rx_skbuff_dma_addr[i]);
@@ -1313,7 +1313,7 @@ static void rtl8169_init_ring (struct rtnet_device *rtdev)
 				priv->drvinit_fail = 1;
 			}
 		}//-----------------------------------------------------------------------
-		priv->rxdesc_array_dma_addr[i] = pci_map_single(pdev, &priv->RxDescArray[i], sizeof(struct RxDesc), PCI_DMA_TODEVICE);
+		priv->rxdesc_array_dma_addr[i] = dma_map_single(&pdev->dev, &priv->RxDescArray[i], sizeof(struct RxDesc), DMA_TO_DEVICE);
 		pci_dma_sync_single_for_device(pdev, priv->rxdesc_array_dma_addr[i], sizeof(struct RxDesc), PCI_DMA_TODEVICE);
 	}
 }
@@ -1382,7 +1382,7 @@ static int rtl8169_start_xmit (struct rtskb *skb, struct rtnet_device *rtdev)
 			len = ETH_ZLEN;
 		}
 
-		txbuf_dma_addr = pci_map_single(pdev, skb->data, len, PCI_DMA_TODEVICE);
+		txbuf_dma_addr = dma_map_single(&pdev->dev, skb->data, len, DMA_TO_DEVICE);
 
 		priv->TxDescArray[entry].buf_addr = cpu_to_le32(txbuf_dma_addr);
 
@@ -1508,7 +1508,7 @@ static void rtl8169_tx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 #endif //end #ifdef RTL8169_DYNAMIC_CONTROL
 
 			if (priv->txdesc_array_dma_addr[entry])
-				pci_unmap_single(priv->pci_dev, priv->txdesc_array_dma_addr[entry], priv->Tx_skbuff[entry]->len, PCI_DMA_TODEVICE);	/*** ##KK## ***/
+				dma_unmap_single(&priv->pci_dev->dev, priv->txdesc_array_dma_addr[entry], priv->Tx_skbuff[entry]->len, DMA_TO_DEVICE);	/*** ##KK## ***/
 			dev_kfree_rtskb( priv->Tx_skbuff[entry] );	/*** RTnet; previously: dev_kfree_skb_irq() - luckily we're within an IRQ ***/
 			priv->Tx_skbuff[entry] = NULL;
 			priv->stats.tx_packets++;
@@ -1630,7 +1630,7 @@ static void rtl8169_rx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 				cur_skb = priv->Rx_skbuff[cur_rx];
 
 				if( cur_skb != NULL ){
-					priv->rx_skbuff_dma_addr[cur_rx] = pci_map_single(pdev, cur_skb->data, priv->rx_buf_size /* <kk> MAX_RX_SKBDATA_SIZE */, PCI_DMA_FROMDEVICE);
+					priv->rx_skbuff_dma_addr[cur_rx] = dma_map_single(&pdev->dev, cur_skb->data, priv->rx_buf_size /* <kk> MAX_RX_SKBDATA_SIZE */, DMA_FROM_DEVICE);
 					rxdesc->buf_addr = cpu_to_le32(priv->rx_skbuff_dma_addr[cur_rx]);
 				}
 				else{

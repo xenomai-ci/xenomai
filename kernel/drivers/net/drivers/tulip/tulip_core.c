@@ -333,9 +333,9 @@ static void tulip_up(/*RTnet*/struct rtnet_device *rtdev)
 		*setup_frm++ = eaddrs[1]; *setup_frm++ = eaddrs[1];
 		*setup_frm++ = eaddrs[2]; *setup_frm++ = eaddrs[2];
 
-		mapping = pci_map_single(tp->pdev, tp->setup_frame,
+		mapping = dma_map_single(&tp->pdev->dev, tp->setup_frame,
 					 sizeof(tp->setup_frame),
-					 PCI_DMA_TODEVICE);
+					 DMA_TO_DEVICE);
 		tp->tx_buffers[tp->cur_tx].skb = NULL;
 		tp->tx_buffers[tp->cur_tx].mapping = mapping;
 
@@ -537,7 +537,8 @@ static void tulip_init_ring(/*RTnet*/struct rtnet_device *rtdev)
 		tp->rx_buffers[i].skb = skb;
 		if (skb == NULL)
 			break;
-		mapping = pci_map_single(tp->pdev, skb->tail, PKT_BUF_SZ, PCI_DMA_FROMDEVICE);
+		mapping = dma_map_single(&tp->pdev->dev, skb->tail, PKT_BUF_SZ,
+					 DMA_FROM_DEVICE);
 		tp->rx_buffers[i].mapping = mapping;
 		tp->rx_ring[i].status = cpu_to_le32(DescOwned);	/* Owned by Tulip chip */
 		tp->rx_ring[i].buffer1 = cpu_to_le32(mapping);
@@ -582,7 +583,8 @@ tulip_start_xmit(struct /*RTnet*/rtskb *skb, /*RTnet*/struct rtnet_device *rtdev
 	entry = tp->cur_tx % TX_RING_SIZE;
 
 	tp->tx_buffers[entry].skb = skb;
-	mapping = pci_map_single(tp->pdev, skb->data, skb->len, PCI_DMA_TODEVICE);
+	mapping = dma_map_single(&tp->pdev->dev, skb->data, skb->len,
+				 DMA_TO_DEVICE);
 	tp->tx_buffers[entry].mapping = mapping;
 	tp->tx_ring[entry].buffer1 = cpu_to_le32(mapping);
 
@@ -642,16 +644,16 @@ static void tulip_clean_tx_ring(struct tulip_private *tp)
 		if (tp->tx_buffers[entry].skb == NULL) {
 			/* test because dummy frames not mapped */
 			if (tp->tx_buffers[entry].mapping)
-				pci_unmap_single(tp->pdev,
+				dma_unmap_single(&tp->pdev->dev,
 					tp->tx_buffers[entry].mapping,
 					sizeof(tp->setup_frame),
-					PCI_DMA_TODEVICE);
+					DMA_TO_DEVICE);
 			continue;
 		}
 
-		pci_unmap_single(tp->pdev, tp->tx_buffers[entry].mapping,
+		dma_unmap_single(&tp->pdev->dev, tp->tx_buffers[entry].mapping,
 				tp->tx_buffers[entry].skb->len,
-				PCI_DMA_TODEVICE);
+				DMA_TO_DEVICE);
 
 		/* Free the original skb. */
 		/*RTnet*/dev_kfree_rtskb(tp->tx_buffers[entry].skb);
@@ -731,8 +733,8 @@ static int tulip_close (/*RTnet*/struct rtnet_device *rtdev)
 		tp->rx_ring[i].length = 0;
 		tp->rx_ring[i].buffer1 = 0xBADF00D0;	/* An invalid address. */
 		if (skb) {
-			pci_unmap_single(tp->pdev, mapping, PKT_BUF_SZ,
-					 PCI_DMA_FROMDEVICE);
+			dma_unmap_single(&tp->pdev->dev, mapping, PKT_BUF_SZ,
+					 DMA_FROM_DEVICE);
 			/*RTnet*/dev_kfree_rtskb (skb);
 		}
 	}
@@ -740,8 +742,9 @@ static int tulip_close (/*RTnet*/struct rtnet_device *rtdev)
 		struct /*RTnet*/rtskb *skb = tp->tx_buffers[i].skb;
 
 		if (skb != NULL) {
-			pci_unmap_single(tp->pdev, tp->tx_buffers[i].mapping,
-					 skb->len, PCI_DMA_TODEVICE);
+			dma_unmap_single(&tp->pdev->dev,
+					 tp->tx_buffers[i].mapping,
+					 skb->len, DMA_TO_DEVICE);
 			/*RTnet*/dev_kfree_rtskb (skb);
 		}
 		tp->tx_buffers[i].skb = NULL;
