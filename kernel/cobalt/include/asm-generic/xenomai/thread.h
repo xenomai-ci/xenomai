@@ -21,4 +21,7 @@ struct task_struct *xnarch_host_task(struct xnarchtcb *tcb)
 	return tcb->altsched.task;
 }
 
+int xnarch_setup_trap_info(unsigned int vector, struct pt_regs *regs,
+			   int *sig, struct kernel_siginfo *info);
+
 #endif /* !_COBALT_ASM_GENERIC_THREAD_H */

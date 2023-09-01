@@ -19,6 +19,7 @@
 #include <linux/types.h>
 #include <linux/err.h>
 #include <linux/sched.h>
+#include <linux/sched/task_stack.h>
 #include <linux/kconfig.h>
 #include <linux/unistd.h>
 #include <cobalt/uapi/corectl.h>
@@ -274,14 +275,20 @@ static COBALT_SYSCALL(sigreturn, current, (void))
 	int ret;
 
 	ret = dovetail_restore_rt_signal_frame(regs);
-	if (ret < 0)
-		goto badframe;
+	if (ret < 0) {
+		struct xnthread *thread = xnthread_current();
+		spl_t s;
+
+		xnlock_get_irqsave(&nklock, s);
+
+		xnthread_set_info(thread, XNKICKED);
+		__xnthread_signal(thread, SIGSEGV, 0);
+
+		xnlock_put_irqrestore(&nklock, s);
+		return ret;
+	}
 
 	return __xn_reg_rval(regs);
-
-badframe:
-	xnthread_signal(xnthread_current(), SIGSEGV, 0);
-	return -1;
 }
 
 static COBALT_SYSCALL(sigaction, current, (int sig, void __user *handler,

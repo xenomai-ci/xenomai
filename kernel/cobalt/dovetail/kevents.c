@@ -56,7 +56,8 @@ void handle_oob_trap_entry(unsigned int trapnr, struct pt_regs *regs)
 		xnsched_run();
 	}
 
-	if (xnthread_handle_rt_signals(trapnr, regs) == 0)
+	if (xnthread_test_state(thread, XNUSER) &&
+	    xnthread_handle_rt_signals(trapnr, regs))
 		return;
 
 	/*

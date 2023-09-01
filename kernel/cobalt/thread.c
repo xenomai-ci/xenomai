@@ -25,7 +25,6 @@
 #include <linux/signal.h>
 #include <linux/pid.h>
 #include <linux/sched.h>
-#include <asm/sighandling.h>
 #include <uapi/linux/sched/types.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/timer.h>
@@ -2516,28 +2515,27 @@ int xnthread_killall(int grace, int mask)
 }
 EXPORT_SYMBOL_GPL(xnthread_killall);
 
-int xnthread_handle_rt_signals(unsigned int trapnr, struct pt_regs *regs)
+bool xnthread_handle_rt_signals(unsigned int trapnr, struct pt_regs *regs)
 {
-	unsigned int code = xnarch_fault_code(regs);
-	unsigned int vector = trapnr;
 	struct cobalt_ppd *sys_ppd;
 	struct kernel_siginfo si;
 	struct ksignal ksig;
-	int sig, ret = 0;
+	int sig, ret;
 
-	code = xnarch_fault_code(regs);
-	ret = xnarch_setup_trap_info(vector, regs, code, &sig, &si);
+	hard_local_irq_enable();
+
+	ret = xnarch_setup_trap_info(trapnr, regs, &sig, &si);
 	if (ret || sig == 0)
-		return 1;
+		return false;
 
 	sys_ppd = cobalt_ppd_get(0);
 	if (sig >= _NSIG ||
 	    sys_ppd->sighand[sig] == NULL ||
 	    sys_ppd->sighand[sig] == SIG_DFL)
-		return 1;
+		return false;
 
 	if (sys_ppd->sigrestorer == NULL)
-		return 1;
+		return false;
 
 	ksig.sig = sig;
 	memcpy(&ksig.info, &si, sizeof(si));
@@ -2547,9 +2545,9 @@ int xnthread_handle_rt_signals(unsigned int trapnr, struct pt_regs *regs)
 
 	ret = dovetail_setup_rt_signal_frame(&ksig, regs);
 	if (ret)
-		return 1;
+		return false;
 
-	return 0;
+	return true;
 }
 
 /* Xenomai's generic personality. */
