@@ -1314,7 +1314,7 @@ static void rtl8169_init_ring (struct rtnet_device *rtdev)
 			}
 		}//-----------------------------------------------------------------------
 		priv->rxdesc_array_dma_addr[i] = dma_map_single(&pdev->dev, &priv->RxDescArray[i], sizeof(struct RxDesc), DMA_TO_DEVICE);
-		pci_dma_sync_single_for_device(pdev, priv->rxdesc_array_dma_addr[i], sizeof(struct RxDesc), PCI_DMA_TODEVICE);
+		dma_sync_single_for_device(&pdev->dev, priv->rxdesc_array_dma_addr[i], sizeof(struct RxDesc), DMA_TO_DEVICE);
 	}
 }
 
@@ -1448,7 +1448,7 @@ static int rtl8169_start_xmit (struct rtskb *skb, struct rtnet_device *rtdev)
 		}
 		priv->TxDescArray[entry].status = cpu_to_le32(status);
 
-		pci_dma_sync_single_for_device(pdev, priv->txdesc_array_dma_addr[entry], sizeof(struct TxDesc), PCI_DMA_TODEVICE);
+		dma_sync_single_for_device(&pdev->dev, priv->txdesc_array_dma_addr[entry], sizeof(struct TxDesc), DMA_TO_DEVICE);
 
 		RTL_W8 ( TxPoll, 0x40);		//set polling bit
 
@@ -1558,7 +1558,7 @@ static void rtl8169_rx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 	cur_rx = priv->cur_rx;
 
 	rxdesc = &priv->RxDescArray[cur_rx];
-	pci_dma_sync_single_for_cpu(pdev, priv->rxdesc_array_dma_addr[cur_rx], sizeof(struct RxDesc), PCI_DMA_FROMDEVICE);
+	dma_sync_single_for_cpu(&pdev->dev, priv->rxdesc_array_dma_addr[cur_rx], sizeof(struct RxDesc), DMA_FROM_DEVICE);
 
 	while ( ((le32_to_cpu(rxdesc->status) & OWNbit)== 0) && (rxdesc_cnt < max_interrupt_work) ){
 
@@ -1593,7 +1593,7 @@ static void rtl8169_rx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 
 					// Indicate rx_skb
 					if( rx_skb != NULL ){
-						pci_dma_sync_single_for_cpu(pdev, priv->rx_skbuff_dma_addr[cur_rx], sizeof(struct RxDesc), PCI_DMA_FROMDEVICE);
+						dma_sync_single_for_cpu(&pdev->dev, priv->rx_skbuff_dma_addr[cur_rx], sizeof(struct RxDesc), DMA_FROM_DEVICE);
 
 						rtskb_put ( rx_skb, pkt_size );
 						rx_skb->protocol = rt_eth_type_trans ( rx_skb, rtdev );
@@ -1643,7 +1643,7 @@ static void rtl8169_rx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 
 	    cur_rx = (cur_rx +1) % NUM_RX_DESC;
 	    rxdesc = &priv->RxDescArray[cur_rx];
-	    pci_dma_sync_single_for_cpu(pdev, priv->rxdesc_array_dma_addr[cur_rx], sizeof(struct RxDesc), PCI_DMA_FROMDEVICE);
+	    dma_sync_single_for_cpu(&pdev->dev, priv->rxdesc_array_dma_addr[cur_rx], sizeof(struct RxDesc), DMA_FROM_DEVICE);
 
 	}// end of while ( (priv->RxDescArray[cur_rx].status & 0x80000000)== 0)
 
