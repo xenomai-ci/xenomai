@@ -25,6 +25,35 @@
 #include <linux/spi/spi.h>
 #include "spi-master.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)
+static inline void rtdm_spi_slave_init(struct spi_controller *ctrl,
+				       struct rtdm_spi_remote_slave *slave,
+				       struct spi_device *spi)
+{
+	if (spi->cs_gpiod)
+		slave->cs_gpiod = spi->cs_gpiod;
+	else {
+		slave->cs_gpiod = NULL;
+		if (ctrl->cs_gpiods)
+			slave->cs_gpiod = ctrl->cs_gpiods[spi->chip_select];
+	}
+}
+#else
+static inline void rtdm_spi_slave_init(struct spi_controller *ctrl,
+				       struct rtdm_spi_remote_slave *slave,
+				       struct spi_device *spi)
+{
+	if (gpio_is_valid(spi->cs_gpio))
+		slave->cs_gpiod = gpio_to_desc(spi->cs_gpio);
+	else {
+		slave->cs_gpiod = NULL;
+		if (ctrl->cs_gpios)
+			slave->cs_gpiod =
+				gpio_to_desc(ctrl->cs_gpios[spi->chip_select]);
+	}
+}
+#endif
+
 int rtdm_spi_add_remote_slave(struct rtdm_spi_remote_slave *slave,
 			      struct rtdm_spi_master *master,
 			      struct spi_device *spi)
@@ -49,23 +78,8 @@ int rtdm_spi_add_remote_slave(struct rtdm_spi_remote_slave *slave,
 	if (dev->label == NULL)
 		return -ENOMEM;
 
-	if (gpio_is_valid(spi->cs_gpio))
-		slave->cs_gpio = spi->cs_gpio;
-	else {
-		slave->cs_gpio = -ENOENT;
-		if (kmaster->cs_gpios)
-			slave->cs_gpio = kmaster->cs_gpios[spi->chip_select];
-	}
+	rtdm_spi_slave_init(kmaster, slave, spi);
 
-	if (gpio_is_valid(slave->cs_gpio)) {
-		ret = gpio_request(slave->cs_gpio, dev->label);
-		if (ret)
-			goto fail;
-		slave->cs_gpiod = gpio_to_desc(slave->cs_gpio);
-		if (slave->cs_gpiod == NULL)
-			goto fail;
-	}
-	
 	mutex_init(&slave->ctl_lock);
 
 	dev->device_data = master;
@@ -90,9 +104,6 @@ void rtdm_spi_remove_remote_slave(struct rtdm_spi_remote_slave *slave)
 	struct rtdm_spi_master *master = slave->master;
 	struct rtdm_device *dev;
 	rtdm_lockctx_t c;
-	
-	if (gpio_is_valid(slave->cs_gpio))
-		gpio_free(slave->cs_gpio);
 
 	mutex_destroy(&slave->ctl_lock);
 	rtdm_lock_get_irqsave(&master->lock, c);

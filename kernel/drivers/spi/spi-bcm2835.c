@@ -139,6 +139,28 @@ static inline void bcm2835_rd_fifo(struct spi_master_bcm2835 *spim)
 	}
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)
+static inline bool xn_gpio_is_valid(struct spi_device *spi)
+{
+       return spi->cs_gpiod != NULL;
+}
+
+static inline int xn_get_gpio(struct spi_device *spi)
+{
+       return desc_to_gpio(spi->cs_gpiod);
+}
+#else
+static inline bool xn_gpio_is_valid(struct spi_device *spi)
+{
+       return gpio_is_valid(spi->cs_gpio);
+}
+
+static inline int xn_get_gpio(struct spi_device *spi)
+{
+       return spi->cs_gpio;
+}
+#endif
+
 static inline void bcm2835_wr_fifo(struct spi_master_bcm2835 *spim)
 {
 	u8 byte;
@@ -281,7 +303,7 @@ static int do_transfer_irq(struct rtdm_spi_remote_slave *slave)
 	 * change the behaviour with gpio-cs this does not happen, so
 	 * it is implemented only for this case.
 	 */
-	if (gpio_is_valid(slave->cs_gpio)) {
+	if (slave->cs_gpiod) {
 		/* Set dummy CS, ->chip_select() was not called. */
 		cs |= BCM2835_SPI_CS_CS_10 | BCM2835_SPI_CS_CS_01;
 		/* Enable SPI block, before filling FIFO. */
@@ -457,11 +479,12 @@ static int find_cs_gpio(struct spi_device *spi)
 	u32 pingroup_index, pin, pin_index;
 	struct device_node *pins;
 	struct gpio_chip *chip;
+	int cs_gpio = -ENOENT;
 	int ret;
 
-	if (gpio_is_valid(spi->cs_gpio)) {
+	if (xn_gpio_is_valid(spi)) {
 		dev_info(&spi->dev, "using GPIO%i for CS%d\n",
-			 spi->cs_gpio, spi->chip_select);
+			 xn_get_gpio(spi), spi->chip_select);
 		return 0;
 	}
 
@@ -477,7 +500,7 @@ static int find_cs_gpio(struct spi_device *spi)
 			     (pin == 8 || pin == 36 || pin == 46)) ||
 			    (spi->chip_select == 1 &&
 			     (pin == 7 || pin == 35))) {
-				spi->cs_gpio = pin;
+				cs_gpio = pin;
 				break;
 			}
 		}
@@ -485,24 +508,24 @@ static int find_cs_gpio(struct spi_device *spi)
 	}
 
 	/* If that failed, assume GPIOs 7-11 are used */
-	if (!gpio_is_valid(spi->cs_gpio) ) {
+	if (!gpio_is_valid(cs_gpio)) {
 		chip = gpiochip_find("pinctrl-bcm2835", gpio_match_name);
 		if (chip == NULL)
 			return 0;
 
-		spi->cs_gpio = chip->base + 8 - spi->chip_select;
+		cs_gpio = chip->base + 8 - spi->chip_select;
 	}
 
 	dev_info(&spi->dev,
 		 "setting up native-CS%i as GPIO %i\n",
-		 spi->chip_select, spi->cs_gpio);
+		 spi->chip_select, cs_gpio);
 
-	ret = gpio_direction_output(spi->cs_gpio,
+	ret = gpio_direction_output(cs_gpio,
 			    (spi->mode & SPI_CS_HIGH) ? 0 : 1);
 	if (ret) {
 		dev_err(&spi->dev,
 			"could not set CS%i gpio %i as output: %i",
-			spi->chip_select, spi->cs_gpio, ret);
+			spi->chip_select, cs_gpio, ret);
 		return ret;
 	}
 
@@ -510,7 +533,7 @@ static int find_cs_gpio(struct spi_device *spi)
 	 * Force value on GPIO in case the pin controller does not
 	 * handle that properly when switching to output mode.
 	 */
-	gpio_set_value(spi->cs_gpio, (spi->mode & SPI_CS_HIGH) ? 0 : 1);
+	gpio_set_value(cs_gpio, (spi->mode & SPI_CS_HIGH) ? 0 : 1);
 
 	return 0;
 }

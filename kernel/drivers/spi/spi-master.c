@@ -112,7 +112,7 @@ static int do_chip_select(struct rtdm_spi_remote_slave *slave)
 	rtdm_lock_get_irqsave(&master->lock, c);
 	
 	if (master->cs != slave) {
-		if (gpio_is_valid(slave->cs_gpio)) {
+		if (slave->cs_gpiod) {
 			state = !!(slave->config.mode & SPI_CS_HIGH);
 			gpiod_set_raw_value(slave->cs_gpiod, state);
 		} else
@@ -133,7 +133,7 @@ static void do_chip_deselect(struct rtdm_spi_remote_slave *slave)
 
 	rtdm_lock_get_irqsave(&master->lock, c);
 
-	if (gpio_is_valid(slave->cs_gpio)) {
+	if (slave->cs_gpiod) {
 		state = !(slave->config.mode & SPI_CS_HIGH);
 		gpiod_set_raw_value(slave->cs_gpiod, state);
 	} else
@@ -354,7 +354,10 @@ __rtdm_spi_alloc_master(struct device *dev, size_t size, int off)
 	kmaster = spi_alloc_master(dev, size);
 	if (kmaster == NULL)
 		return NULL;
-	
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)
+	master->use_gpio_descriptors = true;
+#endif
 	master = (void *)(kmaster + 1) + off;
 	master->kmaster = kmaster;
 	spi_master_set_devdata(kmaster, master);
