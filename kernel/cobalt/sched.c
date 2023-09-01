@@ -1121,11 +1121,6 @@ static spl_t vfile_schedstat_lock_s;
 
 static int vfile_schedstat_get_lock(struct xnvfile *vfile)
 {
-	int ret;
-
-	ret = xnintr_get_query_lock();
-	if (ret < 0)
-		return ret;
 	xnlock_get_irqsave(&nklock, vfile_schedstat_lock_s);
 	return 0;
 }
@@ -1133,7 +1128,6 @@ static int vfile_schedstat_get_lock(struct xnvfile *vfile)
 static void vfile_schedstat_put_lock(struct xnvfile *vfile)
 {
 	xnlock_put_irqrestore(&nklock, vfile_schedstat_lock_s);
-	xnintr_put_query_lock();
 }
 
 static struct xnvfile_lock_ops vfile_schedstat_lockops = {
@@ -1177,7 +1171,6 @@ static struct xnvfile_snapshot schedstat_vfile = {
 static int vfile_schedstat_rewind(struct xnvfile_snapshot_iterator *it)
 {
 	struct vfile_schedstat_priv *priv = xnvfile_iterator_priv(it);
-	int irqnr;
 
 	/*
 	 * The activity numbers on each valid interrupt descriptor are
@@ -1185,9 +1178,8 @@ static int vfile_schedstat_rewind(struct xnvfile_snapshot_iterator *it)
 	 */
 	priv->curr = list_first_entry(&nkthreadq, struct xnthread, glink);
 	priv->irq = 0;
-	irqnr = xnintr_query_init(&priv->intr_it) * num_online_cpus();
 
-	return irqnr + cobalt_nrthreads;
+	return cobalt_nrthreads;
 }
 
 static int vfile_schedstat_next(struct xnvfile_snapshot_iterator *it,
@@ -1201,11 +1193,7 @@ static int vfile_schedstat_next(struct xnvfile_snapshot_iterator *it,
 	int __maybe_unused ret;
 
 	if (priv->curr == NULL)
-		/*
-		 * We are done with actual threads, scan interrupt
-		 * descriptors.
-		 */
-		goto scan_irqs;
+		return 0; /* We are done. */
 
 	thread = priv->curr;
 	if (list_is_last(&thread->glink, &nkthreadq))
@@ -1242,41 +1230,6 @@ static int vfile_schedstat_next(struct xnvfile_snapshot_iterator *it,
 	thread->stat.lastperiod.start = sched->last_account_switch;
 
 	return 1;
-
-scan_irqs:
-#ifdef CONFIG_XENO_OPT_STATS_IRQS
-	if (priv->irq >= PIPELINE_NR_IRQS)
-		return 0;	/* All done. */
-
-	ret = xnintr_query_next(priv->irq, &priv->intr_it, p->name);
-	if (ret) {
-		if (ret == -EAGAIN)
-			xnvfile_touch(it->vfile); /* force rewind. */
-		priv->irq++;
-		return VFILE_SEQ_SKIP;
-	}
-
-	if (!xnsched_supported_cpu(priv->intr_it.cpu))
-		return VFILE_SEQ_SKIP;
-
-	p->cpu = priv->intr_it.cpu;
-	p->csw = priv->intr_it.hits;
-	p->exectime_period = priv->intr_it.exectime_period;
-	p->account_period = priv->intr_it.account_period;
-	p->exectime_total = priv->intr_it.exectime_total;
-	p->pid = 0;
-	p->state =  0;
-	p->ssw = 0;
-	p->xsc = 0;
-	p->pf = 0;
-	p->sched_class = &xnsched_class_idle;
-	p->cprio = 0;
-	p->period = 0;
-
-	return 1;
-#else /* !CONFIG_XENO_OPT_STATS_IRQS */
-	return 0;
-#endif /* !CONFIG_XENO_OPT_STATS_IRQS */
 }
 
 static int vfile_schedstat_show(struct xnvfile_snapshot_iterator *it,

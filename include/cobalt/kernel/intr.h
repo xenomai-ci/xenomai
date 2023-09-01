@@ -84,10 +84,6 @@ struct xnintr {
 	const char *name;
 	/** Descriptor maintenance lock. */
 	raw_spinlock_t lock;
-#ifdef CONFIG_XENO_OPT_STATS_IRQS
-	/** Statistics. */
-	struct xnirqstat *stats;
-#endif
 };
 
 struct xnintr_iterator {
@@ -125,32 +121,6 @@ void xnintr_enable(struct xnintr *intr);
 void xnintr_disable(struct xnintr *intr);
 
 int xnintr_affinity(struct xnintr *intr, const cpumask_t *cpumask);
-
-#ifdef CONFIG_XENO_OPT_STATS_IRQS
-
-int xnintr_query_init(struct xnintr_iterator *iterator);
-
-int xnintr_get_query_lock(void);
-
-void xnintr_put_query_lock(void);
-
-int xnintr_query_next(int irq, struct xnintr_iterator *iterator,
-		      char *name_buf);
-
-#else /* !CONFIG_XENO_OPT_STATS_IRQS */
-
-static inline int xnintr_query_init(struct xnintr_iterator *iterator)
-{
-	return 0;
-}
-
-static inline int xnintr_get_query_lock(void)
-{
-	return 0;
-}
-
-static inline void xnintr_put_query_lock(void) {}
-#endif /* !CONFIG_XENO_OPT_STATS_IRQS */
 
 /** @} */
 

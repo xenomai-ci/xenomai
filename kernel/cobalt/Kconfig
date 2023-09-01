@@ -135,18 +135,6 @@ config XENO_OPT_STATS
 	per-thread runtime statistics, which are accessible through
 	the /proc/xenomai/sched/stat interface.
 
-config XENO_OPT_STATS_IRQS
-	bool "Account IRQ handlers separatly"
-	depends on XENO_OPT_STATS && IPIPE
-	default y
-	help
-	When enabled, the runtime of interrupt handlers is accounted
-	separately from the threads they interrupt. Also, the
-	occurrence of shared interrupts is accounted on a per-handler
-	basis.
-
-	This option is available to legacy I-pipe builds only.
-
 config XENO_OPT_SHIRQ
 	bool "Shared interrupts"
 	help
