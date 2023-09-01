@@ -747,8 +747,9 @@ static int pcnet32_probe1(unsigned long ioaddr, unsigned int irq_line,
 	if (request_region(ioaddr, PCNET32_TOTAL_SIZE, chipname) == NULL)
 		return -EBUSY;
 
-	/* pci_alloc_consistent returns page-aligned memory, so we do not have to check the alignment */
-	if ((lp = pci_alloc_consistent(pdev, sizeof(*lp), &lp_dma_addr)) ==
+	/* dma_alloc_coherent returns page-aligned memory, so we do not have to check the alignment */
+	if ((lp = dma_alloc_coherent(&pdev->dev, sizeof(*lp), &lp_dma_addr,
+				     GFP_ATOMIC)) ==
 	    NULL) {
 		release_region(ioaddr, PCNET32_TOTAL_SIZE);
 		return -ENOMEM;
@@ -784,7 +785,8 @@ static int pcnet32_probe1(unsigned long ioaddr, unsigned int irq_line,
 
 	if (!a) {
 		printk(KERN_ERR PFX "No access methods\n");
-		pci_free_consistent(lp->pci_dev, sizeof(*lp), lp, lp->dma_addr);
+		dma_free_coherent(&lp->pci_dev->dev, sizeof(*lp), lp,
+				  lp->dma_addr);
 		release_region(ioaddr, PCNET32_TOTAL_SIZE);
 		return -ENODEV;
 	}
@@ -842,8 +844,8 @@ static int pcnet32_probe1(unsigned long ioaddr, unsigned int irq_line,
 			printk(", probed IRQ %d.\n", dev->irq);
 		else {
 			printk(", failed to detect IRQ line.\n");
-			pci_free_consistent(lp->pci_dev, sizeof(*lp), lp,
-					    lp->dma_addr);
+			dma_free_coherent(&lp->pci_dev->dev, sizeof(*lp), lp,
+					  lp->dma_addr);
 			release_region(ioaddr, PCNET32_TOTAL_SIZE);
 			return -ENODEV;
 		}
@@ -867,7 +869,8 @@ static int pcnet32_probe1(unsigned long ioaddr, unsigned int irq_line,
 	/* Fill in the generic fields of the device structure. */
 	/*** RTnet ***/
 	if ((i = rt_register_rtnetdev(dev))) {
-		pci_free_consistent(lp->pci_dev, sizeof(*lp), lp, lp->dma_addr);
+		dma_free_coherent(&lp->pci_dev->dev, sizeof(*lp), lp,
+				   lp->dma_addr);
 		release_region(ioaddr, PCNET32_TOTAL_SIZE);
 		rtdev_free(dev);
 		return i;
@@ -1637,7 +1640,8 @@ static void __exit pcnet32_cleanup_module(void)
 		rt_rtdev_disconnect(pcnet32_dev);
 		/*** RTnet ***/
 		release_region(pcnet32_dev->base_addr, PCNET32_TOTAL_SIZE);
-		pci_free_consistent(lp->pci_dev, sizeof(*lp), lp, lp->dma_addr);
+		dma_free_coherent(&lp->pci_dev->dev, sizeof(*lp), lp,
+				  lp->dma_addr);
 		/*** RTnet ***/
 		rtdev_free(pcnet32_dev);
 		/*** RTnet ***/

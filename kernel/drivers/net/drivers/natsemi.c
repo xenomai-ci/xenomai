@@ -1413,9 +1413,9 @@ static void dump_ring(struct rtnet_device *dev)
 static int alloc_ring(struct rtnet_device *dev)
 {
 	struct netdev_private *np = dev->priv;
-	np->rx_ring = pci_alloc_consistent(np->pci_dev,
+	np->rx_ring = dma_alloc_coherent(&np->pci_dev->dev,
 		sizeof(struct netdev_desc) * (RX_RING_SIZE+TX_RING_SIZE),
-		&np->ring_dma);
+		&np->ring_dma, GFP_ATOMIC);
 	if (!np->rx_ring)
 		return -ENOMEM;
 	np->tx_ring = &np->rx_ring[RX_RING_SIZE];
@@ -1526,7 +1526,7 @@ static void drain_ring(struct rtnet_device *dev)
 static void free_ring(struct rtnet_device *dev)
 {
 	struct netdev_private *np = dev->priv;
-	pci_free_consistent(np->pci_dev,
+	dma_free_coherent(&np->pci_dev->dev,
 		sizeof(struct netdev_desc) * (RX_RING_SIZE+TX_RING_SIZE),
 		np->rx_ring, np->ring_dma);
 }

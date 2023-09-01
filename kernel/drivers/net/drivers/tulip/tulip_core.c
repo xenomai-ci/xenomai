@@ -989,10 +989,10 @@ static int tulip_init_one (struct pci_dev *pdev,
 	 */
 	tp = rtdev->priv;
 
-	tp->rx_ring = pci_alloc_consistent(pdev,
-					   sizeof(struct tulip_rx_desc) * RX_RING_SIZE +
-					   sizeof(struct tulip_tx_desc) * TX_RING_SIZE,
-					   &tp->rx_ring_dma);
+	tp->rx_ring = dma_alloc_coherent(&pdev->dev,
+					 sizeof(struct tulip_rx_desc) * RX_RING_SIZE +
+					 sizeof(struct tulip_tx_desc) * TX_RING_SIZE,
+					 &tp->rx_ring_dma, GFP_ATOMIC);
 	if (!tp->rx_ring)
 		goto err_out_mtable;
 	tp->tx_ring = (struct tulip_tx_desc *)(tp->rx_ring + RX_RING_SIZE);
@@ -1319,10 +1319,10 @@ static int tulip_init_one (struct pci_dev *pdev,
 	return 0;
 
 err_out_free_ring:
-	pci_free_consistent (pdev,
-			     sizeof (struct tulip_rx_desc) * RX_RING_SIZE +
-			     sizeof (struct tulip_tx_desc) * TX_RING_SIZE,
-			     tp->rx_ring, tp->rx_ring_dma);
+	dma_free_coherent(&pdev->dev,
+			  sizeof (struct tulip_rx_desc) * RX_RING_SIZE +
+			  sizeof (struct tulip_tx_desc) * TX_RING_SIZE,
+			  tp->rx_ring, tp->rx_ring_dma);
 
 err_out_mtable:
 	if (tp->mtable)
@@ -1349,10 +1349,10 @@ static void tulip_remove_one (struct pci_dev *pdev)
 		return;
 
 	tp = rtdev->priv;
-	pci_free_consistent (pdev,
-			     sizeof (struct tulip_rx_desc) * RX_RING_SIZE +
-			     sizeof (struct tulip_tx_desc) * TX_RING_SIZE,
-			     tp->rx_ring, tp->rx_ring_dma);
+	dma_free_coherent(&pdev->dev,
+			  sizeof (struct tulip_rx_desc) * RX_RING_SIZE +
+			  sizeof (struct tulip_tx_desc) * TX_RING_SIZE,
+			  tp->rx_ring, tp->rx_ring_dma);
 	rt_unregister_rtnetdev (rtdev);
 	if (tp->mtable)
 		kfree (tp->mtable);

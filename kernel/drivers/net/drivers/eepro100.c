@@ -665,7 +665,8 @@ static int speedo_found1(struct pci_dev *pdev,
 	dma_addr_t tx_ring_dma;
 
 	size = TX_RING_SIZE * sizeof(struct TxFD) + sizeof(struct speedo_stats);
-	tx_ring_space = pci_alloc_consistent(pdev, size, &tx_ring_dma);
+	tx_ring_space = dma_alloc_coherent(&pdev->dev, size, &tx_ring_dma,
+					   GFP_ATOMIC);
 	if (tx_ring_space == NULL)
 		return -1;
 
@@ -674,7 +675,7 @@ static int speedo_found1(struct pci_dev *pdev,
 				RX_RING_SIZE * 2 + TX_RING_SIZE);
 	if (rtdev == NULL) {
 		printk(KERN_ERR "eepro100: Could not allocate ethernet device.\n");
-		pci_free_consistent(pdev, size, tx_ring_space, tx_ring_dma);
+		dma_free_coherent(&pdev->dev, size, tx_ring_space, tx_ring_dma);
 		return -1;
 	}
 	rtdev_alloc_name(rtdev, "rteth%d");
@@ -802,7 +803,7 @@ static int speedo_found1(struct pci_dev *pdev,
 
 	if ( (i=rt_register_rtnetdev(rtdev)) )
 	{
-		pci_free_consistent(pdev, size, tx_ring_space, tx_ring_dma);
+		dma_free_coherent(&pdev->dev, size, tx_ring_space, tx_ring_dma);
 		rtdev_free(rtdev);
 		return i;
 	}
@@ -1771,9 +1772,10 @@ static void eepro100_remove_one (struct pci_dev *pdev)
 	iounmap((char *)rtdev->base_addr);
 #endif
 
-	pci_free_consistent(pdev, TX_RING_SIZE * sizeof(struct TxFD)
-								+ sizeof(struct speedo_stats),
-						sp->tx_ring, sp->tx_ring_dma);
+	dma_free_coherent(
+		&pdev->dev,
+		TX_RING_SIZE * sizeof(struct TxFD) + sizeof(struct speedo_stats),
+		sp->tx_ring, sp->tx_ring_dma);
 	pci_disable_device(pdev);
 
 	// *** RTnet ***

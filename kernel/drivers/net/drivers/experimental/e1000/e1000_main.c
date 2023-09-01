@@ -1961,8 +1961,8 @@ static int e1000_setup_tx_resources(struct e1000_adapter *adapter,
 	tx_ring->size = tx_ring->count * sizeof(struct e1000_tx_desc);
 	tx_ring->size = ALIGN(tx_ring->size, 4096);
 
-	tx_ring->desc = pci_alloc_consistent(pdev, tx_ring->size,
-					     &tx_ring->dma);
+	tx_ring->desc = dma_alloc_coherent(&pdev->dev, tx_ring->size,
+					   &tx_ring->dma, GFP_ATOMIC);
 	if (!tx_ring->desc) {
 setup_tx_desc_die:
 		vfree(tx_ring->buffer_info);
@@ -1978,22 +1978,22 @@ setup_tx_desc_die:
 		DPRINTK(TX_ERR, ERR, "tx_ring align check failed: %u bytes "
 				     "at %p\n", tx_ring->size, tx_ring->desc);
 		/* Try again, without freeing the previous */
-		tx_ring->desc = pci_alloc_consistent(pdev, tx_ring->size,
-						     &tx_ring->dma);
+		tx_ring->desc = dma_alloc_coherent(&pdev->dev, tx_ring->size,
+						   &tx_ring->dma, GFP_ATOMIC);
 		/* Failed allocation, critical failure */
 		if (!tx_ring->desc) {
-			pci_free_consistent(pdev, tx_ring->size, olddesc,
-					    olddma);
+			dma_free_coherent(&pdev->dev, tx_ring->size, olddesc,
+					  olddma);
 			goto setup_tx_desc_die;
 		}
 
 		if (!e1000_check_64k_bound(adapter, tx_ring->desc,
 					   tx_ring->size)) {
 			/* give up */
-			pci_free_consistent(pdev, tx_ring->size, tx_ring->desc,
-					    tx_ring->dma);
-			pci_free_consistent(pdev, tx_ring->size, olddesc,
-					    olddma);
+			dma_free_coherent(&pdev->dev, tx_ring->size,
+					  tx_ring->desc, tx_ring->dma);
+			dma_free_coherent(&pdev->dev, tx_ring->size, olddesc,
+					  olddma);
 			DPRINTK(PROBE, ERR,
 				"Unable to allocate aligned memory "
 				"for the transmit descriptor ring\n");
@@ -2001,8 +2001,8 @@ setup_tx_desc_die:
 			return -ENOMEM;
 		} else {
 			/* Free old allocation, new allocation was successful */
-			pci_free_consistent(pdev, tx_ring->size, olddesc,
-					    olddma);
+			dma_free_coherent(&pdev->dev, tx_ring->size, olddesc,
+					  olddma);
 		}
 	}
 	memset(tx_ring->desc, 0, tx_ring->size);
@@ -2200,8 +2200,8 @@ static int e1000_setup_rx_resources(struct e1000_adapter *adapter,
 	rx_ring->size = rx_ring->count * desc_len;
 	rx_ring->size = ALIGN(rx_ring->size, 4096);
 
-	rx_ring->desc = pci_alloc_consistent(pdev, rx_ring->size,
-					     &rx_ring->dma);
+	rx_ring->desc = dma_alloc_coherent(&pdev->dev, rx_ring->size,
+					   &rx_ring->dma, GFP_ATOMIC);
 
 	if (!rx_ring->desc) {
 		DPRINTK(PROBE, ERR,
@@ -2220,12 +2220,12 @@ setup_rx_desc_die:
 		DPRINTK(RX_ERR, ERR, "rx_ring align check failed: %u bytes "
 				     "at %p\n", rx_ring->size, rx_ring->desc);
 		/* Try again, without freeing the previous */
-		rx_ring->desc = pci_alloc_consistent(pdev, rx_ring->size,
-						     &rx_ring->dma);
+		rx_ring->desc = dma_alloc_coherent(&pdev->dev, rx_ring->size,
+						   &rx_ring->dma, GFP_ATOMIC);
 		/* Failed allocation, critical failure */
 		if (!rx_ring->desc) {
-			pci_free_consistent(pdev, rx_ring->size, olddesc,
-					    olddma);
+			dma_free_coherent(&pdev->dev, rx_ring->size, olddesc,
+					  olddma);
 			DPRINTK(PROBE, ERR,
 				"Unable to allocate memory "
 				"for the receive descriptor ring\n");
@@ -2235,18 +2235,18 @@ setup_rx_desc_die:
 		if (!e1000_check_64k_bound(adapter, rx_ring->desc,
 					   rx_ring->size)) {
 			/* give up */
-			pci_free_consistent(pdev, rx_ring->size, rx_ring->desc,
-					    rx_ring->dma);
-			pci_free_consistent(pdev, rx_ring->size, olddesc,
-					    olddma);
+			dma_free_coherent(&pdev->dev, rx_ring->size,
+					  rx_ring->desc, rx_ring->dma);
+			dma_free_coherent(&pdev->dev, rx_ring->size, olddesc,
+					  olddma);
 			DPRINTK(PROBE, ERR,
 				"Unable to allocate aligned memory "
 				"for the receive descriptor ring\n");
 			goto setup_rx_desc_die;
 		} else {
 			/* Free old allocation, new allocation was successful */
-			pci_free_consistent(pdev, rx_ring->size, olddesc,
-					    olddma);
+			dma_free_coherent(&pdev->dev, rx_ring->size, olddesc,
+					  olddma);
 		}
 	}
 	memset(rx_ring->desc, 0, rx_ring->size);
@@ -2570,7 +2570,8 @@ static void e1000_free_tx_resources(struct e1000_adapter *adapter,
 	vfree(tx_ring->buffer_info);
 	tx_ring->buffer_info = NULL;
 
-	pci_free_consistent(pdev, tx_ring->size, tx_ring->desc, tx_ring->dma);
+	dma_free_coherent(&pdev->dev, tx_ring->size, tx_ring->desc,
+			  tx_ring->dma);
 
 	tx_ring->desc = NULL;
 }
@@ -2673,7 +2674,8 @@ static void e1000_free_rx_resources(struct e1000_adapter *adapter,
 	kfree(rx_ring->ps_page_dma);
 	rx_ring->ps_page_dma = NULL;
 
-	pci_free_consistent(pdev, rx_ring->size, rx_ring->desc, rx_ring->dma);
+	dma_free_coherent(&pdev->dev, rx_ring->size, rx_ring->desc,
+			  rx_ring->dma);
 
 	rx_ring->desc = NULL;
 }
