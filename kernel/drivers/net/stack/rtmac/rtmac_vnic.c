@@ -114,9 +114,8 @@ static void rtmac_vnic_signal_handler(rtdm_nrtsig_t *nrtsig, void *arg)
 
 static int rtmac_vnic_copy_mac(struct net_device *dev)
 {
-	memcpy(dev->dev_addr,
-	       (*(struct rtnet_device **)netdev_priv(dev))->dev_addr,
-	       MAX_ADDR_LEN);
+	dev_addr_set(dev,
+		     (*(struct rtnet_device **)netdev_priv(dev))->dev_addr);
 
 	return 0;
 }

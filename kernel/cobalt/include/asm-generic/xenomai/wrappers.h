@@ -252,6 +252,17 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
 #define close_fd(__ufd)	__close_fd(current->files, __ufd)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15,0) && \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0) || \
+     LINUX_VERSION_CODE < KERNEL_VERSION(5,10,188)) && \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0) || \
+     LINUX_VERSION_CODE < KERNEL_VERSION(5,4,251)) && \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(4,20,0) || \
+     LINUX_VERSION_CODE < KERNEL_VERSION(4,19,291))
+#define dev_addr_set(dev, addr)		memcpy((dev)->dev_addr, addr, MAX_ADDR_LEN)
+#define eth_hw_addr_set(dev, addr)	memcpy((dev)->dev_addr, addr, ETH_ALEN)
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5,17,0)
 #define pde_data(i)	PDE_DATA(i)
 #endif

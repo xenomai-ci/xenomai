@@ -324,7 +324,7 @@ static void __init rtnetproxy_init(struct net_device *dev)
 
 	dev->tx_queue_len = 0;
 #ifdef CONFIG_XENO_DRIVERS_NET_ADDON_PROXY_ARP
-	memcpy(dev->dev_addr, rtnetproxy_rtdev->dev_addr, MAX_ADDR_LEN);
+	dev_addr_set(dev, rtnetproxy_rtdev->dev_addr);
 #else
 	dev->flags |= IFF_NOARP;
 #endif
