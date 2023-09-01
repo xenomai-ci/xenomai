@@ -59,11 +59,11 @@ static struct rtdm_driver
 			 .context_size = 0,
 			 .ops = {
 				 .open = (typeof(nomac_driver.ops.open))
-					 nomac_dev_openclose,
+					 (void (*)(void))nomac_dev_openclose,
 				 .ioctl_rt = nomac_dev_ioctl,
 				 .ioctl_nrt = nomac_dev_ioctl,
 				 .close = (typeof(nomac_driver.ops.close))
-					 nomac_dev_openclose,
+					 (void (*)(void))nomac_dev_openclose,
 			 } };
 
 int nomac_dev_init(struct rtnet_device *rtdev, struct nomac_priv *nomac)

@@ -412,10 +412,12 @@ int rtdm_dev_register(struct rtdm_device *dev)
 	}
 
 	dev->ops = drv->ops;
-	if (drv->device_flags & RTDM_NAMED_DEVICE)
-		dev->ops.socket = (typeof(dev->ops.socket))enosys;
-	else
-		dev->ops.open = (typeof(dev->ops.open))enosys;
+	if (drv->device_flags & RTDM_NAMED_DEVICE) {
+		dev->ops.socket =
+			(typeof(dev->ops.socket))(void (*)(void))enosys;
+	} else {
+		dev->ops.open = (typeof(dev->ops.open))(void (*)(void))enosys;
+	}
 
 	INIT_LIST_HEAD(&dev->openfd_list);
 	init_waitqueue_head(&dev->putwq);

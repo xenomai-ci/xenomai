@@ -40,7 +40,8 @@
 #error "__NR_COBALT_SYSCALLS > __COBALT_IA32_BASE"
 #endif
 
-#define __syshand32emu__(__name)	((cobalt_syshand)(CoBaLt32emu_ ## __name))
+#define __syshand32emu__(__name)	\
+	((cobalt_syshand)(void (*)(void))(CoBaLt32emu_ ## __name))
 
 #define __COBALT_CALL32emu_INITHAND(__handler)	\
 	[__COBALT_IA32_BASE ... __COBALT_IA32_BASE + __NR_COBALT_SYSCALLS-1] = __handler,

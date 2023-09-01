@@ -90,7 +90,7 @@ static struct rtdm_fd *fetch_fd(struct cobalt_ppd *p, int ufd)
 
 #define assign_invalid_handler(__handler, __invalid)			\
 	do								\
-		(__handler) = (typeof(__handler))__invalid;		\
+		(__handler) = (typeof(__handler))(void (*)(void))__invalid; \
 	while (0)
 
 /* Calling this handler should beget ENOSYS if not implemented. */
