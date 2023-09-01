@@ -111,7 +111,7 @@ to_master_bcm2835(struct rtdm_spi_remote_slave *slave)
 static inline struct device *
 master_to_kdev(struct rtdm_spi_master *master)
 {
-	return &master->kmaster->dev;
+	return &master->controller->dev;
 }
 
 static inline u32 bcm2835_rd(struct spi_master_bcm2835 *spim,
@@ -475,7 +475,7 @@ static int gpio_match_name(struct gpio_chip *chip, void *data)
 
 static int find_cs_gpio(struct spi_device *spi)
 {
-	struct spi_master *kmaster = spi->master;
+	struct spi_controller *ctlr = spi->controller;
 	u32 pingroup_index, pin, pin_index;
 	struct device_node *pins;
 	struct gpio_chip *chip;
@@ -491,7 +491,7 @@ static int find_cs_gpio(struct spi_device *spi)
 	/* Translate native CS to GPIO. */
 
 	for (pingroup_index = 0;
-	     (pins = of_parse_phandle(kmaster->dev.of_node,
+	     (pins = of_parse_phandle(ctlr->dev.of_node,
 		     "pinctrl-0", pingroup_index)) != 0; pingroup_index++) {
 		for (pin_index = 0;
 		     of_property_read_u32_index(pins, "brcm,pins",
@@ -601,7 +601,7 @@ static int bcm2835_spi_probe(struct platform_device *pdev)
 {
 	struct spi_master_bcm2835 *spim;
 	struct rtdm_spi_master *master;
-	struct spi_master *kmaster;
+	struct spi_controller *ctlr;
 	struct resource *r;
 	int ret, irq;
 
@@ -616,11 +616,11 @@ static int bcm2835_spi_probe(struct platform_device *pdev)
 	master->ops = &bcm2835_master_ops;
 	platform_set_drvdata(pdev, master);
 
-	kmaster = master->kmaster;
-	kmaster->mode_bits = BCM2835_SPI_MODE_BITS;
-	kmaster->bits_per_word_mask = SPI_BPW_MASK(8);
-	kmaster->num_chipselect = 2;
-	kmaster->dev.of_node = pdev->dev.of_node;
+	ctlr = master->controller;
+	ctlr->mode_bits = BCM2835_SPI_MODE_BITS;
+	ctlr->bits_per_word_mask = SPI_BPW_MASK(8);
+	ctlr->num_chipselect = 2;
+	ctlr->dev.of_node = pdev->dev.of_node;
 
 	spim = container_of(master, struct spi_master_bcm2835, master);
 	rtdm_event_init(&spim->transfer_done, 0);
@@ -674,7 +674,7 @@ static int bcm2835_spi_probe(struct platform_device *pdev)
 fail_unclk:
 	clk_disable_unprepare(spim->clk);
 fail:
-	spi_master_put(kmaster);
+	spi_controller_put(ctlr);
 
 	return ret;
 }

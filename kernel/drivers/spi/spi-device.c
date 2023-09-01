@@ -58,7 +58,7 @@ int rtdm_spi_add_remote_slave(struct rtdm_spi_remote_slave *slave,
 			      struct rtdm_spi_master *master,
 			      struct spi_device *spi)
 {
-	struct spi_master *kmaster = master->kmaster;
+	struct spi_controller *ctlr = master->controller;
 	struct rtdm_device *dev;
 	rtdm_lockctx_t c;
 	int ret;
@@ -73,12 +73,12 @@ int rtdm_spi_add_remote_slave(struct rtdm_spi_remote_slave *slave,
 	dev = &slave->dev;
 	dev->driver = &master->driver;
 	dev->label = kasprintf(GFP_KERNEL, "%s/slave%d.%%d",
-			       dev_name(&kmaster->dev),
-			       kmaster->bus_num);
+			       dev_name(&ctlr->dev),
+			       ctlr->bus_num);
 	if (dev->label == NULL)
 		return -ENOMEM;
 
-	rtdm_spi_slave_init(kmaster, slave, spi);
+	rtdm_spi_slave_init(ctlr, slave, spi);
 
 	mutex_init(&slave->ctl_lock);
 

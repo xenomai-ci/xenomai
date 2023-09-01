@@ -150,7 +150,7 @@ to_master_sun6i(struct rtdm_spi_remote_slave *slave)
 static inline struct device *
 master_to_kdev(struct rtdm_spi_master *master)
 {
-	return &master->kmaster->dev;
+	return &master->controller->dev;
 }
 
 static inline u32 sun6i_rd(struct spi_master_sun6i *spim,
@@ -509,7 +509,7 @@ static int sun6i_spi_probe(struct platform_device *pdev)
 {
 	struct rtdm_spi_master *master;
 	struct spi_master_sun6i *spim;
-	struct spi_master *kmaster;
+	struct spi_controller *ctlr;
 	struct resource *r;
 	int ret, irq;
 	u32 clk_rate;
@@ -525,13 +525,13 @@ static int sun6i_spi_probe(struct platform_device *pdev)
 	master->ops = &sun6i_master_ops;
 	platform_set_drvdata(pdev, master);
 
-	kmaster = master->kmaster;
-	kmaster->max_speed_hz = 100 * 1000 * 1000;
-	kmaster->min_speed_hz = 3 * 1000;
-	kmaster->mode_bits = SUN6I_SPI_MODE_BITS;
-	kmaster->bits_per_word_mask = SPI_BPW_MASK(8);
-	kmaster->num_chipselect = 4;
-	kmaster->dev.of_node = pdev->dev.of_node;
+	ctlr = master->controller;
+	ctlr->max_speed_hz = 100 * 1000 * 1000;
+	ctlr->min_speed_hz = 3 * 1000;
+	ctlr->mode_bits = SUN6I_SPI_MODE_BITS;
+	ctlr->bits_per_word_mask = SPI_BPW_MASK(8);
+	ctlr->num_chipselect = 4;
+	ctlr->dev.of_node = pdev->dev.of_node;
 
 	spim = container_of(master, struct spi_master_sun6i, master);
 	spim->setup = of_device_get_match_data(&pdev->dev);
@@ -572,8 +572,8 @@ static int sun6i_spi_probe(struct platform_device *pdev)
 	 * the fastest transfers properly.
 	 */
 	clk_rate = clk_get_rate(spim->mclk);
-	if (clk_rate < 2 * kmaster->max_speed_hz)
-		clk_set_rate(spim->mclk, 2 * kmaster->max_speed_hz);
+	if (clk_rate < 2 * ctlr->max_speed_hz)
+		clk_set_rate(spim->mclk, 2 * ctlr->max_speed_hz);
 
 	spim->clk_hz = clk_get_rate(spim->mclk);
 
@@ -624,7 +624,7 @@ fail_unclk:
 	clk_disable_unprepare(spim->mclk);
 	clk_disable_unprepare(spim->hclk);
 fail:
-	spi_master_put(kmaster);
+	spi_controller_put(ctlr);
 
 	return ret;
 }

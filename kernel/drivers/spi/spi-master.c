@@ -349,18 +349,18 @@ struct rtdm_spi_master *
 __rtdm_spi_alloc_master(struct device *dev, size_t size, int off)
 {
 	struct rtdm_spi_master *master;
-	struct spi_master *kmaster;
+	struct spi_controller *ctlr;
 
-	kmaster = spi_alloc_master(dev, size);
-	if (kmaster == NULL)
+	ctlr = spi_alloc_master(dev, size);
+	if (ctlr == NULL)
 		return NULL;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5,1,0)
-	master->use_gpio_descriptors = true;
+	ctlr->use_gpio_descriptors = true;
 #endif
-	master = (void *)(kmaster + 1) + off;
-	master->kmaster = kmaster;
-	spi_master_set_devdata(kmaster, master);
+	master = (void *)(ctlr + 1) + off;
+	master->controller = ctlr;
+	spi_master_set_devdata(ctlr, master);
 
 	return master;
 }
@@ -369,7 +369,7 @@ EXPORT_SYMBOL_GPL(__rtdm_spi_alloc_master);
 int __rtdm_spi_setup_driver(struct rtdm_spi_master *master)
 {
 	master->classname = kstrdup(
-		dev_name(&master->kmaster->dev), GFP_KERNEL);
+		dev_name(&master->controller->dev), GFP_KERNEL);
 	master->devclass = class_create(THIS_MODULE,
 		master->classname);
 	if (IS_ERR(master->devclass)) {
@@ -418,20 +418,20 @@ static int spi_transfer_one_unimp(struct spi_master *master,
 
 int rtdm_spi_add_master(struct rtdm_spi_master *master)
 {
-	struct spi_master *kmaster = master->kmaster;
+	struct spi_controller *ctlr = master->controller;
 
 	/*
 	 * Prevent the transfer handler to be called from the regular
 	 * SPI stack, just in case.
 	 */
-	kmaster->transfer_one = spi_transfer_one_unimp;
+	ctlr->transfer_one = spi_transfer_one_unimp;
 	master->devclass = NULL;
 
 	/*
 	 * Add the core SPI driver, devices on the bus will be
 	 * enumerated, handed to spi_device_probe().
 	 */
-	return spi_register_master(kmaster);
+	return spi_register_controller(ctlr);
 }
 EXPORT_SYMBOL_GPL(rtdm_spi_add_master);
 
@@ -441,7 +441,7 @@ void rtdm_spi_remove_master(struct rtdm_spi_master *master)
 	char *classname = master->classname;
 	
 	rtdm_mutex_destroy(&master->bus_lock);
-	spi_unregister_master(master->kmaster);
+	spi_unregister_controller(master->controller);
 	rtdm_drv_set_sysclass(&master->driver, NULL);
 	class_destroy(class);
 	kfree(classname);
