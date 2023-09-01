@@ -62,7 +62,6 @@ struct lostage_signal {
 	struct pipeline_inband_work inband_work; /* Must be first. */
 	struct task_struct *task;
 	int signo, sigval;
-	struct lostage_signal *self; /* Revisit: I-pipe requirement */
 };
 
 struct xnthread_init_attr {

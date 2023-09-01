@@ -2162,11 +2162,6 @@ static void lostage_task_signal(struct pipeline_inband_work *inband_work)
 	spl_t s;
 
 	rq = container_of(inband_work, struct lostage_signal, inband_work);
-	/*
-	 * Revisit: I-pipe requirement. It passes a copy of the original work
-	 * struct, so retrieve the original one first in order to update is.
-	 */
-	rq = rq->self;
 
 	xnlock_get_irqsave(&nklock, s);
 
@@ -2396,7 +2391,6 @@ void __xnthread_signal(struct xnthread *thread, int sig, int arg)
 	sigwork->task = xnthread_host_task(thread);
 	sigwork->signo = sig;
 	sigwork->sigval = sig == SIGDEBUG ? arg | sigdebug_marker : arg;
-	sigwork->self = sigwork; /* Revisit: I-pipe requirement */
 
 	trace_cobalt_lostage_request("signal", sigwork->task);
 
