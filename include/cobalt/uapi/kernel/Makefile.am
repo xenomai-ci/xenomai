@@ -7,6 +7,4 @@ includesub_HEADERS =	\
 	synch.h		\
 	thread.h	\
 	trace.h		\
-	types.h		\
-	urw.h		\
-	vdso.h
+	types.h

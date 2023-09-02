@@ -23,7 +23,6 @@
 #include <linux/unistd.h>
 #include <cobalt/uapi/corectl.h>
 #include <cobalt/kernel/tree.h>
-#include <cobalt/kernel/vdso.h>
 #include <cobalt/kernel/init.h>
 #include <pipeline/kevents.h>
 #include <pipeline/vdso_fallback.h>
@@ -330,8 +329,6 @@ static COBALT_SYSCALL(bind, lostage,
 			      sizeof(f->feat_req_s));
 	f->feat_abirev = XENOMAI_ABI_REV;
 	collect_arch_features(f);
-
-	f->vdso_offset = cobalt_umm_offset(&cobalt_ppd_get(1)->umm, nkvdso);
 
 	if (cobalt_copy_to_user(u_breq, &breq, sizeof(breq)))
 		return -EFAULT;

@@ -25,8 +25,8 @@
 struct cobalt_featinfo {
 	/* Used to be real-time clock frequency. */
 	__u64 __reserved1;
-	/** Offset of nkvdso in the sem heap. */
-	__u32 vdso_offset;
+	/* Used to be vdso_offset. */
+	__u32 __reserved2;
 	/** ABI revision level. */
 	__u32 feat_abirev;
 	/** Available feature set. */

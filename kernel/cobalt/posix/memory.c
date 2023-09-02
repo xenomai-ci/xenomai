@@ -23,16 +23,12 @@
 #include <linux/gfp.h>
 #include <linux/vmalloc.h>
 #include <rtdm/driver.h>
-#include <cobalt/kernel/vdso.h>
 #include "process.h"
 #include "memory.h"
 
 #define UMM_PRIVATE  0	/* Per-process user-mapped memory heap */
 #define UMM_SHARED   1	/* Shared user-mapped memory heap */
 #define SYS_GLOBAL   2	/* System heap (not mmapped) */
-
-struct xnvdso *nkvdso;
-EXPORT_SYMBOL_GPL(nkvdso);
 
 static void umm_vmopen(struct vm_area_struct *vma)
 {
@@ -252,12 +248,6 @@ static struct rtdm_device sysmem_device = {
 	.label = COBALT_MEMDEV_SYS,
 };
 
-static inline void init_vdso(void)
-{
-	nkvdso->features = XNVDSO_FEATURES;
-	nkvdso->wallclock_offset = nkclock.wallclock_offset;
-}
-
 int cobalt_memdev_init(void)
 {
 	int ret;
@@ -268,14 +258,6 @@ int cobalt_memdev_init(void)
 		return ret;
 
 	cobalt_umm_set_name(&cobalt_kernel_ppd.umm, "shared heap");
-
-	nkvdso = cobalt_umm_alloc(&cobalt_kernel_ppd.umm, sizeof(*nkvdso));
-	if (nkvdso == NULL) {
-		ret = -ENOMEM;
-		goto fail_vdso;
-	}
-
-	init_vdso();
 
 	ret = rtdm_dev_register(umm_devices + UMM_PRIVATE);
 	if (ret)
@@ -296,8 +278,6 @@ fail_sysmem:
 fail_shared:
 	rtdm_dev_unregister(umm_devices + UMM_PRIVATE);
 fail_private:
-	cobalt_umm_free(&cobalt_kernel_ppd.umm, nkvdso);
-fail_vdso:
 	cobalt_umm_destroy(&cobalt_kernel_ppd.umm);
 
 	return ret;
@@ -308,7 +288,6 @@ void cobalt_memdev_cleanup(void)
 	rtdm_dev_unregister(&sysmem_device);
 	rtdm_dev_unregister(umm_devices + UMM_SHARED);
 	rtdm_dev_unregister(umm_devices + UMM_PRIVATE);
-	cobalt_umm_free(&cobalt_kernel_ppd.umm, nkvdso);
 	cobalt_umm_destroy(&cobalt_kernel_ppd.umm);
 }
 

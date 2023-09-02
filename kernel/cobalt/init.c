@@ -28,7 +28,6 @@
 #include <cobalt/kernel/ppd.h>
 #include <cobalt/kernel/pipe.h>
 #include <cobalt/kernel/select.h>
-#include <cobalt/kernel/vdso.h>
 #include <rtdm/fd.h>
 #include "rtdm/internal.h"
 #include "posix/internal.h"

@@ -22,7 +22,6 @@
 #include <cobalt/kernel/timer.h>
 #include <cobalt/kernel/clock.h>
 #include <cobalt/kernel/arith.h>
-#include <cobalt/kernel/vdso.h>
 #include <cobalt/uapi/time.h>
 #include <asm/xenomai/calibration.h>
 #include <trace/events/cobalt-core.h>
@@ -292,7 +291,6 @@ void xnclock_set_wallclock(xnticks_t epoch_ns)
 	old_offset_ns = nkclock.wallclock_offset;
 	offset_ns = (xnsticks_t)(epoch_ns - xnclock_core_read_monotonic());
 	nkclock.wallclock_offset = offset_ns;
-	nkvdso->wallclock_offset = offset_ns;
 	xnclock_apply_offset(&nkclock, offset_ns - old_offset_ns);
 	xnlock_put_irqrestore(&nklock, s);
 }

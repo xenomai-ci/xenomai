@@ -44,7 +44,6 @@
 #include <cobalt/kernel/trace.h>
 #include <cobalt/kernel/stat.h>
 #include <cobalt/kernel/ppd.h>
-#include <cobalt/kernel/vdso.h>
 #include <cobalt/kernel/thread.h>
 #include <cobalt/uapi/signal.h>
 #include <cobalt/uapi/syscall.h>

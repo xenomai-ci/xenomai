@@ -14,7 +14,6 @@
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/thread.h>
 #include <cobalt/kernel/clock.h>
-#include <cobalt/kernel/vdso.h>
 #include <cobalt/kernel/init.h>
 #include <rtdm/driver.h>
 #include <trace/events/cobalt-core.h>

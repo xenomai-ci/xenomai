@@ -29,7 +29,6 @@
 #include <boilerplate/atomic.h>
 #include <boilerplate/list.h>
 #include <cobalt/uapi/kernel/synch.h>
-#include <cobalt/uapi/kernel/vdso.h>
 #include <cobalt/uapi/corectl.h>
 #include <cobalt/uapi/mutex.h>
 #include <cobalt/uapi/event.h>

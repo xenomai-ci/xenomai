@@ -31,7 +31,6 @@ noinst_HEADERS =	\
 	timer.h		\
 	trace.h		\
 	tree.h		\
-	vdso.h		\
 	vfile.h
 
 SUBDIRS = rtdm
