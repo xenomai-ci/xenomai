@@ -34,8 +34,6 @@
 #include "umm.h"
 #include "internal.h"
 
-struct xnvdso *cobalt_vdso;
-
 void *cobalt_umm_private = NULL;
 
 void *cobalt_umm_shared = NULL;
@@ -117,20 +115,14 @@ static void init_bind(void)
 }
 
 /* Will be called only once, upon call to xenomai_init(). */
-static void init_loadup(__u32 vdso_offset)
+void cobalt_init_umm(void)
 {
 	uint32_t size;
+
+	pthread_once(&init_bind_once, init_bind);
 
 	cobalt_umm_shared = map_umm(COBALT_MEMDEV_SHARED, &size);
 	if (cobalt_umm_shared == MAP_FAILED)
 		early_panic("cannot map shared umm area: %s",
 			    strerror(errno));
-
-	cobalt_vdso = (struct xnvdso *)(cobalt_umm_shared + vdso_offset);
-}
-
-void cobalt_init_umm(__u32 vdso_offset)
-{
-	pthread_once(&init_bind_once, init_bind);
-	init_loadup(vdso_offset);
 }

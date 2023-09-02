@@ -20,12 +20,8 @@
 
 #include <linux/types.h>
 
-void cobalt_init_umm(__u32 vdso_offset);
+void cobalt_init_umm(void);
 
 void cobalt_unmap_umm(void);
-
-struct xnvdso;
-
-extern struct xnvdso *cobalt_vdso;
 
 #endif /* _LIB_COBALT_UMM_H */

@@ -179,7 +179,7 @@ static void low_init(void)
 	trace_me("memory locked");
 	cobalt_ticks_init();
 	cobalt_features_init(f);
-	cobalt_init_umm(f->vdso_offset);
+	cobalt_init_umm();
 	trace_me("memory heaps mapped");
 	cobalt_init_current_keys();
 }
