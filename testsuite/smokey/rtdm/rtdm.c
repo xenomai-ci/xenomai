@@ -18,18 +18,6 @@ smokey_test_plugin(rtdm,
 		   "Check core interface to RTDM services."
 );
 
-#define NS_PER_MS (1000000)
-
-static inline unsigned long long timer_get_tsc(void)
-{
-	return clockobj_get_tsc();
-}
-
-static inline unsigned long long timer_tsc2ns(unsigned long long tsc)
-{
-	return clockobj_tsc_to_ns(tsc);
-}
-
 static void check_inner(const char *fn, int line, const char *msg,
 			int status, int expected)
 {
