@@ -1015,7 +1015,6 @@ AC_CONFIG_FILES([ \
 	testsuite/smokey/sched-tp/Makefile \
 	testsuite/smokey/setsched/Makefile \
 	testsuite/smokey/rtdm/Makefile \
-	testsuite/smokey/vdso-access/Makefile \
 	testsuite/smokey/posix-cond/Makefile \
 	testsuite/smokey/posix-mutex/Makefile \
 	testsuite/smokey/posix-clock/Makefile \

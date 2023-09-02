@@ -38,7 +38,6 @@ COBALT_SUBDIRS = 	\
 	sigdebug	\
 	timerfd		\
 	tsc		\
-	vdso-access 	\
 	xddp		\
 	y2038		\
 	alchemytests	\
@@ -84,7 +83,6 @@ DIST_SUBDIRS = 		\
 	sigdebug	\
 	timerfd		\
 	tsc		\
-	vdso-access 	\
 	xddp		\
 	y2038		\
 	alchemytests	\
