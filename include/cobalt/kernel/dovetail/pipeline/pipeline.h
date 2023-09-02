@@ -92,11 +92,6 @@ static inline void pipeline_prepare_panic(void)
 	/* N/A */
 }
 
-static inline void pipeline_collect_features(struct cobalt_featinfo *f)
-{
-	f->clock_freq = 0;	/* N/A */
-}
-
 #ifndef pipeline_get_syscall_args
 static inline void pipeline_get_syscall_args(struct task_struct *task,
 					     struct pt_regs *regs,

@@ -23,8 +23,8 @@
 #define XNFEAT_STRING_LEN 64
 
 struct cobalt_featinfo {
-	/** Real-time clock frequency */
-	__u64 clock_freq;
+	/* Used to be real-time clock frequency. */
+	__u64 __reserved1;
 	/** Offset of nkvdso in the sem heap. */
 	__u32 vdso_offset;
 	/** ABI revision level. */

@@ -331,7 +331,6 @@ static COBALT_SYSCALL(bind, lostage,
 	f->feat_abirev = XENOMAI_ABI_REV;
 	collect_arch_features(f);
 
-	pipeline_collect_features(f);
 	f->vdso_offset = cobalt_umm_offset(&cobalt_ppd_get(1)->umm, nkvdso);
 
 	if (cobalt_copy_to_user(u_breq, &breq, sizeof(breq)))
