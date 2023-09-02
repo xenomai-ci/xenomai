@@ -114,14 +114,13 @@ void __clockobj_ticks_to_timespec(struct clockobj *clkobj,
 
 /*
  * The Cobalt core exclusively deals with aperiodic timings, so a
- * Cobalt _tick_ is actually a _TSC_ unit. In contrast, Copperplate
- * deals with _TSC_ units and periodic _ticks_ which duration depend
- * on the clock resolution. Therefore, Cobalt ticks are strictly
- * equivalent to Copperplate TSC units, and Copperplate ticks are
- * periods of the reference clockobj which Cobalt does not know about.
+ * Cobalt _tick_ is actually a nanosecond unit. In contrast, Copperplate
+ * deals with both nanosecond units and periodic _ticks_ which duration
+ * depend on the clock resolution. Copperplate ticks are periods of the
+ * reference clockobj which Cobalt does not know about.
  */
 
-static inline ticks_t clockobj_get_tsc(void)
+static inline ticks_t clockobj_get_ns(void)
 {
 	/* Guaranteed to be the source of CLOCK_COPPERPLATE. */
 	return cobalt_read_ns();
@@ -138,7 +137,7 @@ void clockobj_ns_to_timespec(ticks_t ns, struct timespec *ts)
 
 #else /* CONFIG_XENO_MERCURY */
 
-ticks_t clockobj_get_tsc(void);
+ticks_t clockobj_get_ns(void);
 
 static inline
 void clockobj_ns_to_timespec(ticks_t ns, struct timespec *ts)
@@ -148,16 +147,6 @@ void clockobj_ns_to_timespec(ticks_t ns, struct timespec *ts)
 }
 
 #endif /* CONFIG_XENO_MERCURY */
-
-static inline sticks_t clockobj_ns_to_tsc(sticks_t ns)
-{
-	return ns;
-}
-
-static inline sticks_t clockobj_tsc_to_ns(sticks_t tsc)
-{
-	return tsc;
-}
 
 #ifdef CONFIG_XENO_LORES_CLOCK_DISABLED
 

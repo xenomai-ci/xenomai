@@ -347,6 +347,6 @@ u_long tm_get(u_long *date_r, u_long *time_r, u_long *ticks_r)
 
 u_long tm_getm(unsigned long long *ns_r)
 {
-	*ns_r = clockobj_tsc_to_ns(clockobj_get_tsc());
+	*ns_r = clockobj_get_ns();
 	return SUCCESS;
 }

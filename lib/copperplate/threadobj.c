@@ -1693,8 +1693,8 @@ void threadobj_spin(ticks_t ns)
 {
 	ticks_t end;
 
-	end = clockobj_get_tsc() + clockobj_ns_to_tsc(ns);
-	while (clockobj_get_tsc() < end)
+	end = clockobj_get_ns() + ns;
+	while (clockobj_get_ns() < end)
 		cpu_relax();
 }
 

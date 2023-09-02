@@ -257,7 +257,7 @@ void clockobj_get_date(struct clockobj *clkobj, ticks_t *pticks)
 
 	read_lock_nocancel(&clkobj->lock);
 
-	ns = clockobj_get_tsc();
+	ns = clockobj_get_ns();
 	/* Add offset to epoch. */
 	ns += (ticks_t)clkobj->offset.tv_sec * 1000000000ULL;
 	ns += clkobj->offset.tv_nsec;
@@ -270,7 +270,7 @@ void clockobj_get_date(struct clockobj *clkobj, ticks_t *pticks)
 
 #else /* CONFIG_XENO_MERCURY */
 
-ticks_t clockobj_get_tsc(void)
+ticks_t clockobj_get_ns(void)
 {
 	struct timespec now;
 	clock_gettime(CLOCK_COPPERPLATE, &now);
@@ -279,7 +279,7 @@ ticks_t clockobj_get_tsc(void)
 
 ticks_t clockobj_get_time(struct clockobj *clkobj)
 {
-	ticks_t ns = clockobj_get_tsc();
+	ticks_t ns = clockobj_get_ns();
 
 	if (clockobj_get_resolution(clkobj) > 1)
 		return ns / clockobj_get_resolution(clkobj);

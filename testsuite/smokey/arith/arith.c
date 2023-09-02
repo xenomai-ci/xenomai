@@ -20,9 +20,9 @@ static volatile long long arg = 0x3ffffffffffffffULL;
 		  	ticks_t start, end;				\
 			unsigned long delta;				\
 									\
-			start = clockobj_get_tsc();			\
+			start = clockobj_get_ns();			\
 			result = (f);					\
-			end = clockobj_get_tsc();			\
+			end = clockobj_get_ns();			\
 			delta = end - start;				\
 									\
 			if (i == 0 || delta < (avg / i) * 4) {		\
@@ -32,7 +32,7 @@ static volatile long long arg = 0x3ffffffffffffffULL;
 		}							\
 		if (rejected < 10000) {					\
 			avg = xnarch_llimd(avg, 10000, 10000 - rejected); \
-			avg = clockobj_tsc_to_ns(avg) - calib;		\
+			avg -= calib;		\
 			smokey_trace("%s: 0x%016llx: %lld.%03llu ns,"	\
 				    " rejected %d/10000",		\
 				    display, result, avg / 10000,	\
