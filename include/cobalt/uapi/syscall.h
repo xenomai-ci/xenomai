@@ -109,7 +109,7 @@
 #define sc_cobalt_select			86
 #define sc_cobalt_fcntl				87
 #define sc_cobalt_migrate			88
-#define sc_cobalt_archcall			89
+/* 89: formerly archcall */
 #define sc_cobalt_trace				90
 #define sc_cobalt_corectl			91
 #define sc_cobalt_get_current			92

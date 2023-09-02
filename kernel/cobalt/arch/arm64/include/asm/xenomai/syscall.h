@@ -51,13 +51,4 @@ static inline int __xn_interrupted_p(struct pt_regs *regs)
 	return __xn_reg_rval(regs) == -EINTR;
 }
 
-static inline
-int xnarch_local_syscall(unsigned long a1, unsigned long a2,
-			unsigned long a3, unsigned long a4,
-			unsigned long a5)
-{
-	/* We need none of these with Dovetail. */
-	return -ENOSYS;
-}
-
 #endif /* !_COBALT_ARM64_SYSCALL_H */

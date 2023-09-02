@@ -205,14 +205,6 @@ static COBALT_SYSCALL(ftrace_puts, current,
 	return 0;
 }
 
-static COBALT_SYSCALL(archcall, current,
-		      (unsigned long a1, unsigned long a2,
-		       unsigned long a3, unsigned long a4,
-		       unsigned long a5))
-{
-	return xnarch_local_syscall(a1, a2, a3, a4, a5);
-}
-
 static COBALT_SYSCALL(get_current, current,
 		      (xnhandle_t __user *u_handle))
 {

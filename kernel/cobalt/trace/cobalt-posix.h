@@ -144,7 +144,6 @@
 		__cobalt_symbolic_syscall(select),			\
 		__cobalt_symbolic_syscall(fcntl),			\
 		__cobalt_symbolic_syscall(migrate),			\
-		__cobalt_symbolic_syscall(archcall),			\
 		__cobalt_symbolic_syscall(trace),			\
 		__cobalt_symbolic_syscall(corectl),			\
 		__cobalt_symbolic_syscall(get_current),			\
