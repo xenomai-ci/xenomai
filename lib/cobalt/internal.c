@@ -576,7 +576,7 @@ void cobalt_assert_nrt(void)
 		pthread_kill(pthread_self(), SIGDEBUG);
 }
 
-unsigned long long cobalt_read_tsc(void)
+unsigned long long cobalt_read_ns(void)
 {
 	struct timespec ts;
 

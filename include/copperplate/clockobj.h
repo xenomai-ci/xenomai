@@ -124,17 +124,7 @@ void __clockobj_ticks_to_timespec(struct clockobj *clkobj,
 static inline ticks_t clockobj_get_tsc(void)
 {
 	/* Guaranteed to be the source of CLOCK_COPPERPLATE. */
-	return cobalt_read_tsc();
-}
-
-static inline sticks_t clockobj_ns_to_tsc(sticks_t ns)
-{
-	return cobalt_ns_to_ticks(ns);
-}
-
-static inline sticks_t clockobj_tsc_to_ns(sticks_t tsc)
-{
-	return cobalt_ticks_to_ns(tsc);
+	return cobalt_read_ns();
 }
 
 static inline
@@ -150,6 +140,15 @@ void clockobj_ns_to_timespec(ticks_t ns, struct timespec *ts)
 
 ticks_t clockobj_get_tsc(void);
 
+static inline
+void clockobj_ns_to_timespec(ticks_t ns, struct timespec *ts)
+{
+	ts->tv_sec = ns / 1000000000ULL;
+	ts->tv_nsec = ns - (ts->tv_sec * 1000000000ULL);
+}
+
+#endif /* CONFIG_XENO_MERCURY */
+
 static inline sticks_t clockobj_ns_to_tsc(sticks_t ns)
 {
 	return ns;
@@ -159,15 +158,6 @@ static inline sticks_t clockobj_tsc_to_ns(sticks_t tsc)
 {
 	return tsc;
 }
-
-static inline
-void clockobj_ns_to_timespec(ticks_t ns, struct timespec *ts)
-{
-	ts->tv_sec = ns / 1000000000ULL;
-	ts->tv_nsec = ns - (ts->tv_sec * 1000000000ULL);
-}
-
-#endif /* CONFIG_XENO_MERCURY */
 
 #ifdef CONFIG_XENO_LORES_CLOCK_DISABLED
 

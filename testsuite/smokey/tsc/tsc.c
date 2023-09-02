@@ -49,30 +49,9 @@ smokey_test_plugin(tsc,
 		"Check that emulated tsc is monotonic"
 );
 
-
-static inline unsigned long long timer_get_tsc(void)
-{
-	/*
-	 * The additional function call clockobj_get_tsc() makes a big
-	 * difference on low end
-	 */
-	return cobalt_read_tsc();
-}
-
-static inline unsigned long long timer_tsc2ns(unsigned long long tsc)
-{
-	return clockobj_tsc_to_ns(tsc);
-}
-
-static inline unsigned long long timer_ns2tsc(unsigned long long ns)
-{
-	return clockobj_ns_to_tsc(ns);
-}
-
 static int run_tsc(struct smokey_test *t, int argc, char *const argv[])
 {
 	unsigned long long runtime, start, jump, tsc1, tsc2;
-	unsigned long long one_sec_tsc;
 	unsigned long long sum, g_sum;
 	unsigned long long loops, g_loops;
 	unsigned dt, min, max, g_min, g_max;
@@ -102,10 +81,8 @@ static int run_tsc(struct smokey_test *t, int argc, char *const argv[])
 
 	smokey_parse_args(t, argc, argv);
 
-	one_sec_tsc = timer_ns2tsc(ONE_BILLION);
-
-	runtime = timer_get_tsc();
-	margin = timer_tsc2ns(2000);
+	runtime = cobalt_read_ns();
+	margin = 2000;
 	if (margin < 80)
 		margin = 80;
 
@@ -123,15 +100,15 @@ static int run_tsc(struct smokey_test *t, int argc, char *const argv[])
 		max = 0;
 		sum = 0;
 		loops = 0;
-		tsc2 = start = timer_get_tsc();
+		tsc2 = start = cobalt_read_ns();
 		do {
-			tsc1 = timer_get_tsc();
+			tsc1 = cobalt_read_ns();
 			if (tsc1 < tsc2) {
 				fprintf(stderr, "%016Lx -> %016Lx\n",
 					tsc2, tsc1);
 				goto err1;
 			}
-			tsc2 = timer_get_tsc();
+			tsc2 = cobalt_read_ns();
 			if (tsc2 < tsc1) {
 				fprintf(stderr, "%016Lx -> %016Lx\n",
 					tsc1, tsc2);
@@ -149,7 +126,7 @@ static int run_tsc(struct smokey_test *t, int argc, char *const argv[])
 				max = dt;
 			sum += dt;
 			++loops;
-		} while (tsc2 - start < one_sec_tsc);
+		} while (tsc2 - start < ONE_BILLION);
 
 		smokey_trace("min: %u, max: %u, avg: %g",
 			min, max, (double)sum / loops);
@@ -164,7 +141,7 @@ static int run_tsc(struct smokey_test *t, int argc, char *const argv[])
 
 	smokey_trace("min: %u, max: %u, avg: %g -> %g us",
 		g_min, g_max, (double)g_sum / g_loops,
-		(double)timer_tsc2ns(g_sum) / (1000 * g_loops));
+		(double)g_sum / (1000 * g_loops));
 
 	return EXIT_SUCCESS;
 

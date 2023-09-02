@@ -25,24 +25,6 @@
 extern "C" {
 #endif
 
-static inline
-xnsticks_t cobalt_ns_to_ticks(xnsticks_t ns)
-{
-	return ns;
-}
-
-static inline
-xnsticks_t cobalt_ticks_to_ns(xnsticks_t ticks)
-{
-	return ticks;
-}
-
-static inline
-xnsticks_t cobalt_ticks_to_ns_rounded(xnsticks_t ticks)
-{
-	return ticks;
-}
-
 unsigned long long cobalt_divrem_billion(unsigned long long value,
 					 unsigned long *rem);
 #ifdef __cplusplus

@@ -237,7 +237,7 @@ int clockobj_set_resolution(struct clockobj *clkobj, unsigned int resolution_ns)
 
 ticks_t clockobj_get_time(struct clockobj *clkobj)
 {
-	ticks_t ns = cobalt_ticks_to_ns_rounded(cobalt_read_tsc());
+	ticks_t ns = cobalt_read_ns();
 	return clockobj_ns_to_ticks(clkobj, ns);
 }
 
@@ -257,7 +257,7 @@ void clockobj_get_date(struct clockobj *clkobj, ticks_t *pticks)
 
 	read_lock_nocancel(&clkobj->lock);
 
-	ns = cobalt_ticks_to_ns(clockobj_get_tsc());
+	ns = clockobj_get_tsc();
 	/* Add offset to epoch. */
 	ns += (ticks_t)clkobj->offset.tv_sec * 1000000000ULL;
 	ns += clkobj->offset.tv_nsec;
