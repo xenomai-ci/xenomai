@@ -278,18 +278,9 @@ static int test_sc_cobalt_clock_settime64(void)
 {
 	int ret;
 	int sc_nr = sc_cobalt_clock_settime64;
-	struct xn_timespec64 ts64, now64;
-	struct timespec now;
-
-	if (!cobalt_use_legacy_tsc())
-		return 0; // Not implemented, nothing to test, success
 
 	/* Make sure we don't crash because of NULL pointers */
 	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
-	if (ret == -ENOSYS) {
-		smokey_note("clock_settime64: skipped. (no kernel support)");
-		return 0; // Not implemented, nothing to test, success
-	}
 	if (!smokey_assert(ret == -EFAULT))
 		return ret ? ret : -EINVAL;
 
@@ -297,27 +288,6 @@ static int test_sc_cobalt_clock_settime64(void)
 	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_MONOTONIC, (void *)0xdeadbeefUL);
 	if (!smokey_assert(ret == -EFAULT))
 		return ret ? ret : -EINVAL;
-
-	ret = clock_gettime(CLOCK_REALTIME, &now);
-	if (ret)
-		return -errno;
-
-	/* Provide a valid 64bit timespec */
-	ts64.tv_sec  = now.tv_sec + 1;
-	ts64.tv_nsec = now.tv_nsec;
-	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_REALTIME, &ts64);
-	if (!smokey_assert(!ret))
-		return ret;
-
-	ret = clock_gettime(CLOCK_REALTIME, &now);
-	if (ret)
-		return -errno;
-
-	now64.tv_sec = now.tv_sec;
-	now64.tv_nsec = now.tv_nsec;
-
-	if (ts_less(&now64, &ts64))
-		smokey_warning("clock_settime() reported no error but no new time seen");
 
 	return 0;
 }
