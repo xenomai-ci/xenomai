@@ -27,54 +27,12 @@
 #include <cobalt/wrappers.h>
 #include <cobalt/ticks.h>
 #include <asm/xenomai/syscall.h>
-#include <asm/xenomai/tsc.h>
 #include <asm/xenomai/features.h>
 #include <asm/xenomai/uapi/fptest.h>
 #include "internal.h"
 
-struct __xn_full_tscinfo __xn_tscinfo = {
-	.kinfo = {
-		.counter = NULL,
-	},
-};
-
 void cobalt_arch_check_features(struct cobalt_featinfo *finfo)
 {
-	unsigned long phys_addr;
-	unsigned page_size;
-	int err, fd;
-	void *addr;
-
-	if (!cobalt_use_legacy_tsc())
-		return;
-
-	if (__xn_tscinfo.kinfo.counter != NULL)
-		return;
-
-	err = XENOMAI_SYSCALL2(sc_cobalt_archcall,
-			       XENOMAI_SYSARCH_TSCINFO, &__xn_tscinfo.kinfo);
-	if (err)
-		early_panic("missing TSC emulation: %s",
-			     strerror(-err));
-
-	fd = __STD(open("/dev/mem", O_RDONLY | O_SYNC));
-	if (fd == -1)
-		early_panic("failed open(/dev/mem): %s", strerror(errno));
-
-	page_size = sysconf(_SC_PAGESIZE);
-
-	phys_addr = (unsigned long)__xn_tscinfo.kinfo.counter;
-
-	addr = __STD(mmap(NULL, page_size, PROT_READ, MAP_SHARED,
-			  fd, phys_addr & ~(page_size - 1)));
-	if (addr == MAP_FAILED)
-		early_panic("failed mmap(/dev/mem): %s", strerror(errno));
-
-	__xn_tscinfo.kinfo.counter =
-		((volatile unsigned *)
-		 ((char *) addr + (phys_addr & (page_size - 1))));
-
-	__STD(close(fd));
 }
 
 int cobalt_fp_detect(void)

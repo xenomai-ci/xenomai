@@ -31,7 +31,6 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <asm/xenomai/syscall.h>
-#include <asm/xenomai/tsc.h>
 #include <cobalt/ticks.h>
 #include <cobalt/sys/cobalt.h>
 #include "internal.h"
@@ -580,9 +579,6 @@ void cobalt_assert_nrt(void)
 unsigned long long cobalt_read_tsc(void)
 {
 	struct timespec ts;
-
-	if (cobalt_use_legacy_tsc())
-		return cobalt_read_legacy_tsc();
 
 	__cobalt_vdso_gettime(CLOCK_MONOTONIC, &ts);
 

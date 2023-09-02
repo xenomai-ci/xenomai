@@ -82,7 +82,7 @@ void cobalt_print_init(void);
 
 void cobalt_print_init_atfork(void);
 
-void cobalt_ticks_init(unsigned long long freq);
+void cobalt_ticks_init(void);
 
 void cobalt_mutex_init(void);
 

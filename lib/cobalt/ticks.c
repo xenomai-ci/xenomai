@@ -17,11 +17,8 @@
  */
 #include <cobalt/arith.h>
 #include <cobalt/ticks.h>
-#include <asm/xenomai/tsc.h>
 #include <asm/xenomai/time.h>
 #include "internal.h"
-
-unsigned long long __cobalt_tsc_clockfreq;
 
 /*
  * If we have no fast path via the vDSO for reading timestamps, ask
@@ -35,13 +32,8 @@ static int gettime_fallback(clockid_t clk_id, struct timespec *tp)
 int (*__cobalt_vdso_gettime)(clockid_t clk_id,
 			struct timespec *tp) = gettime_fallback;
 
-#ifdef XNARCH_HAVE_LLMULSHFT
-
-static unsigned int tsc_scale, tsc_shift;
-
 #ifdef XNARCH_HAVE_NODIV_LLIMD
 
-static struct xnarch_u32frac tsc_frac;
 static struct xnarch_u32frac bln_frac;
 
 unsigned long long cobalt_divrem_billion(unsigned long long value,
@@ -60,50 +52,8 @@ unsigned long long cobalt_divrem_billion(unsigned long long value,
 	return q;
 }
 
-xnsticks_t __cobalt_ns_to_tsc(xnsticks_t ns)
-{
-	return xnarch_nodiv_llimd(ns, tsc_frac.frac, tsc_frac.integ);
-}
-
 #else /* !XNARCH_HAVE_NODIV_LLIMD */
 
-xnsticks_t __cobalt_ns_to_tsc(xnsticks_t ns)
-{
-	return xnarch_llimd(ns, 1 << tsc_shift, tsc_scale);
-}
-
-#endif /* !XNARCH_HAVE_NODIV_LLIMD */
-
-xnsticks_t __cobalt_tsc_to_ns(xnsticks_t ticks)
-{
-	return xnarch_llmulshft(ticks, tsc_scale, tsc_shift);
-}
-
-xnsticks_t __cobalt_tsc_to_ns_rounded(xnsticks_t ticks)
-{
-	unsigned int shift = tsc_shift - 1;
-	return (xnarch_llmulshft(ticks, tsc_scale, shift) + 1) / 2;
-}
-
-#else  /* !XNARCH_HAVE_LLMULSHFT */
-
-xnsticks_t __cobalt_tsc_to_ns(xnsticks_t ticks)
-{
-	return xnarch_llimd(ticks, 1000000000, __cobalt_tsc_clockfreq);
-}
-
-xnsticks_t __cobalt_tsc_to_ns_rounded(xnsticks_t ticks)
-{
-	return (xnarch_llimd(ticks, 1000000000, __cobalt_tsc_clockfreq/2) + 1) / 2;
-}
-
-xnsticks_t __cobalt_ns_to_tsc(xnsticks_t ns)
-{
-	return xnarch_llimd(ns, __cobalt_tsc_clockfreq, 1000000000);
-}
-#endif /* !XNARCH_HAVE_LLMULSHFT */
-
-#ifndef XNARCH_HAVE_NODIV_LLIMD
 unsigned long long cobalt_divrem_billion(unsigned long long value,
 					 unsigned long *rem)
 {
@@ -112,22 +62,12 @@ unsigned long long cobalt_divrem_billion(unsigned long long value,
 }
 #endif /* !XNARCH_HAVE_NODIV_LLIMD */
 
-void cobalt_ticks_init(unsigned long long freq)
+void cobalt_ticks_init(void)
 {
-	__cobalt_tsc_clockfreq = freq;
-	if (freq) {
-#ifdef XNARCH_HAVE_LLMULSHFT
-		xnarch_init_llmulshft(1000000000, freq, &tsc_scale, &tsc_shift);
-#ifdef XNARCH_HAVE_NODIV_LLIMD
-		xnarch_init_u32frac(&tsc_frac, 1 << tsc_shift, tsc_scale);
-#endif
-#endif
-	} else {
-		void *vcall = cobalt_lookup_vdso(COBALT_VDSO_VERSION,
-						 COBALT_VDSO_GETTIME);
-		if (vcall)
-			__cobalt_vdso_gettime = vcall;
-	}
+	void *vcall = cobalt_lookup_vdso(COBALT_VDSO_VERSION,
+					 COBALT_VDSO_GETTIME);
+	if (vcall)
+		__cobalt_vdso_gettime = vcall;
 #ifdef XNARCH_HAVE_NODIV_LLIMD
 	xnarch_init_u32frac(&bln_frac, 1, 1000000000);
 #endif

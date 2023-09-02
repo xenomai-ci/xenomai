@@ -21,56 +21,25 @@
 #include <stdbool.h>
 #include <cobalt/uapi/kernel/types.h>
 
-/*
- * Depending on the underlying pipeline support, we may represent time
- * stamps as count of nanoseconds (Dovetail), or as values of the
- * hardware tick counter (aka TSC) available with the platform
- * (I-pipe). In the latter - legacy - case, we need to convert from
- * TSC values to nanoseconds and conversely via scaled maths. This
- * indirection will go away once support for the I-pipe is removed.
- */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern unsigned long long __cobalt_tsc_clockfreq;
-
-static inline bool cobalt_use_legacy_tsc(void)
-{
-	return !!__cobalt_tsc_clockfreq;
-}
-
-xnsticks_t __cobalt_tsc_to_ns(xnsticks_t ticks);
-
-xnsticks_t __cobalt_tsc_to_ns_rounded(xnsticks_t ticks);
-
-xnsticks_t __cobalt_ns_to_tsc(xnsticks_t ns);
-
 static inline
 xnsticks_t cobalt_ns_to_ticks(xnsticks_t ns)
 {
-	if (cobalt_use_legacy_tsc())
-		return __cobalt_ns_to_tsc(ns);
-
 	return ns;
 }
 
 static inline
 xnsticks_t cobalt_ticks_to_ns(xnsticks_t ticks)
 {
-	if (cobalt_use_legacy_tsc())
-		return __cobalt_tsc_to_ns(ticks);
-
 	return ticks;
 }
 
 static inline
 xnsticks_t cobalt_ticks_to_ns_rounded(xnsticks_t ticks)
 {
-	if (cobalt_use_legacy_tsc())
-		return __cobalt_tsc_to_ns_rounded(ticks);
-
 	return ticks;
 }
 

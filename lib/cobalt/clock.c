@@ -29,7 +29,6 @@
 #include <cobalt/uapi/time.h>
 #include <cobalt/ticks.h>
 #include <asm/xenomai/syscall.h>
-#include <asm/xenomai/tsc.h>
 #include "umm.h"
 #include "internal.h"
 
@@ -115,45 +114,6 @@ COBALT_IMPL(int, clock_getres, (clockid_t clock_id, struct timespec *tp))
 	return 0;
 }
 
-static int __do_clock_host_realtime(struct timespec *ts)
-{
-	uint64_t now, base, mask, cycle_delta, nsec;
-	struct xnvdso_hostrt_data *hostrt_data;
-	uint32_t mult, shift;
-	unsigned long rem;
-	urwstate_t tmp;
-
-	if (!xnvdso_test_feature(cobalt_vdso, XNVDSO_FEAT_HOST_REALTIME))
-		return -1;
-
-	hostrt_data = &cobalt_vdso->hostrt_data;
-
-	if (!hostrt_data->live)
-		return -1;
-
-	/*
-	 * The following is essentially a verbatim copy of the
-	 * mechanism in the kernel.
-	 */
-	unsynced_read_block(&tmp, &hostrt_data->lock) {
-		now = cobalt_read_legacy_tsc();
-		base = hostrt_data->cycle_last;
-		mask = hostrt_data->mask;
-		mult = hostrt_data->mult;
-		shift = hostrt_data->shift;
-		ts->tv_sec = hostrt_data->wall_sec;
-		nsec = hostrt_data->wall_nsec;
-	}
-
-	cycle_delta = (now - base) & mask;
-	nsec += (cycle_delta * mult) >> shift;
-
-	ts->tv_sec += cobalt_divrem_billion(nsec, &rem);
-	ts->tv_nsec = rem;
-
-	return 0;
-}
-
 static int __do_clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
 #ifdef __USE_TIME_BITS64
@@ -161,65 +121,6 @@ static int __do_clock_gettime(clockid_t clock_id, struct timespec *tp)
 #else
 	return -XENOMAI_SYSCALL2(sc_cobalt_clock_gettime, clock_id, tp);
 #endif
-}
-
-static int gettime_via_tsc(clockid_t clock_id, struct timespec *tp)
-{
-	unsigned long rem;
-	xnticks_t ns;
-	int ret;
-
-	switch (clock_id) {
-	case CLOCK_HOST_REALTIME:
-		ret = __do_clock_host_realtime(tp);
-		break;
-	case CLOCK_MONOTONIC:
-	case CLOCK_MONOTONIC_RAW:
-		ns = cobalt_ticks_to_ns(cobalt_read_legacy_tsc());
-		tp->tv_sec = cobalt_divrem_billion(ns, &rem);
-		tp->tv_nsec = rem;
-		return 0;
-	case CLOCK_REALTIME:
-		ns = cobalt_ticks_to_ns(cobalt_read_legacy_tsc());
-		ns += cobalt_vdso->wallclock_offset;
-		tp->tv_sec = cobalt_divrem_billion(ns, &rem);
-		tp->tv_nsec = rem;
-		return 0;
-	default:
-		ret = __do_clock_gettime(clock_id, tp);
-	}
-
-	if (ret) {
-		errno = ret;
-		return -1;
-	}
-
-	return 0;
-}
-
-static int gettime_via_vdso(clockid_t clock_id, struct timespec *tp)
-{
-	int ret;
-
-	switch (clock_id) {
-	case CLOCK_REALTIME:
-	case CLOCK_HOST_REALTIME:
-		ret = __cobalt_vdso_gettime(CLOCK_REALTIME, tp);
-		break;
-	case CLOCK_MONOTONIC:
-	case CLOCK_MONOTONIC_RAW:
-		ret = __cobalt_vdso_gettime(clock_id, tp);
-		break;
-	default:
-		ret = __do_clock_gettime(clock_id, tp);
-	}
-
-	if (ret) {
-		errno = ret;
-		return -1;
-	}
-
-	return 0;
 }
 
 /**
@@ -253,10 +154,27 @@ static int gettime_via_vdso(clockid_t clock_id, struct timespec *tp)
  */
 COBALT_IMPL(int, clock_gettime, (clockid_t clock_id, struct timespec *tp))
 {
-	if (cobalt_use_legacy_tsc())
-		return gettime_via_tsc(clock_id, tp);
+	int ret;
 
-	return gettime_via_vdso(clock_id, tp);
+	switch (clock_id) {
+	case CLOCK_REALTIME:
+	case CLOCK_HOST_REALTIME:
+		ret = __cobalt_vdso_gettime(CLOCK_REALTIME, tp);
+		break;
+	case CLOCK_MONOTONIC:
+	case CLOCK_MONOTONIC_RAW:
+		ret = __cobalt_vdso_gettime(clock_id, tp);
+		break;
+	default:
+		ret = __do_clock_gettime(clock_id, tp);
+	}
+
+	if (ret) {
+		errno = ret;
+		return -1;
+	}
+
+	return 0;
 }
 
 /**
@@ -287,7 +205,7 @@ COBALT_IMPL(int, clock_settime, (clockid_t clock_id, const struct timespec *tp))
 {
 	int ret;
 
-	if (clock_id == CLOCK_REALTIME && !cobalt_use_legacy_tsc())
+	if (clock_id == CLOCK_REALTIME)
 		return __STD(clock_settime(CLOCK_REALTIME, tp));
 
 #ifdef __USE_TIME_BITS64
