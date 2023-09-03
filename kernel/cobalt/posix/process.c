@@ -638,8 +638,8 @@ int cobalt_map_user(struct xnthread *thread, __u32 __user *u_winoff)
 	 * ->map_thread() handler is invoked after the TCB is fully
 	 * built, and when we know for sure that current will go
 	 * through our task-exit handler, because it has a shadow
-	 * extension and I-pipe notifications will soon be enabled for
-	 * it.
+	 * extension and dovetail notifications will soon be enabled
+	 * for it.
 	 */
 	xnthread_run_handler(thread, map_thread);
 	pipeline_enable_kevents();
