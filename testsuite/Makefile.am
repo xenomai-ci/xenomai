@@ -5,6 +5,7 @@ if XENO_COBALT
 SUBDIRS += 		\
 	clocktest	\
 	gpiotest	\
+	rt-signal-tests	\
 	spitest		\
 	switchtest	\
 	xeno-test
