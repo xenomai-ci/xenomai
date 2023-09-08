@@ -573,6 +573,8 @@ static inline void xnthread_propagate_schedparam(struct xnthread *curr)
 		__xnthread_propagate_schedparam(curr);
 }
 
+int xnthread_handle_rt_signals(unsigned int trapnr, struct pt_regs *regs);
+
 extern struct xnthread_personality xenomai_personality;
 
 /** @} */

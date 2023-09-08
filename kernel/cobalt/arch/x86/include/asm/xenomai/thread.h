@@ -28,5 +28,8 @@
 #define xnarch_fault_bp_p(__nr)		((current->ptrace & PT_PTRACED) &&	\
 					 ((__nr) == X86_TRAP_DB || (__nr) == X86_TRAP_BP))
 #define xnarch_fault_notify(__nr)	(!xnarch_fault_bp_p(__nr))
+#define xnarch_fault_code(__regs)		((__regs)->orig_ax)
+int xnarch_setup_trap_info(unsigned int vector, struct pt_regs *regs,
+			   long errcode, int *sig, struct kernel_siginfo *info);
 
 #endif /* !_COBALT_X86_ASM_THREAD_H */

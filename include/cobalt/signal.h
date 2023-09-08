@@ -54,6 +54,8 @@ COBALT_DECL(int, kill, (pid_t pid, int sig));
 
 COBALT_DECL(int, sigqueue, (pid_t pid, int sig, const union sigval value));
 
+int cobalt_rt_signal(int sig, void (*handler)(int, siginfo_t *, void *));
+
 #ifdef __cplusplus
 }
 #endif

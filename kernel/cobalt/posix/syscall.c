@@ -268,6 +268,38 @@ static COBALT_SYSCALL(serialdbg, current,
 	return 0;
 }
 
+static COBALT_SYSCALL(sigreturn, current, (void))
+{
+	struct pt_regs *regs = task_pt_regs(current);
+	int ret;
+
+	ret = dovetail_restore_rt_signal_frame(regs);
+	if (ret < 0)
+		goto badframe;
+
+	return __xn_reg_rval(regs);
+
+badframe:
+	xnthread_signal(xnthread_current(), SIGSEGV, 0);
+	return -1;
+}
+
+static COBALT_SYSCALL(sigaction, current, (int sig, void __user *handler,
+		      void __user *restorer))
+{
+	struct cobalt_ppd *sys_ppd = cobalt_ppd_get(0);
+
+	if (sig < 0 || sig >= _NSIG)
+		return -EINVAL;
+
+	sys_ppd->sighand[sig] = handler;
+
+	if (!sys_ppd->sigrestorer)
+		sys_ppd->sigrestorer = restorer;
+
+	return 0;
+}
+
 static void stringify_feature_set(unsigned long fset, char *buf, int size)
 {
 	unsigned long feature;

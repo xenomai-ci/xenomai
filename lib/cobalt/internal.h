@@ -137,4 +137,6 @@ static inline bool cobalt_features_available(unsigned int feat_mask)
 	return (cobalt_features & feat_mask) == feat_mask;
 }
 
+extern void *cobalt_get_restorer(void);
+
 #endif /* _LIB_COBALT_INTERNAL_H */

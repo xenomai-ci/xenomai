@@ -25,6 +25,7 @@
 #include <linux/signal.h>
 #include <linux/pid.h>
 #include <linux/sched.h>
+#include <asm/sighandling.h>
 #include <uapi/linux/sched/types.h>
 #include <cobalt/kernel/sched.h>
 #include <cobalt/kernel/timer.h>
@@ -43,6 +44,7 @@
 #include <pipeline/inband_work.h>
 #include <pipeline/sched.h>
 #include <trace/events/cobalt-core.h>
+#include "posix/process.h"
 #include "debug.h"
 
 static DECLARE_WAIT_QUEUE_HEAD(join_all);
@@ -2513,6 +2515,42 @@ int xnthread_killall(int grace, int mask)
 	return ret < 0 ? -EINTR : 0;
 }
 EXPORT_SYMBOL_GPL(xnthread_killall);
+
+int xnthread_handle_rt_signals(unsigned int trapnr, struct pt_regs *regs)
+{
+	unsigned int code = xnarch_fault_code(regs);
+	unsigned int vector = trapnr;
+	struct cobalt_ppd *sys_ppd;
+	struct kernel_siginfo si;
+	struct ksignal ksig;
+	int sig, ret = 0;
+
+	code = xnarch_fault_code(regs);
+	ret = xnarch_setup_trap_info(vector, regs, code, &sig, &si);
+	if (ret || sig == 0)
+		return 1;
+
+	sys_ppd = cobalt_ppd_get(0);
+	if (sig >= _NSIG ||
+	    sys_ppd->sighand[sig] == NULL ||
+	    sys_ppd->sighand[sig] == SIG_DFL)
+		return 1;
+
+	if (sys_ppd->sigrestorer == NULL)
+		return 1;
+
+	ksig.sig = sig;
+	memcpy(&ksig.info, &si, sizeof(si));
+	ksig.ka.sa.sa_flags = SA_SIGINFO | SA_RESTORER;
+	ksig.ka.sa.sa_restorer = sys_ppd->sigrestorer;
+	ksig.ka.sa.sa_handler = sys_ppd->sighand[sig];
+
+	ret = dovetail_setup_rt_signal_frame(&ksig, regs);
+	if (ret)
+		return 1;
+
+	return 0;
+}
 
 /* Xenomai's generic personality. */
 struct xnthread_personality xenomai_personality = {
