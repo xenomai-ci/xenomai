@@ -20,6 +20,7 @@
 
 #include <xeno_config.h>
 #include <cobalt/uapi/syscall.h>
+#include <boilerplate/compiler.h>
 
 /* Some code pulled from glibc's inline syscalls. */
 
@@ -135,6 +136,13 @@ asm (".L__X'%ebx = 1\n\t"
 #define XENOMAI_SYSBIND(breq) \
 	XENOMAI_DO_SYSCALL_SAFE(1, sc_cobalt_bind, breq)
 
+#define XENOMAI_BUILD_SIGRETURN()		\
+	__asm__ (				\
+		".text\n\t"			\
+		"__cobalt_sigreturn:\n\t"	\
+		"movl $" __stringify(__xn_syscode(sc_cobalt_sigreturn)) ",%eax\n\t" \
+		DOSYSCALLSAFE)
+
 #else /* x86_64 */
 
 #if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 3)
@@ -203,6 +211,13 @@ asm (".L__X'%ebx = 1\n\t"
 
 #define XENOMAI_SYSBIND(breq) \
 	XENOMAI_DO_SYSCALL(1, sc_cobalt_bind, breq)
+
+#define XENOMAI_BUILD_SIGRETURN()		\
+	__asm__ (				\
+		".text\n\t"			\
+		"__cobalt_sigreturn:\n\t"	\
+		"movq $" __stringify(__xn_syscode(sc_cobalt_sigreturn)) ",%rax\n\t" \
+		"syscall\n\t")
 
 #endif /* x86_64 */
 

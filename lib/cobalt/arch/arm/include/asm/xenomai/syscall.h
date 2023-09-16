@@ -24,6 +24,7 @@
 #include <xeno_config.h>
 #include <errno.h>
 #include <cobalt/uapi/syscall.h>
+#include <boilerplate/compiler.h>
 
 #ifndef __ARM_EABI__
 #error "ARM OABI support has been removed with Xenomai 3.3.x"
@@ -119,5 +120,13 @@
 	XENOMAI_DO_SYSCALL(5,op,a1,a2,a3,a4,a5)
 #define XENOMAI_SYSBIND(breq)			\
 	XENOMAI_DO_SYSCALL(1,sc_cobalt_bind,breq)
+
+#define XENOMAI_BUILD_SIGRETURN()					\
+	__asm__ (							\
+		".text\n\t"						\
+		"__cobalt_sigreturn:\n\t"				\
+		"mov %r7,$" __stringify(sc_cobalt_sigreturn) "\n\t"	\
+		"orr %r7,%r7,$" __stringify(__COBALT_SYSCALL_BIT) "\n\t" \
+		"swi 0\n\t")
 
 #endif /* !_LIB_COBALT_ARM_SYSCALL_H */

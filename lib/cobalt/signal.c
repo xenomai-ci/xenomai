@@ -126,11 +126,17 @@ COBALT_IMPL(int, sigqueue, (pid_t pid, int sig, const union sigval value))
 	return 0;
 }
 
+XENOMAI_BUILD_SIGRETURN();
+
+extern void cobalt_sigreturn(void) __asm__ ("__cobalt_sigreturn")
+	__attribute__ ((visibility ("hidden")));
+
 int cobalt_rt_signal(int sig, void (*handler)(int, siginfo_t *, void *))
 {
 	int ret;
 
-	ret = XENOMAI_SYSCALL3(sc_cobalt_sigaction, sig, handler, cobalt_get_restorer());
+	ret = XENOMAI_SYSCALL3(sc_cobalt_sigaction, sig, handler,
+			       cobalt_sigreturn);
 	if (ret) {
 		errno = -ret;
 		return -1;

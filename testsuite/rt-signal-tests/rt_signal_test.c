@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/ucontext.h>
 #include <copperplate/traceobj.h>
 #include <alchemy/task.h>
 #include <assert.h>
 #include <setjmp.h>
-#include <asm/ucontext.h>
 
 #ifdef TEST_SEGFAULT
 #define TEST_SIGNAL SIGSEGV
@@ -73,16 +73,18 @@ static int get_step(void)
 static void do_cleanup(void *context)
 {
 	int step = 0;
-	struct ucontext *uc = context;
+	ucontext_t *uc = context;
 
 	step = get_step();
 
 #if defined(__i386__)
-	uc->uc_mcontext.eip += step;
+	uc->uc_mcontext.gregs[REG_EIP] += step;
 #elif defined(__x86_64__)
-	uc->uc_mcontext.rip += step;
+	uc->uc_mcontext.gregs[REG_RIP] += step;
 #elif defined(__aarch64__)
 	uc->uc_mcontext.pc += step;
+#elif defined(__arm__)
+	uc->uc_mcontext.arm_pc += step;
 #endif
 }
 #endif

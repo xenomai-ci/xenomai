@@ -22,6 +22,7 @@
 #include <xeno_config.h>
 #include <errno.h>
 #include <cobalt/uapi/syscall.h>
+#include <boilerplate/compiler.h>
 
 #define __xn_syscall_args0
 #define __xn_syscall_args1 , unsigned long __a1
@@ -100,5 +101,13 @@ DEFINE_XENOMAI_SYSCALL(5)
 #define XENOMAI_SYSBIND(__breq)					\
 	__xenomai_do_syscall1(sc_cobalt_bind,			\
 			      (unsigned long)__breq)
+
+#define XENOMAI_BUILD_SIGRETURN()					\
+	__asm__ (							\
+		".text\n\t"						\
+		"__cobalt_sigreturn:\n\t"				\
+		"mov w8,#" __stringify(sc_cobalt_sigreturn) "\n\t"	\
+		"orr w8,w8,#" __stringify(__COBALT_SYSCALL_BIT) "\n\t"	\
+		"svc 0\n\t")
 
 #endif /* !_LIB_COBALT_ARM64_SYSCALL_H */
