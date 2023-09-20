@@ -1,45 +1,48 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <error.h>
-#include <libgen.h>
-#include <smokey/smokey.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <smokey/smokey.h>
 
-#define TEST(name)								   \
-	smokey_test_plugin(name, SMOKEY_NOARGS, "Run external test");		   \
-	static int run_##name(struct smokey_test *t, int argc, char *const argv[]) \
-	{									   \
-		return __run_extprog(t, argc, argv);				   \
-	}
-
-static int __run_extprog(struct smokey_test *t, int argc, char *const argv[])
+static int run_vxworkstests(struct smokey_test *t, int argc, char *const argv[])
 {
-	int ret;
-	char *tst_path;
+	int ret = 0;
 
-	ret = asprintf(&tst_path, "%s/%s --cpu-affinity=0", XENO_TEST_DIR, t->name);
-	if (ret == -1)
-		return -ENOMEM;
+	char *tests[] = {
+		"vxworkstests",
+		"vxworkstests_lst1",
+		"vxworkstests_msgQ1",
+		"vxworkstests_msgQ2",
+		"vxworkstests_msgQ3",
+		"vxworkstests_rng1",
+		"vxworkstests_sem1",
+		"vxworkstests_sem2",
+		"vxworkstests_sem3",
+		"vxworkstests_sem4",
+		"vxworkstests_wd1",
+		"vxworkstests_task1",
+		"vxworkstests_task2"
+	};
 
-	ret = system(tst_path);
-	free(tst_path);
+	for (size_t t = 0; t < sizeof(tests) / sizeof(tests[0]); t++)
+	{
+		int fails = 0;
+
+		ret = smokey_run_extprog(XENO_TEST_DIR, tests[t],
+					 "--cpu-affinity=0");
+		if (ret) {
+			fails++;
+			if (smokey_keep_going)
+				continue;
+			if (smokey_verbose_mode)
+				error(1, -ret, "test %s failed", tests[t]);
+			return 1;
+		}
+		smokey_note("%s OK", tests[t]);
+	}
 
 	return ret;
 }
+smokey_test_plugin(vxworkstests, SMOKEY_NOARGS, "Run external vxworkstests");
 
-TEST(vxworkstests)
-TEST(vxworkstests_lst1)
-TEST(vxworkstests_msgQ1)
-TEST(vxworkstests_msgQ2)
-TEST(vxworkstests_msgQ3)
-TEST(vxworkstests_rng1)
-TEST(vxworkstests_sem1)
-TEST(vxworkstests_sem2)
-TEST(vxworkstests_sem3)
-TEST(vxworkstests_sem4)
-TEST(vxworkstests_wd1)
-TEST(vxworkstests_task1)
-TEST(vxworkstests_task2)
