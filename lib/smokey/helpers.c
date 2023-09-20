@@ -410,3 +410,18 @@ int smokey_rmmod(const char *name)
 
 	return err;
 }
+
+int smokey_run_extprog(const char *dir, const char *name, const char *args)
+{
+	int ret;
+	char *tst_path;
+
+	ret = asprintf(&tst_path, "%s/%s %s", dir, name, args ? : "");
+	if (ret == -1)
+		return -ENOMEM;
+
+	ret = system(tst_path);
+	free(tst_path);
+
+	return ret;
+}
