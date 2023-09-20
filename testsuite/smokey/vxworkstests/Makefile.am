@@ -11,7 +11,6 @@ libvxworkstests_a_CPPFLAGS =	\
 CCLD = $(top_srcdir)/scripts/wrap-link.sh $(CC)
 
 test_PROGRAMS =				\
-		vxworkstests		\
 		vxworkstests_lst1	\
 		vxworkstests_msgQ1	\
 		vxworkstests_msgQ2	\
@@ -35,15 +34,6 @@ vxworksldadd = 							\
 	@XENO_CORE_LDADD@ 					\
 	@XENO_USER_LDADD@					\
 	-lpthread -lrt -lm
-
-vxworkstests_SOURCES = vxworkstests_driver.c
-vxworkstests_CPPFLAGS = $(vxworkscppflags)
-vxworkstests_LDFLAGS = @XENO_AUTOINIT_LDFLAGS@ $(XENO_POSIX_WRAPPERS)
-vxworkstests_LDADD =				\
-	../../../lib/smokey/libsmokey@CORE@.la	\
-	@XENO_CORE_LDADD@ 			\
-	@XENO_USER_LDADD@			\
-	-lpthread -lrt
 
 vxworkstests_lst1_SOURCES = lst-1.c
 vxworkstests_lst1_CPPFLAGS = $(vxworkscppflags)

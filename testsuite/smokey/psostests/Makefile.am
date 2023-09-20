@@ -11,7 +11,6 @@ libpsostests_a_CPPFLAGS = 	\
 CCLD = $(top_srcdir)/scripts/wrap-link.sh $(CC)
 
 test_PROGRAMS =			\
-		psostests       \
 		psostests_mq1	\
 		psostests_mq2	\
 		psostests_mq3	\
@@ -47,15 +46,6 @@ psosldadd =							\
 	@XENO_CORE_LDADD@ 					\
 	@XENO_USER_LDADD@					\
 	-lpthread -lrt -lm
-
-psostests_SOURCES = psostests_driver.c
-psostests_CPPFLAGS = $(psoscppflags)
-psostests_LDADD =						\
-	../../../lib/smokey/libsmokey@CORE@.la			\
-	@XENO_CORE_LDADD@ 					\
-	@XENO_USER_LDADD@					\
-	-lpthread -lrt
-psostests_LDFLAGS = @XENO_AUTOINIT_LDFLAGS@ $(XENO_POSIX_WRAPPERS)
 
 psostests_mq1_SOURCES = mq-1.c
 psostests_mq1_CPPFLAGS = $(psoscppflags)

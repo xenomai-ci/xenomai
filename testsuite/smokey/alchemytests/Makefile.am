@@ -11,7 +11,6 @@ libalchemytests_a_CPPFLAGS =	\
 CCLD = $(top_srcdir)/scripts/wrap-link.sh $(CC)
 
 test_PROGRAMS =				\
-		alchemytests		\
 		alchemytests_alarm1	\
 		alchemytests_buffer1	\
 		alchemytests_event1	\
@@ -45,17 +44,6 @@ alchemyldadd = 							\
 	@XENO_CORE_LDADD@ 					\
 	@XENO_USER_LDADD@					\
 	-lpthread -lrt -lm
-
-alchemytests_SOURCES = alchemytests_driver.c
-alchemytests_CPPFLAGS =				\
-	$(XENO_USER_CFLAGS)			\
-	-I$(top_srcdir)/include
-alchemytests_LDFLAGS = @XENO_AUTOINIT_LDFLAGS@
-alchemytests_LDADD =				\
-	../../../lib/smokey/libsmokey@CORE@.la	\
-	@XENO_CORE_LDADD@			\
-	@XENO_USER_LDADD@			\
-	-lpthread -lrt
 
 alchemytests_alarm1_SOURCES = alarm-1.c
 alchemytests_alarm1_CPPFLAGS = $(alchemycppflags)
