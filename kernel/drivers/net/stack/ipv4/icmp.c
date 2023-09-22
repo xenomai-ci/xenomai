@@ -421,6 +421,7 @@ static struct rt_icmp_control rt_icmp_pointers[NR_ICMP_TYPES + 1] = {
 struct rtsocket *rt_icmp_dest_socket(struct rtskb *skb)
 {
 	rt_socket_reference(icmp_socket);
+	skb->sk = icmp_socket;
 	return icmp_socket;
 }
 
