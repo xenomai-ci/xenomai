@@ -174,7 +174,7 @@ void xnregistry_cleanup(void)
 	struct xnpnode *pnode;
 	int n;
 
-	flush_scheduled_work();
+	flush_work(&registry_proc_work);
 
 	for (n = 0; n < nr_object_entries; n++)
 		hlist_for_each_entry_safe(ecurr, enext, 
@@ -200,7 +200,7 @@ void xnregistry_cleanup(void)
 
 #ifdef CONFIG_XENO_OPT_VFILE
 	pipeline_delete_inband_sirq(proc_virq);
-	flush_scheduled_work();
+	flush_work(&registry_proc_work);
 	xnvfile_destroy_regular(&usage_vfile);
 	xnvfile_destroy_dir(&registry_vfroot);
 #endif /* CONFIG_XENO_OPT_VFILE */
