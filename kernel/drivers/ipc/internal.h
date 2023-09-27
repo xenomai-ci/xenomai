@@ -76,7 +76,27 @@ static inline nanosecs_rel_t rtipc_timeval_to_ns(const struct __kernel_old_timev
 	return ns;
 }
 
+static inline nanosecs_rel_t
+rtipc_sock_timeval_to_ns(const struct __kernel_sock_timeval *tv)
+{
+	nanosecs_rel_t ns = tv->tv_usec * 1000;
+
+	if (tv->tv_sec)
+		ns += (nanosecs_rel_t)tv->tv_sec * 1000000000UL;
+
+	return ns;
+}
+
 static inline void rtipc_ns_to_timeval(struct __kernel_old_timeval *tv, nanosecs_rel_t ns)
+{
+	unsigned long nsecs;
+
+	tv->tv_sec = xnclock_divrem_billion(ns, &nsecs);
+	tv->tv_usec = nsecs / 1000;
+}
+
+static inline void rtipc_ns_to_sock_timeval(struct __kernel_sock_timeval *tv,
+					    nanosecs_rel_t ns)
 {
 	unsigned long nsecs;
 
@@ -105,8 +125,15 @@ int rtipc_get_sockoptin(struct rtdm_fd *fd,
 int rtipc_get_timeval(struct rtdm_fd *fd, struct __kernel_old_timeval *tv,
 		      const void *arg, size_t arglen);
 
+int rtipc_get_sock_timeval(struct rtdm_fd *fd, struct __kernel_sock_timeval *tv,
+			   const void *arg, size_t arglen);
+
 int rtipc_put_timeval(struct rtdm_fd *fd, void *arg,
 		      const struct __kernel_old_timeval *tv, size_t arglen);
+
+int rtipc_put_sock_timeval(struct rtdm_fd *fd, void *arg,
+			   const struct __kernel_sock_timeval *tv,
+			   size_t arglen);
 
 int rtipc_get_length(struct rtdm_fd *fd, size_t *lenp,
 		     const void *arg, size_t arglen);

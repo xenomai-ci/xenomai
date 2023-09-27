@@ -290,6 +290,20 @@ int rtipc_get_timeval(struct rtdm_fd *fd, struct __kernel_old_timeval *tv,
 	return rtdm_safe_copy_from_user(fd, tv, arg, sizeof(*tv));
 }
 
+int rtipc_get_sock_timeval(struct rtdm_fd *fd, struct __kernel_sock_timeval *tv,
+			   const void *arg, size_t arglen)
+{
+	if (arglen != sizeof(*tv))
+		return -EINVAL;
+
+	if (!rtdm_fd_is_user(fd)) {
+		*tv = *(struct __kernel_sock_timeval *)arg;
+		return 0;
+	}
+
+	return rtdm_safe_copy_from_user(fd, tv, arg, sizeof(*tv));
+}
+
 int rtipc_put_timeval(struct rtdm_fd *fd, void *arg,
 		      const struct __kernel_old_timeval *tv, size_t arglen)
 {
@@ -306,6 +320,21 @@ int rtipc_put_timeval(struct rtdm_fd *fd, void *arg,
 
 	if (!rtdm_fd_is_user(fd)) {
 		*(struct __kernel_old_timeval *)arg = *tv;
+		return 0;
+	}
+
+	return rtdm_safe_copy_to_user(fd, arg, tv, sizeof(*tv));
+}
+
+int rtipc_put_sock_timeval(struct rtdm_fd *fd, void *arg,
+			   const struct __kernel_sock_timeval *tv,
+			   size_t arglen)
+{
+	if (arglen != sizeof(*tv))
+		return -EINVAL;
+
+	if (!rtdm_fd_is_user(fd)) {
+		*(struct __kernel_sock_timeval *)arg = *tv;
 		return 0;
 	}
 

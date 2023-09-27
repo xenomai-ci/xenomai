@@ -859,6 +859,7 @@ static int __xddp_setsockopt(struct xddp_socket *sk,
 {
 	int (*monitor)(struct rtdm_fd *fd, int event, long arg);
 	struct _rtdm_setsockopt_args sopt;
+	struct __kernel_sock_timeval stv;
 	struct rtipc_port_label plabel;
 	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t s;
@@ -879,6 +880,14 @@ static int __xddp_setsockopt(struct xddp_socket *sk,
 			sk->timeout = rtipc_timeval_to_ns(&tv);
 			break;
 
+		case SO_RCVTIMEO_NEW:
+			ret = rtipc_get_sock_timeval(fd, &stv, sopt.optval,
+						     sopt.optlen);
+			if (ret)
+				return ret;
+
+			sk->timeout = rtipc_sock_timeval_to_ns(&stv);
+			break;
 		default:
 			ret = -EINVAL;
 		}
@@ -965,6 +974,7 @@ static int __xddp_getsockopt(struct xddp_socket *sk,
 			     void *arg)
 {
 	struct _rtdm_getsockopt_args sopt;
+	struct __kernel_sock_timeval stv;
 	struct rtipc_port_label plabel;
 	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t s;
@@ -984,6 +994,14 @@ static int __xddp_getsockopt(struct xddp_socket *sk,
 		case SO_RCVTIMEO_OLD:
 			rtipc_ns_to_timeval(&tv, sk->timeout);
 			ret = rtipc_put_timeval(fd, sopt.optval, &tv, len);
+			if (ret)
+				return ret;
+			break;
+
+		case SO_RCVTIMEO_NEW:
+			rtipc_ns_to_sock_timeval(&stv, sk->timeout);
+			ret = rtipc_put_sock_timeval(fd, sopt.optval, &stv,
+						     len);
 			if (ret)
 				return ret;
 			break;

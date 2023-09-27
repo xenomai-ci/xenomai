@@ -824,6 +824,7 @@ static int __bufp_setsockopt(struct bufp_socket *sk,
 			     void *arg)
 {
 	struct _rtdm_setsockopt_args sopt;
+	struct __kernel_sock_timeval stv;
 	struct rtipc_port_label plabel;
 	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t s;
@@ -844,11 +845,27 @@ static int __bufp_setsockopt(struct bufp_socket *sk,
 			sk->rx_timeout = rtipc_timeval_to_ns(&tv);
 			break;
 
+		case SO_RCVTIMEO_NEW:
+			ret = rtipc_get_sock_timeval(fd, &stv, sopt.optval,
+						     sopt.optlen);
+			if (ret)
+				return ret;
+			sk->rx_timeout = rtipc_sock_timeval_to_ns(&stv);
+			break;
+
 		case SO_SNDTIMEO_OLD:
 			ret = rtipc_get_timeval(fd, &tv, sopt.optval, sopt.optlen);
 			if (ret)
 				return ret;
 			sk->tx_timeout = rtipc_timeval_to_ns(&tv);
+			break;
+
+		case SO_SNDTIMEO_NEW:
+			ret = rtipc_get_sock_timeval(fd, &stv, sopt.optval,
+						     sopt.optlen);
+			if (ret)
+				return ret;
+			sk->tx_timeout = rtipc_sock_timeval_to_ns(&stv);
 			break;
 
 		default:
@@ -913,6 +930,7 @@ static int __bufp_getsockopt(struct bufp_socket *sk,
 			     void *arg)
 {
 	struct _rtdm_getsockopt_args sopt;
+	struct __kernel_sock_timeval stv;
 	struct rtipc_port_label plabel;
 	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t s;
@@ -936,9 +954,25 @@ static int __bufp_getsockopt(struct bufp_socket *sk,
 				return ret;
 			break;
 
+		case SO_RCVTIMEO_NEW:
+			rtipc_ns_to_sock_timeval(&stv, sk->rx_timeout);
+			ret = rtipc_put_sock_timeval(fd, sopt.optval, &stv,
+						     len);
+			if (ret)
+				return ret;
+			break;
+
 		case SO_SNDTIMEO_OLD:
 			rtipc_ns_to_timeval(&tv, sk->tx_timeout);
 			ret = rtipc_put_timeval(fd, sopt.optval, &tv, len);
+			if (ret)
+				return ret;
+			break;
+
+		case SO_SNDTIMEO_NEW:
+			rtipc_ns_to_sock_timeval(&stv, sk->tx_timeout);
+			ret = rtipc_put_sock_timeval(fd, sopt.optval, &stv,
+						     len);
 			if (ret)
 				return ret;
 			break;

@@ -1743,6 +1743,7 @@ static int rt_tcp_setsockopt(struct rtdm_fd *fd, struct tcp_socket *ts,
 			     socklen_t optlen)
 {
 	/* uint64_t val; */
+	struct __kernel_sock_timeval stv;
 	struct __kernel_old_timeval tv;
 	rtdm_lockctx_t context;
 
@@ -1788,6 +1789,36 @@ static int rt_tcp_setsockopt(struct rtdm_fd *fd, struct tcp_socket *ts,
 		if (tv.tv_sec < (MAX_SCHEDULE_TIMEOUT / 1000000000ull - 1))
 			ts->sk_sndtimeo =
 				(tv.tv_sec * 1000000 + tv.tv_usec) * 1000;
+
+		rtdm_lock_put_irqrestore(&ts->socket_lock, context);
+
+		return 0;
+
+	case SO_SNDTIMEO_NEW:
+		if (optlen < sizeof(stv))
+			return -EINVAL;
+		if (rtdm_copy_from_user(fd, &stv, optval, sizeof(stv)))
+			return -EFAULT;
+		if (stv.tv_usec < 0 || stv.tv_usec >= 1000000)
+			return -EDOM;
+
+		rtdm_lock_get_irqsave(&ts->socket_lock, context);
+
+		if (stv.tv_sec < 0) {
+			ts->sk_sndtimeo = RTDM_TIMEOUT_NONE;
+			rtdm_lock_put_irqrestore(&ts->socket_lock, context);
+			return 0;
+		}
+
+		ts->sk_sndtimeo = RTDM_TIMEOUT_INFINITE;
+		if (stv.tv_sec == 0 && stv.tv_usec == 0) {
+			rtdm_lock_put_irqrestore(&ts->socket_lock, context);
+			return 0;
+		}
+
+		if (stv.tv_sec < (MAX_SCHEDULE_TIMEOUT / 1000000000ull - 1))
+			ts->sk_sndtimeo =
+				(stv.tv_sec * 1000000 + stv.tv_usec) * 1000;
 
 		rtdm_lock_put_irqrestore(&ts->socket_lock, context);
 
