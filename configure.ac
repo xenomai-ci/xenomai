@@ -138,19 +138,23 @@ case "$build_for" in
 	use_tls=yes
 	target_cpu_arch=x86
 	CONFIG_XENO_DEFAULT_PERIOD=100000
+	y2038_affected=yes
 	;;
  arm*-*)
 	target_cpu_arch=arm
 	CONFIG_XENO_DEFAULT_PERIOD=1000000
+	y2038_affected=yes
 	;;
  aarch64-*)
 	target_cpu_arch=arm64
 	CONFIG_XENO_DEFAULT_PERIOD=1000000
+	y2038_affected=no
 	;;
  x86_64-*|amd64-*)
 	use_tls=yes
 	target_cpu_arch=x86
 	CONFIG_XENO_DEFAULT_PERIOD=100000
+	y2038_affected=no
 	;;
  *)
 	if test $rtcore_type = cobalt; then
@@ -780,6 +784,49 @@ AC_ARG_ENABLE([tls],
 			   [Enable thread local storage]),
 	    [use_tls=$enableval])
 AC_MSG_RESULT($use_tls)
+
+AC_MSG_CHECKING(whether glibc has y2038 support)
+AC_TRY_COMPILE([#include <features.h>],
+	[
+		#if !(__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 34))
+			#error "No y2038 support"
+		#endif
+	],
+	glibc_has_y2038_support=yes,
+	glibc_has_y2038_support=no)
+AC_MSG_RESULT($glibc_has_y2038_support)
+
+AC_MSG_CHECKING(whether to enable y2038 support in Xenomai libraries)
+AC_ARG_ENABLE(y2038,
+	AC_HELP_STRING([--disable-y2038], [Disable y2038 support]),
+	[
+		CONFIG_XENO_LIBS_TIME64=no
+	],
+	[
+		if test "$y2038_affected" = "yes"; then
+			CONFIG_XENO_LIBS_TIME64="$glibc_has_y2038_support"
+		else
+			CONFIG_XENO_LIBS_TIME64=no
+		fi
+	])
+AC_MSG_RESULT(${CONFIG_XENO_LIBS_TIME64})
+
+if test "$CONFIG_XENO_LIBS_TIME64" = "yes"; then
+	AC_DEFINE(CONFIG_XENO_LIBS_TIME64,1,[config])
+	XENO_TIME64_CFLAGS="-D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
+	XENO_USER_CFLAGS="$XENO_USER_CFLAGS $XENO_TIME64_CFLAGS"
+	XENO_USER_APP_CFLAGS="$XENO_USER_APP_CFLAGS $XENO_TIME64_CFLAGS"
+	AC_SUBST(CONFIG_XENO_LIBS_TIME64)
+else
+	if test "$y2038_affected" = "yes"; then
+		AC_MSG_WARN([You're affected by the time_t overflow in 2038])
+		if test "$glibc_has_y2038_support" = "yes"; then
+			AC_MSG_WARN([You should consider removing --disable-y2038])
+		fi
+	fi
+fi
+AM_CONDITIONAL(CONFIG_XENO_LIBS_TIME64,[test "$CONFIG_XENO_LIBS_TIME64" = "yes"])
+
 
 dnl Check whether the compiler supports the __thread keyword.
 if test "x$use_tls" != xno; then
