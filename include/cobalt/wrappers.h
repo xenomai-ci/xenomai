@@ -20,9 +20,6 @@
 
 #include <boilerplate/compiler.h>
 
-#define __stringify_1(x...)	#x
-#define __stringify(x...)	__stringify_1(x)
-
 #define __WRAP(call)		__wrap_ ## call
 #define __STD(call)		__real_ ## call
 #define __COBALT(call)		__cobalt_ ## call
