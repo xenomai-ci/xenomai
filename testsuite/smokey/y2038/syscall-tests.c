@@ -1583,6 +1583,49 @@ out:
 	return test_pselect64_interruption();
 }
 
+static int test_function_wrapping(void)
+{
+#ifndef __USE_TIME_BITS64
+	/*
+	 * We're testing some functions here that are wrapped only for 32 bit
+	 * applications with y2038 support enabled. If that's not the case we
+	 * can simply bail out and simulate success.
+	 */
+	return 0;
+#else
+	struct timespec ts64 = { 0 };
+	int ret;
+
+	/*
+	 * If the nsec part of ts64 is still 0 it's a good indication that our
+	 * function wrapping does not work as expected. We retry up to three
+	 * times to avoid shaky test results.
+	 *
+	 * __STD(clock_gettime()) is replaced with
+	 * __real_clock_gettime() by the preprocessor. If
+	 * __real_clock_gettime() is not properly redirected by the use of
+	 * COBALT_DECL_TIME64() (linker magic) we will end up in the glibc
+	 * implementation with "native" time_t.
+	 */
+	for (int i = 0; i < 3; i++) {
+		ret = smokey_check_errno(
+			__STD(clock_gettime(CLOCK_REALTIME, &ts64)));
+		if (ret)
+			return ret;
+
+		if (ts64.tv_nsec != 0)
+			break;
+
+		if (i == 2) {
+			smokey_warning("Function wrapping seems broken.");
+			return -EINVAL;
+		}
+	}
+
+	return 0;
+#endif
+}
+
 static int check_kernel_version(void)
 {
 	int ret, major, minor;
@@ -1689,6 +1732,10 @@ static int run_y2038(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	ret = test_sc_cobalt_pselect64();
+	if (ret)
+		return ret;
+
+	ret = test_function_wrapping();
 	if (ret)
 		return ret;
 
