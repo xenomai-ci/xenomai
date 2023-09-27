@@ -11,6 +11,11 @@
 #define _LIB_COBALT_ARM_TIME_H
 
 #define COBALT_VDSO_VERSION	"LINUX_2.6"
+
+#ifdef __USE_TIME_BITS64
+#define COBALT_VDSO_GETTIME	"__vdso_clock_gettime64"
+#else
 #define COBALT_VDSO_GETTIME	"__vdso_clock_gettime"
+#endif
 
 #endif /* !_LIB_COBALT_ARM_TIME_H */
