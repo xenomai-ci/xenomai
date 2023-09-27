@@ -15,10 +15,8 @@
  * architecture that has a vDSO.
  */
 
-#include <sys/types.h>
 #include <sys/auxv.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
 #include <limits.h>
 #include <pthread.h>

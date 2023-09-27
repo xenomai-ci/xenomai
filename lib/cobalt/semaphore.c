@@ -23,7 +23,6 @@
 #include <pthread.h>		/* For pthread_setcanceltype. */
 #include <semaphore.h>
 #include <asm/xenomai/syscall.h>
-#include <cobalt/uapi/sem.h>
 #include "internal.h"
 
 /**

@@ -20,10 +20,9 @@
  * Internal Cobalt services. No sanity check will be done with
  * respect to object validity, callers have to take care of this.
  */
+
 #include <sys/types.h>
 #include <stddef.h>
-#include <stdlib.h>
-#include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
@@ -31,7 +30,6 @@
 #include <stdarg.h>
 #include <pthread.h>
 #include <asm/xenomai/syscall.h>
-#include <cobalt/ticks.h>
 #include <cobalt/sys/cobalt.h>
 #include "internal.h"
 

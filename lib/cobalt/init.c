@@ -29,8 +29,6 @@
 #include <stdint.h>
 #include <semaphore.h>
 #include <boilerplate/setup.h>
-#include <cobalt/uapi/kernel/heap.h>
-#include <cobalt/ticks.h>
 #include <cobalt/tunables.h>
 #include <asm/xenomai/syscall.h>
 #include <xenomai/init.h>

@@ -23,7 +23,6 @@
 #include <pthread.h>
 #include <mqueue.h>
 #include <asm/xenomai/syscall.h>
-#include "internal.h"
 
 /**
  * @ingroup cobalt_api

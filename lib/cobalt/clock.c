@@ -16,20 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <stdint.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
-#include <cobalt/uapi/time.h>
-#include <cobalt/ticks.h>
 #include <asm/xenomai/syscall.h>
-#include "umm.h"
 #include "internal.h"
 
 /**

@@ -18,8 +18,6 @@
 #ifndef _LIB_COBALT_UMM_H
 #define _LIB_COBALT_UMM_H
 
-#include <linux/types.h>
-
 void cobalt_init_umm(void);
 
 void cobalt_unmap_umm(void);

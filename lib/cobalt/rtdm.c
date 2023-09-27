@@ -29,7 +29,6 @@
 #include <rtdm/rtdm.h>
 #include <cobalt/uapi/syscall.h>
 #include <asm/xenomai/syscall.h>
-#include "internal.h"
 
 /* support for very old c libraries not supporting O_TMPFILE */
 #ifndef O_TMPFILE

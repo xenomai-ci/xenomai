@@ -15,22 +15,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
+
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <stdio.h>
 #include <errno.h>
-#include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <pthread.h>
 #include <rtdm/rtdm.h>
 #include <cobalt/uapi/kernel/heap.h>
-#include <asm/xenomai/syscall.h>
-#include "current.h"
 #include "umm.h"
 #include "internal.h"
 

@@ -16,12 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
 
-#include <stddef.h>
-#include <errno.h>
 #include <pthread.h>
 #include <memory.h>
-#include <cobalt/uapi/thread.h>
-#include "internal.h"
 
 COBALT_IMPL(int, pthread_attr_init, (pthread_attr_t *attr))
 {
