@@ -40,19 +40,19 @@ int cobalt_sigshadow_handler(int sig, siginfo_t *si,
 void cobalt_sigdebug_handler(int sig, siginfo_t *si,
 			     void *context);
 
-COBALT_DECL(int, sigpending(sigset_t *set));
+COBALT_DECL(int, sigpending, (sigset_t *set));
 
-COBALT_DECL(int, sigwait(const sigset_t *set, int *sig));
+COBALT_DECL(int, sigwait, (const sigset_t *set, int *sig));
 
-COBALT_DECL(int, sigwaitinfo(const sigset_t *set, siginfo_t *si));
+COBALT_DECL(int, sigwaitinfo, (const sigset_t *set, siginfo_t *si));
 
-COBALT_DECL(int, sigtimedwait(const sigset_t *set, siginfo_t *si,
-			      const struct timespec *timeout));
+COBALT_DECL(int, sigtimedwait,
+	    (const sigset_t *set, siginfo_t *si,
+	     const struct timespec *timeout));
 
-COBALT_DECL(int, kill(pid_t pid, int sig));
+COBALT_DECL(int, kill, (pid_t pid, int sig));
 
-COBALT_DECL(int, sigqueue(pid_t pid, int sig,
-			  const union sigval value));
+COBALT_DECL(int, sigqueue, (pid_t pid, int sig, const union sigval value));
 
 #ifdef __cplusplus
 }

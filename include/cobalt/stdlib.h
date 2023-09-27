@@ -29,9 +29,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-COBALT_DECL(void, free(void *ptr));
+COBALT_DECL(void, free, (void *ptr));
 
-COBALT_DECL(void *, malloc(size_t size));
+COBALT_DECL(void *, malloc, (size_t size));
 
 #ifdef __cplusplus
 }

@@ -27,10 +27,10 @@
 #define __STD(call)		__real_ ## call
 #define __COBALT(call)		__cobalt_ ## call
 #define __RT(call)		__COBALT(call)
-#define COBALT_DECL(T, P)	\
-	__typeof__(T) __RT(P);	\
-	__typeof__(T) __STD(P); \
-	__typeof__(T) __WRAP(P)
+#define COBALT_DECL(T, FN, I)                                                  \
+	__typeof__(T) __RT(FN) I;                                              \
+	__typeof__(T) __STD(FN) I;                                             \
+	__typeof__(T) __WRAP(FN) I
 
 /*
  * 

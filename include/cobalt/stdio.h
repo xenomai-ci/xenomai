@@ -31,19 +31,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
-COBALT_DECL(int, vfprintf(FILE *stream, const char *fmt, va_list args));
+COBALT_DECL(int, vfprintf, (FILE *stream, const char *fmt, va_list args));
 
 #ifdef CONFIG_XENO_FORTIFY
 
-COBALT_DECL(int, __vfprintf_chk(FILE *stream, int level,
-				const char *fmt, va_list ap));
+COBALT_DECL(int, __vfprintf_chk,
+	    (FILE *stream, int level, const char *fmt, va_list ap));
 
-COBALT_DECL(int, __vprintf_chk(int flag,
-			       const char *fmt, va_list ap));
+COBALT_DECL(int, __vprintf_chk, (int flag, const char *fmt, va_list ap));
 
-COBALT_DECL(int, __printf_chk(int flag, const char *fmt, ...));
+COBALT_DECL(int, __printf_chk, (int flag, const char *fmt, ...));
 
-COBALT_DECL(int, __fprintf_chk(FILE *fp, int flag, const char *fmt, ...));
+COBALT_DECL(int, __fprintf_chk, (FILE *fp, int flag, const char *fmt, ...));
 
 int __rt_vfprintf_chk(FILE *stream, int level,
 		      const char *fmt, va_list args);
@@ -53,18 +52,18 @@ void __rt_vsyslog_chk(int priority, int level,
 
 #endif	/* CONFIG_XENO_FORTIFY */
 
-COBALT_DECL(int, vprintf(const char *fmt, va_list args));
+COBALT_DECL(int, vprintf, (const char *fmt, va_list args));
 
-COBALT_DECL(int, fprintf(FILE *stream, const char *fmt, ...));
+COBALT_DECL(int, fprintf, (FILE *stream, const char *fmt, ...));
 
-COBALT_DECL(int, printf(const char *fmt, ...));
+COBALT_DECL(int, printf, (const char *fmt, ...));
 
-COBALT_DECL(int, puts(const char *s));
+COBALT_DECL(int, puts, (const char *s));
 
-COBALT_DECL(int, fputs(const char *s, FILE *stream));
+COBALT_DECL(int, fputs, (const char *s, FILE *stream));
 
 #ifndef putchar
-COBALT_DECL(int, putchar(int c));
+COBALT_DECL(int, putchar, (int c));
 #else
 static inline int __real_putchar(int c)
 {
@@ -77,7 +76,7 @@ int __cobalt_putchar(int c);
 #endif
 
 #ifndef fputc
-COBALT_DECL(int, fputc(int c, FILE *stream));
+COBALT_DECL(int, fputc, (int c, FILE *stream));
 #else
 static inline int __real_fputc(int c, FILE *stream)
 {
@@ -89,10 +88,10 @@ int __cobalt_fputc(int c, FILE *stream);
 #define fputc fputc
 #endif
 
-COBALT_DECL(size_t,
-	    fwrite(const void *ptr, size_t sz, size_t nmemb, FILE *stream));
+COBALT_DECL(size_t, fwrite,
+	    (const void *ptr, size_t sz, size_t nmemb, FILE *stream));
 
-COBALT_DECL(int, fclose(FILE *stream));
+COBALT_DECL(int, fclose, (FILE *stream));
 
 int rt_vfprintf(FILE *stream, const char *format, va_list args);
 

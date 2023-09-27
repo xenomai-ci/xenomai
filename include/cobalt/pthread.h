@@ -38,63 +38,60 @@ typedef struct pthread_attr_ex {
 extern "C" {
 #endif
 
-COBALT_DECL(int, pthread_attr_init(pthread_attr_t *attr));
+COBALT_DECL(int, pthread_attr_init, (pthread_attr_t *attr));
 
-COBALT_DECL(int, pthread_create(pthread_t *ptid_r,
-				const pthread_attr_t *attr,
-				void *(*start) (void *),
-				void *arg));
+COBALT_DECL(int, pthread_create,
+	    (pthread_t *ptid_r, const pthread_attr_t *attr,
+	     void *(*start)(void *), void *arg));
 
-COBALT_DECL(int, pthread_getschedparam(pthread_t thread,
-				       int *policy,
-				       struct sched_param *param));
+COBALT_DECL(int, pthread_getschedparam,
+	    (pthread_t thread, int *policy, struct sched_param *param));
 
-COBALT_DECL(int, pthread_setschedparam(pthread_t thread,
-				       int policy,
-				       const struct sched_param *param));
+COBALT_DECL(int, pthread_setschedparam,
+	    (pthread_t thread, int policy, const struct sched_param *param));
 
-COBALT_DECL(int, pthread_setschedprio(pthread_t thread, int prio));
+COBALT_DECL(int, pthread_setschedprio, (pthread_t thread, int prio));
 
-COBALT_DECL(int, pthread_mutex_init(pthread_mutex_t *mutex,
-				    const pthread_mutexattr_t *attr));
+COBALT_DECL(int, pthread_mutex_init,
+	    (pthread_mutex_t *mutex, const pthread_mutexattr_t *attr));
 
-COBALT_DECL(int, pthread_mutex_destroy(pthread_mutex_t *mutex));
+COBALT_DECL(int, pthread_mutex_destroy, (pthread_mutex_t *mutex));
 
-COBALT_DECL(int, pthread_mutex_lock(pthread_mutex_t *mutex));
+COBALT_DECL(int, pthread_mutex_lock, (pthread_mutex_t *mutex));
 
-COBALT_DECL(int, pthread_mutex_timedlock(pthread_mutex_t *mutex,
-					 const struct timespec *to));
+COBALT_DECL(int, pthread_mutex_timedlock,
+	    (pthread_mutex_t *mutex, const struct timespec *to));
 
-COBALT_DECL(int, pthread_mutex_trylock(pthread_mutex_t *mutex));
+COBALT_DECL(int, pthread_mutex_trylock, (pthread_mutex_t *mutex));
 
-COBALT_DECL(int, pthread_mutex_unlock(pthread_mutex_t *mutex));
+COBALT_DECL(int, pthread_mutex_unlock, (pthread_mutex_t *mutex));
 
-COBALT_DECL(int, pthread_mutex_setprioceiling(pthread_mutex_t *__restrict mutex,
-					      int prioceiling,
-					      int *__restrict old_ceiling));
-  
-COBALT_DECL(int, pthread_mutex_getprioceiling(pthread_mutex_t *__restrict mutex,
-					      int *__restrict old_ceiling));
+COBALT_DECL(int, pthread_mutex_setprioceiling,
+	    (pthread_mutex_t *__restrict mutex, int prioceiling,
+	     int *__restrict old_ceiling));
 
-COBALT_DECL(int, pthread_cond_init (pthread_cond_t *cond,
-				    const pthread_condattr_t *attr));
+COBALT_DECL(int, pthread_mutex_getprioceiling,
+	    (pthread_mutex_t *__restrict mutex, int *__restrict old_ceiling));
 
-COBALT_DECL(int, pthread_cond_destroy(pthread_cond_t *cond));
+COBALT_DECL(int, pthread_cond_init,
+	    (pthread_cond_t *cond, const pthread_condattr_t *attr));
 
-COBALT_DECL(int, pthread_cond_wait(pthread_cond_t *cond,
-				   pthread_mutex_t *mutex));
+COBALT_DECL(int, pthread_cond_destroy, (pthread_cond_t *cond));
 
-COBALT_DECL(int, pthread_cond_timedwait(pthread_cond_t *cond,
-					pthread_mutex_t *mutex,
-					const struct timespec *abstime));
+COBALT_DECL(int, pthread_cond_wait,
+	    (pthread_cond_t *cond, pthread_mutex_t *mutex));
 
-COBALT_DECL(int, pthread_cond_signal(pthread_cond_t *cond));
+COBALT_DECL(int, pthread_cond_timedwait,
+	    (pthread_cond_t *cond, pthread_mutex_t *mutex,
+	     const struct timespec *abstime));
 
-COBALT_DECL(int, pthread_cond_broadcast(pthread_cond_t *cond));
+COBALT_DECL(int, pthread_cond_signal, (pthread_cond_t *cond));
 
-COBALT_DECL(int, pthread_kill(pthread_t ptid, int sig));
+COBALT_DECL(int, pthread_cond_broadcast, (pthread_cond_t *cond));
 
-COBALT_DECL(int, pthread_join(pthread_t ptid, void **retval));
+COBALT_DECL(int, pthread_kill, (pthread_t ptid, int sig));
+
+COBALT_DECL(int, pthread_join, (pthread_t ptid, void **retval));
 
 #ifndef pthread_yield
 /*
@@ -104,13 +101,13 @@ COBALT_DECL(int, pthread_join(pthread_t ptid, void **retval));
  * sched_yield() implementation internally, we can live with this
  * wrapping.
  */
-COBALT_DECL(int, pthread_yield(void));
+COBALT_DECL(int, pthread_yield, (void));
 #endif
 
 int pthread_setmode_np(int clrmask, int setmask,
 		       int *mask_r);
 
-COBALT_DECL(int, pthread_setname_np(pthread_t thread, const char *name));
+COBALT_DECL(int, pthread_setname_np, (pthread_t thread, const char *name));
 
 int pthread_create_ex(pthread_t *ptid_r,
 		      const pthread_attr_ex_t *attr_ex,

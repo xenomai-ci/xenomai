@@ -29,28 +29,26 @@
 extern "C" {
 #endif
 
-COBALT_DECL(int, sem_init(sem_t *sem,
-			  int pshared,
-			  unsigned int value));
+COBALT_DECL(int, sem_init, (sem_t *sem, int pshared, unsigned int value));
 
-COBALT_DECL(int, sem_destroy(sem_t *sem));
+COBALT_DECL(int, sem_destroy, (sem_t *sem));
 
-COBALT_DECL(int, sem_post(sem_t *sem));
+COBALT_DECL(int, sem_post, (sem_t *sem));
 
-COBALT_DECL(int, sem_wait(sem_t *sem));
+COBALT_DECL(int, sem_wait, (sem_t *sem));
 
-COBALT_DECL(int, sem_timedwait(sem_t *sem,
-			       const struct timespec *abs_timeout));
+COBALT_DECL(int, sem_timedwait,
+	    (sem_t *sem, const struct timespec *abs_timeout));
 
-COBALT_DECL(int, sem_trywait(sem_t *sem));
+COBALT_DECL(int, sem_trywait, (sem_t *sem));
 
-COBALT_DECL(int, sem_getvalue(sem_t *sem, int *value));
+COBALT_DECL(int, sem_getvalue, (sem_t *sem, int *value));
 
-COBALT_DECL(sem_t *, sem_open(const char *name, int oflags, ...));
+COBALT_DECL(sem_t *, sem_open, (const char *name, int oflags, ...));
 
-COBALT_DECL(int, sem_close(sem_t *sem));
+COBALT_DECL(int, sem_close, (sem_t *sem));
 
-COBALT_DECL(int, sem_unlink(const char *name));
+COBALT_DECL(int, sem_unlink, (const char *name));
 
 int sem_init_np(sem_t *sem,
 		int flags,

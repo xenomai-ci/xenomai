@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-COBALT_DECL(int, sched_yield(void));
+COBALT_DECL(int, sched_yield, (void));
 
-COBALT_DECL(int, sched_get_priority_min(int policy));
+COBALT_DECL(int, sched_get_priority_min, (int policy));
 
-COBALT_DECL(int, sched_get_priority_max(int policy));
+COBALT_DECL(int, sched_get_priority_max, (int policy));
 
-COBALT_DECL(int, sched_setscheduler(pid_t pid, int policy,
-				    const struct sched_param *param));
+COBALT_DECL(int, sched_setscheduler,
+	    (pid_t pid, int policy, const struct sched_param *param));
 
-COBALT_DECL(int, sched_getscheduler(pid_t pid));
+COBALT_DECL(int, sched_getscheduler, (pid_t pid));
 
 int sched_get_priority_min_ex(int policy);
 

@@ -27,15 +27,15 @@
 extern "C" {
 #endif
 
-COBALT_DECL(int, open(const char *path, int oflag, ...));
+COBALT_DECL(int, open, (const char *path, int oflag, ...));
 
-COBALT_DECL(int, open64(const char *path, int oflag, ...));
+COBALT_DECL(int, open64, (const char *path, int oflag, ...));
 
-COBALT_DECL(int, __open_2(const char *path, int oflag));
+COBALT_DECL(int, __open_2, (const char *path, int oflag));
 
-COBALT_DECL(int, __open64_2(const char *path, int oflag));
+COBALT_DECL(int, __open64_2, (const char *path, int oflag));
 
-COBALT_DECL(int, fcntl(int fd, int cmd, ...));
+COBALT_DECL(int, fcntl, (int fd, int cmd, ...));
 
 #ifdef __cplusplus
 }

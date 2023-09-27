@@ -27,15 +27,15 @@
 extern "C" {
 #endif
 
-COBALT_DECL(ssize_t, read(int fd, void *buf, size_t nbyte));
+COBALT_DECL(ssize_t, read, (int fd, void *buf, size_t nbyte));
 
-COBALT_DECL(ssize_t, write(int fd, const void *buf, size_t nbyte));
+COBALT_DECL(ssize_t, write, (int fd, const void *buf, size_t nbyte));
 
-COBALT_DECL(int, close(int fildes));
+COBALT_DECL(int, close, (int fildes));
 
-COBALT_DECL(unsigned int, sleep(unsigned int seconds));
+COBALT_DECL(unsigned int, sleep, (unsigned int seconds));
 
-COBALT_DECL(int, usleep(useconds_t usec));
+COBALT_DECL(int, usleep, (useconds_t usec));
 
 #ifdef __cplusplus
 }

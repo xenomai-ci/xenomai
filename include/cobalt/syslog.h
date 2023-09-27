@@ -29,18 +29,16 @@
 extern "C" {
 #endif /* __cplusplus */
 
-COBALT_DECL(void, syslog(int priority, const char *fmt, ...));
+COBALT_DECL(void, syslog, (int priority, const char *fmt, ...));
 
-COBALT_DECL(void, vsyslog(int priority,
-			  const char *fmt, va_list ap));
+COBALT_DECL(void, vsyslog, (int priority, const char *fmt, va_list ap));
 
 #ifdef CONFIG_XENO_FORTIFY
 
-COBALT_DECL(void, __vsyslog_chk(int priority, int level,
-				const char *fmt, va_list ap));
+COBALT_DECL(void, __vsyslog_chk,
+	    (int priority, int level, const char *fmt, va_list ap));
 
-COBALT_DECL(void, __syslog_chk(int pri, int flag,
-			       const char *fmt, ...));
+COBALT_DECL(void, __syslog_chk, (int pri, int flag, const char *fmt, ...));
 
 #endif /* CONFIG_XENO_FORTIFY */
 
