@@ -59,10 +59,12 @@ AM_LIBTOOLFLAGS = --silent
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(libdir)
 	$(INSTALL_DATA) $(srcdir)/cobalt.wrappers $(DESTDIR)$(libdir)
+	$(INSTALL_DATA) $(srcdir)/cobalt-glibc-time64.wrappers $(DESTDIR)$(libdir)
 	$(INSTALL_DATA) $(srcdir)/modechk.wrappers $(DESTDIR)$(libdir)
 
 uninstall-local:
 	$(RM) $(DESTDIR)$(libdir)/cobalt.wrappers
+	$(RM) $(DESTDIR)$(libdir)/cobalt-glibc-time64.wrappers
 	$(RM) $(DESTDIR)$(libdir)/modechk.wrappers
 
 EXTRA_DIST = cobalt.wrappers modechk.wrappers

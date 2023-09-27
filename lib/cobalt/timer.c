@@ -159,10 +159,10 @@ COBALT_IMPL(int, timer_delete, (timer_t timerid))
  *
  * @apitags{xcontext, switch-primary}
  */
-COBALT_IMPL(int, timer_settime, (timer_t timerid,
-				 int flags,
-				 const struct itimerspec *__restrict__ value,
-				 struct itimerspec *__restrict__ ovalue))
+COBALT_IMPL_TIME64(int, timer_settime, __timer_settime64,
+		   (timer_t timerid, int flags,
+		    const struct itimerspec *__restrict__ value,
+		    struct itimerspec *__restrict__ ovalue))
 {
 	int ret;
 
@@ -210,7 +210,8 @@ COBALT_IMPL(int, timer_settime, (timer_t timerid,
  *
  * @apitags{unrestricted}
  */
-COBALT_IMPL(int, timer_gettime, (timer_t timerid, struct itimerspec *value))
+COBALT_IMPL_TIME64(int, timer_gettime, __timer_gettime64,
+		   (timer_t timerid, struct itimerspec *value))
 {
 	int ret;
 

@@ -391,10 +391,9 @@ COBALT_IMPL(int, mq_send, (mqd_t q, const char *buffer, size_t len, unsigned pri
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL(int, mq_timedsend, (mqd_t q,
-				const char *buffer,
-				size_t len,
-				unsigned prio, const struct timespec *timeout))
+COBALT_IMPL_TIME64(int, mq_timedsend, __mq_timedsend_time64,
+		   (mqd_t q, const char *buffer, size_t len, unsigned prio,
+		    const struct timespec *timeout))
 {
 	int err, oldtype;
 
@@ -524,11 +523,10 @@ COBALT_IMPL(ssize_t, mq_receive, (mqd_t q, char *buffer, size_t len, unsigned *p
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL(ssize_t, mq_timedreceive, (mqd_t q,
-				       char *__restrict__ buffer,
-				       size_t len,
-				       unsigned *__restrict__ prio,
-				       const struct timespec * __restrict__ timeout))
+COBALT_IMPL_TIME64(ssize_t, mq_timedreceive, __mq_timedreceive_time64,
+		   (mqd_t q, char *__restrict__ buffer, size_t len,
+		    unsigned *__restrict__ prio,
+		    const struct timespec *__restrict__ timeout))
 {
 	ssize_t rlen = (ssize_t) len;
 	int err, oldtype;

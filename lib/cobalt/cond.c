@@ -375,9 +375,9 @@ COBALT_IMPL(int, pthread_cond_wait, (pthread_cond_t *cond, pthread_mutex_t *mute
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL(int, pthread_cond_timedwait, (pthread_cond_t *cond,
-					  pthread_mutex_t *mutex,
-					  const struct timespec *abstime))
+COBALT_IMPL_TIME64(int, pthread_cond_timedwait, __pthread_cond_timedwait64,
+		   (pthread_cond_t *cond, pthread_mutex_t *mutex,
+		    const struct timespec *abstime))
 {
 	struct cobalt_cond_shadow *_cnd = &((union cobalt_cond_union *)cond)->shadow_cond;
 	struct cobalt_mutex_shadow *_mx =

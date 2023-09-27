@@ -53,12 +53,13 @@ COBALT_DECL(ssize_t, recv, (int fd, void *buf, size_t len, int flags));
 
 COBALT_DECL(ssize_t, send, (int fd, const void *buf, size_t len, int flags));
 
-COBALT_DECL(int, getsockopt,
-	    (int fd, int level, int optname, void *optval, socklen_t *optlen));
+COBALT_DECL_TIME64(int, getsockopt, __getsockopt64,
+		   (int fd, int level, int optname, void *optval,
+		    socklen_t *optlen));
 
-COBALT_DECL(int, setsockopt,
-	    (int fd, int level, int optname, const void *optval,
-	     socklen_t optlen));
+COBALT_DECL_TIME64(int, setsockopt, __setsockopt64,
+		   (int fd, int level, int optname, const void *optval,
+		    socklen_t optlen));
 
 COBALT_DECL(int, bind,
 	    (int fd, const struct sockaddr *my_addr, socklen_t addrlen));

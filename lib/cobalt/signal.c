@@ -55,8 +55,9 @@ COBALT_IMPL(int, sigwaitinfo, (const sigset_t *set, siginfo_t *si))
 	return ret;
 }
 
-COBALT_IMPL(int, sigtimedwait, (const sigset_t *set, siginfo_t *si,
-				const struct timespec *timeout))
+COBALT_IMPL_TIME64(int, sigtimedwait, __sigtimedwait64,
+		   (const sigset_t *set, siginfo_t *si,
+		    const struct timespec *timeout))
 {
 	int ret, oldtype;
 

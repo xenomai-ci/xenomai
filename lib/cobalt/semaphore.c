@@ -362,7 +362,8 @@ COBALT_IMPL(int, sem_wait, (sem_t *sem))
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL(int, sem_timedwait, (sem_t *sem, const struct timespec *abs_timeout))
+COBALT_IMPL_TIME64(int, sem_timedwait, __sem_timedwait64,
+		   (sem_t *sem, const struct timespec *abs_timeout))
 {
 	struct cobalt_sem_shadow *_sem = &((union cobalt_sem_union *)sem)->shadow_sem;
 	int ret, oldtype;

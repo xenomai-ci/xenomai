@@ -59,8 +59,8 @@ COBALT_DECL(int, pthread_mutex_destroy, (pthread_mutex_t *mutex));
 
 COBALT_DECL(int, pthread_mutex_lock, (pthread_mutex_t *mutex));
 
-COBALT_DECL(int, pthread_mutex_timedlock,
-	    (pthread_mutex_t *mutex, const struct timespec *to));
+COBALT_DECL_TIME64(int, pthread_mutex_timedlock, __pthread_mutex_timedlock64,
+		   (pthread_mutex_t *mutex, const struct timespec *to));
 
 COBALT_DECL(int, pthread_mutex_trylock, (pthread_mutex_t *mutex));
 
@@ -81,9 +81,9 @@ COBALT_DECL(int, pthread_cond_destroy, (pthread_cond_t *cond));
 COBALT_DECL(int, pthread_cond_wait,
 	    (pthread_cond_t *cond, pthread_mutex_t *mutex));
 
-COBALT_DECL(int, pthread_cond_timedwait,
-	    (pthread_cond_t *cond, pthread_mutex_t *mutex,
-	     const struct timespec *abstime));
+COBALT_DECL_TIME64(int, pthread_cond_timedwait, __pthread_cond_timedwait64,
+		   (pthread_cond_t *cond, pthread_mutex_t *mutex,
+		    const struct timespec *abstime));
 
 COBALT_DECL(int, pthread_cond_signal, (pthread_cond_t *cond));
 

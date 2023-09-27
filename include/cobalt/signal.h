@@ -46,9 +46,9 @@ COBALT_DECL(int, sigwait, (const sigset_t *set, int *sig));
 
 COBALT_DECL(int, sigwaitinfo, (const sigset_t *set, siginfo_t *si));
 
-COBALT_DECL(int, sigtimedwait,
-	    (const sigset_t *set, siginfo_t *si,
-	     const struct timespec *timeout));
+COBALT_DECL_TIME64(int, sigtimedwait, __sigtimedwait64,
+		   (const sigset_t *set, siginfo_t *si,
+		    const struct timespec *timeout));
 
 COBALT_DECL(int, kill, (pid_t pid, int sig));
 

@@ -20,12 +20,52 @@
 #include <pthread.h>
 #include <sys/select.h>
 #include <asm/xenomai/syscall.h>
-#include "internal.h"
 
-COBALT_IMPL(int, select, (int __nfds, fd_set *__restrict __readfds,
-			  fd_set *__restrict __writefds,
-			  fd_set *__restrict __exceptfds,
-			  struct timeval *__restrict __timeout))
+#if __USE_TIME_BITS64
+/*
+ * The time64 wrapper for select() is a little different:
+ * There is no y2038 safe syscall for select() itself, but we have pselect()
+ * without signal support.
+ */
+static inline int do_select(int __nfds, fd_set *__restrict __readfds,
+			      fd_set *__restrict __writefds,
+			      fd_set *__restrict __exceptfds,
+			      struct timeval *__restrict __timeout)
+{
+	struct timespec to;
+	int err, oldtype;
+
+	if (__timeout) {
+		to.tv_sec = __timeout->tv_sec;
+		to.tv_nsec = __timeout->tv_usec * 1000;
+	}
+
+	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
+
+	/*
+	 * Note: No sigmask here, we already reached the limit of 5
+	 * syscall parameters
+	 */
+	err = XENOMAI_SYSCALL5(sc_cobalt_pselect64, __nfds, __readfds,
+			       __writefds, __exceptfds, __timeout ? &to : NULL);
+
+	pthread_setcanceltype(oldtype, NULL);
+
+	if (err == -EADV || err == -EPERM || err == -ENOSYS)
+		err = __STD(__select64(__nfds, __readfds, __writefds,
+				       __exceptfds, __timeout));
+
+	if (err >= 0)
+		return err;
+
+	errno = -err;
+	return -1;
+}
+#else
+static inline int do_select(int __nfds, fd_set *__restrict __readfds,
+			    fd_set *__restrict __writefds,
+			    fd_set *__restrict __exceptfds,
+			    struct timeval *__restrict __timeout)
 {
 	int err, oldtype;
 
@@ -45,4 +85,14 @@ COBALT_IMPL(int, select, (int __nfds, fd_set *__restrict __readfds,
 
 	errno = -err;
 	return -1;
+}
+#endif
+
+COBALT_IMPL_TIME64(int, select, __select64,
+		   (int __nfds, fd_set *__restrict __readfds,
+		    fd_set *__restrict __writefds,
+		    fd_set *__restrict __exceptfds,
+		    struct timeval *__restrict __timeout))
+{
+	return do_select(__nfds, __readfds, __writefds, __exceptfds, __timeout);
 }

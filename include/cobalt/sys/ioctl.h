@@ -27,7 +27,8 @@
 extern "C" {
 #endif
 
-COBALT_DECL(int, ioctl, (int fildes, unsigned int request, ...));
+COBALT_DECL_TIME64(int, ioctl, __ioctl_time64,
+		   (int fd, unsigned int request, ...));
 
 #ifdef __cplusplus
 }

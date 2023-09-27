@@ -37,8 +37,8 @@ COBALT_DECL(int, sem_post, (sem_t *sem));
 
 COBALT_DECL(int, sem_wait, (sem_t *sem));
 
-COBALT_DECL(int, sem_timedwait,
-	    (sem_t *sem, const struct timespec *abs_timeout));
+COBALT_DECL_TIME64(int, sem_timedwait, __sem_timedwait64,
+		   (sem_t *sem, const struct timespec *abs_timeout));
 
 COBALT_DECL(int, sem_trywait, (sem_t *sem));
 

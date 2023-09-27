@@ -35,9 +35,9 @@ COBALT_IMPL(int, timerfd_create, (int clockid, int flags))
 	return fd;
 }
 
-COBALT_IMPL(int, timerfd_settime,
-	    (int fd, int flags, const struct itimerspec *new_value,
-	     struct itimerspec *old_value))
+COBALT_IMPL_TIME64(int, timerfd_settime, __timerfd_settime64,
+		   (int fd, int flags, const struct itimerspec *new_value,
+		    struct itimerspec *old_value))
 {
 	int ret;
 
@@ -55,7 +55,8 @@ COBALT_IMPL(int, timerfd_settime,
 	return -1;
 }
 
-COBALT_IMPL(int, timerfd_gettime, (int fd, struct itimerspec *curr_value))
+COBALT_IMPL_TIME64(int, timerfd_gettime, __timerfd_gettime64,
+		   (int fd, struct itimerspec *curr_value))
 {
 	int ret;
 

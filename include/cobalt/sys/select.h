@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-COBALT_DECL(int, select,
+COBALT_DECL_TIME64(int, select, __select64,
 	    (int __nfds, fd_set *__restrict __readfds,
 	     fd_set *__restrict __writefds, fd_set *__restrict __exceptfds,
 	     struct timeval *__restrict __timeout));

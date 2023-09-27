@@ -96,7 +96,8 @@
  *
  * @apitags{unrestricted}
  */
-COBALT_IMPL(int, clock_getres, (clockid_t clock_id, struct timespec *tp))
+COBALT_IMPL_TIME64(int, clock_getres, __clock_getres64,
+		   (clockid_t clock_id, struct timespec *tp))
 {
 	int ret;
 
@@ -152,7 +153,8 @@ static int __do_clock_gettime(clockid_t clock_id, struct timespec *tp)
  *
  * @apitags{unrestricted}
  */
-COBALT_IMPL(int, clock_gettime, (clockid_t clock_id, struct timespec *tp))
+COBALT_IMPL_TIME64(int, clock_gettime, __clock_gettime64,
+		   (clockid_t clock_id, struct timespec *tp))
 {
 	int ret;
 
@@ -201,7 +203,8 @@ COBALT_IMPL(int, clock_gettime, (clockid_t clock_id, struct timespec *tp))
  *
  * @apitags{unrestricted, switch-secondary}
  */
-COBALT_IMPL(int, clock_settime, (clockid_t clock_id, const struct timespec *tp))
+COBALT_IMPL_TIME64(int, clock_settime, __clock_settime64,
+		   (clockid_t clock_id, const struct timespec *tp))
 {
 	int ret;
 
@@ -223,7 +226,8 @@ COBALT_IMPL(int, clock_settime, (clockid_t clock_id, const struct timespec *tp))
 
 /* @apitags{unrestricted} */
 
-COBALT_IMPL(int, clock_adjtime, (clockid_t clock_id, struct timex *tx))
+COBALT_IMPL_TIME64(int, clock_adjtime, __clock_adjtime64,
+		   (clockid_t clock_id, struct timex *tx))
 {
 	int ret;
 
@@ -281,9 +285,9 @@ COBALT_IMPL(int, clock_adjtime, (clockid_t clock_id, struct timex *tx))
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL(int, clock_nanosleep, (clockid_t clock_id,
-				   int flags,
-				   const struct timespec *rqtp, struct timespec *rmtp))
+COBALT_IMPL_TIME64(int, clock_nanosleep, __clock_nanosleep_time64,
+		   (clockid_t clock_id, int flags, const struct timespec *rqtp,
+		    struct timespec *rmtp))
 {
 	int ret, oldtype;
 
@@ -332,7 +336,8 @@ COBALT_IMPL(int, clock_nanosleep, (clockid_t clock_id,
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL(int, nanosleep, (const struct timespec *rqtp, struct timespec *rmtp))
+COBALT_IMPL_TIME64(int, nanosleep, __nanosleep64,
+		   (const struct timespec *rqtp, struct timespec *rmtp))
 {
 	int ret;
 
@@ -380,7 +385,8 @@ COBALT_IMPL(int, usleep, (useconds_t usec))
 
 /* @apitags{unrestricted} */
 
-COBALT_IMPL(int, gettimeofday, (struct timeval *tv, struct timezone *tz))
+COBALT_IMPL_TIME64(int, gettimeofday, __gettimeofday64,
+		   (struct timeval *tv, struct timezone *tz))
 {
 	struct timespec ts;
 	int ret = __WRAP(clock_gettime(CLOCK_REALTIME, &ts));
@@ -393,7 +399,7 @@ COBALT_IMPL(int, gettimeofday, (struct timeval *tv, struct timezone *tz))
 
 /* @apitags{unrestricted} */
 
-COBALT_IMPL(time_t, time, (time_t *t))
+COBALT_IMPL_TIME64(time_t, time, __time64, (time_t *t))
 {
 	struct timespec ts;
 	int ret = __WRAP(clock_gettime(CLOCK_REALTIME, &ts));

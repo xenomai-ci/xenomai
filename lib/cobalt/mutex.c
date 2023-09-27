@@ -423,8 +423,8 @@ protect:
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL(int, pthread_mutex_timedlock, (pthread_mutex_t *mutex,
-					   const struct timespec *to))
+COBALT_IMPL_TIME64(int, pthread_mutex_timedlock, __pthread_mutex_timedlock64,
+		   (pthread_mutex_t *mutex, const struct timespec *to))
 {
 	struct cobalt_mutex_shadow *_mutex =
 		&((union cobalt_mutex_union *)mutex)->shadow_mutex;

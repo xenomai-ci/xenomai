@@ -29,7 +29,8 @@ struct timezone;
 extern "C" {
 #endif
 
-COBALT_DECL(int, gettimeofday, (struct timeval *tv, struct timezone *tz));
+COBALT_DECL_TIME64(int, gettimeofday, __gettimeofday64,
+		   (struct timeval *tv, struct timezone *tz));
 
 #ifdef __cplusplus
 }

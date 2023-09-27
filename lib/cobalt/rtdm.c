@@ -192,7 +192,8 @@ COBALT_IMPL(int, fcntl, (int fd, int cmd, ...))
 	return __STD(fcntl(fd, cmd, arg));
 }
 
-COBALT_IMPL(int, ioctl, (int fd, unsigned int request, ...))
+COBALT_IMPL_TIME64(int, ioctl, __ioctl_time64,
+		   (int fd, unsigned int request, ...))
 {
 	va_list ap;
 	void *arg;
@@ -265,8 +266,9 @@ COBALT_IMPL(ssize_t, recvmsg, (int fd, struct msghdr *msg, int flags))
 	return __STD(recvmsg(fd, msg, flags));
 }
 
-COBALT_IMPL(int, recvmmsg, (int fd, struct mmsghdr *msgvec, unsigned int vlen,
-			    unsigned int flags, struct timespec *timeout))
+COBALT_IMPL_TIME64(int, recvmmsg, __recvmmsg64,
+		   (int fd, struct mmsghdr *msgvec, unsigned int vlen,
+		    unsigned int flags, struct timespec *timeout))
 {
 	int ret, oldtype;
 
@@ -429,8 +431,9 @@ COBALT_IMPL(ssize_t, send, (int fd, const void *buf, size_t len, int flags))
 	return __STD(send(fd, buf, len, flags));
 }
 
-COBALT_IMPL(int, getsockopt, (int fd, int level, int optname, void *optval,
-			      socklen_t *optlen))
+COBALT_IMPL_TIME64(int, getsockopt, __getsockopt64,
+		   (int fd, int level, int optname, void *optval,
+		    socklen_t *optlen))
 {
 	struct _rtdm_getsockopt_args args = { level, optname, optval, optlen };
 	int ret;
@@ -442,8 +445,9 @@ COBALT_IMPL(int, getsockopt, (int fd, int level, int optname, void *optval,
 	return __STD(getsockopt(fd, level, optname, optval, optlen));
 }
 
-COBALT_IMPL(int, setsockopt, (int fd, int level, int optname, const void *optval,
-			      socklen_t optlen))
+COBALT_IMPL_TIME64(int, setsockopt, __setsockopt64,
+		   (int fd, int level, int optname, const void *optval,
+		    socklen_t optlen))
 {
 	struct _rtdm_setsockopt_args args = {
 		level, optname, (void *)optval, optlen

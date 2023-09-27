@@ -944,17 +944,27 @@ dnl in-tree executables which require POSIX symbol wrapping.
 
    modechk_wrappers="$topdir/lib/cobalt/modechk.wrappers"
    cobalt_wrappers="$topdir/lib/cobalt/cobalt.wrappers"
+   cobalt_wrappers_glibc_time64="$topdir/lib/cobalt/cobalt-glibc-time64.wrappers"
+   all_wrappers="$modechk_wrappers $cobalt_wrappers"
+
+   linker_flags="-Wl,@$modechk_wrappers -Wl,@$cobalt_wrappers"
+
+   if [[ "$CONFIG_XENO_LIBS_TIME64" = "yes" ]]; then
+      all_wrappers="$all_wrappers $cobalt_wrappers_glibc_time64"
+      linker_flags="$linker_flags -Wl,@$cobalt_wrappers_glibc_time64"
+   fi
+
    if [[ $ac_cv_ld_file_option = yes ]]; then
-	XENO_POSIX_WRAPPERS="-Wl,@$modechk_wrappers -Wl,@$cobalt_wrappers"
+	XENO_POSIX_WRAPPERS="$linker_flags"
    else
-	XENO_POSIX_WRAPPERS=`cat $modechk_wrappers $cobalt_wrappers | \
+	XENO_POSIX_WRAPPERS=`cat $all_wrappers | \
 			while read wrap_option symbol ; do \
 				echo -n "-Wl,$wrap_option,$symbol " ; \
 			done`
    fi
 
    AC_SUBST(XENO_POSIX_WRAPPERS)
-   AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ["$modechk_wrappers $cobalt_wrappers"])
+   AC_SUBST([CONFIG_STATUS_DEPENDENCIES], ["$all_wrappers"])
 fi
 
 dnl Multi-library support.

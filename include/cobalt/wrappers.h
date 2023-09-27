@@ -32,6 +32,22 @@
 	__typeof__(T) __STD(FN) I;                                             \
 	__typeof__(T) __WRAP(FN) I
 
+#if __USE_TIME_BITS64
+/*
+ * Make __RT() and __STD() usable in combination with time64_t related services.
+ */
+#define COBALT_IMPL_TIME64(T, FN, FN_64, I)                                    \
+	__typeof__(T) __wrap_##FN_64 I                                         \
+		__attribute__((alias("__cobalt_" __stringify(FN)), weak));     \
+	COBALT_IMPL(T, FN, I)
+#define COBALT_DECL_TIME64(T, FN, A, I)                                        \
+	extern T __REDIRECT_NTH(__STD(FN), I, __real_##A);                     \
+	COBALT_DECL(T, FN, I)
+#else
+#define COBALT_IMPL_TIME64(T, FN, FN_64, I) COBALT_IMPL(T, FN, I)
+#define COBALT_DECL_TIME64(T, FN, FN_64, I) COBALT_DECL(T, FN, I)
+#endif
+
 /*
  * 
  * Each "foo" Cobalt routine shadowing a POSIX service may be
@@ -48,8 +64,9 @@
  * version. The original Cobalt implementation can still be
  * referenced as __COBALT(foo).
  */
-#define COBALT_IMPL(T, I, A)								\
-__typeof__(T) __wrap_ ## I A __attribute__((alias("__cobalt_" __stringify(I)), weak));	\
-__typeof__(T) __cobalt_ ## I A
+#define COBALT_IMPL(T, FN, I)                                                  \
+	__typeof__(T) __wrap_##FN I                                            \
+		__attribute__((alias("__cobalt_" __stringify(FN)), weak));     \
+	__typeof__(T) __cobalt_##FN I
 
 #endif /* !_COBALT_WRAPPERS_H */
