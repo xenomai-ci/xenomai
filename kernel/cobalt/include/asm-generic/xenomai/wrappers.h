@@ -258,7 +258,9 @@ devm_hwmon_device_register_with_groups(struct device *dev, const char *name,
     (LINUX_VERSION_CODE >= KERNEL_VERSION(5,5,0) || \
      LINUX_VERSION_CODE < KERNEL_VERSION(5,4,251)) && \
     (LINUX_VERSION_CODE >= KERNEL_VERSION(4,20,0) || \
-     LINUX_VERSION_CODE < KERNEL_VERSION(4,19,291))
+     LINUX_VERSION_CODE < KERNEL_VERSION(4,19,255) || \
+     (LINUX_VERSION_CODE == KERNEL_VERSION(4,19,255) && \
+      CONFIG_KVER_SUBLEVEL < 291))
 #define dev_addr_set(dev, addr)		memcpy((dev)->dev_addr, addr, MAX_ADDR_LEN)
 #define eth_hw_addr_set(dev, addr)	memcpy((dev)->dev_addr, addr, ETH_ALEN)
 #endif
