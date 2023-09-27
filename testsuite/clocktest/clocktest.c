@@ -80,14 +80,19 @@ static inline uint64_t read_clock(clockid_t clock_id)
 
 static inline uint64_t read_reference_clock(void)
 {
-	struct timeval tv;
+	struct timespec ts;
 
 	/*
 	 * Make sure we do not pick the vsyscall variant. It won't
 	 * switch us into secondary mode and can easily deadlock.
 	 */
-	syscall(SYS_gettimeofday, &tv, NULL);
-	return tv.tv_usec * 1000ULL + tv.tv_sec * 1000000000ULL;
+#if __USE_TIME_BITS64
+	syscall(SYS_clock_gettime64, CLOCK_REALTIME, &ts);
+#else
+	syscall(SYS_clock_gettime, CLOCK_REALTIME, &ts);
+#endif
+
+	return ts.tv_nsec + ts.tv_sec * 1000000000ULL;
 }
 
 static void check_reference(struct per_cpu_data *per_cpu_data)
