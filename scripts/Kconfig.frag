@@ -47,3 +47,7 @@ config XENO_REVISION_LEVEL
 config XENO_VERSION_STRING
        string
        default "@VERSION_STRING@"
+
+config KVER_SUBLEVEL
+       int
+       default @KVER_SUBLEVEL@
