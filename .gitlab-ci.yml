@@ -13,7 +13,7 @@ stages:
   - test
 
 default:
-  image: debian:bullseye
+  image: debian:bookworm
 
 variables:
   GIT_STRATEGY: clone
@@ -21,7 +21,7 @@ variables:
   USE_CCACHE: "1"
   CCACHE_MAXSIZE: "1G"
   PIPELINE_KERNEL: "https://source.denx.de/Xenomai/linux-dovetail.git"
-  GCC_VERSION: "10"
+  GCC_VERSION: "12"
   PACKAGES: "u-boot-tools git make bc bison libelf-dev autotools-dev \
              autoconf autogen libtool pkg-config ccache flex libssl-dev \
              gcc-${GCC_VERSION}"
