@@ -257,6 +257,12 @@ i386-userland:
     - make -j $(nproc)
     - ccache -s
 
+i386-userland-y2038-unavailable:
+  extends: i386-userland
+  image: debian:bullseye
+  variables:
+    GCC_VERSION: "10"
+
 trigger-xenomai-images:
   stage: test
   variables:
