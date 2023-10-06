@@ -3558,7 +3558,7 @@ static void e1000_tx_queue(struct e1000_adapter *adapter,
 	struct e1000_buffer *buffer_info;
 	u32 txd_upper = 0, txd_lower = E1000_TXD_CMD_IFCS;
 	unsigned int i;
-    rtdm_lockctx_t context;
+	rtdm_lockctx_t context;
 
 	if (likely(tx_flags & E1000_TX_FLAGS_TSO)) {
 		txd_lower |= E1000_TXD_CMD_DEXT | E1000_TXD_DTYP_D |
@@ -3593,10 +3593,10 @@ static void e1000_tx_queue(struct e1000_adapter *adapter,
 
 	tx_desc->lower.data |= cpu_to_le32(adapter->txd_cmd);
 
-    rtdm_lock_irqsave(context);
+	rtdm_lock_irqsave(context);
 
-    if (xmit_stamp)
-	*xmit_stamp = cpu_to_be64(rtdm_clock_read() + *xmit_stamp);
+	if (xmit_stamp)
+		*xmit_stamp = cpu_to_be64(rtdm_clock_read() + *xmit_stamp);
 
 	/* Force memory writes to complete before letting h/w
 	 * know there are new descriptors to fetch.  (Only
@@ -3607,7 +3607,7 @@ static void e1000_tx_queue(struct e1000_adapter *adapter,
 	tx_ring->next_to_use = i;
 	writel(i, adapter->hw.hw_addr + tx_ring->tdt);
 
-    rtdm_lock_irqrestore(context);
+	rtdm_lock_irqrestore(context);
 }
 
 #define E1000_FIFO_HDR			0x10
