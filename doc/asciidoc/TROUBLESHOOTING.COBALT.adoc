@@ -219,12 +219,9 @@ support.
 
 Although the program in question may be present, this message may
 happen on ARM platforms when a mismatch exists between the kernel and
-user library configurations with respect to EABI support. Typically,
-if user libraries are compiled with a toolchain generating OABI code,
-the result won't run over a kernel not enabling the
-+CONFIG_OABI_COMPAT+ option. Conversely, the product of a compilation
-with an EABI toolchain won't run on a kernel not enabling the
-+CONFIG_AEABI+ option.
+user library configurations with respect to EABI support. The product
+of a compilation with an EABI toolchain won't run on a kernel not
+enabling the +CONFIG_AEABI+ option.
 
 === incompatible feature set
 

@@ -25,6 +25,10 @@
 #include <errno.h>
 #include <cobalt/uapi/syscall.h>
 
+#ifndef __ARM_EABI__
+#error "ARM OABI support has been removed with Xenomai 3.3.x"
+#endif
+
 /*
  * Some of the following macros have been adapted from Linux's
  * implementation of the syscall mechanism in <asm-arm/unistd.h>:
@@ -85,32 +89,18 @@
 #define ASM_INPUT_4 ASM_INPUT_3, "r" (__r4)
 #define ASM_INPUT_5 ASM_INPUT_4, "r" (__r5)
 
-#define __sys2(x)	#x
-#define __sys1(x)	__sys2(x)
-
-#ifdef __ARM_EABI__
-#define __SYS_REG_DECL unsigned long __r7 = XENO_ARM_SYSCALL
-#define __SYS_REG_INPUT , [__r7] "r" (__r7)
-#define __SYS_CALLOP "push {r7}; mov %%r7,%[__r7]; swi\t0; pop {r7}"
-#else
-#define __SYS_REG_DECL
-#define __SYS_REG_INPUT
-#define __NR_OABI_SYSCALL_BASE	0x900000
-#define __SYS_CALLOP "swi\t" __sys1(__NR_OABI_SYSCALL_BASE + XENO_ARM_SYSCALL) ""
-#endif
-
 #define XENOMAI_DO_SYSCALL(nr, op, args...)				\
 	({								\
 		ASM_INDECL_##nr;					\
-		__SYS_REG_DECL;						\
+		unsigned long __r7 = XENO_ARM_SYSCALL;			\
 		LOADARGS_##nr(__xn_syscode(op), args);			\
 		__asm__ __volatile__ ("" : /* */ : /* */ :		\
 				      CLOBBER_REGS_##nr);		\
 		LOADREGS_##nr;						\
 		__asm__ __volatile__ (					\
-			__SYS_CALLOP					\
+			"push {r7}; mov %%r7,%[__r7]; swi\t0; pop {r7}"	\
 			: "=r" (__r0)					\
-			: ASM_INPUT_##nr __SYS_REG_INPUT		\
+			: ASM_INPUT_##nr, [__r7] "r" (__r7)		\
 			: "memory");					\
 		(int) __r0;						\
 	})
