@@ -42,6 +42,11 @@ static const char * const tests[] = {
 
 static int run_psostests(struct smokey_test *t, int argc, char *const argv[])
 {
+#ifdef CONFIG_XENO_LORES_CLOCK_DISABLED
+	(void)tests;
+	smokey_note("psostests skipped. --enable-lores-clock missing.");
+	return 0;
+#else
 	int test_ret = 0;
 	int ret = 0;
 	int tmp;
@@ -56,6 +61,7 @@ static int run_psostests(struct smokey_test *t, int argc, char *const argv[])
 	}
 
 	return ret;
+#endif
 }
 smokey_test_plugin(psostests, SMOKEY_NOARGS, "Run external psostests");
 
