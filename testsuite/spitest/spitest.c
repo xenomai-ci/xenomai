@@ -455,10 +455,11 @@ int main(int argc, char *const argv[])
 				continue;
 			}
 			fails++;
+			if (smokey_verbose_mode)
+				smokey_note("test %s failed: %d", t->name,
+					    -ret);
 			if (smokey_keep_going)
 				continue;
-			if (smokey_verbose_mode)
-				error(1, -ret, "test %s failed", t->name);
 			return 1;
 		}
 		smokey_note("%s OK", t->name);
