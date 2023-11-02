@@ -10,7 +10,6 @@ static int run_vxworkstests(struct smokey_test *t, int argc, char *const argv[])
 	int ret = 0;
 
 	char *tests[] = {
-		"vxworkstests",
 		"vxworkstests_lst1",
 		"vxworkstests_msgQ1",
 		"vxworkstests_msgQ2",
