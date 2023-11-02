@@ -6,6 +6,7 @@
 #include <copperplate/traceobj.h>
 #include <alchemy/task.h>
 #include <alchemy/pipe.h>
+#include <smokey/smokey.h>
 
 static struct traceobj trobj;
 
@@ -85,7 +86,10 @@ int main(int argc, char *const argv[])
 	traceobj_init(&trobj, argv[0], 0);
 
 	ret = rt_pipe_create(&mpipe, "pipe", P_MINOR_AUTO, 0);
-	traceobj_assert(&trobj, ret >= 0);
+	if (ret < 0) {
+		notice("Test skipped (no kernel support)");
+		return 0;
+	}
 
 	ret = rt_pipe_delete(&mpipe);
 	traceobj_check(&trobj, ret, 0);
@@ -138,5 +142,5 @@ int main(int argc, char *const argv[])
 
 	traceobj_join(&trobj);
 
-	exit(0);
+	return 0;
 }
