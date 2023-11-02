@@ -259,7 +259,8 @@ int smokey_modprobe(const char *name, bool silent);
 
 int smokey_rmmod(const char *name);
 
-int smokey_run_extprog(const char *dir, const char *name, const char *args);
+int smokey_run_extprog(const char *dir, const char *name, const char *args,
+		       int *test_ret);
 
 #ifdef __cplusplus
 }

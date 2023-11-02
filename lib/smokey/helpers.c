@@ -411,10 +411,11 @@ int smokey_rmmod(const char *name)
 	return err;
 }
 
-int smokey_run_extprog(const char *dir, const char *name, const char *args)
+int smokey_run_extprog(const char *dir, const char *name, const char *args,
+		       int *test_ret)
 {
-	int ret;
 	char *tst_path;
+	int ret;
 
 	ret = asprintf(&tst_path, "%s/%s %s", dir, name, args ? : "");
 	if (ret == -1)
@@ -423,5 +424,12 @@ int smokey_run_extprog(const char *dir, const char *name, const char *args)
 	ret = system(tst_path);
 	free(tst_path);
 
-	return ret;
+	*test_ret = ret;
+
+	if (ret)
+		smokey_note("test %s failed: %d", name, ret);
+	else
+		smokey_note("%s OK", name);
+
+	return smokey_keep_going ? 0 : ret;
 }

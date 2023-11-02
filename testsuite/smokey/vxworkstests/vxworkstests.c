@@ -1,44 +1,35 @@
 // SPDX-License-Identifier: GPL-2.0
-#include <error.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <smokey/smokey.h>
 
+static const char * const tests[] = {
+	"vxworkstests_lst1",
+	"vxworkstests_msgQ1",
+	"vxworkstests_msgQ2",
+	"vxworkstests_msgQ3",
+	"vxworkstests_rng1",
+	"vxworkstests_sem1",
+	"vxworkstests_sem2",
+	"vxworkstests_sem3",
+	"vxworkstests_sem4",
+	"vxworkstests_wd1",
+	"vxworkstests_task1",
+	"vxworkstests_task2",
+};
+
 static int run_vxworkstests(struct smokey_test *t, int argc, char *const argv[])
 {
+	int test_ret = 0;
 	int ret = 0;
+	int tmp;
 
-	char *tests[] = {
-		"vxworkstests_lst1",
-		"vxworkstests_msgQ1",
-		"vxworkstests_msgQ2",
-		"vxworkstests_msgQ3",
-		"vxworkstests_rng1",
-		"vxworkstests_sem1",
-		"vxworkstests_sem2",
-		"vxworkstests_sem3",
-		"vxworkstests_sem4",
-		"vxworkstests_wd1",
-		"vxworkstests_task1",
-		"vxworkstests_task2"
-	};
-
-	for (size_t t = 0; t < sizeof(tests) / sizeof(tests[0]); t++)
-	{
-		int fails = 0;
-
-		ret = smokey_run_extprog(XENO_TEST_DIR, tests[t],
-					 "--cpu-affinity=0");
-		if (ret) {
-			fails++;
-			if (smokey_keep_going)
-				continue;
-			if (smokey_verbose_mode)
-				error(1, -ret, "test %s failed", tests[t]);
-			return 1;
-		}
-		smokey_note("%s OK", tests[t]);
+	for (size_t i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
+		tmp = smokey_run_extprog(XENO_TEST_DIR, tests[i],
+					 "--cpu-affinity=0", &test_ret);
+		if (test_ret)
+			ret = test_ret; /* Return the last failed test result */
+		if (tmp)
+			break;
 	}
 
 	return ret;
