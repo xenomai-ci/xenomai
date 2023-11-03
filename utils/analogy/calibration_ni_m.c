@@ -19,13 +19,14 @@
  * along with Xenomai; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
 #include <rtdm/uapi/analogy.h>
 #include <rtdm/analogy.h>
 #include <math.h>
 
 #include "boilerplate/ancillaries.h"
 #include "calibration_ni_m.h"
-#include "calibration.h"
+
 struct listobj ai_calibration_list;
 struct listobj ao_calibration_list;
 

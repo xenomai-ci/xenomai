@@ -27,7 +27,6 @@
 #include <error.h>
 #include <getopt.h>
 #include <string.h>
-#include <signal.h>
 #include <pthread.h>
 #include <rtdm/analogy.h>
 

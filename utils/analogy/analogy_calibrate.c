@@ -21,11 +21,7 @@
  */
 
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <getopt.h>
-#include <pthread.h>
-#include <sys/mman.h>
-#include <xeno_config.h>
 #include <rtdm/analogy.h>
 #include "analogy_calibrate.h"
 #include "calibration_ni_m.h"

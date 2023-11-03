@@ -21,7 +21,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/mman.h>
 #include <errno.h>
 #include <getopt.h>
 #include <rtdm/analogy.h>
