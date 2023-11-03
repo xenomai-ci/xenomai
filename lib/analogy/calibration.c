@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include "iniparser/iniparser.h"
+#include "boilerplate/ancillaries.h"
 #include "boilerplate/list.h"
 #include "calibration.h"
 
@@ -36,8 +37,6 @@ do {										\
 	if (rc < 0) 								\
 		return -1;							\
 } while (0)
-
-#define ARRAY_LEN(a)  (sizeof(a) / sizeof((a)[0]))
 
 static lsampl_t data32_get(void *src)
 {

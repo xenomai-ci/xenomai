@@ -23,6 +23,7 @@
 #include <rtdm/analogy.h>
 #include <math.h>
 
+#include "boilerplate/ancillaries.h"
 #include "calibration_ni_m.h"
 #include "calibration.h"
 struct listobj ai_calibration_list;

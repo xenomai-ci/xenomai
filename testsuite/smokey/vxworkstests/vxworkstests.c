@@ -28,7 +28,7 @@ static int run_vxworkstests(struct smokey_test *t, int argc, char *const argv[])
 	int ret = 0;
 	int tmp;
 
-	for (size_t i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
+	for (size_t i = 0; i < ARRAY_LEN(tests); i++) {
 		tmp = smokey_run_extprog(XENO_TEST_DIR, tests[i],
 					 "--cpu-affinity=0", &test_ret);
 		if (test_ret)

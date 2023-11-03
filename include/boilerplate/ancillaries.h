@@ -30,6 +30,8 @@ struct error_frame;
 
 void __namecpy_requires_character_array_as_destination(void);
 
+#define ARRAY_LEN(a) (sizeof(a) / sizeof(*(a)))
+
 #define namecpy(__dst, __src)						\
 	({								\
 		if (!__builtin_types_compatible_p(typeof(__dst), char[])) \
