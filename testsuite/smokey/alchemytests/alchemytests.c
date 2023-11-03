@@ -1,7 +1,4 @@
 // SPDX-License-Identifier: GPL-2.0
-#include <error.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <smokey/smokey.h>
 
@@ -32,9 +29,15 @@ static const char * const tests[] = {
 
 static int run_alchemytests(struct smokey_test *t, int argc, char *const argv[])
 {
+	const char *const mod = "xeno_rtipc";
 	int test_ret = 0;
 	int ret = 0;
 	int tmp;
+
+	/* Try loading the xeno_rtipc module as the pipe test depends on it */
+	tmp = smokey_modprobe(mod, true);
+	if (tmp)
+		smokey_note("Loading the %s module failed.", mod);
 
 	for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
 		tmp = smokey_run_extprog(XENO_TEST_DIR, tests[i],
@@ -45,7 +48,8 @@ static int run_alchemytests(struct smokey_test *t, int argc, char *const argv[])
 			break;
 	}
 
+	smokey_rmmod(mod);
+
 	return ret;
 }
 smokey_test_plugin(alchemytests, SMOKEY_NOARGS, "Run external alchemytests");
-
