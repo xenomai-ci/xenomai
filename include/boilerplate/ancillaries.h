@@ -30,7 +30,7 @@ struct error_frame;
 
 void __namecpy_requires_character_array_as_destination(void);
 
-#define ARRAY_LEN(a) (sizeof(a) / sizeof(*(a)))
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof(*(a)))
 
 #define namecpy(__dst, __src)						\
 	({								\

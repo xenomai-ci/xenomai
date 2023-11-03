@@ -429,7 +429,7 @@ const char *ni_m_boards[] = {
 	"pci-6229", "pci-6250", "pci-6251", "pci-6254", "pci-6259", "pcie-6259",
 	"pci-6280", "pci-6281", "pxi-6281", "pci-6284", "pci-6289"};
 
-const int nr_ni_m_boards = ARRAY_LEN(ni_m_boards);
+const int nr_ni_m_boards = ARRAY_SIZE(ni_m_boards);
 
 static inline int pwm_period_ticks(void)
 {
@@ -973,7 +973,7 @@ static int ni_m_calibrate_ai(void)
 	/*
 	 * calibrate low, medium and high gain ranges
 	 */
-	for (i = 0; i < ARRAY_LEN(cal_info); i++) {
+	for (i = 0; i < ARRAY_SIZE(cal_info); i++) {
 		__debug("Calibrating AI: %s \n", cal_info[i].message);
 
 		if (cal_info[i].range >= 0)

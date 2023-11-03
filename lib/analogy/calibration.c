@@ -220,7 +220,7 @@ int a4l_read_calibration_file(char *name, struct a4l_calibration_data *data)
 	CHK(read_str, &data->driver_name, d, PLATFORM_STR, DRIVER_STR);
 	CHK(read_str, &data->board_name, d, PLATFORM_STR, BOARD_STR);
 
-	for (k = 0; k < ARRAY_LEN(subdevice); k++) {
+	for (k = 0; k < ARRAY_SIZE(subdevice); k++) {
 		read_int(&nb_elements, d, subdevice[k], -1, ELEMENTS_STR);
 		if (nb_elements < 0 ) {
 			/* AO is optional */
