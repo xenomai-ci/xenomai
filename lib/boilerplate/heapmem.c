@@ -23,15 +23,14 @@
  * multi-page memory ranges, and pages holding bucketed memory have a
  * fast allocation bitmap to manage their blocks internally.
  */
+
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+
 #include <boilerplate/heapmem.h>
 
 enum heapmem_pgtype {

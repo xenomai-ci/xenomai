@@ -15,6 +15,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
+
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <stdio.h>
@@ -32,13 +33,10 @@
 #include "boilerplate/atomic.h"
 #include "boilerplate/lock.h"
 #include "boilerplate/time.h"
-#include "boilerplate/scope.h"
 #include "boilerplate/setup.h"
-#include "boilerplate/debug.h"
 #include "boilerplate/ancillaries.h"
 #include "boilerplate/signal.h"
 #include "boilerplate/namegen.h"
-#include "xenomai/init.h"
 
 pthread_mutex_t __printlock;
 

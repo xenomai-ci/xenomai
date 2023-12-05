@@ -18,9 +18,9 @@
 
 #include <string.h>
 #include <errno.h>
+
 #include "boilerplate/lock.h"
 #include "boilerplate/hash.h"
-#include "boilerplate/debug.h"
 
 /*
  * Crunching routine borrowed from:

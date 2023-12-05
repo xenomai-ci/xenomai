@@ -15,21 +15,18 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
 #include <pthread.h>
 #include <malloc.h>
-#include <errno.h>
-#include <signal.h>
+
 #include "boilerplate/ancillaries.h"
-#include "boilerplate/wrappers.h"
 #include "boilerplate/lock.h"
 #include "boilerplate/signal.h"
-#include "boilerplate/debug.h"
 
 static pthread_key_t btkey;
 
