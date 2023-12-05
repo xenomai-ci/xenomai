@@ -17,11 +17,9 @@
  */
 
 #include <stdio.h>
-#include <memory.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <sched.h>
@@ -30,10 +28,6 @@
 #include "msgQLib.h"
 #include "taskHookLib.h"
 #include "boilerplate/namegen.h"
-#include "copperplate/heapobj.h"
-#include "copperplate/threadobj.h"
-#include "copperplate/syncobj.h"
-#include "copperplate/cluster.h"
 #include "copperplate/internal.h"
 #include "copperplate/registry-obstack.h"
 #include "vxworks/errnoLib.h"

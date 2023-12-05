@@ -16,10 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
 
-#include "tickLib.h"
-#include <boilerplate/lock.h>
 #include <vxworks/errnoLib.h>
 #include <vxworks/sysLib.h>
+
+#include "tickLib.h"
 
 int sysClkRateGet(void)
 {

@@ -20,6 +20,7 @@
 #include <boilerplate/lock.h>
 #include <copperplate/heapobj.h>
 #include <vxworks/errnoLib.h>
+
 #include "rngLib.h"
 
 #define ring_magic 0x5432affe

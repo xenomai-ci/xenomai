@@ -16,13 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
 
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <boilerplate/lock.h>
 #include <vxworks/tickLib.h>
+
 #include "tickLib.h"
 
 struct clockobj wind_clock;

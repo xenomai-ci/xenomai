@@ -25,6 +25,7 @@
 #include <copperplate/heapobj.h>
 #include <vxworks/errnoLib.h>
 #include <vxworks/memPartLib.h>
+
 #include "memPartLib.h"
 
 #define mempart_magic	0x5a6b7c8d
