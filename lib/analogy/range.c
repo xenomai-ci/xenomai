@@ -21,7 +21,6 @@
  */
 
 #include <errno.h>
-#include <math.h>
 #include "internal.h"
 #include <rtdm/analogy.h>
 

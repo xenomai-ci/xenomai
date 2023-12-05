@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <math.h>
 #include <assert.h>
 
 #include <rtdm/analogy.h>
