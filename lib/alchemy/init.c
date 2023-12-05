@@ -17,11 +17,10 @@
  */
 
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <getopt.h>
 #include <xenomai/init.h>
+
 #include "timer.h"
 #include "task.h"
 #include "sem.h"

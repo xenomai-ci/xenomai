@@ -19,8 +19,8 @@
 #include <sched.h>
 #include <pthread.h>
 #include <errno.h>
-#include <stdio.h>
 #include <string.h>
+
 #include "copperplate/heapobj.h"
 #include "copperplate/internal.h"
 #include "internal.h"

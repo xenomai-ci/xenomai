@@ -17,8 +17,6 @@
  */
 
 #include <string.h>
-#include <stdio.h>
-#include <errno.h>
 #include <boilerplate/lock.h>
 #include <copperplate/cluster.h>
 #include <copperplate/heapobj.h>

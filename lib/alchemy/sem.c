@@ -20,7 +20,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <copperplate/threadobj.h>
-#include <copperplate/heapobj.h>
 #include <copperplate/registry-obstack.h>
 #include "reference.h"
 #include "internal.h"
