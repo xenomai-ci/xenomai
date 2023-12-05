@@ -17,19 +17,14 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
 #include <errno.h>
-#include <stdlib.h>
-#include <memory.h>
 #include <boilerplate/ancillaries.h>
 #include <copperplate/threadobj.h>
-#include <copperplate/heapobj.h>
-#include <copperplate/clockobj.h>
 #include <copperplate/cluster.h>
 #include <psos/psos.h>
+
 #include "internal.h"
 #include "reference.h"
-#include "task.h"
 #include "queue.h"
 #include "tm.h"
 

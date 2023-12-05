@@ -17,14 +17,11 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <memory.h>
 #include <boilerplate/ancillaries.h>
 #include <boilerplate/lock.h>
 #include <copperplate/cluster.h>
 #include <psos/psos.h>
+
 #include "internal.h"
 #include "pt.h"
 

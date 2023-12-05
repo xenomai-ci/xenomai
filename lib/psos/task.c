@@ -17,18 +17,15 @@
  */
 
 #include <stdio.h>
-#include <memory.h>
 #include <errno.h>
 #include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <pthread.h>
 #include <sched.h>
+
 #include "boilerplate/namegen.h"
 #include "copperplate/heapobj.h"
 #include "copperplate/threadobj.h"
 #include "copperplate/syncobj.h"
-#include "copperplate/clockobj.h"
 #include "copperplate/cluster.h"
 #include "copperplate/internal.h"
 #include "psos/psos.h"

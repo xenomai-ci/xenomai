@@ -16,11 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
 
-#include <errno.h>
 #include <memory.h>
 #include <copperplate/threadobj.h>
-#include <copperplate/heapobj.h>
-#include <copperplate/clockobj.h>
 #include <psos/psos.h>
 #include "task.h"
 #include "tm.h"

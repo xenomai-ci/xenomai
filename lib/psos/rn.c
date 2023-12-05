@@ -17,14 +17,11 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
 #include <errno.h>
-#include <stdlib.h>
-#include <memory.h>
 #include <boilerplate/ancillaries.h>
 #include <copperplate/threadobj.h>
-#include <copperplate/clockobj.h>
 #include <psos/psos.h>
+
 #include "internal.h"
 #include "tm.h"
 #include "rn.h"

@@ -17,17 +17,15 @@
  */
 
 #include <stdio.h>
-#include <stdint.h>
 #include <errno.h>
-#include <stdlib.h>
 #include <string.h>
 #include <boilerplate/ancillaries.h>
 #include <copperplate/heapobj.h>
 #include <copperplate/cluster.h>
 #include <copperplate/clockobj.h>
 #include <copperplate/semobj.h>
+
 #include "reference.h"
-#include "task.h"
 #include "sem.h"
 #include "tm.h"
 #include "internal.h"
