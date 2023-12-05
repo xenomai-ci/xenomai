@@ -1762,6 +1762,7 @@ static int mmap_iomem_helper(struct vm_area_struct *vma, phys_addr_t pa)
 {
 	pgprot_t prot = PAGE_SHARED;
 	unsigned long len;
+	int ret;
 
 	len = vma->vm_end - vma->vm_start;
 #ifndef CONFIG_MMU
@@ -1775,8 +1776,17 @@ static int mmap_iomem_helper(struct vm_area_struct *vma, phys_addr_t pa)
 #endif
 	vma->vm_page_prot = pgprot_noncached(prot);
 
-	return remap_pfn_range(vma, vma->vm_start, pa >> PAGE_SHIFT,
-			       len, vma->vm_page_prot);
+	ret = remap_pfn_range(vma, vma->vm_start, pa >> PAGE_SHIFT,
+			      len, vma->vm_page_prot);
+	if (ret)
+		return ret;
+
+#ifdef CONFIG_MMU
+	if (cobalt_machine.prefault)
+		cobalt_machine.prefault(vma);
+#endif
+
+	return 0;
 }
 
 static int mmap_buffer_helper(struct rtdm_fd *fd, struct vm_area_struct *vma)
