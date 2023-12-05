@@ -196,7 +196,7 @@ static int __attribute__((cold))
 	};
 	int i;
 
-	for (i = sizeof(mutex_types) / sizeof(mutex_types[0]); i > 0; --i) {
+	for (i = ARRAY_SIZE(mutex_types); i > 0; --i) {
 		if (memcmp(mutex, &mutex_initializers[i - 1],
 				sizeof(mutex_initializers[0])) == 0)
 			return mutex_types[i - 1];

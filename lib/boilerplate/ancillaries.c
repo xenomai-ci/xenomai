@@ -182,7 +182,7 @@ static const char *__esym_map[] = {
 	__esym_def(EPROTO),
 };
 
-#define __esym_max  (sizeof(__esym_map) / sizeof(__esym_map[0]))
+#define __esym_max	ARRAY_SIZE(__esym_map)
 
 const char *symerror(int errnum)
 {
@@ -472,7 +472,7 @@ char *lookup_command(const char *cmd)
 	char *path;
 	int n, ret;
 
-	for (n = 0; n < sizeof(dirs) / sizeof(dirs[0]); n++) {
+	for (n = 0; n < ARRAY_SIZE(dirs); n++) {
 		ret = asprintf(&path, "%s/%s", dirs[n], cmd);
 		if (ret < 0)
 			return NULL;

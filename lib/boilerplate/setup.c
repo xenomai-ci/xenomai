@@ -304,7 +304,7 @@ static struct option *build_option_array(int *base_opt_startp)
 	const struct option *p;
 	int nopts;
 
-	nopts = sizeof(base_options) / sizeof(base_options[0]);
+	nopts = ARRAY_SIZE(base_options);
 
 	if (!pvlist_empty(&setup_list)) {
 		pvlist_for_each_entry(setup, &setup_list, __reserved.next) {

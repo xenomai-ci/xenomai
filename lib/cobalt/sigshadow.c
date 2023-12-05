@@ -53,7 +53,7 @@ int cobalt_sigshadow_handler(int sig, siginfo_t *si, void *ctxt)
 		break;
 	case SIGSHADOW_ACTION_BACKTRACE:
 		arg = sigshadow_arg(si->si_int);
-		nr = backtrace(frames, sizeof(frames) / sizeof(frames[0]));
+		nr = backtrace(frames, ARRAY_SIZE(frames));
 		/* Skip the sighandler context. */
 		skip = nr > 3 ? 3 : 0;
 		XENOMAI_SYSCALL3(sc_cobalt_backtrace, nr - skip, frames + skip, arg);
