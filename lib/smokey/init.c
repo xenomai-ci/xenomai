@@ -15,11 +15,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
+
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <unistd.h>
 #include <malloc.h>
 #include <string.h>
 #include <errno.h>
@@ -27,10 +26,9 @@
 #include <fnmatch.h>
 #include <boilerplate/list.h>
 #include <boilerplate/ancillaries.h>
-#include "copperplate/internal.h"
-#include <xenomai/init.h>
-#include <xenomai/tunables.h>
 #include <smokey/smokey.h>
+
+#include "copperplate/internal.h"
 
 /**
  * @defgroup smokey Smokey API
