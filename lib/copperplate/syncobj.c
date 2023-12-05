@@ -21,8 +21,6 @@
 #include "boilerplate/lock.h"
 #include "copperplate/threadobj.h"
 #include "copperplate/syncobj.h"
-#include "copperplate/debug.h"
-#include "internal.h"
 
 /*
  * XXX: The POSIX spec states that "Synchronization primitives that

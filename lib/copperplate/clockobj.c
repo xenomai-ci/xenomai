@@ -18,16 +18,13 @@
 
 #include <errno.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <assert.h>
-#include <limits.h>
 #include <time.h>
 #include <string.h>
 #include "boilerplate/lock.h"
 #include "boilerplate/time.h"
 #include "copperplate/clockobj.h"
-#include "copperplate/debug.h"
 #include "internal.h"
 
 #ifdef CONFIG_XENO_LORES_CLOCK_DISABLED
@@ -229,7 +226,6 @@ int clockobj_set_resolution(struct clockobj *clkobj, unsigned int resolution_ns)
 #ifdef CONFIG_XENO_COBALT
 
 #include <cobalt/arith.h>
-#include <cobalt/sys/cobalt.h>
 
 #ifdef CONFIG_XENO_COPPERPLATE_CLOCK_RESTRICTED
 #error "restricted CLOCK_COPPERPLATE not available"

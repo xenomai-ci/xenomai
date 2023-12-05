@@ -90,12 +90,9 @@
 
 #include <errno.h>
 #include <string.h>
-#include <memory.h>
 #include "copperplate/heapobj.h"
 #include "copperplate/cluster.h"
-#include "copperplate/syncobj.h"
 #include "copperplate/threadobj.h"
-#include "copperplate/debug.h"
 #include "internal.h"
 
 const static struct hash_operations hash_operations;

@@ -20,8 +20,6 @@
 #include <errno.h>
 #include "copperplate/threadobj.h"
 #include "copperplate/eventobj.h"
-#include "copperplate/heapobj.h"
-#include "copperplate/debug.h"
 
 #ifdef CONFIG_XENO_COBALT
 

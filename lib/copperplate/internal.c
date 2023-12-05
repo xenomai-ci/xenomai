@@ -15,17 +15,17 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
+
 #include <sys/types.h>
 #include <sys/prctl.h>
-#include <sys/syscall.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
 #include <limits.h>
+
 #include <boilerplate/ancillaries.h>
 #include <copperplate/clockobj.h>
 #include <copperplate/threadobj.h>

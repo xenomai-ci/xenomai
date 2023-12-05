@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -26,9 +25,8 @@
 #include <errno.h>
 #include <getopt.h>
 #include <grp.h>
+
 #include "copperplate/threadobj.h"
-#include "copperplate/heapobj.h"
-#include "copperplate/clockobj.h"
 #include "copperplate/registry.h"
 #include "copperplate/timerobj.h"
 #include "xenomai/init.h"
