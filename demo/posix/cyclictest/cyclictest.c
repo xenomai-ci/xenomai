@@ -36,14 +36,14 @@
 #include <sys/resource.h>
 #include <sys/utsname.h>
 #include <sys/mman.h>
-#include "rt_numa.h"
 
+#include <boilerplate/ancillaries.h>
+
+#include "rt_numa.h"
 #include "rt-utils.h"
 
 #define DEFAULT_INTERVAL 1000
 #define DEFAULT_DISTANCE 500
-
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 /* Ugly, but .... */
 #define gettid() syscall(__NR_gettid)

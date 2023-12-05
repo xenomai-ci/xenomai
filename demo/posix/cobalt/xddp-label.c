@@ -72,6 +72,8 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#include <boilerplate/ancillaries.h>
 #include <rtdm/ipc.h>
 
 pthread_t rt1, rt2, nrt;
@@ -235,7 +237,7 @@ static void *realtime_thread2(void *arg)
 		printf("%s: sent %d bytes, \"%.*s\"\n",
 		       __FUNCTION__, ret, ret, msg[n]);
 
-		n = (n + 1) % (sizeof(msg) / sizeof(msg[0]));
+		n = (n + 1) % ARRAY_SIZE(msg);
 		/*
 		 * We run in full real-time mode (i.e. primary mode),
 		 * so we have to let the system breathe between two

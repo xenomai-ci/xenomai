@@ -32,7 +32,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
+
 #include <rtdm/ipc.h>
+#include <boilerplate/ancillaries.h>
 
 pthread_t svtid, cltid;
 
@@ -136,7 +138,7 @@ static void *client(void *arg)
 		}
 		printf("%s: sent %d bytes, \"%.*s\"\n",
 		       __FUNCTION__, ret, ret, msg[n]);
-		n = (n + 1) % (sizeof(msg) / sizeof(msg[0]));
+		n = (n + 1) % ARRAY_SIZE(msg);
 		/*
 		 * We run in full real-time mode (i.e. primary mode),
 		 * so we have to let the system breathe between two

@@ -66,6 +66,8 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <errno.h>
+
+#include <boilerplate/ancillaries.h>
 #include <rtdm/ipc.h>
 
 pthread_t rt, nrt;
@@ -164,7 +166,7 @@ static void *realtime_thread(void *arg)
 
 		printf("   => \"%.*s\" echoed by peer\n", ret, buf);
 
-		n = (n + 1) % (sizeof(msg) / sizeof(msg[0]));
+		n = (n + 1) % ARRAY_SIZE(msg);
 		/*
 		 * We run in full real-time mode (i.e. primary mode),
 		 * so we have to let the system breathe between two
