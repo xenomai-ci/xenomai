@@ -15,13 +15,13 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  */
+
 #include <xeno_config.h>
-#include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <memory.h>
 #include <boilerplate/signal.h>
+
 #include "cobalt/internal.h"
 #include "internal.h"
 
