@@ -3,6 +3,7 @@
  *
  * Licensed under the LGPL v2.1.
  */
+
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -13,7 +14,6 @@
 #include <unistd.h>
 #include <signal.h>
 #include <alchemy/task.h>
-#include <alchemy/timer.h>
 #include <alchemy/sem.h>
 #include <rtdm/testing.h>
 #include <boilerplate/trace.h>

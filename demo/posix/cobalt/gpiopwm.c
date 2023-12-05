@@ -1,4 +1,3 @@
-#include <xenomai/init.h>
 #include <semaphore.h>
 #include <pthread.h>
 #include <signal.h>
@@ -11,9 +10,7 @@
 #include <time.h>
 
 #include <unistd.h>
-#include <stdlib.h>
 #include <string.h>
-#include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
