@@ -37,8 +37,7 @@ static s32  e1000_acquire_phy(struct e1000_hw *hw);
 static const u16 e1000_m88_cable_length_table[] =
 	{ 0, 50, 80, 110, 140, 140, E1000_CABLE_LENGTH_UNDEFINED };
 #define M88E1000_CABLE_LENGTH_TABLE_SIZE \
-                (sizeof(e1000_m88_cable_length_table) / \
-                 sizeof(e1000_m88_cable_length_table[0]))
+	ARRAY_SIZE(e1000_m88_cable_length_table)
 
 static const u16 e1000_igp_2_cable_length_table[] =
     { 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 8, 11, 13, 16, 18, 21,
@@ -50,8 +49,7 @@ static const u16 e1000_igp_2_cable_length_table[] =
       83, 89, 95, 100, 105, 109, 113, 116, 119, 122, 124,
       104, 109, 114, 118, 121, 124};
 #define IGP02E1000_CABLE_LENGTH_TABLE_SIZE \
-                (sizeof(e1000_igp_2_cable_length_table) / \
-                 sizeof(e1000_igp_2_cable_length_table[0]))
+	ARRAY_SIZE(e1000_igp_2_cable_length_table)
 
 /**
  *  e1000_check_reset_block_generic - Check if PHY reset is blocked

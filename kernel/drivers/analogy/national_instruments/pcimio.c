@@ -1104,7 +1104,7 @@ static ni_board ni_boards[]={
 		.caldac = {ad8804_debug,ad8804_debug},
 	},
 };
-#define n_pcimio_boards ((sizeof(ni_boards)/sizeof(ni_boards[0])))
+#define n_pcimio_boards	ARRAY_SIZE(ni_boards)
 
 /* How we access STC registers */
 

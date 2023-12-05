@@ -73,8 +73,7 @@ static void e1000_power_down_phy_copper_80003es2lan(struct e1000_hw *hw);
 static const u16 e1000_gg82563_cable_length_table[] =
          { 0, 60, 115, 150, 150, 60, 115, 150, 180, 180, 0xFF };
 #define GG82563_CABLE_LENGTH_TABLE_SIZE \
-                (sizeof(e1000_gg82563_cable_length_table) / \
-                 sizeof(e1000_gg82563_cable_length_table[0]))
+	ARRAY_SIZE(e1000_gg82563_cable_length_table)
 
 /**
  *  e1000_init_phy_params_80003es2lan - Init ESB2 PHY func ptrs.

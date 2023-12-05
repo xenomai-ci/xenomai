@@ -66,8 +66,7 @@ static const u16 e1000_igp_cable_length_table[] =
       100, 100, 100, 100, 110, 110, 110, 110, 110, 110, 110, 110, 110, 110, 110, 110,
       110, 110, 110, 110, 110, 110, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120};
 #define IGP01E1000_AGC_LENGTH_TABLE_SIZE \
-                (sizeof(e1000_igp_cable_length_table) / \
-                 sizeof(e1000_igp_cable_length_table[0]))
+	ARRAY_SIZE(e1000_igp_cable_length_table)
 
 struct e1000_dev_spec_82541 {
 	e1000_dsp_config dsp_config;

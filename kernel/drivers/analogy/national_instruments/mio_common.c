@@ -1212,8 +1212,7 @@ static void ni_ai_fifo_read(struct a4l_subdevice *subd, int n)
 			a4l_buf_put(subd, &data[0], sizeof(sampl_t));
 		}
 	} else {
-		if (n > sizeof(devpriv->ai_fifo_buffer) /
-		    sizeof(devpriv->ai_fifo_buffer[0])) {
+		if (n > ARRAY_SIZE(devpriv->ai_fifo_buffer)) {
 			a4l_err(dev,
 				"ni_ai_fifo_read: "
 				"bug! ai_fifo_buffer too small");
@@ -1325,8 +1324,7 @@ static void ni_handle_fifo_dregs(struct a4l_subdevice *subd)
 		while (fifo_empty == 0) {
 			for (i = 0;
 			     i <
-				     sizeof(devpriv->ai_fifo_buffer) /
-				     sizeof(devpriv->ai_fifo_buffer[0]); i++) {
+				     ARRAY_SIZE(devpriv->ai_fifo_buffer); i++) {
 				fifo_empty =
 					devpriv->stc_readw(dev,
 							   AI_Status_1_Register) &
