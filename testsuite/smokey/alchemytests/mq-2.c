@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <stdio.h>
 #include <stdlib.h>
+#include <boilerplate/ancillaries.h>
 #include <copperplate/traceobj.h>
 #include <alchemy/task.h>
 #include <alchemy/queue.h>
@@ -13,7 +14,7 @@ static int tseq[] = {
 	7,
 };
 
-#define NMESSAGES (sizeof(messages) / sizeof(messages[0]))
+#define NMESSAGES   ARRAY_SIZE(messages)
 
 static int messages[] = {
 	0xfafafafa,

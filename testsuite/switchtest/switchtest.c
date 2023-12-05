@@ -173,7 +173,7 @@ static char *task_name(char *buf, size_t sz,
 			;
 
 	pos = snprintf(buf, sz, "%s", basename[param->type]);
-	for (i = 0; i < sizeof(flags) / sizeof(flags[0]); i++) {
+	for (i = 0; i < ARRAY_SIZE(flags); i++) {
 		if (!(param->fp & flags[i].flag))
 			continue;
 
@@ -478,7 +478,7 @@ static double dot(volatile double *a, volatile double *b, int n)
 
 static void *fpu_stress(void *cookie)
 {
-	static volatile double a[10000], b[sizeof(a)/sizeof(a[0])];
+	static volatile double a[10000], b[ARRAY_SIZE(a)];
 	struct task_params *param = (struct task_params *) cookie;
 	cpu_set_t cpu_set;
 	unsigned i;
@@ -490,11 +490,11 @@ static void *fpu_stress(void *cookie)
 		clean_exit(EXIT_FAILURE);
 	}
 
-	for (i = 0; i < sizeof(a)/sizeof(a[0]); i++)
+	for (i = 0; i < ARRAY_SIZE(a); i++)
 		a[i] = b[i] = 3.14;
 
 	for (;;) {
-		double s = dot(a, b, sizeof(a)/sizeof(a[0]));
+		double s = dot(a, b, ARRAY_SIZE(a));
 		if ((unsigned) (s + 0.5) != 98596) {
 			fprintf(stderr, "fpu stress task failure! dot: %g\n", s);
 			clean_exit(EXIT_FAILURE);
@@ -1121,7 +1121,7 @@ static void usage(FILE *fd, const char *progname)
 		progname, progname);
 
 	for_each_cpu(i) {
-		for (j = 0; j < sizeof(all_fp)/sizeof(char *); j++)
+		for (j = 0; j < ARRAY_SIZE(all_fp); j++)
 			fprintf(fd, " %s%d", all_fp[j], i);
 	}
 
@@ -1130,7 +1130,7 @@ static void usage(FILE *fd, const char *progname)
 		"running:\n%s", progname);
 
 	for_each_cpu(i) {
-		for (j = 0; j < sizeof(all_nofp)/sizeof(char *); j++)
+		for (j = 0; j < ARRAY_SIZE(all_nofp); j++)
 			fprintf(fd, " %s%d", all_nofp[j], i);
 	}
 	fprintf(fd, "\n\n");
@@ -1333,10 +1333,10 @@ int main(int argc, const char *argv[])
 
 		if (use_fp) {
 			all = all_fp;
-			count = sizeof(all_fp)/sizeof(char *);
+			count = ARRAY_SIZE(all_fp);
 		} else {
 			all = all_nofp;
-			count = sizeof(all_nofp)/sizeof(char *);
+			count = ARRAY_SIZE(all_nofp);
 		}
 
 		argc = count * nr_cpus + 1;

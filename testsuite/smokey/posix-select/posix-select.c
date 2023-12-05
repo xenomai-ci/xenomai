@@ -96,7 +96,7 @@ static void *mq_thread(void *cookie)
 		}
 
 		smokey_trace("received %s", buf);
-		i = (i + 1) % (sizeof(tunes) / sizeof(tunes[0]));
+		i = (i + 1) % (ARRAY_SIZE(tunes));
 	}
 
 	return NULL;
@@ -121,7 +121,7 @@ static int run_posix_select(struct smokey_test *t, int argc, char *const argv[])
 		return ret;
 
 	for (j = 0; j < 3; j++) {
-		for (i = 0; i < sizeof(tunes) / sizeof(tunes[0]); i++) {
+		for (i = 0; i < ARRAY_SIZE(tunes); i++) {
 			ret = smokey_check_errno(mq_send(mq, tunes[i], strlen(tunes[i]) + 1, 0));
 			if (ret < 0) {
 				smokey_check_status(pthread_cancel(tcb));

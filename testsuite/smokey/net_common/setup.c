@@ -70,7 +70,7 @@ static int option_to_modid(int option)
 {
 	unsigned i;
 
-	for (i = 0; i < sizeof(modules)/sizeof(modules[0]); i++) {
+	for (i = 0; i < ARRAY_SIZE(modules); i++) {
 		if (modules[i].option != option)
 			continue;
 

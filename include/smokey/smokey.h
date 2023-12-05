@@ -88,7 +88,7 @@ struct smokey_test {
 	pvlist_for_each_entry((__pos), &smokey_test_list, __reserved.next)
 
 #define __smokey_arg_count(__args)	\
-	(sizeof(__args) / sizeof(__args[0]))
+	ARRAY_SIZE(__args)
 
 #define smokey_test_plugin(__plugin, __args, __desc)			\
 	static int run_ ## __plugin(struct smokey_test *t,		\

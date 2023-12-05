@@ -119,7 +119,7 @@ static void server_loop_cleanup(void *cookie)
 	int *fds = cookie;
 	int i;
 
-	for (i = 0; i < sizeof(protos)/sizeof(protos[0]); i++)
+	for (i = 0; i < ARRAY_SIZE(protos); i++)
 		__RT(close(fds[i]));
 	free(fds);
 }
@@ -131,7 +131,7 @@ void smokey_net_server_loop(int net_config)
 	int i, maxfd, *fds;
 	fd_set rfds;
 
-	fds = malloc(sizeof(*fds) * sizeof(protos)/sizeof(protos[0]));
+	fds = malloc(sizeof(*fds) * ARRAY_SIZE(protos));
 	if (fds == NULL)
 		pthread_exit((void *)(long)-ENOMEM);
 
@@ -139,7 +139,7 @@ void smokey_net_server_loop(int net_config)
 
 	FD_ZERO(&rfds);
 	maxfd = 0;
-	for (i = 0; i < sizeof(protos)/sizeof(protos[0]); i++) {
+	for (i = 0; i < ARRAY_SIZE(protos); i++) {
 		p = &protos[i];
 
 		if ((net_config & p->config_flag) == 0) {
@@ -164,7 +164,7 @@ void smokey_net_server_loop(int net_config)
 
 		check_unix(__RT(select(maxfd + 1, &tfds, NULL, NULL, NULL)));
 
-		for (i = 0; i < sizeof(protos)/sizeof(protos[0]); i++) {
+		for (i = 0; i < ARRAY_SIZE(protos); i++) {
 			p = &protos[i];
 
 			if (fds[i] < 0 || !FD_ISSET(fds[i], &tfds))
