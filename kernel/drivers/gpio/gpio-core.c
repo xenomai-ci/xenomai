@@ -516,16 +516,31 @@ int rtdm_gpiochip_post_event(struct rtdm_gpio_chip *rgc,
 }
 EXPORT_SYMBOL_GPL(rtdm_gpiochip_post_event);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,7,0)
 static int gpiochip_match_name(struct gpio_chip *chip, void *data)
 {
 	const char *name = data;
 
 	return !strcmp(chip->label, name);
 }
+#endif
 
 static struct gpio_chip *find_chip_by_name(const char *name)
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,7,0)
+	struct gpio_device *gd;
+	struct gpio_chip *chip;
+
+	gd = gpio_device_find_by_label(name);
+	if (gd)
+		return NULL;
+
+	chip = gpio_device_get_chip(gd);
+	gpio_device_put(gd);
+	return chip;
+#else
 	return gpiochip_find((void *)name, gpiochip_match_name);
+#endif
 }
 
 int rtdm_gpiochip_add_by_name(struct rtdm_gpio_chip *rgc,
@@ -637,7 +652,11 @@ int rtdm_gpiochip_scan_of(struct device_node *from, const char *compat,
 			break;
 		match.parent = &pdev->dev;
 		INIT_LIST_HEAD(&match.list);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,7,0)
+		gpio_device_find(&match, match_gpio_chip);
+#else
 		gpiochip_find(&match, match_gpio_chip);
+#endif
 		if (!list_empty(&match.list)) {
 			ret = 0;
 			list_for_each_entry_safe(h, n, &match.list, next) {

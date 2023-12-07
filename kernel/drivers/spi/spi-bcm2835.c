@@ -446,10 +446,12 @@ static void bcm2835_mmap_release(struct rtdm_spi_remote_slave *slave)
 	bcm->io_len = 0;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,7,0)
 static int gpio_match_name(struct gpio_chip *chip, void *data)
 {
 	return !strcmp(chip->label, data);
 }
+#endif
 
 static int find_cs_gpio(struct spi_device *spi)
 {
@@ -487,9 +489,19 @@ static int find_cs_gpio(struct spi_device *spi)
 
 	/* If that failed, assume GPIOs 7-11 are used */
 	if (!gpio_is_valid(cs_gpio)) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,7,0)
+		struct gpio_device *gd;
+
+		gd = gpio_device_find_by_label("pinctrl-bcm2835");
+		if (!gd)
+			return 0;
+		chip = gpio_device_get_chip(gd);
+		gpio_device_put(gd);
+#else
 		chip = gpiochip_find("pinctrl-bcm2835", gpio_match_name);
 		if (chip == NULL)
 			return 0;
+#endif
 
 		cs_gpio = chip->base + 8 - spi->chip_select;
 	}
