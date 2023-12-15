@@ -62,8 +62,10 @@ static struct psos_task *find_psos_task(u_long tid, int *err_r)
 
 	magic = threadobj_get_magic(&task->thobj);
 
-	if (magic == task_magic)
+	if (magic == task_magic) {
+		*err_r = SUCCESS;
 		return task;
+	}
 
 	if (magic == ~task_magic) {
 		*err_r = ERR_OBJDEL;
@@ -115,8 +117,10 @@ struct psos_task *get_psos_task(u_long tid, int *err_r)
 	 * holding the lock. Therefore we need no cleanup handler
 	 * here.
 	 */
-	if (task == NULL || threadobj_lock(&task->thobj) == -EINVAL)
+	if (task == NULL || threadobj_lock(&task->thobj) == -EINVAL) {
+		*err_r = ERR_OBJDEL;
 		return NULL;
+	}
 
 	/* Check the magic word again, while we hold the lock. */
 	if (threadobj_get_magic(&task->thobj) != task_magic) {
@@ -140,6 +144,8 @@ struct psos_task *get_psos_task_or_self(u_long tid, int *err_r)
 		*err_r = ERR_SSFN;
 		return NULL;
 	}
+
+	*err_r = SUCCESS;
 
 	/* This one might block but can't fail, it is ours. */
 	threadobj_lock(&current->thobj);
@@ -447,8 +453,8 @@ out:
 
 u_long t_setpri(u_long tid, u_long newprio, u_long *oldprio_r)
 {
-	int policy, ret = SUCCESS, cprio = 1;
 	struct sched_param_ex param_ex;
+	int policy, ret, cprio = 1;
 	struct psos_task *task;
 	struct service svc;
 
@@ -556,7 +562,7 @@ u_long t_getreg(u_long tid, u_long regnum, u_long *regvalue_r)
 {
 	struct psos_task *task;
 	struct service svc;
-	int ret = SUCCESS;
+	int ret;
 
 	if (regnum >= PSOSTASK_NR_REGS)
 		return ERR_REGNUM;
@@ -579,7 +585,7 @@ u_long t_setreg(u_long tid, u_long regnum, u_long regvalue)
 {
 	struct psos_task *task;
 	struct service svc;
-	int ret = SUCCESS;
+	int ret;
 
 	if (regnum >= PSOSTASK_NR_REGS)
 		return ERR_REGNUM;
@@ -601,9 +607,9 @@ out:
 u_long t_mode(u_long mask, u_long newmask, u_long *oldmode_r)
 {
 	struct sched_param_ex param_ex;
-	int policy, ret = SUCCESS;
 	struct psos_task *task;
 	struct service svc;
+	int policy, ret;
 
 	CANCEL_DEFER(svc);
 
