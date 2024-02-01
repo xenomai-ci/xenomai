@@ -136,7 +136,13 @@ static void do_div_by_0(void)
 	__asm__("xorl %eax, %eax\n\t"
 		"movl %eax, %ecx\n\t"
 		"cltd\n\t"
-		"idivl %ecx");
+		"idivl %ecx"
+		: : : "eax", "ecx");
+#else
+	__asm__("fmov d0, #1.000000000000000000e+00\n\t"
+		"movi d1, #0x0\n\t"
+		"fdiv d0, d0, d1"
+		: : : "d0", "d1");
 #endif
 	//TODO find a cortex-A way to trigger an FPE
 }
