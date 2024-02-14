@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
  */
-#ifndef _COBALT_X86_ASM_SYSCALL32_TABLE_H
-#define _COBALT_X86_ASM_SYSCALL32_TABLE_H
+#ifndef _COBALT_ASM_SYSCALL32_TABLE_H
+#define _COBALT_ASM_SYSCALL32_TABLE_H
 
 /*
  * CAUTION: This file is read verbatim into the main syscall
@@ -59,4 +59,4 @@ __COBALT_CALL32emu_THUNK(mq_timedreceive64)
 __COBALT_CALL32emu_THUNK(sigtimedwait64)
 __COBALT_CALL32emu_THUNK(recvmmsg64)
 
-#endif /* !_COBALT_X86_ASM_SYSCALL32_TABLE_H */
+#endif /* !_COBALT_ASM_SYSCALL32_TABLE_H */

@@ -19,6 +19,12 @@
 #ifndef _COBALT_ARM_ASM_SYSCALL32_H
 #define _COBALT_ARM_ASM_SYSCALL32_H
 
-#include <asm-generic/xenomai/syscall32.h>
+#define __COBALT_CALL32_INITHAND(__handler)
+
+#define __COBALT_CALL32_INITMODE(__mode)
+
+#define __COBALT_CALL32_ENTRY(__name, __handler)
+
+#define __COBALT_CALL_COMPAT(__reg)	0
 
 #endif /* !_COBALT_ARM_ASM_SYSCALL32_H */

@@ -30,7 +30,7 @@ struct pt_regs;
 #define COBALT_SYSCALL_DECL(__name, __args)	\
 	long CoBaLt_ ## __name __args
 
-#include <asm/xenomai/syscall32.h>
+#include <asm-generic/xenomai/syscall32.h>
 
 int handle_head_syscall(bool caller_is_relaxed,
 			struct pt_regs *regs);

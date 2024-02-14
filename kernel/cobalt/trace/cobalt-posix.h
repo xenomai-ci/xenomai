@@ -42,8 +42,8 @@
 #define __timespec_args(__name)					\
 	(long long)__entry->tv_sec_##__name, __entry->tv_nsec_##__name
 
-#ifdef CONFIG_IA32_EMULATION
-#define __sc_compat(__name)	, { sc_cobalt_##__name + __COBALT_IA32_BASE, "compat-" #__name }
+#ifdef CONFIG_XENO_ARCH_SYS3264
+#define __sc_compat(__name)	, { sc_cobalt_##__name + __COBALT_COMPAT32_BASE, "compat-" #__name }
 #else
 #define __sc_compat(__name)
 #endif
