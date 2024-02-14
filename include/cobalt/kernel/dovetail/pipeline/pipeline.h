@@ -92,13 +92,4 @@ static inline void pipeline_prepare_panic(void)
 	/* N/A */
 }
 
-#ifndef pipeline_get_syscall_args
-static inline void pipeline_get_syscall_args(struct task_struct *task,
-					     struct pt_regs *regs,
-					     unsigned long *args)
-{
-	syscall_get_arguments(task, regs, args);
-}
-#endif	/* !pipeline_get_syscall_args */
-
 #endif /* !_COBALT_KERNEL_DOVETAIL_PIPELINE_H */

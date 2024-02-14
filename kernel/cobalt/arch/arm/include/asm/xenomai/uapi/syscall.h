@@ -23,8 +23,6 @@
 
 #define __xn_syscode(__nr)	(__COBALT_SYSCALL_BIT | (__nr))
 
-#define XENO_ARM_SYSCALL        0x000F0042	/* carefully chosen... */
-
 #define XENOMAI_SYSARCH_TSCINFO      4
 
 #endif /* !_COBALT_ARM_ASM_UAPI_SYSCALL_H */

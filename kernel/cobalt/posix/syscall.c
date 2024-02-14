@@ -584,7 +584,7 @@ restart:
 	 */
 
 	p = current;
-	pipeline_get_syscall_args(p, regs, args);
+	syscall_get_arguments(p, regs, args);
 
 	ret = handler(args[0], args[1], args[2], args[3], args[4]);
 	if (ret == -ENOSYS && (sysflags & __xn_exec_adaptive)) {
@@ -733,7 +733,7 @@ restart:
 	}
 
 	p = current;
-	pipeline_get_syscall_args(p, regs, args);
+	syscall_get_arguments(p, regs, args);
 
 	ret = handler(args[0], args[1], args[2], args[3], args[4]);
 	if (ret == -ENOSYS && (sysflags & __xn_exec_adaptive)) {

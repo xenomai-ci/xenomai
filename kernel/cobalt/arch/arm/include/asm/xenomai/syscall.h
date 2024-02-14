@@ -29,13 +29,11 @@
 #include <asm-generic/xenomai/syscall.h>
 
 /*
- * Cobalt syscall numbers can be fetched from ARM_ORIG_r0 with ARM_r7
- * containing the Xenomai syscall marker, Linux syscalls directly from
+ * Cobalt syscall and Linux syscall numbers can be fetched directly from
  * ARM_r7. Since we have to work with Dovetail whilst remaining binary
- * compatible with applications built for the I-pipe, we retain the
- * old syscall signature based on receiving XENO_ARM_SYSCALL in
- * ARM_r7, possibly ORed with __COBALT_SYSCALL_BIT by Dovetail
- * (IPIPE_COMPAT mode).
+ * compatible with applications built for the I-pipe, the syscall signature
+ * is possibly ORed with __COBALT_SYSCALL_BIT by Dovetail (IPIPE_COMPAT
+ * mode).
  *
  * FIXME: We also have __COBALT_SYSCALL_BIT (equal to
  * __OOB_SYSCALL_BIT) present in the actual syscall number in r0,
@@ -44,8 +42,8 @@
  * Dovetail abides by, with the actual syscall number into r7 ORed
  * with __OOB_SYSCALL_BIT, freeing r0 for passing a call argument.
  */
-#define __xn_reg_sys(__regs)	((__regs)->ARM_ORIG_r0)
-#define __xn_syscall_p(__regs)	(((__regs)->ARM_r7 & ~__COBALT_SYSCALL_BIT) == XENO_ARM_SYSCALL)
+#define __xn_reg_sys(__regs)	((__regs)->ARM_r7)
+#define __xn_syscall_p(__regs)	((__regs)->ARM_r7 & __COBALT_SYSCALL_BIT)
 #define __xn_syscall(__regs)	(__xn_reg_sys(__regs) & ~__COBALT_SYSCALL_BIT)
 
 /*
@@ -75,18 +73,6 @@ static inline void __xn_status_return(struct pt_regs *regs, long v)
 static inline int __xn_interrupted_p(struct pt_regs *regs)
 {
 	return __xn_reg_rval(regs) == -EINTR;
-}
-
-#define pipeline_get_syscall_args pipeline_get_syscall_args
-static inline void pipeline_get_syscall_args(struct task_struct *task,
-					     struct pt_regs *regs,
-					     unsigned long *args)
-{
-	args[0] = regs->ARM_r1;
-	args[1] = regs->ARM_r2;
-	args[2] = regs->ARM_r3;
-	args[3] = regs->ARM_r4;
-	args[4] = regs->ARM_r5;
 }
 
 #endif /* !_COBALT_ARM_SYSCALL_H */
