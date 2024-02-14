@@ -9,8 +9,6 @@
 #define _COBALT_ARM64_SYSCALL_H
 
 #include <linux/errno.h>
-#include <linux/uaccess.h>
-#include <asm/unistd.h>
 #include <asm/ptrace.h>
 #include <asm-generic/xenomai/syscall.h>
 
@@ -20,7 +18,13 @@
  */
 #define __xn_reg_sys(__regs)	((unsigned long)(__regs)->syscallno)
 #define __xn_syscall_p(regs)	((__xn_reg_sys(regs) & __COBALT_SYSCALL_BIT) != 0)
+
+#ifdef CONFIG_XENO_ARCH_SYS3264
+#define __xn_syscall(__regs)    __COBALT_SYSNR32emu(__xn_reg_sys(__regs)	\
+				    & ~__COBALT_SYSCALL_BIT)
+#else
 #define __xn_syscall(__regs)	((unsigned long)(__xn_reg_sys(__regs) & ~__COBALT_SYSCALL_BIT))
+#endif
 
 #define __xn_reg_rval(__regs)	((__regs)->regs[0])
 #define __xn_reg_pc(__regs)	((__regs)->pc)
@@ -32,7 +36,7 @@
  */
 #define __xn_rootcall_p(__regs, __code)			\
 	({						\
-		*(__code) = __xn_syscall(__regs);	\
+		*(__code) = __xn_reg_sys(__regs);	\
 		*(__code) < NR_syscalls;		\
 	})
 
