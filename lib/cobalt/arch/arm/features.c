@@ -52,6 +52,11 @@ int cobalt_fp_detect(void)
 			features |= __COBALT_HAVE_VFP;
 			break;
 		}
+		/* arm on arm64 */
+		if (strstr(buffer, "fp")) {
+			features |= __COBALT_HAVE_VFP;
+			break;
+		}
 	}
 
 	fclose(fp);
