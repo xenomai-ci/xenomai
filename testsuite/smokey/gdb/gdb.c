@@ -78,7 +78,7 @@ static void handle_sigchld(int signum)
 	if (WEXITSTATUS(status) == ESRCH)
 		smokey_note("gdb: skipped (gdb not available)");
 	else
-		check("gdb execution", WEXITSTATUS(status), 0);
+		check("gdb terminated unexpectedly", 0, 1);
 	child_terminated = 1;
 	close(pipe_out[0]);
 }
@@ -202,6 +202,8 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 	pthread_attr_t attr;
 	char run_param[32];
 	cpu_set_t cpu_set;
+	pid_t childpid;
+	int status;
 	int err;
 
 	smokey_parse_args(t, argc, argv);
@@ -257,7 +259,8 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 		err = pipe(pipe_out);
 		check_no_error("pipe_out", err);
 
-		switch (do_fork()) {
+		childpid = do_fork();
+		switch (childpid) {
 		case -1:
 			error(1, errno, "fork/vfork");
 
@@ -283,8 +286,14 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 
 		default:
 			wait_for_pattern("(gdb) ");
+
+			/* the signal handler only is used to skip the test if
+			   gdb is missing */
 			if (child_terminated)
 				break;
+			else
+				signal(SIGCHLD, SIG_DFL);
+
 			send_command("b breakpoint_target\n", 1);
 			send_command("r\n", 1);
 
@@ -301,13 +310,11 @@ static int run_gdb(struct smokey_test *t, int argc, char *const argv[])
 			eval_expression("thread_loops==expected_loops", "1");
 
 			send_command("q\n", 0);
-			pause();
 
-			if (!child_terminated) {
-				fprintf(stderr,
-					"FAILURE: gdb still running?!\n");
-				exit(1);
-			}
+			err = waitpid(childpid, &status, 0);
+			check("waitpid", err, childpid);
+			check("gdb execution", WEXITSTATUS(status), 0);
+			close(pipe_out[0]);
 		}
 
 		signal(SIGCHLD, SIG_DFL);
