@@ -307,7 +307,7 @@ static int gpio_pin_select(struct rtdm_fd *fd, struct xnselector *selector,
 	return rtdm_event_select(&pin->event, selector, type, index);
 }
 
-int gpio_pin_open(struct rtdm_fd *fd, int oflags)
+static int gpio_pin_open(struct rtdm_fd *fd, int oflags)
 {
 	struct rtdm_gpio_chan *chan = rtdm_fd_to_private(fd);
 	struct rtdm_device *dev = rtdm_fd_device(fd);
