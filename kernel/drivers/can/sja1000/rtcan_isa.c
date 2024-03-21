@@ -84,7 +84,7 @@ static void rtcan_isa_writereg(struct rtcan_device *dev, int port, u8 val)
 }
 
 
-int __init rtcan_isa_init_one(int idx)
+static int __init rtcan_isa_init_one(int idx)
 {
 	struct rtcan_device *dev;
 	struct rtcan_sja1000 *chip;

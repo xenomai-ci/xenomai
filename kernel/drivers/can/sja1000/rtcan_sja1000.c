@@ -547,16 +547,15 @@ static int rtcan_sja_mode_start(struct rtcan_device *dev,
     return ret;
 }
 
-can_state_t rtcan_sja_get_state(struct rtcan_device *dev)
+static can_state_t rtcan_sja_get_state(struct rtcan_device *dev)
 {
     can_state_t state = dev->state;
     rtcan_sja_is_operating(dev, &state);
     return state;
 }
 
-int rtcan_sja_set_mode(struct rtcan_device *dev,
-		       can_mode_t mode,
-		       rtdm_lockctx_t *lock_ctx)
+static int rtcan_sja_set_mode(struct rtcan_device *dev,
+			      can_mode_t mode, rtdm_lockctx_t *lock_ctx)
 {
     int ret = 0;
     can_state_t state;
@@ -608,9 +607,9 @@ int rtcan_sja_set_mode(struct rtcan_device *dev,
     return ret;
 }
 
-int rtcan_sja_set_bit_time(struct rtcan_device *dev,
-			   struct can_bittime *bit_time,
-			   rtdm_lockctx_t *lock_ctx)
+static int rtcan_sja_set_bit_time(struct rtcan_device *dev,
+				  struct can_bittime *bit_time,
+				  rtdm_lockctx_t *lock_ctx)
 {
     struct rtcan_sja1000 *chip = (struct rtcan_sja1000 *)dev->priv;
     u8 btr0, btr1;
@@ -642,7 +641,7 @@ int rtcan_sja_set_bit_time(struct rtcan_device *dev,
     return 0;
 }
 
-void rtcan_sja_enable_bus_err(struct rtcan_device *dev)
+static void rtcan_sja_enable_bus_err(struct rtcan_device *dev)
 {
     struct rtcan_sja1000 *chip = (struct rtcan_sja1000 *)dev->priv;
 
@@ -820,7 +819,7 @@ void rtcan_sja1000_unregister(struct rtcan_device *dev)
     rtcan_dev_unregister(dev);
 }
 
-int __init rtcan_sja_init(void)
+static int __init rtcan_sja_init(void)
 {
 	if (!rtdm_available())
 		return -ENOSYS;
@@ -830,7 +829,7 @@ int __init rtcan_sja_init(void)
 }
 
 
-void __exit rtcan_sja_exit(void)
+static void __exit rtcan_sja_exit(void)
 {
 	printk("%s removed\n", sja_ctrl_name);
 }

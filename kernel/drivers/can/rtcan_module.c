@@ -401,7 +401,7 @@ static void rtcan_proc_unregister(void)
 
 
 
-int __init rtcan_init(void)
+static int __init rtcan_init(void)
 {
     int err = 0;
 
@@ -427,7 +427,7 @@ int __init rtcan_init(void)
 }
 
 
-void __exit rtcan_exit(void)
+static void __exit rtcan_exit(void)
 {
     rtcan_corectl_unregister();
 

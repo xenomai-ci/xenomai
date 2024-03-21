@@ -91,7 +91,7 @@ static void rtcan_mem_writereg(struct rtcan_device *dev, int reg, u8 val)
 	writeb(val, board->vmem + reg);
 }
 
-int __init rtcan_mem_init_one(int idx)
+static int __init rtcan_mem_init_one(int idx)
 {
 	struct rtcan_device *dev;
 	struct rtcan_sja1000 *chip;

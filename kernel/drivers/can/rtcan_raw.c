@@ -216,7 +216,7 @@ EXPORT_SYMBOL_GPL(rtcan_loopback);
 #endif /* CONFIG_XENO_DRIVERS_CAN_LOOPBACK */
 
 
-int rtcan_raw_socket(struct rtdm_fd *fd, int protocol)
+static int rtcan_raw_socket(struct rtdm_fd *fd, int protocol)
 {
     /* Only protocol CAN_RAW is supported */
     if (protocol != CAN_RAW && protocol != 0)
@@ -258,8 +258,7 @@ static void rtcan_raw_close(struct rtdm_fd *fd)
 }
 
 
-int rtcan_raw_bind(struct rtdm_fd *fd,
-		   struct sockaddr_can *scan)
+static int rtcan_raw_bind(struct rtdm_fd *fd, struct sockaddr_can *scan)
 {
     struct rtcan_socket *sock = rtdm_fd_to_private(fd);
     rtdm_lockctx_t lock_ctx;
@@ -406,8 +405,7 @@ static int rtcan_raw_setsockopt(struct rtdm_fd *fd,
 }
 
 
-int rtcan_raw_ioctl(struct rtdm_fd *fd,
-		    unsigned int request, void *arg)
+static int rtcan_raw_ioctl(struct rtdm_fd *fd, unsigned int request, void *arg)
 {
     int ret = 0;
 
@@ -523,8 +521,8 @@ do {									\
 	recv_buf_index = (recv_buf_index + len) & (RTCAN_RXBUF_SIZE - 1); \
 } while (0)
 
-ssize_t rtcan_raw_recvmsg(struct rtdm_fd *fd,
-			  struct user_msghdr *msg, int flags)
+static ssize_t rtcan_raw_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
+				 int flags)
 {
     struct rtcan_socket *sock = rtdm_fd_to_private(fd);
     struct sockaddr_can scan;
@@ -851,8 +849,8 @@ static ssize_t __rtcan_raw_sendmsg(struct rtcan_device *dev, struct rtcan_socket
     return ret;
 }
 
-ssize_t rtcan_raw_sendmsg(struct rtdm_fd *fd,
-			  const struct user_msghdr *msg, int flags)
+static ssize_t rtcan_raw_sendmsg(struct rtdm_fd *fd,
+				 const struct user_msghdr *msg, int flags)
 {
     struct rtcan_socket *sock = rtdm_fd_to_private(fd);
     struct sockaddr_can *scan = (struct sockaddr_can *)msg->msg_name;

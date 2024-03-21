@@ -208,7 +208,7 @@ static inline void rtcan_peak_dng_disable(struct rtcan_device *dev)
 }
 
 /** Init module */
-int __init rtcan_peak_dng_init_one(int idx)
+static int __init rtcan_peak_dng_init_one(int idx)
 {
     int ret, dtype;
     struct rtcan_device *dev;
@@ -304,7 +304,7 @@ int __init rtcan_peak_dng_init_one(int idx)
     return ret;
 }
 
-void rtcan_peak_dng_exit_one(struct rtcan_device *dev)
+static void rtcan_peak_dng_exit_one(struct rtcan_device *dev)
 {
     struct rtcan_peak_dng *dng = (struct rtcan_peak_dng *)dev->board_priv;
 
