@@ -38,8 +38,8 @@ static u16 rt_ip_id_count = 0;
  *  Slow path for fragmented packets
  */
 int rt_ip_build_xmit_slow(struct rtsocket *sk,
-			  int getfrag(const void *, char *, unsigned int,
-				      unsigned int),
+			  int getfrag(const void *, unsigned char *,
+				      unsigned int, unsigned int),
 			  const void *frag, unsigned length,
 			  struct dest_route *rt, int msg_flags,
 			  unsigned int mtu, unsigned int prio)
@@ -155,7 +155,7 @@ error:
  *  Fast path for unfragmented packets.
  */
 int rt_ip_build_xmit(struct rtsocket *sk,
-		     int getfrag(const void *, char *, unsigned int,
+		     int getfrag(const void *, unsigned char *, unsigned int,
 				 unsigned int),
 		     const void *frag, unsigned length, struct dest_route *rt,
 		     int msg_flags)
