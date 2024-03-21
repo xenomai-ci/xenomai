@@ -27,6 +27,7 @@
 #include <rtdev.h>
 #include <rtmac.h>
 #include <rtmac/tdma/tdma.h>
+#include <rtmac/tdma/tdma_dev.h>
 
 struct tdma_dev_ctx {
 	rtdm_task_t *cycle_waiter;

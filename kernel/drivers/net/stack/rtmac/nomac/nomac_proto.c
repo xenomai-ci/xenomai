@@ -27,6 +27,7 @@
 #include <rtdev.h>
 #include <rtmac/rtmac_proto.h>
 #include <rtmac/nomac/nomac.h>
+#include <rtmac/nomac/nomac_proto.h>
 
 static struct rtskb_queue nrt_rtskb_queue;
 static rtdm_task_t wrapper_task;

@@ -28,6 +28,7 @@
 #include <rtcfg/rtcfg_conn_event.h>
 #include <rtcfg/rtcfg_event.h>
 #include <rtcfg/rtcfg_frame.h>
+#include <rtcfg/rtcfg_proc.h>
 
 #ifdef CONFIG_XENO_OPT_VFILE
 DEFINE_MUTEX(nrt_proc_lock);

@@ -26,6 +26,7 @@
 
 #include <rtdev.h>
 #include <rtnet_internal.h>
+#include <ethernet/eth.h>
 
 /*
  *  Create the Ethernet MAC header for an arbitrary protocol layer

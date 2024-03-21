@@ -27,6 +27,7 @@
 #include <linux/in.h>
 
 #include <rtnet_socket.h>
+#include <ipv4/ip_sock.h>
 
 int rt_ip_setsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
 		     int optname, const void __user *optval, socklen_t optlen)

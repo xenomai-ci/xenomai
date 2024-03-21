@@ -27,6 +27,7 @@
 #include <rtcfg/rtcfg_event.h>
 #include <rtcfg/rtcfg_frame.h>
 #include <rtcfg/rtcfg_timer.h>
+#include <rtcfg/rtcfg_client_event.h>
 
 static int rtcfg_client_get_frag(int ifindex, struct rt_proc_call *call);
 static void rtcfg_client_detach(int ifindex, struct rt_proc_call *call);

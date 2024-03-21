@@ -27,6 +27,7 @@
 #include <rtdev.h>
 #include <rtmac.h>
 #include <rtmac/nomac/nomac.h>
+#include <rtmac/nomac/nomac_dev.h>
 
 static int nomac_dev_openclose(void)
 {

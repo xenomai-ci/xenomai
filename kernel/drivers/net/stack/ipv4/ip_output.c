@@ -29,6 +29,7 @@
 #include <stack_mgr.h>
 #include <ipv4/ip_fragment.h>
 #include <ipv4/ip_input.h>
+#include <ipv4/ip_output.h>
 #include <ipv4/route.h>
 
 static DEFINE_RTDM_LOCK(rt_ip_id_lock);

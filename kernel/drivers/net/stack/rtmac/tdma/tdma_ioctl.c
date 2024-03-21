@@ -30,6 +30,7 @@
 #include <tdma_chrdev.h>
 #include <rtmac/rtmac_vnic.h>
 #include <rtmac/tdma/tdma.h>
+#include <rtmac/tdma/tdma_ioctl.h>
 
 #ifdef CONFIG_XENO_DRIVERS_NET_TDMA_MASTER
 static int tdma_ioctl_master(struct rtnet_device *rtdev,

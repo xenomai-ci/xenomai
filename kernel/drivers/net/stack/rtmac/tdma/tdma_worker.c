@@ -24,6 +24,7 @@
 
 #include <rtmac/rtmac_proto.h>
 #include <rtmac/tdma/tdma_proto.h>
+#include <rtmac/tdma/tdma_worker.h>
 
 static void do_slot_job(struct tdma_priv *tdma, struct tdma_slot *job,
 			rtdm_lockctx_t lockctx)

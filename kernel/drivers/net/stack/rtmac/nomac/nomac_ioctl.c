@@ -27,6 +27,7 @@
 
 #include <nomac_chrdev.h>
 #include <rtmac/nomac/nomac.h>
+#include <rtmac/nomac/nomac_ioctl.h>
 
 static int nomac_ioctl_attach(struct rtnet_device *rtdev)
 {
