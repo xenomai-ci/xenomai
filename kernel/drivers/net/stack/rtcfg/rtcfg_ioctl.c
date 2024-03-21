@@ -33,7 +33,7 @@
 #include <rtcfg/rtcfg_frame.h>
 #include <rtcfg/rtcfg_proc.h>
 
-int rtcfg_event_handler(struct rt_proc_call *call)
+static int rtcfg_event_handler(struct rt_proc_call *call)
 {
 	struct rtcfg_cmd *cmd_event;
 
@@ -42,7 +42,7 @@ int rtcfg_event_handler(struct rt_proc_call *call)
 				   cmd_event->internal.data.event_id, call);
 }
 
-void keep_cmd_add(struct rt_proc_call *call, void *priv_data)
+static void keep_cmd_add(struct rt_proc_call *call, void *priv_data)
 {
 	/* do nothing on error (<0), or if file already present (=0) */
 	if (rtpc_get_result(call) <= 0)
@@ -52,7 +52,7 @@ void keep_cmd_add(struct rt_proc_call *call, void *priv_data)
 	rtpc_set_cleanup_handler(call, NULL);
 }
 
-void cleanup_cmd_add(void *priv_data)
+static void cleanup_cmd_add(void *priv_data)
 {
 	struct rtcfg_cmd *cmd = (struct rtcfg_cmd *)priv_data;
 	void *buf;
@@ -76,7 +76,7 @@ void cleanup_cmd_add(void *priv_data)
 	}
 }
 
-void cleanup_cmd_del(void *priv_data)
+static void cleanup_cmd_del(void *priv_data)
 {
 	struct rtcfg_cmd *cmd = (struct rtcfg_cmd *)priv_data;
 	void *buf;
@@ -99,7 +99,7 @@ void cleanup_cmd_del(void *priv_data)
 	}
 }
 
-void copy_stage_1_data(struct rt_proc_call *call, void *priv_data)
+static void copy_stage_1_data(struct rt_proc_call *call, void *priv_data)
 {
 	struct rtcfg_cmd *cmd;
 	int result = rtpc_get_result(call);
@@ -116,7 +116,7 @@ void copy_stage_1_data(struct rt_proc_call *call, void *priv_data)
 		rtpc_set_result(call, -EFAULT);
 }
 
-void cleanup_cmd_client(void *priv_data)
+static void cleanup_cmd_client(void *priv_data)
 {
 	struct rtcfg_cmd *cmd = (struct rtcfg_cmd *)priv_data;
 	void *station_buf;
@@ -131,7 +131,7 @@ void cleanup_cmd_client(void *priv_data)
 		kfree_rtskb(rtskb);
 }
 
-void copy_stage_2_data(struct rt_proc_call *call, void *priv_data)
+static void copy_stage_2_data(struct rt_proc_call *call, void *priv_data)
 {
 	struct rtcfg_cmd *cmd;
 	int result = rtpc_get_result(call);
@@ -158,7 +158,7 @@ void copy_stage_2_data(struct rt_proc_call *call, void *priv_data)
 	}
 }
 
-void cleanup_cmd_announce(void *priv_data)
+static void cleanup_cmd_announce(void *priv_data)
 {
 	struct rtcfg_cmd *cmd = (struct rtcfg_cmd *)priv_data;
 	struct rtskb *rtskb;
@@ -168,7 +168,7 @@ void cleanup_cmd_announce(void *priv_data)
 		kfree_rtskb(rtskb);
 }
 
-void cleanup_cmd_detach(void *priv_data)
+static void cleanup_cmd_detach(void *priv_data)
 {
 	struct rtcfg_cmd *cmd = (struct rtcfg_cmd *)priv_data;
 	void *buf;
@@ -231,7 +231,7 @@ static int load_cfg_file(struct rtcfg_file *cfgfile, struct rtcfg_cmd *cmd)
 				sizeof(*cmd), NULL, cleanup_cmd_add);
 }
 
-int rtcfg_ioctl_add(struct rtnet_device *rtdev, struct rtcfg_cmd *cmd)
+static int rtcfg_ioctl_add(struct rtnet_device *rtdev, struct rtcfg_cmd *cmd)
 {
 	struct rtcfg_connection *conn_buf;
 	struct rtcfg_file *file = NULL;
@@ -320,8 +320,8 @@ err:
 	return ret;
 }
 
-int rtcfg_ioctl(struct rtnet_device *rtdev, unsigned int request,
-		unsigned long arg)
+static int rtcfg_ioctl(struct rtnet_device *rtdev, unsigned int request,
+		       unsigned long arg)
 {
 	struct rtcfg_cmd cmd;
 	struct rtcfg_station *station_buf;

@@ -41,7 +41,7 @@ void rtcfg_timer(rtdm_timer_t *t)
 	rtcfg_thread_signal();
 }
 
-void rtcfg_timer_run_one(int ifindex)
+static void rtcfg_timer_run_one(int ifindex)
 {
 	struct rtcfg_device *rtcfg_dev = &device[ifindex];
 	struct list_head *entry;

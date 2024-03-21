@@ -202,7 +202,7 @@ static int tdma_ioctl_cal_result_size(struct rtnet_device *rtdev,
 		return 0;
 }
 
-int start_calibration(struct rt_proc_call *call)
+static int start_calibration(struct rt_proc_call *call)
 {
 	struct tdma_request_cal *req_cal;
 	struct tdma_priv *tdma;
@@ -221,7 +221,7 @@ int start_calibration(struct rt_proc_call *call)
 	return -CALL_PENDING;
 }
 
-void copyback_calibration(struct rt_proc_call *call, void *priv_data)
+static void copyback_calibration(struct rt_proc_call *call, void *priv_data)
 {
 	struct tdma_request_cal *req_cal;
 	struct tdma_priv *tdma;
@@ -260,7 +260,7 @@ void copyback_calibration(struct rt_proc_call *call, void *priv_data)
 	       (unsigned long)average, (unsigned long)min, (unsigned long)max);
 }
 
-void cleanup_calibration(void *priv_data)
+static void cleanup_calibration(void *priv_data)
 {
 	struct tdma_request_cal *req_cal;
 

@@ -36,7 +36,7 @@
 LIST_HEAD(nomac_devices);
 DEFINE_MUTEX(nomac_nrt_lock);
 
-int nomac_proc_read(struct xnvfile_regular_iterator *it, void *data)
+static int nomac_proc_read(struct xnvfile_regular_iterator *it, void *data)
 {
 	struct nomac_priv *entry;
 
@@ -54,7 +54,7 @@ int nomac_proc_read(struct xnvfile_regular_iterator *it, void *data)
 }
 #endif /* CONFIG_XENO_OPT_VFILE */
 
-int nomac_attach(struct rtnet_device *rtdev, void *priv)
+static int nomac_attach(struct rtnet_device *rtdev, void *priv)
 {
 	struct nomac_priv *nomac = (struct nomac_priv *)priv;
 	int ret;
@@ -77,7 +77,7 @@ int nomac_attach(struct rtnet_device *rtdev, void *priv)
 	return 0;
 }
 
-int nomac_detach(struct rtnet_device *rtdev, void *priv)
+static int nomac_detach(struct rtnet_device *rtdev, void *priv)
 {
 	struct nomac_priv *nomac = (struct nomac_priv *)priv;
 
@@ -127,7 +127,7 @@ struct rtmac_disc nomac_disc = {
 #endif /* CONFIG_XENO_OPT_VFILE */
 };
 
-int __init nomac_init(void)
+static int __init nomac_init(void)
 {
 	int ret;
 
@@ -146,7 +146,7 @@ int __init nomac_init(void)
 	return 0;
 }
 
-void nomac_release(void)
+static void nomac_release(void)
 {
 	rtmac_disc_deregister(&nomac_disc);
 	nomac_proto_cleanup();

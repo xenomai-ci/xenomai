@@ -472,14 +472,14 @@ exit:
 	return;
 }
 
-void e1000e_mod_watchdog_timer(rtdm_nrtsig_t *nrt_sig, void *data)
+static void e1000e_mod_watchdog_timer(rtdm_nrtsig_t *nrt_sig, void *data)
 {
 	struct timer_list *timer = data;
 
 	mod_timer(timer, jiffies + 1);
 }
 
-void e1000e_trigger_downshift(rtdm_nrtsig_t *nrt_sig, void *data)
+static void e1000e_trigger_downshift(rtdm_nrtsig_t *nrt_sig, void *data)
 {
 	struct work_struct *downshift_task = data;
 

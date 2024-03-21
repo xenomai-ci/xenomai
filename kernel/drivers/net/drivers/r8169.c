@@ -510,7 +510,7 @@ unsigned alloc_rxskb_cnt = 0;
 //	20-16	5-bit GMII/MII register address
 //	15-0	16-bit GMII/MII register data
 //=================================================================
-void RTL8169_WRITE_GMII_REG( unsigned long ioaddr, int RegAddr, int value )
+static void RTL8169_WRITE_GMII_REG( unsigned long ioaddr, int RegAddr, int value )
 {
 	int	i;
 
@@ -528,7 +528,7 @@ void RTL8169_WRITE_GMII_REG( unsigned long ioaddr, int RegAddr, int value )
 	}// end of for() loop
 }
 //=================================================================
-int RTL8169_READ_GMII_REG( unsigned long ioaddr, int RegAddr )
+static int RTL8169_READ_GMII_REG( unsigned long ioaddr, int RegAddr )
 {
 	int i, value = -1;
 

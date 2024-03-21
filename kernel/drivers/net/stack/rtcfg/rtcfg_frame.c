@@ -96,8 +96,8 @@ static void rtcfg_rx_task(void *arg)
 	}
 }
 
-int rtcfg_send_frame(struct rtskb *rtskb, struct rtnet_device *rtdev,
-		     u8 *dest_addr)
+static int rtcfg_send_frame(struct rtskb *rtskb, struct rtnet_device *rtdev,
+			    u8 *dest_addr)
 {
 	int ret;
 

@@ -315,7 +315,7 @@ static void rtnet_proc_unregister(void)
 /**
  *  rtnet_init()
  */
-int __init rtnet_init(void)
+static int __init rtnet_init(void)
 {
 	int err = 0;
 
@@ -388,7 +388,7 @@ err_out1:
 /**
  *  rtnet_release()
  */
-void __exit rtnet_release(void)
+static void __exit rtnet_release(void)
 {
 	rtnet_corectl_unregister();
 

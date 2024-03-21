@@ -106,7 +106,7 @@ out:
 /***
  *  arp_rcv:    Receive an arp request by the device layer.
  */
-int rt_arp_rcv(struct rtskb *skb, struct rtpacket_type *pt)
+static int rt_arp_rcv(struct rtskb *skb, struct rtpacket_type *pt)
 {
 	struct rtnet_device *rtdev = skb->rtdev;
 	struct arphdr *arp = skb->nh.arph;

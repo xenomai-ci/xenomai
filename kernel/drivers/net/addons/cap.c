@@ -55,7 +55,7 @@ static struct tap_device_t {
 	int (*orig_xmit)(struct rtskb *skb, struct rtnet_device *dev);
 } tap_device[MAX_RT_DEVICES];
 
-void rtcap_rx_hook(struct rtskb *rtskb)
+static void rtcap_rx_hook(struct rtskb *rtskb)
 {
 	bool			trigger = false;
 
@@ -78,7 +78,7 @@ void rtcap_rx_hook(struct rtskb *rtskb)
 		rtdm_nrtsig_pend(&cap_signal);
 }
 
-int rtcap_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
+static int rtcap_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
 {
 	struct tap_device_t *tap_dev = &tap_device[rtskb->rtdev->ifindex];
 	rtdm_lockctx_t context;
@@ -113,7 +113,8 @@ int rtcap_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
 	return tap_dev->orig_xmit(rtskb, rtdev);
 }
 
-int rtcap_loopback_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
+static int rtcap_loopback_xmit_hook(struct rtskb *rtskb,
+				    struct rtnet_device *rtdev)
 {
 	struct tap_device_t *tap_dev = &tap_device[rtskb->rtdev->ifindex];
 
@@ -122,7 +123,7 @@ int rtcap_loopback_xmit_hook(struct rtskb *rtskb, struct rtnet_device *rtdev)
 	return tap_dev->orig_xmit(rtskb, rtdev);
 }
 
-void rtcap_kfree_rtskb(struct rtskb *rtskb)
+static void rtcap_kfree_rtskb(struct rtskb *rtskb)
 {
 	rtdm_lockctx_t context;
 	struct rtskb *comp_skb;
@@ -310,7 +311,7 @@ static void tap_dev_setup(struct net_device *dev)
 	dev->flags &= ~IFF_MULTICAST;
 }
 
-void cleanup_tap_devices(void)
+static void cleanup_tap_devices(void)
 {
 	int i;
 	struct rtnet_device *rtdev;
@@ -342,7 +343,7 @@ void cleanup_tap_devices(void)
 		}
 }
 
-int __init rtcap_init(void)
+static int __init rtcap_init(void)
 {
 	struct rtnet_device *rtdev;
 	struct net_device *dev;
@@ -476,7 +477,7 @@ error2:
 	return ret;
 }
 
-void rtcap_cleanup(void)
+static void rtcap_cleanup(void)
 {
 	rtdm_lockctx_t context;
 

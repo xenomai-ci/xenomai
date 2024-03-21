@@ -49,7 +49,8 @@ static struct xnvfile_lock_ops rtnet_rtcfg_proc_lock_ops = {
 	.put = rtnet_rtcfg_proc_lock_put,
 };
 
-int rtnet_rtcfg_dev_state_show(struct xnvfile_regular_iterator *it, void *data)
+static int rtnet_rtcfg_dev_state_show(struct xnvfile_regular_iterator *it,
+				      void *data)
 {
 	struct rtcfg_device *rtcfg_dev = xnvfile_priv(it->vfile);
 	const char *state_name[] = { "OFF",
@@ -104,7 +105,8 @@ static struct xnvfile_regular_ops rtnet_rtcfg_dev_state_vfile_ops = {
 	.show = rtnet_rtcfg_dev_state_show,
 };
 
-int rtnet_rtcfg_dev_stations_show(struct xnvfile_regular_iterator *it, void *d)
+static int rtnet_rtcfg_dev_stations_show(struct xnvfile_regular_iterator *it,
+					 void *d)
 {
 	struct rtcfg_device *rtcfg_dev = xnvfile_priv(it->vfile);
 	struct rtcfg_connection *conn;
@@ -144,8 +146,8 @@ static struct xnvfile_regular_ops rtnet_rtcfg_dev_stations_vfile_ops = {
 	.show = rtnet_rtcfg_dev_stations_show,
 };
 
-int rtnet_rtcfg_dev_conn_state_show(struct xnvfile_regular_iterator *it,
-				    void *d)
+static int rtnet_rtcfg_dev_conn_state_show(struct xnvfile_regular_iterator *it,
+					   void *d)
 {
 	struct rtcfg_connection *conn = xnvfile_priv(it->vfile);
 	char *state_name[] = { "SEARCHING", "STAGE_1", "STAGE_2", "READY",
@@ -229,7 +231,7 @@ void rtcfg_remove_conn_proc_entries(int ifindex)
 		xnvfile_destroy_regular(&conn->proc_entry);
 }
 
-void rtcfg_new_rtdev(struct rtnet_device *rtdev)
+static void rtcfg_new_rtdev(struct rtnet_device *rtdev)
 {
 	struct rtcfg_device *dev = &device[rtdev->ifindex];
 	int err;
@@ -275,7 +277,7 @@ error1:
 	mutex_unlock(&nrt_proc_lock);
 }
 
-void rtcfg_remove_rtdev(struct rtnet_device *rtdev)
+static void rtcfg_remove_rtdev(struct rtnet_device *rtdev)
 {
 	struct rtcfg_device *dev = &device[rtdev->ifindex];
 

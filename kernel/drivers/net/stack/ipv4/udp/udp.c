@@ -151,8 +151,8 @@ static inline struct rtsocket *rt_udp_v4_lookup(u32 daddr, u16 dport)
  *  @s:     socket
  *  @addr:  local address
  */
-int rt_udp_bind(struct rtdm_fd *fd, struct rtsocket *sock,
-		const struct sockaddr __user *addr, socklen_t addrlen)
+static int rt_udp_bind(struct rtdm_fd *fd, struct rtsocket *sock,
+		       const struct sockaddr __user *addr, socklen_t addrlen)
 {
 	struct sockaddr_in _sin, *sin;
 	rtdm_lockctx_t context;
@@ -206,8 +206,9 @@ unlock_out:
 /***
  *  rt_udp_connect
  */
-int rt_udp_connect(struct rtdm_fd *fd, struct rtsocket *sock,
-		   const struct sockaddr __user *serv_addr, socklen_t addrlen)
+static int rt_udp_connect(struct rtdm_fd *fd, struct rtsocket *sock,
+			  const struct sockaddr __user *serv_addr,
+			  socklen_t addrlen)
 {
 	struct sockaddr _sa, *sa;
 	struct sockaddr_in _sin, *sin;
@@ -271,7 +272,7 @@ int rt_udp_connect(struct rtdm_fd *fd, struct rtsocket *sock,
  *  rt_udp_socket - create a new UDP-Socket
  *  @s: socket
  */
-int rt_udp_socket(struct rtdm_fd *fd)
+static int rt_udp_socket(struct rtdm_fd *fd)
 {
 	struct rtsocket *sock = rtdm_fd_to_private(fd);
 	int ret;
@@ -319,7 +320,7 @@ int rt_udp_socket(struct rtdm_fd *fd)
 /***
  *  rt_udp_close
  */
-void rt_udp_close(struct rtdm_fd *fd)
+static void rt_udp_close(struct rtdm_fd *fd)
 {
 	struct rtsocket *sock = rtdm_fd_to_private(fd);
 	struct rtskb *del;
@@ -353,7 +354,8 @@ void rt_udp_close(struct rtdm_fd *fd)
 	rt_socket_cleanup(fd);
 }
 
-int rt_udp_ioctl(struct rtdm_fd *fd, unsigned int request, void __user *arg)
+static int rt_udp_ioctl(struct rtdm_fd *fd, unsigned int request,
+			void __user *arg)
 {
 	struct rtsocket *sock = rtdm_fd_to_private(fd);
 	struct _rtdm_setsockaddr_args args;
@@ -389,8 +391,8 @@ int rt_udp_ioctl(struct rtdm_fd *fd, unsigned int request, void __user *arg)
 /***
  *  rt_udp_recvmsg
  */
-ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
-		       int msg_flags)
+static ssize_t rt_udp_recvmsg(struct rtdm_fd *fd, struct user_msghdr *msg,
+			      int msg_flags)
 {
 	struct rtsocket *sock = rtdm_fd_to_private(fd);
 	size_t len;
@@ -571,8 +573,8 @@ static int rt_udp_getfrag(const void *p, unsigned char *to, unsigned int offset,
 /***
  *  rt_udp_sendmsg
  */
-ssize_t rt_udp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg,
-		       int msg_flags)
+static ssize_t rt_udp_sendmsg(struct rtdm_fd *fd, const struct user_msghdr *msg,
+			      int msg_flags)
 {
 	struct rtsocket *sock = rtdm_fd_to_private(fd);
 	size_t len;
@@ -690,7 +692,7 @@ static inline unsigned short rt_udp_check(struct udphdr *uh, int len,
 	return (csum_tcpudp_magic(saddr, daddr, len, IPPROTO_UDP, base));
 }
 
-struct rtsocket *rt_udp_dest_socket(struct rtskb *skb)
+static struct rtsocket *rt_udp_dest_socket(struct rtskb *skb)
 {
 	struct udphdr *uh = skb->h.uh;
 	unsigned short ulen = ntohs(uh->len);
@@ -728,7 +730,7 @@ struct rtsocket *rt_udp_dest_socket(struct rtskb *skb)
 /***
  *  rt_udp_rcv
  */
-void rt_udp_rcv(struct rtskb *skb)
+static void rt_udp_rcv(struct rtskb *skb)
 {
 	struct rtsocket *sock = skb->sk;
 	void (*callback_func)(struct rtdm_fd *, void *);
@@ -750,7 +752,7 @@ void rt_udp_rcv(struct rtskb *skb)
 /***
  *  rt_udp_rcv_err
  */
-void rt_udp_rcv_err(struct rtskb *skb)
+static void rt_udp_rcv_err(struct rtskb *skb)
 {
 	rtdm_printk("RTnet: rt_udp_rcv err\n");
 }

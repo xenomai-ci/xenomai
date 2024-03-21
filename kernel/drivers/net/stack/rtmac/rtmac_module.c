@@ -30,7 +30,7 @@
 #include <rtmac/rtmac_proto.h>
 #include <rtmac/rtmac_vnic.h>
 
-int __init rtmac_init(void)
+static int __init rtmac_init(void)
 {
 	int ret = 0;
 
@@ -62,7 +62,7 @@ error1:
 	return ret;
 }
 
-void rtmac_release(void)
+static void rtmac_release(void)
 {
 	rtmac_proto_release();
 	rtmac_vnic_module_cleanup();

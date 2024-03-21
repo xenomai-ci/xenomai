@@ -116,8 +116,8 @@ struct rtnet_device *rtwlan_alloc_dev(unsigned sizeof_priv,
 
 EXPORT_SYMBOL_GPL(rtwlan_alloc_dev);
 
-int rtwlan_ioctl(struct rtnet_device *rtdev, unsigned int request,
-		 unsigned long arg)
+static int rtwlan_ioctl(struct rtnet_device *rtdev, unsigned int request,
+			unsigned long arg)
 {
 	struct rtwlan_cmd cmd;
 	struct ifreq ifr;

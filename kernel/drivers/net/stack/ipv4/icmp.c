@@ -362,7 +362,7 @@ int rt_icmp_send_echo(u32 daddr, u16 id, u16 sequence, size_t msg_size)
 /***
  *  rt_icmp_socket
  */
-int rt_icmp_socket(struct rtdm_fd *fd)
+static int rt_icmp_socket(struct rtdm_fd *fd)
 {
 	/* we don't support user-created ICMP sockets */
 	return -ENOPROTOOPT;
@@ -418,7 +418,7 @@ static struct rt_icmp_control rt_icmp_pointers[NR_ICMP_TYPES + 1] = {
 /***
  *  rt_icmp_dest_pool
  */
-struct rtsocket *rt_icmp_dest_socket(struct rtskb *skb)
+static struct rtsocket *rt_icmp_dest_socket(struct rtskb *skb)
 {
 	rt_socket_reference(icmp_socket);
 	skb->sk = icmp_socket;
@@ -428,7 +428,7 @@ struct rtsocket *rt_icmp_dest_socket(struct rtskb *skb)
 /***
  *  rt_icmp_rcv
  */
-void rt_icmp_rcv(struct rtskb *skb)
+static void rt_icmp_rcv(struct rtskb *skb)
 {
 	struct icmphdr *icmpHdr = skb->h.icmph;
 	unsigned int length = skb->len;
@@ -465,7 +465,7 @@ cleanup:
 /***
  *  rt_icmp_rcv_err
  */
-void rt_icmp_rcv_err(struct rtskb *skb)
+static void rt_icmp_rcv_err(struct rtskb *skb)
 {
 	rtdm_printk("RTnet: rt_icmp_rcv err\n");
 }

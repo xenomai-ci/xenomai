@@ -2395,7 +2395,7 @@ static void rt_tcp_proc_unregister(void)
 /***
  *  rt_tcp_init
  */
-int __init rt_tcp_init(void)
+static int __init rt_tcp_init(void)
 {
 	unsigned int skbs;
 	int i;
@@ -2465,7 +2465,7 @@ out_1:
 /***
  *  rt_tcp_release
  */
-void __exit rt_tcp_release(void)
+static void __exit rt_tcp_release(void)
 {
 	rt_inet_del_protocol(&tcp_protocol);
 

@@ -37,7 +37,7 @@
 #include <rtmac/tdma/tdma_worker.h>
 
 #ifdef CONFIG_XENO_OPT_VFILE
-int tdma_proc_read(struct xnvfile_regular_iterator *it, void *data)
+static int tdma_proc_read(struct xnvfile_regular_iterator *it, void *data)
 {
 	int d, err = 0;
 	struct rtnet_device *rtdev;
@@ -101,7 +101,7 @@ int tdma_proc_read(struct xnvfile_regular_iterator *it, void *data)
 	return err;
 }
 
-int tdma_slots_proc_read(struct xnvfile_regular_iterator *it, void *data)
+static int tdma_slots_proc_read(struct xnvfile_regular_iterator *it, void *data)
 {
 	int d, i, err = 0;
 	struct rtnet_device *rtdev;
@@ -183,7 +183,7 @@ int tdma_slots_proc_read(struct xnvfile_regular_iterator *it, void *data)
 }
 #endif /* CONFIG_XENO_OPT_VFILE */
 
-int tdma_attach(struct rtnet_device *rtdev, void *priv)
+static int tdma_attach(struct rtnet_device *rtdev, void *priv)
 {
 	struct tdma_priv *tdma = (struct tdma_priv *)priv;
 	int ret;
@@ -221,7 +221,7 @@ err_out1:
 	return ret;
 }
 
-int tdma_detach(struct rtnet_device *rtdev, void *priv)
+static int tdma_detach(struct rtnet_device *rtdev, void *priv)
 {
 	struct tdma_priv *tdma = (struct tdma_priv *)priv;
 	struct tdma_job *job, *tmp;
@@ -289,7 +289,7 @@ struct rtmac_disc tdma_disc = {
 #endif /* CONFIG_XENO_OPT_VFILE */
 };
 
-int __init tdma_init(void)
+static int __init tdma_init(void)
 {
 	int ret;
 
@@ -303,7 +303,7 @@ int __init tdma_init(void)
 	return 0;
 }
 
-void tdma_release(void)
+static void tdma_release(void)
 {
 	rtmac_disc_deregister(&tdma_disc);
 

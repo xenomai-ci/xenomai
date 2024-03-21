@@ -33,7 +33,7 @@
 
 MODULE_LICENSE("GPL");
 
-int __init rtcfg_init(void)
+static int __init rtcfg_init(void)
 {
 	int ret;
 
@@ -67,7 +67,7 @@ error1:
 	return ret;
 }
 
-void rtcfg_cleanup(void)
+static void rtcfg_cleanup(void)
 {
 #ifdef CONFIG_XENO_OPT_VFILE
 	rtcfg_cleanup_proc();

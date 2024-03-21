@@ -275,7 +275,8 @@ EXPORT_SYMBOL_GPL(rtdev_destroy);
  *
  *  allocate memory for a new rt-network-adapter
  */
-struct rtnet_device *rtdev_alloc(unsigned sizeof_priv, unsigned dev_pool_size)
+static struct rtnet_device *rtdev_alloc(unsigned sizeof_priv,
+					unsigned dev_pool_size)
 {
 	struct rtnet_device *rtdev;
 	unsigned alloc_size;

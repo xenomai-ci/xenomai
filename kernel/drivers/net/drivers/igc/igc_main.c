@@ -229,8 +229,8 @@ static void igc_get_hw_control(struct igc_adapter *adapter)
 	     ctrl_ext | IGC_CTRL_EXT_DRV_LOAD);
 }
 
-void igc_unmap_and_free_tx_resource(struct igc_ring *ring,
-				    struct igc_tx_buffer *tx_buffer)
+static void igc_unmap_and_free_tx_resource(struct igc_ring *ring,
+					   struct igc_tx_buffer *tx_buffer)
 {
 	if (tx_buffer->skb) {
 		kfree_rtskb(tx_buffer->skb);
@@ -3434,7 +3434,7 @@ static int igc_ptp_set_timestamp_mode(struct igc_adapter *adapter,
  * @ifr: interface request data
  *
  **/
-int igc_ptp_set_ts_config(struct rtnet_device *netdev, struct ifreq *ifr)
+static int igc_ptp_set_ts_config(struct rtnet_device *netdev, struct ifreq *ifr)
 {
 	struct igc_adapter *adapter = rtnetdev_priv(netdev);
 	struct hwtstamp_config config;
@@ -3464,7 +3464,7 @@ int igc_ptp_set_ts_config(struct rtnet_device *netdev, struct ifreq *ifr)
  * to deconstruct the settings from the registers, just return a shadow copy
  * of the last known settings.
  **/
-int igc_ptp_get_ts_config(struct rtnet_device *netdev, struct ifreq *ifr)
+static int igc_ptp_get_ts_config(struct rtnet_device *netdev, struct ifreq *ifr)
 {
 	struct igc_adapter *adapter = rtnetdev_priv(netdev);
 	struct hwtstamp_config *config = &adapter->tstamp_config;

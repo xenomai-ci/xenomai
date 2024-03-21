@@ -29,8 +29,9 @@
 #include <rtnet_socket.h>
 #include <ipv4/ip_sock.h>
 
-int rt_ip_setsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
-		     int optname, const void __user *optval, socklen_t optlen)
+static int rt_ip_setsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
+			    int optname, const void __user *optval,
+			    socklen_t optlen)
 {
 	int err = 0;
 	unsigned int _tos, *tos;
@@ -58,8 +59,9 @@ int rt_ip_setsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
 	return err;
 }
 
-int rt_ip_getsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
-		     int optname, void __user *optval, socklen_t __user *optlen)
+static int rt_ip_getsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
+			    int optname, void __user *optval,
+			    socklen_t __user *optlen)
 {
 	int err = 0;
 	unsigned int tos;
@@ -90,8 +92,9 @@ int rt_ip_getsockopt(struct rtdm_fd *fd, struct rtsocket *s, int level,
 	return err;
 }
 
-int rt_ip_getsockname(struct rtdm_fd *fd, struct rtsocket *s,
-		      struct sockaddr __user *addr, socklen_t __user *addrlen)
+static int rt_ip_getsockname(struct rtdm_fd *fd, struct rtsocket *s,
+			     struct sockaddr __user *addr,
+			     socklen_t __user *addrlen)
 {
 	struct sockaddr_in _sin;
 	socklen_t *len, _len;
@@ -118,8 +121,9 @@ int rt_ip_getsockname(struct rtdm_fd *fd, struct rtsocket *s,
 	return ret;
 }
 
-int rt_ip_getpeername(struct rtdm_fd *fd, struct rtsocket *s,
-		      struct sockaddr __user *addr, socklen_t __user *addrlen)
+static int rt_ip_getpeername(struct rtdm_fd *fd, struct rtsocket *s,
+			     struct sockaddr __user *addr,
+			     socklen_t __user *addrlen)
 {
 	struct sockaddr_in _sin;
 	socklen_t *len, _len;

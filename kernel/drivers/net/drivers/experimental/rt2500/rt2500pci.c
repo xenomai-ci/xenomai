@@ -166,7 +166,7 @@ static void rt2x00_interrupt_rxdone(struct _data_ring *ring,
 	}
 }
 
-int rt2x00_interrupt(rtdm_irq_t *irq_handle)
+static int rt2x00_interrupt(rtdm_irq_t *irq_handle)
 {
 	nanosecs_abs_t time_stamp = rtdm_clock_read();
 
@@ -215,8 +215,8 @@ int rt2x00_interrupt(rtdm_irq_t *irq_handle)
 	return RTDM_IRQ_HANDLED;
 }
 
-void rt2x00_init_eeprom(struct _rt2x00_pci *rt2x00pci,
-			struct _rt2x00_config *config)
+static void rt2x00_init_eeprom(struct _rt2x00_pci *rt2x00pci,
+			       struct _rt2x00_config *config)
 {
 	u32 reg = 0x00000000;
 	u16 eeprom = 0x0000;
@@ -256,8 +256,8 @@ void rt2x00_init_eeprom(struct _rt2x00_pci *rt2x00pci,
 			rt2x00pci, EEPROM_BBP_START + eeprom);
 }
 
-void rt2x00_dev_read_mac(struct _rt2x00_pci *rt2x00pci,
-			 struct rtnet_device *rtnet_dev)
+static void rt2x00_dev_read_mac(struct _rt2x00_pci *rt2x00pci,
+				struct rtnet_device *rtnet_dev)
 {
 	u32 reg[2];
 
@@ -275,7 +275,7 @@ void rt2x00_dev_read_mac(struct _rt2x00_pci *rt2x00pci,
 	rtnet_dev->addr_len = 6;
 }
 
-int rt2x00_dev_probe(struct _rt2x00_core *core, void *priv)
+static int rt2x00_dev_probe(struct _rt2x00_core *core, void *priv)
 {
 	struct pci_dev *pci_dev = (struct pci_dev *)priv;
 	struct _rt2x00_pci *rt2x00pci = core->priv;
@@ -304,7 +304,7 @@ int rt2x00_dev_probe(struct _rt2x00_core *core, void *priv)
 	return 0;
 }
 
-int rt2x00_dev_remove(struct _rt2x00_core *core)
+static int rt2x00_dev_remove(struct _rt2x00_core *core)
 {
 	struct _rt2x00_pci *rt2x00pci = rt2x00_priv(core);
 
@@ -1163,7 +1163,8 @@ static struct _rt2x00_dev_handler rt2x00_pci_handler = {
 	.dev_xmit_packet = rt2x00_dev_xmit_packet,
 };
 
-int rt2x00_pci_probe(struct pci_dev *pci_dev, const struct pci_device_id *id)
+static int rt2x00_pci_probe(struct pci_dev *pci_dev,
+			    const struct pci_device_id *id)
 {
 	struct rtnet_device *rtnet_dev = NULL;
 	int status = 0x00000000;

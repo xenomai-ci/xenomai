@@ -76,7 +76,7 @@ int nomac_nrt_packet_tx(struct rtskb *rtskb)
 	}
 }
 
-void nrt_xmit_task(void *arg)
+static void nrt_xmit_task(void *arg)
 {
 	struct rtskb *rtskb;
 	struct rtnet_device *rtdev;

@@ -28,7 +28,7 @@
 #include <rtmac/rtmac_proto.h>
 #include <rtmac/rtmac_vnic.h>
 
-int rtmac_proto_rx(struct rtskb *skb, struct rtpacket_type *pt)
+static int rtmac_proto_rx(struct rtskb *skb, struct rtpacket_type *pt)
 {
 	struct rtmac_disc *disc = skb->rtdev->mac_disc;
 	struct rtmac_hdr *hdr;

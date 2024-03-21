@@ -937,7 +937,7 @@ static int alloc_ring(struct rtnet_device* dev) /*** RTnet ***/
 	return 0;
 }
 
-void free_ring(struct rtnet_device* dev) /*** RTnet ***/
+static void free_ring(struct rtnet_device* dev) /*** RTnet ***/
 {
 	struct netdev_private *np = dev->priv;
 
