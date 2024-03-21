@@ -158,7 +158,7 @@ static inline int mq_init(struct cobalt_mq *mq, const struct mq_attr *attr)
 
 	memsize = msgsize * attr->mq_maxmsg;
 	memsize = PAGE_ALIGN(memsize);
-	if (get_order(memsize) > MAX_ORDER)
+	if (get_order(memsize) > MAX_PAGE_ORDER)
 		return -ENOSPC;
 
 	mem = xnheap_vmalloc(memsize);

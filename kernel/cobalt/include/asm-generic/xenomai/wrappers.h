@@ -65,4 +65,8 @@
 #define pde_data(i)	PDE_DATA(i)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,8,0)
+#define MAX_PAGE_ORDER	MAX_ORDER
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
