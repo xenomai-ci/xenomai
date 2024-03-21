@@ -236,7 +236,7 @@ static const struct rtskb_pool_lock_ops rtdev_ops = {
 	.unlock = rtdev_pool_unlock,
 };
 
-int rtdev_init(struct rtnet_device *rtdev, unsigned dev_pool_size)
+static int rtdev_init(struct rtnet_device *rtdev, unsigned dev_pool_size)
 {
 	int ret;
 
@@ -259,7 +259,6 @@ int rtdev_init(struct rtnet_device *rtdev, unsigned dev_pool_size)
 
 	return 0;
 }
-EXPORT_SYMBOL_GPL(rtdev_init);
 
 void rtdev_destroy(struct rtnet_device *rtdev)
 {
