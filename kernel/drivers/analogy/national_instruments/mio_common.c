@@ -3833,15 +3833,6 @@ int ni_serial_insn_config(struct a4l_subdevice *subd, struct a4l_kernel_instruct
 	return -EINVAL;
 }
 
-void mio_common_detach(struct a4l_device * dev)
-{
-	if (dev->priv) {
-		if (devpriv->counter_dev) {
-			a4l_ni_gpct_device_destroy(devpriv->counter_dev);
-		}
-	}
-}
-
 static void init_ao_67xx(struct a4l_device * dev)
 {
 	struct a4l_subdevice *subd = a4l_get_subd(dev, NI_AO_SUBDEV);
