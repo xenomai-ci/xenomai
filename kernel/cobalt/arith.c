@@ -17,6 +17,7 @@
  * 02111-1307, USA.
  */
 #include <linux/module.h>
+#include <cobalt/kernel/arith.h>
 
 /**
  * @ingroup cobalt_core
@@ -31,6 +32,7 @@
  * @{
  */
 
+#ifdef IMPLEMENT_GENERIC_FULL_DIVMOD64
 /**
  * Architecture-independent div64 operation with remainder.
  *
@@ -61,5 +63,6 @@ unsigned long long xnarch_generic_full_divmod64(unsigned long long a,
 	return q;
 }
 EXPORT_SYMBOL_GPL(xnarch_generic_full_divmod64);
+#endif
 
 /** @} */

@@ -73,6 +73,13 @@ static inline unsigned long long xnarch_generic_ulldiv (unsigned long long ull,
 #endif /* !xnarch_uldivrem */
 
 #ifndef xnarch_divmod64
+#if defined(__KERNEL__) && BITS_PER_LONG < 64
+unsigned long long xnarch_generic_full_divmod64(unsigned long long a,
+						unsigned long long b,
+						unsigned long long *rem);
+#define IMPLEMENT_GENERIC_FULL_DIVMOD64
+#endif
+
 static inline unsigned long long
 xnarch_generic_divmod64(unsigned long long a,
 			unsigned long long b,
@@ -80,10 +87,6 @@ xnarch_generic_divmod64(unsigned long long a,
 {
 	unsigned long long q;
 #if defined(__KERNEL__) && BITS_PER_LONG < 64
-	unsigned long long
-		xnarch_generic_full_divmod64(unsigned long long a,
-					     unsigned long long b,
-					     unsigned long long *rem);
 	if (b <= 0xffffffffULL) {
 		unsigned long r;
 		q = xnarch_ulldiv(a, b, &r);
