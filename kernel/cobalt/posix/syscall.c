@@ -21,6 +21,7 @@
 #include <linux/sched.h>
 #include <linux/kconfig.h>
 #include <linux/unistd.h>
+#include <linux/dovetail.h>
 #include <cobalt/uapi/corectl.h>
 #include <cobalt/kernel/tree.h>
 #include <cobalt/kernel/init.h>

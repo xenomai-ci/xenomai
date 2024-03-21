@@ -21,6 +21,7 @@
 #include <asm/processor.h>
 #include <asm/cpu_device_id.h>
 #include <asm/msr.h>
+#include <asm/xenomai/c1e.h>
 
 #define ICPU(model) \
 	{ X86_VENDOR_INTEL, 6, model, X86_FEATURE_MWAIT, 1UL }

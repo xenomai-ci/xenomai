@@ -25,6 +25,7 @@
 #include <cobalt/kernel/sched.h>
 #include <xenomai/version.h>
 #include "debug.h"
+#include "procfs.h"
 
 #ifdef CONFIG_XENO_OPT_DEBUG_LOCKING
 

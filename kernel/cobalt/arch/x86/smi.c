@@ -30,6 +30,7 @@
 #include <cobalt/kernel/assert.h>
 #include <asm-generic/xenomai/pci_ids.h>
 #include <asm/xenomai/machine.h>
+#include <asm/xenomai/smi.h>
 
 #define DEVFN		0xf8	/* device 31, function 0 */
 

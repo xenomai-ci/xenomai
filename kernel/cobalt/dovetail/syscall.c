@@ -5,6 +5,7 @@
  * Copyright (C) 2005 Gilles Chanteperdrix <gilles.chanteperdrix@xenomai.org>
  */
 
+#include <linux/dovetail.h>
 #include <linux/irqstage.h>
 #include <pipeline/pipeline.h>
 #include <pipeline/kevents.h>
