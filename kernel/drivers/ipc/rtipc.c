@@ -519,7 +519,7 @@ static struct rtdm_device device = {
 	.label = "rtipc",
 };
 
-int __init __rtipc_init(void)
+static int __init __rtipc_init(void)
 {
 	int ret, n;
 
@@ -537,7 +537,7 @@ int __init __rtipc_init(void)
 	return rtdm_dev_register(&device);
 }
 
-void __exit __rtipc_exit(void)
+static void __exit __rtipc_exit(void)
 {
 	int n;
 
