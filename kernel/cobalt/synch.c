@@ -37,8 +37,6 @@ static inline int get_ceiling_value(struct xnsynch *synch)
 	return *synch->ceiling_ref & PP_CEILING_MASK ?: 1;
 }
 
-struct xnsynch *lookup_lazy_pp(xnhandle_t handle);
-
 /**
  * @ingroup cobalt_core
  * @defgroup cobalt_core_synch Thread synchronization services
@@ -514,7 +512,7 @@ void xnsynch_commit_ceiling(struct xnthread *curr)  /* nklock held, irqs off */
 	atomic_t *lockp;
 
 	/* curr->u_window has to be valid, curr bears XNUSER. */
-	synch = lookup_lazy_pp(curr->u_window->pp_pending);
+	synch = __cobalt_mutex_lookup_lazy_pp(curr->u_window->pp_pending);
 	if (synch == NULL) {
 		/*
 		 * If pp_pending is a bad handle, don't panic but

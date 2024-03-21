@@ -174,6 +174,8 @@ void xnsynch_requeue_sleeper(struct xnthread *thread);
 
 void xnsynch_forget_sleeper(struct xnthread *thread);
 
+struct xnsynch *__cobalt_mutex_lookup_lazy_pp(xnhandle_t handle);
+
 /** @} */
 
 #endif /* !_COBALT_KERNEL_SYNCH_H_ */

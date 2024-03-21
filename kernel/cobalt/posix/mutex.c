@@ -424,7 +424,7 @@ void cobalt_mutex_reclaim(struct cobalt_resnode *node, spl_t s)
 	xnfree(mutex);
 }
 
-struct xnsynch *lookup_lazy_pp(xnhandle_t handle)
+struct xnsynch *__cobalt_mutex_lookup_lazy_pp(xnhandle_t handle)
 {				/* nklock held, irqs off */
 	struct cobalt_mutex *mutex;
 
