@@ -33,10 +33,9 @@
 #include <rtcan_dev.h>
 #include <rtcan_raw.h>
 
-MODULE_LICENSE("GPL");
+#include "corectl.h"
 
-void rtcan_corectl_register(void);
-void rtcan_corectl_unregister(void);
+MODULE_LICENSE("GPL");
 
 const char rtcan_rtdm_provider_name[] =
     "(C) 2006 RT-Socket-CAN Development Team";

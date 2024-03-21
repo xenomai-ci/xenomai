@@ -5,6 +5,7 @@
 
 #include <asm/xenomai/syscall.h>
 #include <xenomai/posix/corectl.h>
+#include "corectl.h"
 
 static int rtcan_corectl_call(struct notifier_block *self, unsigned long arg,
 			      void *cookie)
