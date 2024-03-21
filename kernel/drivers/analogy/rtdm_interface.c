@@ -75,7 +75,7 @@ static const DEFINE_PROC_OPS(a4l_proc_drvs_ops,
 			seq_read,
 			NULL);
 
-int a4l_init_proc(void)
+static int a4l_init_proc(void)
 {
 	int ret = 0;
 	struct proc_dir_entry *entry;
@@ -116,7 +116,7 @@ err_proc_init:
 	return ret;
 }
 
-void a4l_cleanup_proc(void)
+static void a4l_cleanup_proc(void)
 {
 	remove_proc_entry("drivers", a4l_proc_root);
 	remove_proc_entry("devices", a4l_proc_root);
@@ -130,7 +130,7 @@ void a4l_cleanup_proc(void)
 
 #endif /* CONFIG_PROC_FS */
 
-int a4l_open(struct rtdm_fd *fd, int flags)
+static int a4l_open(struct rtdm_fd *fd, int flags)
 {
 	struct a4l_device_context *cxt = (struct a4l_device_context *)rtdm_fd_to_private(fd);
 
@@ -154,7 +154,7 @@ int a4l_open(struct rtdm_fd *fd, int flags)
 	return 0;
 }
 
-void a4l_close(struct rtdm_fd *fd)
+static void a4l_close(struct rtdm_fd *fd)
 {
 	struct a4l_device_context *cxt = (struct a4l_device_context *)rtdm_fd_to_private(fd);
 
@@ -171,7 +171,7 @@ void a4l_close(struct rtdm_fd *fd)
 	rtdm_free(cxt->buffer);
 }
 
-ssize_t a4l_read(struct rtdm_fd *fd, void *buf, size_t nbytes)
+static ssize_t a4l_read(struct rtdm_fd *fd, void *buf, size_t nbytes)
 {
 	struct a4l_device_context *cxt = (struct a4l_device_context *)rtdm_fd_to_private(fd);
 
@@ -185,7 +185,7 @@ ssize_t a4l_read(struct rtdm_fd *fd, void *buf, size_t nbytes)
 	return a4l_read_buffer(cxt, buf, nbytes);
 }
 
-ssize_t a4l_write(struct rtdm_fd *fd, const void *buf, size_t nbytes)
+static ssize_t a4l_write(struct rtdm_fd *fd, const void *buf, size_t nbytes)
 {
 	struct a4l_device_context *cxt = (struct a4l_device_context *)rtdm_fd_to_private(fd);
 
@@ -199,14 +199,14 @@ ssize_t a4l_write(struct rtdm_fd *fd, const void *buf, size_t nbytes)
 	return a4l_write_buffer(cxt, buf, nbytes);
 }
 
-int a4l_ioctl(struct rtdm_fd *fd, unsigned int request, void *arg)
+static int a4l_ioctl(struct rtdm_fd *fd, unsigned int request, void *arg)
 {
 	struct a4l_device_context *cxt = (struct a4l_device_context *)rtdm_fd_to_private(fd);
 
 	return a4l_ioctl_functions[_IOC_NR(request)] (cxt, arg);
 }
 
-int a4l_rt_select(struct rtdm_fd *fd,
+static int a4l_rt_select(struct rtdm_fd *fd,
 		  rtdm_selector_t *selector,
 		  enum rtdm_selecttype type, unsigned fd_index)
 {
@@ -243,7 +243,7 @@ static struct rtdm_device rtdm_devs[A4L_NB_DEVICES] = {
 	}
 };
 
-int a4l_register(void)
+static int a4l_register(void)
 {
 	int i, ret;
 
@@ -261,7 +261,7 @@ fail:
 	return ret;
 }
 
-void a4l_unregister(void)
+static void a4l_unregister(void)
 {
 	int i;
 	for (i = 0; i < A4L_NB_DEVICES; i++)

@@ -26,8 +26,9 @@
 #include <rtdm/analogy/device.h>
 
 /* --- Command descriptor management functions --- */
-int a4l_fill_cmddesc(struct a4l_device_context *cxt, struct a4l_cmd_desc *desc,
-		     unsigned int **chan_descs, void *arg)
+static int a4l_fill_cmddesc(struct a4l_device_context *cxt,
+			    struct a4l_cmd_desc *desc,
+			    unsigned int **chan_descs, void *arg)
 {
 	unsigned int *tmpchans = NULL;
 	int ret = 0;
@@ -124,7 +125,7 @@ int a4l_check_cmddesc(struct a4l_device_context * cxt, struct a4l_cmd_desc * des
 
 /* --- Command checking functions --- */
 
-int a4l_check_generic_cmdcnt(struct a4l_cmd_desc * desc)
+static int a4l_check_generic_cmdcnt(struct a4l_cmd_desc * desc)
 {
 	unsigned int tmp1, tmp2;
 
@@ -226,7 +227,8 @@ int a4l_check_generic_cmdcnt(struct a4l_cmd_desc * desc)
 	return 0;
 }
 
-int a4l_check_specific_cmdcnt(struct a4l_device_context * cxt, struct a4l_cmd_desc * desc)
+static int a4l_check_specific_cmdcnt(struct a4l_device_context * cxt,
+				     struct a4l_cmd_desc * desc)
 {
 	unsigned int tmp1, tmp2;
 	struct a4l_device *dev = a4l_get_dev(cxt);

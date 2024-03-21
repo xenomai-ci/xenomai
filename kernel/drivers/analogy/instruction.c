@@ -27,7 +27,7 @@
 #include <asm/errno.h>
 #include <rtdm/analogy/device.h>
 
-int a4l_do_insn_gettime(struct a4l_kernel_instruction * dsc)
+static int a4l_do_insn_gettime(struct a4l_kernel_instruction * dsc)
 {
 	nanosecs_abs_t ns;
 	uint32_t ns2;
@@ -51,7 +51,7 @@ int a4l_do_insn_gettime(struct a4l_kernel_instruction * dsc)
 	return 0;
 }
 
-int a4l_do_insn_wait(struct a4l_kernel_instruction * dsc)
+static int a4l_do_insn_wait(struct a4l_kernel_instruction * dsc)
 {
 	unsigned int us;
 	unsigned int *data = (unsigned int *)dsc->data;
@@ -81,7 +81,8 @@ int a4l_do_insn_wait(struct a4l_kernel_instruction * dsc)
 	return 0;
 }
 
-int a4l_do_insn_trig(struct a4l_device_context * cxt, struct a4l_kernel_instruction * dsc)
+static int a4l_do_insn_trig(struct a4l_device_context * cxt,
+			    struct a4l_kernel_instruction * dsc)
 {
 	struct a4l_subdevice *subd;
 	struct a4l_device *dev = a4l_get_dev(cxt);
@@ -115,7 +116,8 @@ int a4l_do_insn_trig(struct a4l_device_context * cxt, struct a4l_kernel_instruct
 	return subd->trigger(subd, trignum);
 }
 
-int a4l_fill_insndsc(struct a4l_device_context * cxt, struct a4l_kernel_instruction * dsc, void *arg)
+static int a4l_fill_insndsc(struct a4l_device_context * cxt,
+			    struct a4l_kernel_instruction * dsc, void *arg)
 {
 	struct rtdm_fd *fd = rtdm_private_to_fd(cxt);
 	int ret = 0;
@@ -159,7 +161,8 @@ out_insndsc:
 	return ret;
 }
 
-int a4l_free_insndsc(struct a4l_device_context * cxt, struct a4l_kernel_instruction * dsc)
+static int a4l_free_insndsc(struct a4l_device_context * cxt,
+			    struct a4l_kernel_instruction * dsc)
 {
 	struct rtdm_fd *fd = rtdm_private_to_fd(cxt);
 	int ret = 0;
@@ -175,7 +178,8 @@ int a4l_free_insndsc(struct a4l_device_context * cxt, struct a4l_kernel_instruct
 	return ret;
 }
 
-int a4l_do_special_insn(struct a4l_device_context * cxt, struct a4l_kernel_instruction * dsc)
+static int a4l_do_special_insn(struct a4l_device_context * cxt,
+			       struct a4l_kernel_instruction * dsc)
 {
 	int ret = 0;
 
@@ -203,7 +207,8 @@ int a4l_do_special_insn(struct a4l_device_context * cxt, struct a4l_kernel_instr
 	return ret;
 }
 
-int a4l_do_insn(struct a4l_device_context * cxt, struct a4l_kernel_instruction * dsc)
+static int a4l_do_insn(struct a4l_device_context * cxt,
+		       struct a4l_kernel_instruction * dsc)
 {
 	int ret = 0;
 	struct a4l_subdevice *subd;
@@ -326,7 +331,8 @@ err_ioctl_insn:
 	return ret;
 }
 
-int a4l_fill_ilstdsc(struct a4l_device_context * cxt, struct a4l_kernel_instruction_list * dsc, void *arg)
+static int a4l_fill_ilstdsc(struct a4l_device_context * cxt,
+			    struct a4l_kernel_instruction_list * dsc, void *arg)
 {
 	struct rtdm_fd *fd = rtdm_private_to_fd(cxt);
 	int i, ret = 0;
@@ -366,7 +372,8 @@ int a4l_fill_ilstdsc(struct a4l_device_context * cxt, struct a4l_kernel_instruct
 	return ret;
 }
 
-int a4l_free_ilstdsc(struct a4l_device_context * cxt, struct a4l_kernel_instruction_list * dsc)
+static int a4l_free_ilstdsc(struct a4l_device_context * cxt,
+			    struct a4l_kernel_instruction_list * dsc)
 {
 	int i, ret = 0;
 

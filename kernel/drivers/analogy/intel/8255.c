@@ -90,13 +90,14 @@ static void do_config(struct a4l_subdevice *subd)
 	CALLBACK_FUNC(1, _8255_CR, config, CALLBACK_ARG);
 }
 
-int subd_8255_cmd(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
+static int subd_8255_cmd(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
 {
 	/* FIXME */
 	return 0;
 }
 
-int subd_8255_cmdtest(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
+static int subd_8255_cmdtest(struct a4l_subdevice *subd,
+			     struct a4l_cmd_desc *cmd)
 {
 	if (cmd->start_arg != 0) {
 		cmd->start_arg = 0;
@@ -122,12 +123,13 @@ int subd_8255_cmdtest(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
 	return 0;
 }
 
-void subd_8255_cancel(struct a4l_subdevice *subd)
+static void subd_8255_cancel(struct a4l_subdevice *subd)
 {
 	/* FIXME */
 }
 
-int subd_8255_insn_bits(struct a4l_subdevice *subd, struct a4l_kernel_instruction *insn)
+static int subd_8255_insn_bits(struct a4l_subdevice *subd,
+			       struct a4l_kernel_instruction *insn)
 {
 	subd_8255_t *subd_8255 = (subd_8255_t *)subd->priv;
 	uint32_t *data = (uint32_t *)insn->data;
@@ -157,7 +159,8 @@ int subd_8255_insn_bits(struct a4l_subdevice *subd, struct a4l_kernel_instructio
 	return 0;
 }
 
-int subd_8255_insn_config(struct a4l_subdevice *subd, struct a4l_kernel_instruction *insn)
+static int subd_8255_insn_config(struct a4l_subdevice *subd,
+				 struct a4l_kernel_instruction *insn)
 {
 	unsigned int mask;
 	unsigned int bits;

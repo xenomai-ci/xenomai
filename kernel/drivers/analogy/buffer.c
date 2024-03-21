@@ -462,13 +462,13 @@ unsigned long a4l_buf_count(struct a4l_subdevice *subd)
 
 /* --- Mmap functions --- */
 
-void a4l_map(struct vm_area_struct *area)
+static void a4l_map(struct vm_area_struct *area)
 {
 	unsigned long *status = (unsigned long *)area->vm_private_data;
 	set_bit(A4L_BUF_MAP_NR, status);
 }
 
-void a4l_unmap(struct vm_area_struct *area)
+static void a4l_unmap(struct vm_area_struct *area)
 {
 	unsigned long *status = (unsigned long *)area->vm_private_data;
 	clear_bit(A4L_BUF_MAP_NR, status);

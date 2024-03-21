@@ -101,7 +101,7 @@ static const DEFINE_PROC_OPS(a4l_proc_transfer_ops,
 			seq_read,
 			NULL);
 
-int a4l_proc_attach(struct a4l_device_context * cxt)
+static int a4l_proc_attach(struct a4l_device_context * cxt)
 {
 	int ret = 0;
 	struct a4l_device *dev = a4l_get_dev(cxt);
@@ -134,7 +134,7 @@ int a4l_proc_attach(struct a4l_device_context * cxt)
 	return ret;
 }
 
-void a4l_proc_detach(struct a4l_device_context * cxt)
+static void a4l_proc_detach(struct a4l_device_context * cxt)
 {
 	struct a4l_device *dev = a4l_get_dev(cxt);
 	char *entry_name;
@@ -156,12 +156,12 @@ void a4l_proc_detach(struct a4l_device_context * cxt)
 
 #else /* !CONFIG_PROC_FS */
 
-int a4l_proc_attach(struct a4l_device_context * cxt)
+static int a4l_proc_attach(struct a4l_device_context * cxt)
 {
 	return 0;
 }
 
-void a4l_proc_detach(struct a4l_device_context * cxt)
+static void a4l_proc_detach(struct a4l_device_context * cxt)
 {
 }
 
@@ -169,8 +169,8 @@ void a4l_proc_detach(struct a4l_device_context * cxt)
 
 /* --- Attach / detach section --- */
 
-int a4l_fill_lnkdesc(struct a4l_device_context * cxt,
-		     a4l_lnkdesc_t * link_arg, void *arg)
+static int a4l_fill_lnkdesc(struct a4l_device_context * cxt,
+			    a4l_lnkdesc_t * link_arg, void *arg)
 {
 	struct rtdm_fd *fd = rtdm_private_to_fd(cxt);
 	int ret;
@@ -249,7 +249,8 @@ int a4l_fill_lnkdesc(struct a4l_device_context * cxt,
 	return ret;
 }
 
-void a4l_free_lnkdesc(struct a4l_device_context * cxt, a4l_lnkdesc_t * link_arg)
+static void a4l_free_lnkdesc(struct a4l_device_context * cxt,
+			     a4l_lnkdesc_t * link_arg)
 {
 	if (link_arg->bname != NULL)
 		rtdm_free(link_arg->bname);
@@ -258,8 +259,8 @@ void a4l_free_lnkdesc(struct a4l_device_context * cxt, a4l_lnkdesc_t * link_arg)
 		rtdm_free(link_arg->opts);
 }
 
-int a4l_assign_driver(struct a4l_device_context * cxt,
-			 struct a4l_driver * drv, a4l_lnkdesc_t * link_arg)
+static int a4l_assign_driver(struct a4l_device_context * cxt,
+			     struct a4l_driver * drv, a4l_lnkdesc_t * link_arg)
 {
 	int ret = 0;
 	struct a4l_device *dev = a4l_get_dev(cxt);
@@ -307,7 +308,7 @@ out_assign_driver:
 	return ret;
 }
 
-int a4l_release_driver(struct a4l_device_context * cxt)
+static int a4l_release_driver(struct a4l_device_context * cxt)
 {
 	struct a4l_device *dev = a4l_get_dev(cxt);
 	struct a4l_subdevice *subd, *tmp;
@@ -335,7 +336,7 @@ out_release_driver:
 	return ret;
 }
 
-int a4l_device_attach(struct a4l_device_context * cxt, void *arg)
+static int a4l_device_attach(struct a4l_device_context * cxt, void *arg)
 {
 	int ret = 0;
 	a4l_lnkdesc_t link_arg;
@@ -358,7 +359,7 @@ int a4l_device_attach(struct a4l_device_context * cxt, void *arg)
 	return ret;
 }
 
-int a4l_device_detach(struct a4l_device_context * cxt)
+static int a4l_device_detach(struct a4l_device_context * cxt)
 {
 	struct a4l_device *dev = a4l_get_dev(cxt);
 

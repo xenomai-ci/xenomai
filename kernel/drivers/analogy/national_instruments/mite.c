@@ -515,7 +515,7 @@ void a4l_mite_prep_dma(struct mite_channel *mite_chan,
 	MDPRINTK("exit a4l_mite_prep_dma\n");
 }
 
-u32 mite_device_bytes_transferred(struct mite_channel *mite_chan)
+static u32 mite_device_bytes_transferred(struct mite_channel *mite_chan)
 {
 	struct mite_struct *mite = mite_chan->mite;
 	return readl(mite->mite_io_addr + MITE_DAR(mite_chan->channel));

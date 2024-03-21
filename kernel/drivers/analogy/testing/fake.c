@@ -132,7 +132,7 @@ static inline uint16_t ai_value_output(struct ai_priv *priv)
 	return output_tab[idx] / priv->amplitude_div;
 }
 
-int ai_push_values(struct a4l_subdevice *subd)
+static int ai_push_values(struct a4l_subdevice *subd)
 {
 	uint64_t now_ns, elapsed_ns = 0;
 	struct a4l_cmd_desc *cmd;
@@ -175,7 +175,7 @@ int ai_push_values(struct a4l_subdevice *subd)
 
 /* --- Data retrieval for AO --- */
 
-int ao_pull_values(struct a4l_subdevice *subd)
+static int ao_pull_values(struct a4l_subdevice *subd)
 {
 	struct ao_ai2_priv *priv = (struct ao_ai2_priv *)subd->priv;
 	int err;
@@ -205,7 +205,7 @@ int ao_pull_values(struct a4l_subdevice *subd)
 
 /* --- Data redirection for 2nd AI (from AO) --- */
 
-int ai2_push_values(struct a4l_subdevice *subd)
+static int ai2_push_values(struct a4l_subdevice *subd)
 {
 	struct ao_ai2_priv *priv = *((struct ao_ai2_priv **)subd->priv);
 	int err = 0;
@@ -290,13 +290,13 @@ static void ai_munge(struct a4l_subdevice *subd, void *buf, unsigned long size)
 
 /* --- Asynchronous A0 functions --- */
 
-int ao_cmd(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
+static int ao_cmd(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
 {
 	a4l_info(subd->dev, "(subd=%d)\n", subd->idx);
 	return 0;
 }
 
-int ao_trigger(struct a4l_subdevice *subd, lsampl_t trignum)
+static int ao_trigger(struct a4l_subdevice *subd, lsampl_t trignum)
 {
 	struct fake_priv *priv = (struct fake_priv *)subd->dev->priv;
 
@@ -305,7 +305,7 @@ int ao_trigger(struct a4l_subdevice *subd, lsampl_t trignum)
 	return 0;
 }
 
-void ao_cancel(struct a4l_subdevice *subd)
+static void ao_cancel(struct a4l_subdevice *subd)
 {
 	struct fake_priv *priv = (struct fake_priv *)subd->dev->priv;
 	struct ao_ai2_priv *ao_priv = (struct ao_ai2_priv *)subd->priv;
@@ -333,7 +333,7 @@ void ao_cancel(struct a4l_subdevice *subd)
 
 /* --- Asynchronous 2nd AI functions --- */
 
-int ai2_cmd(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
+static int ai2_cmd(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
 {
 	struct fake_priv *priv = (struct fake_priv *)subd->dev->priv;
 
@@ -342,7 +342,7 @@ int ai2_cmd(struct a4l_subdevice *subd, struct a4l_cmd_desc *cmd)
 	return 0;
 }
 
-void ai2_cancel(struct a4l_subdevice *subd)
+static void ai2_cancel(struct a4l_subdevice *subd)
 {
 	struct fake_priv *priv = (struct fake_priv *)subd->dev->priv;
 	struct ao_ai2_priv *ai2_priv = *((struct ao_ai2_priv **)subd->priv);
@@ -407,7 +407,7 @@ static int dio_insn_bits(struct a4l_subdevice *subd, struct a4l_kernel_instructi
 
 /* --- Synchronous AO + AI2 functions --- */
 
-int ao_insn_write(struct a4l_subdevice *subd, struct a4l_kernel_instruction *insn)
+static int ao_insn_write(struct a4l_subdevice *subd, struct a4l_kernel_instruction *insn)
 {
 	struct ao_ai2_priv *priv = (struct ao_ai2_priv *)subd->priv;
 	uint16_t *data = (uint16_t *)insn->data;
@@ -422,7 +422,7 @@ int ao_insn_write(struct a4l_subdevice *subd, struct a4l_kernel_instruction *ins
 	return 0;
 }
 
-int ai2_insn_read(struct a4l_subdevice *subd, struct a4l_kernel_instruction *insn)
+static int ai2_insn_read(struct a4l_subdevice *subd, struct a4l_kernel_instruction *insn)
 {
 	struct ao_ai2_priv *priv = *((struct ao_ai2_priv **)subd->priv);
 	uint16_t *data = (uint16_t *)insn->data;
@@ -495,7 +495,7 @@ static void task_proc(void *arg)
 
 /* --- Initialization functions --- */
 
-void setup_ai_subd(struct a4l_subdevice *subd)
+static void setup_ai_subd(struct a4l_subdevice *subd)
 {
 	/* Fill the subdevice structure */
 	subd->flags |= A4L_SUBD_AI;
@@ -511,7 +511,7 @@ void setup_ai_subd(struct a4l_subdevice *subd)
 	subd->insn_read = ai_insn_read;
 }
 
-void setup_dio_subd(struct a4l_subdevice *subd)
+static void setup_dio_subd(struct a4l_subdevice *subd)
 {
 	/* Fill the subdevice structure */
 	subd->flags |= A4L_SUBD_DIO;
@@ -520,7 +520,7 @@ void setup_dio_subd(struct a4l_subdevice *subd)
 	subd->insn_bits = dio_insn_bits;
 }
 
-void setup_ao_subd(struct a4l_subdevice *subd)
+static void setup_ao_subd(struct a4l_subdevice *subd)
 {
 	/* Fill the subdevice structure */
 	subd->flags |= A4L_SUBD_AO;
@@ -535,7 +535,7 @@ void setup_ao_subd(struct a4l_subdevice *subd)
 	subd->insn_write = ao_insn_write;
 }
 
-void setup_ai2_subd(struct a4l_subdevice *subd)
+static void setup_ai2_subd(struct a4l_subdevice *subd)
 {
 	/* Fill the subdevice structure */
 	subd->flags |= A4L_SUBD_AI;
@@ -551,7 +551,7 @@ void setup_ai2_subd(struct a4l_subdevice *subd)
 
 /* --- Attach / detach functions ---  */
 
-int test_attach(struct a4l_device *dev, a4l_lnkdesc_t *arg)
+static int test_attach(struct a4l_device *dev, a4l_lnkdesc_t *arg)
 {
 	typedef void (*setup_subd_function) (struct a4l_subdevice *subd);
 	struct fake_priv *priv = (struct fake_priv *) dev->priv;
@@ -648,7 +648,7 @@ int test_attach(struct a4l_device *dev, a4l_lnkdesc_t *arg)
 	return ret;
 }
 
-int test_detach(struct a4l_device *dev)
+static int test_detach(struct a4l_device *dev)
 {
 	struct fake_priv *priv = (struct fake_priv *)dev->priv;
 
