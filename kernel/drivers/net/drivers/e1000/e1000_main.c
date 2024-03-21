@@ -223,14 +223,6 @@ static void e1000_smartspeed(struct e1000_adapter *adapter);
 static int e1000_82547_fifo_workaround(struct e1000_adapter *adapter,
 				       struct rtskb *skb);
 
-
-
-
-
-/* Exported from other modules */
-
-extern void e1000_check_options(struct e1000_adapter *adapter);
-
 static struct pci_driver e1000_driver = {
 	.name     = e1000_driver_name,
 	.id_table = e1000_pci_tbl,

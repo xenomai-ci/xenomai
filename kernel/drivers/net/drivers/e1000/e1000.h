@@ -388,4 +388,6 @@ enum e1000_state_t {
 	__E1000_DRIVER_TESTING,
 	__E1000_RESETTING,
 };
+
+void e1000_check_options(struct e1000_adapter *adapter);
 #endif /* _E1000_H_ */
