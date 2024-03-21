@@ -723,14 +723,14 @@ static struct rtdm_device device = {
 	.label = "switchtest",
 };
 
-int __init __switchtest_init(void)
+static int __init __switchtest_init(void)
 {
 	fp_features = fp_detect();
 
 	return rtdm_dev_register(&device);
 }
 
-void __switchtest_exit(void)
+static void __switchtest_exit(void)
 {
 	rtdm_dev_unregister(&device);
 }
