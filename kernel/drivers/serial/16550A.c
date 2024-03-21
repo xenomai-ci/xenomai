@@ -428,7 +428,7 @@ static int rt_16550_set_config(struct rt_16550_context *ctx,
 	return err;
 }
 
-void rt_16550_cleanup_ctx(struct rt_16550_context *ctx)
+static void rt_16550_cleanup_ctx(struct rt_16550_context *ctx)
 {
 	rtdm_event_destroy(&ctx->in_event);
 	rtdm_event_destroy(&ctx->out_event);
@@ -436,7 +436,7 @@ void rt_16550_cleanup_ctx(struct rt_16550_context *ctx)
 	rtdm_mutex_destroy(&ctx->out_lock);
 }
 
-int rt_16550_open(struct rtdm_fd *fd, int oflags)
+static int rt_16550_open(struct rtdm_fd *fd, int oflags)
 {
 	struct rt_16550_context *ctx;
 	int dev_id = rtdm_fd_minor(fd);
@@ -500,7 +500,7 @@ int rt_16550_open(struct rtdm_fd *fd, int oflags)
 	return 0;
 }
 
-void rt_16550_close(struct rtdm_fd *fd)
+static void rt_16550_close(struct rtdm_fd *fd)
 {
 	struct rt_16550_context *ctx;
 	unsigned long base;
@@ -536,7 +536,7 @@ void rt_16550_close(struct rtdm_fd *fd)
 	kfree(in_history);
 }
 
-int rt_16550_ioctl(struct rtdm_fd *fd, unsigned int request, void *arg)
+static int rt_16550_ioctl(struct rtdm_fd *fd, unsigned int request, void *arg)
 {
 	rtdm_lockctx_t lock_ctx;
 	struct rt_16550_context *ctx;
@@ -779,7 +779,7 @@ int rt_16550_ioctl(struct rtdm_fd *fd, unsigned int request, void *arg)
 	return err;
 }
 
-ssize_t rt_16550_read(struct rtdm_fd *fd, void *buf, size_t nbyte)
+static ssize_t rt_16550_read(struct rtdm_fd *fd, void *buf, size_t nbyte)
 {
 	struct rt_16550_context *ctx;
 	rtdm_lockctx_t lock_ctx;
@@ -942,7 +942,7 @@ break_unlocked:
 	return ret;
 }
 
-ssize_t rt_16550_write(struct rtdm_fd *fd, const void *buf, size_t nbyte)
+static ssize_t rt_16550_write(struct rtdm_fd *fd, const void *buf, size_t nbyte)
 {
 	struct rt_16550_context *ctx;
 	rtdm_lockctx_t lock_ctx;
@@ -1092,9 +1092,9 @@ static struct rtdm_driver uart16550A_driver = {
 	},
 };
 
-void rt_16550_exit(void);
+static void rt_16550_exit(void);
 
-int __init rt_16550_init(void)
+static int __init rt_16550_init(void)
 {
 	struct rtdm_device *dev;
 	unsigned long base;
@@ -1169,7 +1169,7 @@ int __init rt_16550_init(void)
 	return err;
 }
 
-void rt_16550_exit(void)
+static void rt_16550_exit(void)
 {
 	int i;
 

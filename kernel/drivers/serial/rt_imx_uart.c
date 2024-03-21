@@ -786,7 +786,7 @@ static int rt_imx_uart_set_config(struct rt_imx_uart_ctx *ctx,
 	return err;
 }
 
-void rt_imx_uart_cleanup_ctx(struct rt_imx_uart_ctx *ctx)
+static void rt_imx_uart_cleanup_ctx(struct rt_imx_uart_ctx *ctx)
 {
 	rtdm_event_destroy(&ctx->in_event);
 	rtdm_event_destroy(&ctx->out_event);
@@ -933,7 +933,7 @@ static int rt_imx_uart_open(struct rtdm_fd *fd, int oflags)
 				rtdm_fd_device(fd)->name, ctx);
 }
 
-void rt_imx_uart_close(struct rtdm_fd *fd)
+static void rt_imx_uart_close(struct rtdm_fd *fd)
 {
 	struct rt_imx_uart_port *port;
 	struct rt_imx_uart_ctx *ctx;
@@ -1198,7 +1198,7 @@ wait_unlock_out:
 	return err;
 }
 
-ssize_t rt_imx_uart_read(struct rtdm_fd *fd, void *buf, size_t nbyte)
+static ssize_t rt_imx_uart_read(struct rtdm_fd *fd, void *buf, size_t nbyte)
 {
 	struct rt_imx_uart_ctx *ctx;
 	rtdm_lockctx_t lock_ctx;
