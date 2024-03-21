@@ -419,12 +419,12 @@ static void cleanup_timerlist_proc(struct xnclock *clock)
 	xnvfile_destroy_snapshot(&clock->timer_vfile);
 }
 
-void init_timerlist_root(void)
+static void init_timerlist_root(void)
 {
 	xnvfile_init_dir("timer", &timerlist_vfroot, &cobalt_vfroot);
 }
 
-void cleanup_timerlist_root(void)
+static void cleanup_timerlist_root(void)
 {
 	xnvfile_destroy_dir(&timerlist_vfroot);
 }
@@ -445,8 +445,8 @@ static inline void cleanup_timerlist_proc(struct xnclock *clock) { }
 
 static struct xnvfile_directory clock_vfroot;
 
-void print_core_clock_status(struct xnclock *clock,
-			     struct xnvfile_regular_iterator *it)
+static void print_core_clock_status(struct xnclock *clock,
+				    struct xnvfile_regular_iterator *it)
 {
 	const char *wd_status = "off";
 

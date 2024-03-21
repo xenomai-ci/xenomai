@@ -169,7 +169,7 @@ void pipeline_cleanup_process(void)
 	dovetail_stop_altsched();
 }
 
-int handle_ptrace_resume(struct task_struct *tracee)
+static int handle_ptrace_resume(struct task_struct *tracee)
 {
 	struct xnthread *thread;
 	spl_t s;

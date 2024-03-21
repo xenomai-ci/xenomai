@@ -237,7 +237,7 @@ static void mqd_close(struct rtdm_fd *fd)
 	mq_unref(mq);
 }
 
-int
+static int
 mqd_select(struct rtdm_fd *fd, struct xnselector *selector,
 	   unsigned type, unsigned index)
 {

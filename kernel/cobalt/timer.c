@@ -62,7 +62,7 @@ int xntimer_heading_p(struct xntimer *timer)
 	return 0;
 }
 
-void xntimer_enqueue_and_program(struct xntimer *timer, xntimerq_t *q)
+static void xntimer_enqueue_and_program(struct xntimer *timer, xntimerq_t *q)
 {
 	struct xnsched *sched = xntimer_sched(timer);
 

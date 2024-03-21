@@ -314,8 +314,8 @@ static int vfile_snapshot_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-ssize_t vfile_snapshot_write(struct file *file, const char __user *buf,
-			     size_t size, loff_t *ppos)
+static ssize_t vfile_snapshot_write(struct file *file, const char __user *buf,
+				    size_t size, loff_t *ppos)
 {
 	struct xnvfile_snapshot *vfile =
 		pde_data(file->f_path.dentry->d_inode);
@@ -562,8 +562,8 @@ static int vfile_regular_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-ssize_t vfile_regular_write(struct file *file, const char __user *buf,
-			    size_t size, loff_t *ppos)
+static ssize_t vfile_regular_write(struct file *file, const char __user *buf,
+				   size_t size, loff_t *ppos)
 {
 	struct xnvfile_regular *vfile =
 		pde_data(file->f_path.dentry->d_inode);
