@@ -20,7 +20,6 @@
  */
 #ifndef _COBALT_X86_ASM_UAPI_ARITH_H
 #define _COBALT_X86_ASM_UAPI_ARITH_H
-#define _COBALT_X86_ASM_UAPI_ARITH_H
 
 #include <asm/xenomai/uapi/features.h>
 
