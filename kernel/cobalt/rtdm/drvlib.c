@@ -636,7 +636,7 @@ void rtdm_timer_stop_in_handler(rtdm_timer_t *timer);
 
 #define RTDM_SYNCH_DELETED          XNSYNCH_SPARE0
 
-void __rtdm_synch_flush(struct xnsynch *synch, unsigned long reason)
+static void __rtdm_synch_flush(struct xnsynch *synch, unsigned long reason)
 {
 	spl_t s;
 
@@ -650,8 +650,6 @@ void __rtdm_synch_flush(struct xnsynch *synch, unsigned long reason)
 
 	xnlock_put_irqrestore(&nklock, s);
 }
-
-EXPORT_SYMBOL_GPL(__rtdm_synch_flush);
 
 /**
  * @ingroup rtdm_driver_interface
