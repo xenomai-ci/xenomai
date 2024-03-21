@@ -27,6 +27,7 @@
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 
+#include <corectl.h>
 #include <rtdev_mgr.h>
 #include <rtnet_chrdev.h>
 #include <rtnet_internal.h>
