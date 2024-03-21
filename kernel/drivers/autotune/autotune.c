@@ -242,7 +242,7 @@ struct irq_gravity_tuner irq_tuner = {
 	},
 };
 
-void task_handler(void *arg)
+static void task_handler(void *arg)
 {
 	struct kthread_gravity_tuner *k_tuner = arg;
 	xnticks_t now;
