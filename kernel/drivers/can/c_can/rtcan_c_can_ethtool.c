@@ -20,9 +20,9 @@ static void rtcan_c_can_get_drvinfo(struct rtcan_device *dev,
 	struct c_can_priv *priv = rtcan_priv(dev);
 	struct platform_device *pdev = to_platform_device(priv->device);
 
-	strlcpy(info->driver, "c_can", sizeof(info->driver));
-	strlcpy(info->version, "1.0", sizeof(info->version));
-	strlcpy(info->bus_info, pdev->name, sizeof(info->bus_info));
+	strscpy(info->driver, "c_can", sizeof(info->driver));
+	strscpy(info->version, "1.0", sizeof(info->version));
+	strscpy(info->bus_info, pdev->name, sizeof(info->bus_info));
 }
 
 static void rtcan_c_can_get_ringparam(struct rtcan_device *dev,
