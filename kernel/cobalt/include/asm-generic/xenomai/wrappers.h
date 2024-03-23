@@ -65,6 +65,11 @@
 #define pde_data(i)	PDE_DATA(i)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,3,0)
+#define spi_get_chipselect(spi, idx)	((spi)->chip_select)
+#define spi_get_csgpiod(spi, idx)	((spi)->cs_gpiod)
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(6,8,0)
 #define MAX_PAGE_ORDER	MAX_ORDER
 #endif

@@ -35,12 +35,12 @@ int rtdm_spi_add_remote_slave(struct rtdm_spi_remote_slave *slave,
 	int ret;
 
 	memset(slave, 0, sizeof(*slave));
-	slave->chip_select = spi->chip_select;
+	slave->chip_select = spi_get_chipselect(spi, 0);
 	slave->config.bits_per_word = spi->bits_per_word;
 	slave->config.speed_hz = spi->max_speed_hz;
 	slave->config.mode = spi->mode;
 	slave->master = master;
-	
+
 	dev = &slave->dev;
 	dev->driver = &master->driver;
 	dev->label = kasprintf(GFP_KERNEL, "%s/slave%d.%%d",
@@ -49,14 +49,14 @@ int rtdm_spi_add_remote_slave(struct rtdm_spi_remote_slave *slave,
 	if (dev->label == NULL)
 		return -ENOMEM;
 
-	if (spi->cs_gpiod)
-		slave->cs_gpiod = spi->cs_gpiod;
-	else {
+	if (spi_get_csgpiod(spi, 0)) {
+		slave->cs_gpiod = spi_get_csgpiod(spi, 0);
+	} else {
 		slave->cs_gpiod = NULL;
 		if (ctlr->cs_gpiods)
-			slave->cs_gpiod = ctlr->cs_gpiods[spi->chip_select];
+			slave->cs_gpiod = ctlr->cs_gpiods[slave->chip_select];
 	}
-	
+
 	mutex_init(&slave->ctl_lock);
 
 	dev->device_data = master;

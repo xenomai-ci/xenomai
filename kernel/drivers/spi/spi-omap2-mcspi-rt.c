@@ -804,7 +804,8 @@ omap2_mcspi_attach_slave(struct rtdm_spi_master *master, struct spi_device *spi)
 	struct spi_slave_omap2_mcspi *mapped_data;
 	int ret;
 
-	if ((spi->chip_select >= OMAP2_MCSPI_CS_N) || (OMAP2_MCSPI_CS_N > 2)) {
+	if (spi_get_chipselect(spi, 0) >= OMAP2_MCSPI_CS_N ||
+	    OMAP2_MCSPI_CS_N > 2) {
 		/* Error in the case of native CS requested with CS > 1 */
 		dev_err(&spi->dev, "%s: only two native CS per spi module are supported\n",
 			__func__);
@@ -823,11 +824,11 @@ omap2_mcspi_attach_slave(struct rtdm_spi_master *master, struct spi_device *spi)
 	}
 
 	spim = container_of(master, struct spi_master_omap2_mcspi, master);
-	spim->cs[spi->chip_select].chosen = 0;
-	spim->cs[spi->chip_select].regs = spim->regs +
-		spi->chip_select * OMAP2_MCSPI_CHANNELBANK_SIZE;
-	spim->cs[spi->chip_select].phys = spim->phys +
-		spi->chip_select * OMAP2_MCSPI_CHANNELBANK_SIZE;
+	spim->cs[spi_get_chipselect(spi, 0)].chosen = 0;
+	spim->cs[spi_get_chipselect(spi, 0)].regs = spim->regs +
+		spi_get_chipselect(spi, 0) * OMAP2_MCSPI_CHANNELBANK_SIZE;
+	spim->cs[spi_get_chipselect(spi, 0)].phys = spim->phys +
+		spi_get_chipselect(spi, 0) * OMAP2_MCSPI_CHANNELBANK_SIZE;
 
 	return &mapped_data->slave;
 }

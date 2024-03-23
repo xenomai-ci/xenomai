@@ -462,9 +462,10 @@ static int find_cs_gpio(struct spi_device *spi)
 	int cs_gpio = -ENOENT;
 	int ret;
 
-	if (spi->cs_gpiod) {
+	if (spi_get_csgpiod(spi, 0)) {
 		dev_info(&spi->dev, "using GPIO%i for CS%d\n",
-			 desc_to_gpio(spi->cs_gpiod), spi->chip_select);
+			 desc_to_gpio(spi_get_csgpiod(spi, 0)),
+				      spi_get_chipselect(spi, 0));
 		return 0;
 	}
 
@@ -476,9 +477,9 @@ static int find_cs_gpio(struct spi_device *spi)
 		for (pin_index = 0;
 		     of_property_read_u32_index(pins, "brcm,pins",
 				pin_index, &pin) == 0; pin_index++) {
-			if ((spi->chip_select == 0 &&
+			if ((spi_get_chipselect(spi, 0) == 0 &&
 			     (pin == 8 || pin == 36 || pin == 46)) ||
-			    (spi->chip_select == 1 &&
+			    (spi_get_chipselect(spi, 0) == 1 &&
 			     (pin == 7 || pin == 35))) {
 				cs_gpio = pin;
 				break;
@@ -503,19 +504,19 @@ static int find_cs_gpio(struct spi_device *spi)
 			return 0;
 #endif
 
-		cs_gpio = chip->base + 8 - spi->chip_select;
+		cs_gpio = chip->base + 8 - spi_get_chipselect(spi, 0);
 	}
 
 	dev_info(&spi->dev,
 		 "setting up native-CS%i as GPIO %i\n",
-		 spi->chip_select, cs_gpio);
+		 spi_get_chipselect(spi, 0), cs_gpio);
 
 	ret = gpio_direction_output(cs_gpio,
 			    (spi->mode & SPI_CS_HIGH) ? 0 : 1);
 	if (ret) {
 		dev_err(&spi->dev,
 			"could not set CS%i gpio %i as output: %i",
-			spi->chip_select, cs_gpio, ret);
+			spi_get_chipselect(spi, 0), cs_gpio, ret);
 		return ret;
 	}
 
@@ -534,7 +535,7 @@ bcm2835_attach_slave(struct rtdm_spi_master *master, struct spi_device *spi)
 	struct spi_slave_bcm2835 *bcm;
 	int ret;
 
-	if (spi->chip_select > 1) {
+	if (spi_get_chipselect(spi, 0) > 1) {
 		/*
 		 * Error in the case of native CS requested with CS >
 		 * 1 officially there is a CS2, but it is not
