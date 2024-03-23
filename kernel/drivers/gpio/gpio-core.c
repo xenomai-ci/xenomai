@@ -22,6 +22,7 @@
 #include <linux/irq.h>
 #include <linux/slab.h>
 #include <linux/err.h>
+#include <linux/platform_device.h>
 #include <linux/gpio/driver.h>
 #include <rtdm/gpio.h>
 
