@@ -66,18 +66,6 @@ patch_append() {
     fi
 }
 
-patch_ed() {
-    file="$1"
-    if test "x$output_patch" = "x"; then
-        ed -s "$linux_tree/$file" > /dev/null
-    else
-        if test `check_filter $file` = "ok"; then
-            patch_copytempfile "$file"
-            ed -s "$temp_tree/$file" > /dev/null
-        fi
-    fi
-}
-
 patch_link() {
     recursive="$1"         # "r" or "n"
     link_file="$2"         # "m", "n" or some file (basename) from $target_dir
