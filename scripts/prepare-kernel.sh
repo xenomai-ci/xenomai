@@ -82,7 +82,7 @@ patch_link() {
               link_makefiles_opt="-name Makefile -o"
            fi
            if test x$recursive = xr; then
-	       recursive_opts="-mindepth 1"
+	       recursive_opt="-mindepth 1"
 	       dir_opt="-type d -o"
            else
 	       recursive_opt="-maxdepth 1"
