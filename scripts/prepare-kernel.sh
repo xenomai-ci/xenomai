@@ -214,7 +214,6 @@ while test x$linux_tree = x; do
 done
 
 linux_tree=`cd $linux_tree && pwd`
-linux_out=$linux_tree
 
 if test \! -r $linux_tree/Makefile; then
    echo "$me: $linux_tree is not a valid Linux kernel tree" >&2
