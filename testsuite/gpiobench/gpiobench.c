@@ -334,7 +334,7 @@ static int rw_gpio(int value, int index)
 
 	if (outer_diff < ti.ts.outer_min)
 		ti.ts.outer_min = outer_diff;
-	if (inner_diff > ti.ts.outer_max)
+	if (outer_diff > ti.ts.outer_max)
 		ti.ts.outer_max = outer_diff;
 	ti.ts.outer_avg += (double) outer_diff;
 	if (outer_diff >= ti.max_histogram)
