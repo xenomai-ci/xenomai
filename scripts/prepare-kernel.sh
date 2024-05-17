@@ -114,6 +114,9 @@ patch_link() {
                 fi
             else
                 if test `check_filter $link_dir/$f` = "ok"; then
+                    if test -e $linux_tree/$link_dir/$f; then
+                        echo "$me: warning: $link_dir/$f already present in Linux kernel tree, output patch might be defective" >&2
+                    fi
                     mkdir -p $temp_tree/$link_dir/$d
                     cp $xenomai_root/$target_dir/$f $temp_tree/$link_dir/$f
                 fi
