@@ -29,12 +29,11 @@
 #include <rtnet_socket.h>
 #include <stack_mgr.h>
 #include <ipv4/ip_fragment.h>
+#include <ipv4/ip_input.h>
 #include <ipv4/protocol.h>
 #include <ipv4/route.h>
 
 #if IS_ENABLED(CONFIG_XENO_DRIVERS_NET_ADDON_PROXY)
-#include <ipv4/ip_input.h>
-
 rt_ip_fallback_handler_t rt_ip_fallback_handler = NULL;
 EXPORT_SYMBOL_GPL(rt_ip_fallback_handler);
 #endif /* CONFIG_XENO_DRIVERS_NET_ADDON_PROXY */
