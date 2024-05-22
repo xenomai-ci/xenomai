@@ -610,9 +610,13 @@ struct gpiochip_match_data {
 	struct list_head list;
 };
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,9,0)
+static int match_gpio_chip(struct gpio_chip *gc, const void *data)
+#else
 static int match_gpio_chip(struct gpio_chip *gc, void *data)
+#endif
 {
-	struct gpiochip_match_data *d = data;
+	struct gpiochip_match_data *d = (void *)data;
 	struct gpiochip_holder *h;
 
 	if (gc->parent == d->parent) {
