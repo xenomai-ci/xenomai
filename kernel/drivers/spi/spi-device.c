@@ -108,7 +108,7 @@ static int spi_device_probe(struct spi_device *spi)
 	 *
 	 * NOTE: the driver core guarantees serialization.
 	 */
-	master = spi_master_get_devdata(spi->master);
+	master = spi_controller_get_devdata(spi->controller);
 	if (master->devclass == NULL) {
 		ret = __rtdm_spi_setup_driver(master);
 		if (ret)

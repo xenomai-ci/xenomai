@@ -362,7 +362,7 @@ __rtdm_spi_alloc_master(struct device *dev, size_t size, int off)
 	ctlr->use_gpio_descriptors = true;
 	master = (void *)(ctlr + 1) + off;
 	master->controller = ctlr;
-	spi_master_set_devdata(ctlr, master);
+	spi_controller_set_devdata(ctlr, master);
 
 	return master;
 }
@@ -414,7 +414,7 @@ int __rtdm_spi_setup_driver(struct rtdm_spi_master *master)
 	return 0;
 }
 
-static int spi_transfer_one_unimp(struct spi_master *master,
+static int spi_transfer_one_unimp(struct spi_controller *controller,
 				  struct spi_device *spi,
 				  struct spi_transfer *tfr)
 {
