@@ -12,6 +12,7 @@ static const char * const tests[] = {
 	"alchemytests_mq2",
 	"alchemytests_mq3",
 	"alchemytests_mutex1",
+	"alchemytests_mutex2",
 	"alchemytests_pipe1",
 	"alchemytests_sem1",
 	"alchemytests_sem2",

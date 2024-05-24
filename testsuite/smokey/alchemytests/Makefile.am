@@ -20,6 +20,7 @@ test_PROGRAMS =				\
 		alchemytests_mq2	\
 		alchemytests_mq3	\
 		alchemytests_mutex1	\
+		alchemytests_mutex2	\
 		alchemytests_pipe1	\
 		alchemytests_sem1	\
 		alchemytests_sem2	\
@@ -69,6 +70,10 @@ alchemytests_mutex1_SOURCES = mutex-1.c
 alchemytests_mutex1_CPPFLAGS = $(alchemycppflags)
 alchemytests_mutex1_LDADD = $(alchemyldadd)
 alchemytests_mutex1_LDFLAGS = @XENO_AUTOINIT_LDFLAGS@
+alchemytests_mutex2_SOURCES = mutex-2.c
+alchemytests_mutex2_CPPFLAGS = $(alchemycppflags)
+alchemytests_mutex2_LDADD = $(alchemyldadd)
+alchemytests_mutex2_LDFLAGS = @XENO_AUTOINIT_LDFLAGS@
 alchemytests_pipe1_SOURCES = pipe-1.c
 alchemytests_pipe1_CPPFLAGS = $(alchemycppflags)
 alchemytests_pipe1_LDADD = $(alchemyldadd)
