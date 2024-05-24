@@ -327,7 +327,11 @@ int rt_mutex_acquire_timed(RT_MUTEX *mutex,
 
 	/* Slow path. */
 	if (abs_timeout == NULL) {
+#ifdef CONFIG_XENO_MERCURY
 		ret = -__RT(pthread_mutex_lock(&mcb->lock));
+#else
+		ret = -pthread_mutex_lock_interruptible_np(&mcb->lock);
+#endif
 		goto done;
 	}
 
@@ -338,7 +342,11 @@ int rt_mutex_acquire_timed(RT_MUTEX *mutex,
 	 * the user timeout into something POSIX understands.
 	 */
 	clockobj_convert_clocks(&alchemy_clock, abs_timeout, CLOCK_REALTIME, &ts);
+#ifdef CONFIG_XENO_MERCURY
 	ret = -__RT(pthread_mutex_timedlock(&mcb->lock, &ts));
+#else
+	ret = -pthread_timedmutex_lock_interruptible_np(&mcb->lock, &ts);
+#endif
 done:
 	switch (ret) {
 	case -ENOTRECOVERABLE:

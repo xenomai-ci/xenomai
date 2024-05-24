@@ -170,6 +170,11 @@ int pthread_attr_getpersonality_ex(const pthread_attr_ex_t *attr_ex,
 
 int pthread_attr_setpersonality_ex(pthread_attr_ex_t *attr_ex,
 				   int personality);
+
+int pthread_mutex_lock_interruptible_np(pthread_mutex_t *mutex);
+
+int pthread_timedmutex_lock_interruptible_np(pthread_mutex_t *mutex, const struct timespec *to);
+
 #ifdef __cplusplus
 }
 #endif

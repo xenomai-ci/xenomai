@@ -314,7 +314,7 @@ COBALT_IMPL(int, pthread_mutex_destroy, (pthread_mutex_t *mutex))
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL(int, pthread_mutex_lock, (pthread_mutex_t *mutex))
+static int __pthread_mutex_lock(pthread_mutex_t *mutex)
 {
 	struct cobalt_mutex_shadow *_mutex =
 		&((union cobalt_mutex_union *)mutex)->shadow_mutex;
@@ -371,9 +371,7 @@ slow_path:
 		}
 	}
 
-	do
-		ret = XENOMAI_SYSCALL1(sc_cobalt_mutex_lock, _mutex);
-	while (ret == -EINTR);
+	ret = XENOMAI_SYSCALL1(sc_cobalt_mutex_lock, _mutex);
 
 	if (ret == 0)
 		_mutex->lockcnt = 1;
@@ -390,6 +388,20 @@ protect:
 	u_window->pp_pending = _mutex->handle;
 	lazy_protect = 1;
 	goto fast_path;
+}
+
+COBALT_IMPL(int, pthread_mutex_lock, (pthread_mutex_t *mutex))
+{
+	int ret;
+	do
+		ret = __pthread_mutex_lock(mutex);
+	while (ret == EINTR);
+	return ret;
+}
+
+int pthread_mutex_lock_interruptible_np(pthread_mutex_t *mutex)
+{
+	return __pthread_mutex_lock(mutex);
 }
 
 /**
@@ -423,8 +435,7 @@ protect:
  *
  * @apitags{xthread-only, switch-primary}
  */
-COBALT_IMPL_TIME64(int, pthread_mutex_timedlock, __pthread_mutex_timedlock64,
-		   (pthread_mutex_t *mutex, const struct timespec *to))
+static int __pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *to)
 {
 	struct cobalt_mutex_shadow *_mutex =
 		&((union cobalt_mutex_union *)mutex)->shadow_mutex;
@@ -478,13 +489,11 @@ slow_path:
 		}
 	}
 
-	do {
 #ifdef __USE_TIME_BITS64
-		ret = XENOMAI_SYSCALL2(sc_cobalt_mutex_timedlock64, _mutex, to);
+	ret = XENOMAI_SYSCALL2(sc_cobalt_mutex_timedlock64, _mutex, to);
 #else
-		ret = XENOMAI_SYSCALL2(sc_cobalt_mutex_timedlock, _mutex, to);
+	ret = XENOMAI_SYSCALL2(sc_cobalt_mutex_timedlock, _mutex, to);
 #endif
-	} while (ret == -EINTR);
 
 	if (ret == 0)
 		_mutex->lockcnt = 1;
@@ -500,6 +509,21 @@ protect:
 	u_window->pp_pending = _mutex->handle;
 	lazy_protect = 1;
 	goto fast_path;
+}
+
+COBALT_IMPL_TIME64(int, pthread_mutex_timedlock, __pthread_mutex_timedlock64,
+		   (pthread_mutex_t *mutex, const struct timespec *to))
+{
+	int ret;
+	do
+		ret = __pthread_mutex_timedlock(mutex, to);
+	while (ret == EINTR);
+	return ret;
+}
+
+int pthread_timedmutex_lock_interruptible_np(pthread_mutex_t *mutex, const struct timespec *to)
+{
+	return __pthread_mutex_timedlock(mutex, to);
 }
 
 /**
