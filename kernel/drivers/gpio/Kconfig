@@ -17,6 +17,14 @@ config XENO_DRIVERS_GPIO_BCM2835
 	Enables support for the GPIO controller available from
 	Broadcom's BCM2835 SoC.
 
+config XENO_DRIVERS_GPIO_BCM2711
+	depends on MACH_BCM2708 || ARCH_BCM2835
+	tristate "Support for BCM2711 GPIOs"
+	help
+
+	Enables support for the GPIO controller available from
+	Broadcom's BCM2711 SoC.
+
 config XENO_DRIVERS_GPIO_MXC
 	depends on GPIO_MXC
 	tristate "Support for MXC GPIOs"

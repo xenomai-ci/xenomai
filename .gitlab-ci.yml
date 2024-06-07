@@ -153,6 +153,7 @@ variables:
     - ./scripts/config -e GPIOLIB
     - ./scripts/config -e XENO_DRIVERS_GPIO
     - ./scripts/config -e XENO_DRIVERS_GPIO_BCM2835
+    - ./scripts/config -e XENO_DRIVERS_GPIO_BCM2711
     - ./scripts/config -e XENO_DRIVERS_GPIO_MXC
     - ./scripts/config -e XENO_DRIVERS_GPIO_SUN8I_H3
     - ./scripts/config -e XENO_DRIVERS_GPIO_ZYNQ7000
