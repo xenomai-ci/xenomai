@@ -374,6 +374,8 @@ static void *run_gpiobench_loop(void *cookie)
 		/*take a break, nanosleep here will not jeopardize the latency*/
 		thread_msleep(10);
 
+		i += 1;
+		ti.total_cycles = i;
 		ret = rw_gpio(GPIO_LOW, i);
 		/* send a low level pulse from gpio output pin and
 		 * receive an interrupt from the other gpio pin,
@@ -392,8 +394,8 @@ static void *run_gpiobench_loop(void *cookie)
 		thread_msleep(10);
 	}
 
-	ti.ts.inner_avg /= (ti.total_cycles * 2);
-	ti.ts.outer_avg /= (ti.total_cycles * 2);
+	ti.ts.inner_avg /= ti.total_cycles;
+	ti.ts.outer_avg /= ti.total_cycles;
 
 	return NULL;
 }
@@ -506,8 +508,8 @@ static void print_hist(void)
 		printf("\nTest is interrupted and exit exceptionally\n");
 		printf("Please run again till it exit normally\n");
 
-		ti.ts.inner_avg /= (ti.total_cycles * 2);
-		ti.ts.outer_avg /= (ti.total_cycles * 2);
+		ti.ts.inner_avg /= ti.total_cycles;
+		ti.ts.outer_avg /= ti.total_cycles;
 
 	}
 	printf("\n");
