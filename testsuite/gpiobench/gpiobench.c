@@ -424,7 +424,11 @@ static void *run_gpiobench_react(void *cookie)
 		 * latency box will measure the time elapsed
 		 * between the two events
 		 */
-		value = GPIO_HIGH;
+		if (!(i & 1))
+			value = GPIO_HIGH;
+		else
+			value = GPIO_LOW;
+
 		ret = write(ti.fd_dev_out, &value, sizeof(value));
 		if (ret < 0) {
 			printf("RW GPIO write, failed\n");
