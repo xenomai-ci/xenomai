@@ -756,7 +756,8 @@ upon notification, which therefore applies to RTDM tasks as well.
 - +rtdm_task_set_period()+ now accepts a start date for the periodic
 timeline. Zero can be passed to emulate the previous call form,
 setting the first release point when the first period after the
-current date elapses.
+current date elapses. If the thread is already periodic, the end of
+the current period is used for the first release point.
 
 - +rtdm_task_wait_period()+ now copies back the count of overruns into
 a user-provided variable if -ETIMEDOUT is returned. NULL can be passed

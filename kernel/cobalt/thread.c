@@ -1273,9 +1273,10 @@ EXPORT_SYMBOL_GPL(xnthread_unblock);
  * point, expressed in nanoseconds. The affected thread will be
  * delayed by the first call to xnthread_wait_period() until this
  * point is reached. If @a idate is equal to XN_INFINITE, the first
- * release point is set to @a period nanoseconds after the current
- * date. In the latter case, @a timeout_mode is not considered and can
- * have any valid value.
+ * release point is set to the end of the current period, or to
+ * @a period nanoseconds after the current date, if thread was not
+ * periodic before. For XN_INFINITE, @a timeout_mode is not considered
+ * and can have any valid value.
  *
  * @param timeout_mode The mode of the @a idate parameter. It can
  * either be set to XN_ABSOLUTE or XN_REALTIME with @a idate different
@@ -1336,9 +1337,14 @@ int xnthread_set_periodic(struct xnthread *thread, xnticks_t idate,
 
 	xntimer_set_affinity(&thread->ptimer, thread->sched);
 
-	if (idate == XN_INFINITE)
-		xntimer_start(&thread->ptimer, period, period, XN_RELATIVE);
-	else {
+	if (idate == XN_INFINITE) {
+		idate = period;
+
+		if (xntimer_running_p(&thread->ptimer))
+			idate = __xntimer_get_timeout(&thread->ptimer);
+
+		xntimer_start(&thread->ptimer, idate, period, XN_RELATIVE);
+	} else {
 		if (timeout_mode == XN_REALTIME)
 			idate -= xnclock_get_offset(xntimer_clock(&thread->ptimer));
 		else if (timeout_mode != XN_ABSOLUTE) {

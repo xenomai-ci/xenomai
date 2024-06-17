@@ -212,7 +212,9 @@ void rtdm_task_set_priority(rtdm_task_t *task, int priority);
  * release point, expressed in nanoseconds.  @a task will be delayed
  * by the first call to rtdm_task_wait_period() until this point is
  * reached. If @a start_date is zero, the first release point is set
- * to @a period nanoseconds after the current date.
+ * to @a period nanoseconds after the current date. If @a start_date
+ * is zero, and the thread is already periodic, the end of the current
+ * period is used for the first release point.
 
  * @param[in] period New period in nanoseconds of a cyclic task, zero
  * to disable cyclic mode for @a task.
