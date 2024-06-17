@@ -799,7 +799,8 @@ undo:
  *
  * @param idate The initial (absolute) date of the first release
  * point, expressed in clock ticks (see note).  If @a idate is equal
- * to TM_NOW, the current system date is used.
+ * to TM_NOW, the end of the current period is used, or the current
+ * system date if the task was not periodic before.
  *
  * @param period The period of the task, expressed in clock ticks (see
  * note). Passing TM_INFINITE stops the task's periodic timer if
@@ -839,12 +840,21 @@ CURRENT_IMPL(int, rt_task_set_periodic,
 int rt_task_set_periodic(RT_TASK *task, RTIME idate, RTIME period)
 #endif
 {
-	struct timespec its, pts, now;
+	struct timespec its, old_its, pts, old_pts, now;
 	struct alchemy_task *tcb;
 	struct service svc;
 	int ret;
 
 	CANCEL_DEFER(svc);
+
+	tcb = get_alchemy_task_or_self(task, &ret);
+	if (tcb == NULL)
+		goto out;
+
+	if (!threadobj_local_p(&tcb->thobj)) {
+		ret = -EINVAL;
+		goto out;
+	}
 
 	if (period == TM_INFINITE) {
 		pts.tv_sec = 0;
@@ -854,7 +864,13 @@ int rt_task_set_periodic(RT_TASK *task, RTIME idate, RTIME period)
 		clockobj_ticks_to_timespec(&alchemy_clock, period, &pts);
 		if (idate == TM_NOW) {
 			__RT(clock_gettime(CLOCK_COPPERPLATE, &now));
-			timespec_add(&its, &now, &pts);
+
+			if (threadobj_get_periodic(&tcb->thobj, &old_its,
+						   &old_pts) == 0) {
+				timespec_add(&its, &now, &old_its);
+			} else {
+				timespec_add(&its, &now, &pts);
+			}
 		} else
 			/*
 			 * idate is an absolute time specification
@@ -862,15 +878,6 @@ int rt_task_set_periodic(RT_TASK *task, RTIME idate, RTIME period)
 			 * timespec.
 			 */
 			clockobj_ticks_to_timespec(&alchemy_clock, idate, &its);
-	}
-
-	tcb = get_alchemy_task_or_self(task, &ret);
-	if (tcb == NULL)
-		goto out;
-
-	if (!threadobj_local_p(&tcb->thobj)) {
-		ret = -EINVAL;
-		goto out;
 	}
 
 	ret = threadobj_set_periodic(&tcb->thobj, &its, &pts);
