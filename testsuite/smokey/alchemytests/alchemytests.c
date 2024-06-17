@@ -25,11 +25,13 @@ static const char * const tests[] = {
 	"alchemytests_task7",
 	"alchemytests_task8",
 	"alchemytests_task9",
-	"alchemytests_task10"
+	"alchemytests_task10",
+	"alchemytests_task11"
 };
 
 static int run_alchemytests(struct smokey_test *t, int argc, char *const argv[])
 {
+	const char *args = "--vm --cpu-affinity=0";
 	const char *const mod = "xeno_rtipc";
 	int test_ret = 0;
 	int ret = 0;
@@ -42,7 +44,8 @@ static int run_alchemytests(struct smokey_test *t, int argc, char *const argv[])
 
 	for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
 		tmp = smokey_run_extprog(XENO_TEST_DIR, tests[i],
-					 "--cpu-affinity=0", &test_ret);
+					 smokey_on_vm ? args : args + 5,
+					 &test_ret);
 		if (test_ret)
 			ret = test_ret; /* Return the last failed test result */
 		if (tmp)

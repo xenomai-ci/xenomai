@@ -33,7 +33,8 @@ test_PROGRAMS =				\
 		alchemytests_task7	\
 		alchemytests_task8	\
 		alchemytests_task9	\
-		alchemytests_task10
+		alchemytests_task10	\
+		alchemytests_task11
 
 alchemycppflags =			\
 	$(XENO_USER_CFLAGS)		\
@@ -138,3 +139,7 @@ alchemytests_task10_SOURCES = task-10.c
 alchemytests_task10_CPPFLAGS = $(alchemycppflags)
 alchemytests_task10_LDADD = $(alchemyldadd)
 alchemytests_task10_LDFLAGS = @XENO_AUTOINIT_LDFLAGS@
+alchemytests_task11_SOURCES = task-11.c
+alchemytests_task11_CPPFLAGS = $(alchemycppflags)
+alchemytests_task11_LDADD = $(alchemyldadd)
+alchemytests_task11_LDFLAGS = @XENO_AUTOINIT_LDFLAGS@
