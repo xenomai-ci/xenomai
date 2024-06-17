@@ -1661,6 +1661,27 @@ int threadobj_set_periodic(struct threadobj *thobj,
 	return 0;
 }
 
+int threadobj_get_periodic(struct threadobj *thobj,
+			   struct timespec *__restrict__ idate,
+			   struct timespec *__restrict__ period)
+{				/* thobj->lock held */
+	struct itimerspec its;
+	int ret;
+
+	__threadobj_check_locked(thobj);
+
+	if (!(thobj->status & __THREAD_S_PERIODIC))
+		return __bt(-EINVAL);
+
+	ret = __RT(timer_gettime(thobj->periodic_timer, &its));
+	if (ret)
+		return __bt(-errno);
+
+	*idate = its.it_value;
+	*period = its.it_interval;
+	return 0;
+}
+
 int threadobj_wait_period(unsigned long *overruns_r)
 {
 	struct threadobj *current = threadobj_current();

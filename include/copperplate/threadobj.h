@@ -365,6 +365,10 @@ int threadobj_set_periodic(struct threadobj *thobj,
 			   const struct timespec *__restrict__ idate,
 			   const struct timespec *__restrict__ period);
 
+int threadobj_get_periodic(struct threadobj *thobj,
+			   struct timespec *__restrict__ idate,
+			   struct timespec *__restrict__ period);
+
 int threadobj_wait_period(unsigned long *overruns_r) __must_check;
 
 void threadobj_spin(ticks_t ns);
