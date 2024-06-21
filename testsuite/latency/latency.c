@@ -89,6 +89,7 @@ int32_t *histogram_avg = NULL, *histogram_max = NULL, *histogram_min = NULL;
 char *do_gnuplot = NULL;
 int do_histogram = 0, do_stats = 0, finished = 0;
 int bucketsize = 1000;		/* default = 1000ns, -B <size> to override */
+int max_latency_treshold = 0;	/* default = 0 (diabled), -m <max> (in us) to override */
 
 #define need_histo() (do_histogram || do_stats || do_gnuplot)
 
@@ -536,6 +537,12 @@ static void cleanup(void)
 	if (histogram_min)
 		free(histogram_min);
 
+	if (max_latency_treshold > 0 && (double)gmaxjitter / 1000 > max_latency_treshold) {
+		printf("\nMaximum latency exceeded: %11.3f > %d\n",
+		       (double)gmaxjitter / 1000, max_latency_treshold);
+		exit(1);
+	}
+
 	exit(0);
 }
 
@@ -614,6 +621,7 @@ void application_usage(void)
 		"-c <cpu>                        pin measuring task down to given CPU\n"
 		"-P <priority>                   task priority (test mode 0 and 1 only)\n"
 		"-b                              break upon mode switch\n"
+		"-m <max>                        fail if the maximum latency is larger than max\n"
 		);
 }
 
@@ -648,7 +656,7 @@ int main(int argc, char *const *argv)
 	cpu_set_t cpus;
 	sigset_t mask;
 
-	while ((c = getopt(argc, argv, "g:hp:l:T:qH:B:sD:t:fc:P:b")) != EOF)
+	while ((c = getopt(argc, argv, "g:hp:l:T:qH:B:sD:t:fc:P:bm:")) != EOF)
 		switch (c) {
 		case 'g':
 			do_gnuplot = strdup(optarg);
@@ -720,6 +728,10 @@ int main(int argc, char *const *argv)
 
 		case 'b':
 			stop_upon_switch = 1;
+			break;
+
+		case 'm':
+			max_latency_treshold = atoi(optarg);
 			break;
 
 		default:
