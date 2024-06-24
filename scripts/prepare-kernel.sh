@@ -82,9 +82,7 @@ patch_link() {
 				rm -f $linux_tree/$link_dir/$f
 			else
 				mkdir -p $linux_tree/$link_dir/$d
-				if test x$forcelink = x1 -o \
-					! $xenomai_root/$target_dir/$f -ef $linux_tree/$link_dir/$f;
-				then
+				if test ! $xenomai_root/$target_dir/$f -ef $linux_tree/$link_dir/$f; then
 					ln -sf $xenomai_root/$target_dir/$f $linux_tree/$link_dir/$f
 				fi
 			fi
@@ -117,7 +115,7 @@ generate_patch() {
 	)
 }
 
-usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--forcelink] [--verbose] [--reverse]'
+usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--verbose] [--reverse]'
 me=`basename $0`
 
 while test $# -gt 0; do
@@ -145,7 +143,7 @@ while test $# -gt 0; do
 		echo "$me: warning: --filterarch= is deprecated and now a no-op" >&2
 		;;
 	--forcelink)
-		forcelink=1
+		echo "$me: warning: --forcelink is deprecated and now a no-op" >&2
 		;;
 	--default)
 		echo "$me: warning: --default is deprecated and now always on" >&2
