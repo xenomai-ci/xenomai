@@ -3,9 +3,6 @@ set -e
 
 unset CDPATH
 
-# Default path to kernel tree
-linux_tree=.
-
 patch_copytempfile() {
 	file="$1"
 	if ! test -f "$temp_tree/$file"; then
@@ -117,6 +114,14 @@ generate_patch() {
 
 usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--verbose] [--reverse]'
 me=`basename $0`
+
+# Default path to kernel tree
+linux_tree=.
+output_patch=""
+linux_arch=""
+reverse=0
+pipeline_patch=""
+verbose=0
 
 while test $# -gt 0; do
 	case "$1" in
