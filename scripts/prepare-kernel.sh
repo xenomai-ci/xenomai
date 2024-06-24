@@ -248,15 +248,8 @@ if [ ! -z $foo ] ; then
 fi
 unset foo
 
-eval linux_`grep '^EXTRAVERSION =' $linux_tree/Makefile | sed -e 's, ,,g'`
-eval linux_`grep '^PATCHLEVEL =' $linux_tree/Makefile | sed -e 's, ,,g'`
-eval linux_`grep '^SUBLEVEL =' $linux_tree/Makefile | sed -e 's, ,,g'`
-eval linux_`grep '^VERSION =' $linux_tree/Makefile | sed -e 's, ,,g'`
-
-linux_version="$linux_VERSION.$linux_PATCHLEVEL.$linux_SUBLEVEL"
-
 if test x$verbose = x1; then
-	echo "Preparing kernel $linux_version$linux_EXTRAVERSION in $linux_tree..."
+	echo "Preparing kernel $linux_tree..."
 fi
 
 if test -r $linux_tree/include/linux/dovetail.h; then
@@ -277,7 +270,7 @@ else
 	curdir=$PWD
 	cd $linux_tree && patch --dry-run -p1 -f < $pipeline_patch || {
 		cd $curdir;
-		echo "$me: Unable to patch kernel $linux_version$linux_EXTRAVERSION with `basename $pipeline_patch`." >&2
+		echo "$me: Unable to patch kernel $linux_tree with `basename $pipeline_patch`." >&2
 		exit 2;
 	}
 	patch -p1 -f -s < $pipeline_patch
@@ -295,56 +288,48 @@ if test x$verbose = x1; then
 	echo "IRQ pipeline installed."
 fi
 
-case $linux_VERSION.$linux_PATCHLEVEL in
-2.*)
-	echo "$me: Unsupported kernel version $linux_VERSION.$linux_PATCHLEVEL.x" >&2
-	exit 2
-	;;
-*)
-	if ! grep -q XENOMAI $linux_tree/init/Kconfig; then
-		version_stamp=`cat $xenomai_root/config/version-code`
-		version_major=`expr $version_stamp : '\([[0-9]]*\)' || true`
-		version_minor=`expr $version_stamp : '[[0-9]]*\.\([[0-9]*]*\)' || true`
-		revision_level=`expr $version_stamp : '[[0-9]]*\.[[0-9]*]*\.\([[0-9]*]*\)' || true`
-		if [ -z "$revision_level" ]; then
-			revision_level=0
-		fi
-		version_string=`cat $xenomai_root/config/version-label`
-		sed -e "s,@VERSION_MAJOR@,$version_major,g" \
-			-e "s,@VERSION_MINOR@,$version_minor,g" \
-			-e "s,@REVISION_LEVEL@,$revision_level,g" \
-			-e "s,@VERSION_STRING@,$version_string,g" \
-			$xenomai_root/scripts/Kconfig.frag |
-			patch_append init/Kconfig
-	elif test x$reverse = x1; then
-		patch_reverse init/Kconfig
-	fi
+if ! grep -q XENOMAI $linux_tree/init/Kconfig; then
+	version_stamp=`cat $xenomai_root/config/version-code`
+	version_major=`expr $version_stamp : '\([[0-9]]*\)' || true`
+	version_minor=`expr $version_stamp : '[[0-9]]*\.\([[0-9]*]*\)' || true`
+	revision_level=`expr $version_stamp : '[[0-9]]*\.[[0-9]*]*\.\([[0-9]*]*\)' || true`
+if [ -z "$revision_level" ]; then
+	revision_level=0
+fi
+version_string=`cat $xenomai_root/config/version-label`
+sed -e "s,@VERSION_MAJOR@,$version_major,g" \
+	-e "s,@VERSION_MINOR@,$version_minor,g" \
+	-e "s,@REVISION_LEVEL@,$revision_level,g" \
+	-e "s,@VERSION_STRING@,$version_string,g" \
+	$xenomai_root/scripts/Kconfig.frag |
+		patch_append init/Kconfig
+elif test x$reverse = x1; then
+	patch_reverse init/Kconfig
+fi
 
-	for a in $target_linux_archs; do
-		if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$a/Makefile; then
-			p1="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
-			p2="core-\$(CONFIG_XENOMAI)	+= arch/$a/xenomai/"
-			(echo; echo $p1; echo $p2) | patch_append arch/$a/Makefile
-		elif test x$reverse = x1; then
-			patch_reverse arch/$a/Makefile
-		fi
-	done
-
-	if ! grep -q CONFIG_XENOMAI $linux_tree/drivers/Makefile; then
-		p="obj-\$(CONFIG_XENOMAI)		+= xenomai/"
-		( echo ; echo $p ) | patch_append drivers/Makefile
+for a in $target_linux_archs; do
+	if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$a/Makefile; then
+		p1="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
+		p2="core-\$(CONFIG_XENOMAI)	+= arch/$a/xenomai/"
+		(echo; echo $p1; echo $p2) | patch_append arch/$a/Makefile
 	elif test x$reverse = x1; then
-		patch_reverse drivers/Makefile
+		patch_reverse arch/$a/Makefile
 	fi
+done
 
-	if ! grep -q CONFIG_XENOMAI $linux_tree/kernel/Makefile; then
-		p="obj-\$(CONFIG_XENOMAI)		+= xenomai/"
-		( echo ; echo $p ) | patch_append kernel/Makefile
-	elif test x$reverse = x1; then
-		patch_reverse kernel/Makefile
-	fi
-	;;
-esac
+if ! grep -q CONFIG_XENOMAI $linux_tree/drivers/Makefile; then
+	p="obj-\$(CONFIG_XENOMAI)		+= xenomai/"
+	( echo ; echo $p ) | patch_append drivers/Makefile
+elif test x$reverse = x1; then
+	patch_reverse drivers/Makefile
+fi
+
+if ! grep -q CONFIG_XENOMAI $linux_tree/kernel/Makefile; then
+	p="obj-\$(CONFIG_XENOMAI)		+= xenomai/"
+	( echo ; echo $p ) | patch_append kernel/Makefile
+elif test x$reverse = x1; then
+	patch_reverse kernel/Makefile
+fi
 
 # Create local directories then symlink to the source files from
 # there, so that we don't pollute the Xenomai source tree with
