@@ -3,28 +3,6 @@ set -e
 
 unset CDPATH
 
-# At all time, this variable must be set to either:
-# "y" if the changes to the Linux tree are specific to the kernel version;
-# "n" otherwise.
-patch_kernelversion_specific="n"
-
-# At all time, this variable must be set to either:
-# "y" if the changes to the Linux tree are specific to the architecture;
-# "n" otherwise.
-patch_architecture_specific="n"
-
-# At all time, this variable must be set to either:
-# "y": ignore kernel-version-specific changes;
-# "n": ignore non-kernel-version-specific changes;
-# "b": don't filter according to the kernel version.
-patch_kernelversion_filter="b"
-
-# At all time, this variable must be set to either:
-# "y": ignore architecture-specific changes;
-# "n": ignore non-architecture-specific changes;
-# "b": don't filter according to the architecture.
-patch_architecture_filter="b"
-
 # Default path to kernel tree
 linux_tree=.
 
@@ -34,18 +12,6 @@ patch_copytempfile() {
 		subdir=`dirname "$file"`
 		mkdir -p "$temp_tree/$subdir"
 		cp "$linux_tree/$file" "$temp_tree/$file"
-	fi
-}
-
-check_filter() {
-	if test "$patch_kernelversion_specific" != "$patch_kernelversion_filter" \
-		-a "$patch_architecture_specific" != "$patch_architecture_filter"; then
-		echo ok
-	elif test -e "$temp_tree/$1"; then
-		echo "$me: inconsistent multiple changes to $1 in Linux kernel tree" >&2
-		echo error
-	else
-		echo ignore
 	fi
 }
 
@@ -61,10 +27,8 @@ patch_append() {
 		chmod +w "$linux_tree/$file"
 		cat >> "$linux_tree/$file"
 	else
-		if test `check_filter $file` = "ok"; then
-			patch_copytempfile "$file"
-			cat >> "$temp_tree/$file"
-		fi
+		patch_copytempfile "$file"
+		cat >> "$temp_tree/$file"
 	fi
 }
 
@@ -125,13 +89,11 @@ patch_link() {
 				fi
 			fi
 		else
-			if test `check_filter $link_dir/$f` = "ok"; then
-				if test -e $linux_tree/$link_dir/$f; then
-					echo "$me: warning: $link_dir/$f already present in Linux kernel tree, output patch might be defective" >&2
-				fi
-				mkdir -p $temp_tree/$link_dir/$d
-				cp $xenomai_root/$target_dir/$f $temp_tree/$link_dir/$f
+			if test -e $linux_tree/$link_dir/$f; then
+				echo "$me: warning: $link_dir/$f already present in Linux kernel tree, output patch might be defective" >&2
 			fi
+			mkdir -p $temp_tree/$link_dir/$d
+			cp $xenomai_root/$target_dir/$f $temp_tree/$link_dir/$f
 		fi
 	done
 	if test x$reverse = x1; then
@@ -155,7 +117,7 @@ generate_patch() {
 	)
 }
 
-usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--filterkvers=y|n] [--filterarch=y|n]] [--forcelink] [--default] [--verbose] [--reverse]'
+usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--forcelink] [--default] [--verbose] [--reverse]'
 me=`basename $0`
 
 while test $# -gt 0; do
@@ -177,10 +139,10 @@ while test $# -gt 0; do
 		output_patch=`echo $1|sed -e 's,^--outpatch=\\(.*\\)$,\\1,g'`
 		;;
 	--filterkvers=*)
-		patch_kernelversion_filter=`echo $1|sed -e 's,^--filterkvers=\\(.*\\)$,\\1,g'`
+		echo "$me: warning: --filterkvers= is deprecated and now a no-op" >&2
 		;;
 	--filterarch=*)
-		patch_architecture_filter=`echo $1|sed -e 's,^--filterarch=\\(.*\\)$,\\1,g'`
+		echo "$me: warning: --filterarch= is deprecated and now a no-op" >&2
 		;;
 	--forcelink)
 		forcelink=1
@@ -349,16 +311,12 @@ if test x$verbose = x1; then
 	echo "IRQ pipeline installed."
 fi
 
-patch_kernelversion_specific="y"
-
 case $linux_VERSION.$linux_PATCHLEVEL in
 2.*)
 	echo "$me: Unsupported kernel version $linux_VERSION.$linux_PATCHLEVEL.x" >&2
 	exit 2
 	;;
 *)
-	patch_architecture_specific="y"
-
 	if ! grep -q XENOMAI $linux_tree/init/Kconfig; then
 		version_stamp=`cat $xenomai_root/config/version-code`
 		version_major=`expr $version_stamp : '\([[0-9]]*\)' || true`
@@ -390,8 +348,6 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 		fi
 	done
 
-	patch_architecture_specific="n"
-
 	if ! grep -q CONFIG_XENOMAI $linux_tree/drivers/Makefile; then
 		p="obj-\$(CONFIG_XENOMAI)		+= xenomai/"
 		( echo ; echo $p ) | patch_append drivers/Makefile
@@ -415,13 +371,10 @@ esac
 # Keep link dirs (4th parameter) descending, otherwise --reverse
 # is not able to cleanup these directories!
 
-patch_kernelversion_specific="n"
-patch_architecture_specific="y"
 for a in $target_linux_archs; do
 	patch_link r m kernel/cobalt/arch/$a arch/$a/xenomai
 	patch_link n n kernel/cobalt/include/dovetail arch/$a/include/dovetail
 done
-patch_architecture_specific="n"
 patch_link n cobalt-core.h kernel/cobalt/trace include/trace/events
 patch_link n cobalt-rtdm.h kernel/cobalt/trace include/trace/events
 patch_link n cobalt-posix.h kernel/cobalt/trace include/trace/events
