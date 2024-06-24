@@ -117,7 +117,7 @@ generate_patch() {
 	)
 }
 
-usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--forcelink] [--default] [--verbose] [--reverse]'
+usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--forcelink] [--verbose] [--reverse]'
 me=`basename $0`
 
 while test $# -gt 0; do
@@ -148,7 +148,7 @@ while test $# -gt 0; do
 		forcelink=1
 		;;
 	--default)
-		usedefault=1
+		echo "$me: warning: --default is deprecated and now always on" >&2
 		;;
 	--verbose)
 		verbose=1
@@ -180,23 +180,9 @@ xenomai_root=`cd $xenomai_root && pwd`
 
 default_linux_tree=/lib/modules/`uname -r`/source
 
-while test x$linux_tree = x; do
-	if test x$usedefault = x; then
-		echo -n "Linux tree [default $default_linux_tree]: "
-		read linux_tree
-	fi
-	if test x$linux_tree = x; then
-		linux_tree=$default_linux_tree
-	fi
-	if test \! -x "$linux_tree"; then
-		echo "$me: cannot access Linux tree in $linux_tree"
-		linux_tree=
-		usedefault=
-		default_linux_tree=/usr/src
-	else
-		break
-	fi
-done
+if test x$linux_tree = x; then
+	linux_tree=$default_linux_tree
+fi
 
 linux_tree=`cd $linux_tree && pwd`
 
@@ -279,14 +265,10 @@ else
 	if test x$verbose = x1; then
 		echo "$me: no IRQ pipeline support found." >&2
 	fi
-	while test x$pipeline_patch = x; do
-		echo -n "IRQ pipeline patch: "
-		read pipeline_patch
-		if test \! -r "$pipeline_patch" -o x$pipeline_patch = x; then
-			echo "$me: cannot read IRQ pipeline support from $pipeline_patch" >&2
-			pipeline_patch=
-		fi
-	done
+	if test x$pipeline_patch = x; then
+		echo "$me: no IRQ pipeline support found in $linux_tree and --dovetail= not set" >&2
+		exit 2
+	fi
 	patchdir=`dirname $pipeline_patch`;
 	patchdir=`cd $patchdir && pwd`
 	pipeline_patch=$patchdir/`basename $pipeline_patch`
