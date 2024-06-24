@@ -237,7 +237,7 @@ done
 
 linux_tree=`cd $linux_tree && pwd`
 
-if test \! -r $linux_tree/Makefile; then
+if test "$(head -1 $linux_tree/README 2> /dev/null)" != "Linux kernel"; then
 	echo "$me: $linux_tree is not a valid Linux kernel tree" >&2
 	exit 2
 fi
