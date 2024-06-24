@@ -127,8 +127,6 @@ while test $# -gt 0; do
 	--dovetail=*)
 		pipeline_patch=`echo $1|sed -e 's,^--dovetail=\\(.*\\)$,\\1,g'`
 		pipeline_patch=`eval "echo $pipeline_patch"`
-		probe_header=include/linux/dovetail.h
-		arch_probe_header=include/asm/dovetail.h
 		;;
 	--arch=*)
 		linux_arch=`echo $1|sed -e 's,^--arch=\\(.*\\)$,\\1,g'`
@@ -255,7 +253,7 @@ if test x$verbose = x1; then
 	echo "Preparing kernel $linux_version$linux_EXTRAVERSION in $linux_tree..."
 fi
 
-if test -r $linux_tree/$probe_header; then
+if test -r $linux_tree/include/linux/dovetail.h; then
 	if test x$verbose = x1; then
 		echo "IRQ pipeline found - bypassing patch."
 	fi
@@ -281,7 +279,7 @@ else
 fi
 
 for a in $target_linux_archs; do
-	if test \! -r $linux_tree/arch/$a/$arch_probe_header; then
+	if test \! -r $linux_tree/arch/$a/include/asm/dovetail.h; then
 		echo "$me: $linux_tree has no IRQ pipeline support for $a" >&2
 		exit 2
 	fi
