@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 set -e
 
 unset CDPATH
@@ -172,7 +172,7 @@ done
 # Infere the location of the Xenomai source tree from
 # the path of the current script.
 
-script_path=`type -p $0`
+script_path=`realpath $0`
 xenomai_root=`dirname $script_path`/..
 xenomai_root=`cd $xenomai_root && pwd`
 
