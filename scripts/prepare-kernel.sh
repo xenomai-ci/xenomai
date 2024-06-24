@@ -242,13 +242,6 @@ if test \! -r $linux_tree/Makefile; then
 	exit 2
 fi
 
-if test x$reverse = x1; then
-	if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$linux_arch/Makefile; then
-		echo "$me: $linux_tree is not prepared with Xenomai" >&2
-		exit 2
-	fi
-fi
-
 # Create an empty output patch file, and initialize the temporary tree.
 if test "x$output_patch" != "x"; then
 	temp_tree=`mktemp -d prepare-kernel-XXX --tmpdir`
@@ -269,41 +262,32 @@ if test "x$output_patch" != "x"; then
 
 fi
 
-# Infer the default architecture if unspecified.
-
 if test x$linux_arch = x; then
-	build_arch=`$xenomai_root/config/config.guess`
-	default_linux_arch=`echo $build_arch|cut -f1 -d-`
-fi
-
-while : ; do
-	if test x$linux_arch = x; then
-		if test x$usedefault = x; then
-			echo -n "Target architecture [default $default_linux_arch]: "
-			read linux_arch
-		fi
-		if test "x$linux_arch" = x; then
-			linux_arch=$default_linux_arch
-		fi
-	fi
+	target_linux_archs="x86 arm arm64"
+else
 	case "$linux_arch" in
 		x86*|i*86|amd*)
-		linux_arch=x86
+		target_linux_archs="x86"
 		;;
 	arm)
-		linux_arch=arm
+		target_linux_archs="arm"
 		;;
 	arm64|aarch64)
-		linux_arch=arm64
+		target_linux_archs="arm64"
 		;;
 	*)
 		echo "$me: unsupported architecture: $linux_arch" >&2
-		linux_arch=
-		usedefault=
+		exit 1
 		;;
 	esac
-	if test \! x$linux_arch = x; then
-		break
+fi
+
+for a in $target_linux_archs; do
+	if test x$reverse = x1; then
+		if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$a/Makefile; then
+			echo "$me: $linux_tree is not prepared with Xenomai" >&2
+			exit 2
+		fi
 	fi
 done
 
@@ -353,10 +337,12 @@ else
 	cd $curdir
 fi
 
-if test \! -r $linux_tree/arch/$linux_arch/$arch_probe_header; then
-	echo "$me: $linux_tree has no IRQ pipeline support for $linux_arch" >&2
-	exit 2
-fi
+for a in $target_linux_archs; do
+	if test \! -r $linux_tree/arch/$a/$arch_probe_header; then
+		echo "$me: $linux_tree has no IRQ pipeline support for $a" >&2
+		exit 2
+	fi
+done
 
 if test x$verbose = x1; then
 	echo "IRQ pipeline installed."
@@ -385,7 +371,6 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 			-e "s,@VERSION_MINOR@,$version_minor,g" \
 			-e "s,@REVISION_LEVEL@,$revision_level,g" \
 			-e "s,@VERSION_STRING@,$version_string,g" \
-			-e "s,@SRCARCH@,$linux_arch,g" \
 			$xenomai_root/scripts/Kconfig.frag |
 			patch_append init/Kconfig
 	elif test x$reverse = x1; then
@@ -394,13 +379,15 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 
 	test "x$CONFIG_XENO_REVISION_LEVEL" = "x" && CONFIG_XENO_REVISION_LEVEL=0
 
-	if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$linux_arch/Makefile; then
-		p1="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
-		p2="core-\$(CONFIG_XENOMAI)	+= arch/$linux_arch/xenomai/"
-		(echo; echo $p1; echo $p2) | patch_append arch/$linux_arch/Makefile
-	elif test x$reverse = x1; then
-		patch_reverse arch/$linux_arch/Makefile
-	fi
+	for a in $target_linux_archs; do
+		if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$a/Makefile; then
+			p1="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
+			p2="core-\$(CONFIG_XENOMAI)	+= arch/$a/xenomai/"
+			(echo; echo $p1; echo $p2) | patch_append arch/$a/Makefile
+		elif test x$reverse = x1; then
+			patch_reverse arch/$a/Makefile
+		fi
+	done
 
 	patch_architecture_specific="n"
 
@@ -429,8 +416,10 @@ esac
 
 patch_kernelversion_specific="n"
 patch_architecture_specific="y"
-patch_link r m kernel/cobalt/arch/$linux_arch arch/$linux_arch/xenomai
-patch_link n n kernel/cobalt/include/dovetail arch/$linux_arch/include/dovetail
+for a in $target_linux_archs; do
+	patch_link r m kernel/cobalt/arch/$a arch/$a/xenomai
+	patch_link n n kernel/cobalt/include/dovetail arch/$a/include/dovetail
+done
 patch_architecture_specific="n"
 patch_link n cobalt-core.h kernel/cobalt/trace include/trace/events
 patch_link n cobalt-rtdm.h kernel/cobalt/trace include/trace/events
