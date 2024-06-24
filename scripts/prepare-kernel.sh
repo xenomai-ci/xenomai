@@ -136,7 +136,8 @@ patch_link() {
 	done
 	if test x$reverse = x1; then
 		if ! find $linux_tree/$link_dir -not -type d | grep -q . ; then
-			rm -rf $linux_tree/$link_dir
+			# shellcheck disable=SC2115
+			rm -rf ${linux_tree}/$link_dir
 		fi
 	fi
 	)
