@@ -319,8 +319,6 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 		patch_reverse init/Kconfig
 	fi
 
-	test "x$CONFIG_XENO_REVISION_LEVEL" = "x" && CONFIG_XENO_REVISION_LEVEL=0
-
 	for a in $target_linux_archs; do
 		if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$a/Makefile; then
 			p1="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
