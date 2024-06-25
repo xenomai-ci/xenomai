@@ -83,18 +83,16 @@ patch_link() {
 		fi
 		if test x$recursive = xr; then
 			recursive_opt="-mindepth 1"
-			dir_opt="-type d -o"
 		else
 			recursive_opt="-maxdepth 1"
-			dir_opt=""
 		fi
-		find_clean_opt="$recursive_opt \( $dir_opt $link_makefiles_opt -name Kconfig -o -name '*.[chS]' -o -name '*.sh' \)"
+		find_clean_opt="$recursive_opt \( $link_makefiles_opt -name Kconfig -o -name '*.[chS]' -o -name '*.sh' \)"
 		find_link_opt="$recursive_opt \( $link_makefiles_opt -name Kconfig -o -name '*.[chS]' -o -name '*.sh' \)"
 	fi
 
 	if test "x$output_patch" = "x" -a -e $linux_tree/$link_dir; then
 		cd $linux_tree/$link_dir && eval find . $find_clean_opt | while read f; do
-			if test -L $f -a ! -e $xenomai_root/$target_dir/$f; then rm -Rf $f; fi
+			if test -L $f -a ! -e $f; then rm -f $f; fi
 		done
 	fi
 
