@@ -55,6 +55,8 @@ patch_append() {
 		if test -L "$linux_tree/$file" ; then
 			mv "$linux_tree/$file" "$linux_tree/$file.orig"
 			cp "$linux_tree/$file.orig" "$linux_tree/$file"
+		else
+			cp "$linux_tree/$file" "$linux_tree/$file.orig"
 		fi
 		chmod +w "$linux_tree/$file"
 		cat >> "$linux_tree/$file"
@@ -63,6 +65,16 @@ patch_append() {
 			patch_copytempfile "$file"
 			cat >> "$temp_tree/$file"
 		fi
+	fi
+}
+
+patch_reverse() {
+	file="$1"
+	if test "x$output_patch" = "x"; then
+		if test -L "$linux_tree/$file" ; then
+			rm "$linux_tree/$file"
+		fi
+		mv "$linux_tree/$file.orig" "$linux_tree/$file"
 	fi
 }
 
@@ -90,7 +102,7 @@ patch_link() {
 		find_link_opt="$recursive_opt \( $link_makefiles_opt -name Kconfig -o -name '*.[chS]' -o -name '*.sh' \)"
 	fi
 
-	if test "x$output_patch" = "x" -a -e $linux_tree/$link_dir; then
+	if test "x$output_patch" = "x" -a "x$reverse" = "x0" -a -e $linux_tree/$link_dir; then
 		cd $linux_tree/$link_dir && eval find . $find_clean_opt | while read f; do
 			if test -L $f -a ! -e $f; then rm -f $f; fi
 		done
@@ -102,11 +114,15 @@ patch_link() {
 		f=`echo $f | cut -d/ -f2-`
 		d=`dirname $f`
 		if test "x$output_patch" = "x"; then
-			mkdir -p $linux_tree/$link_dir/$d
-			if test x$forcelink = x1 -o \
-				! $xenomai_root/$target_dir/$f -ef $linux_tree/$link_dir/$f;
-			then
-				ln -sf $xenomai_root/$target_dir/$f $linux_tree/$link_dir/$f
+			if test x$reverse = x1; then
+				rm -f $linux_tree/$link_dir/$f
+			else
+				mkdir -p $linux_tree/$link_dir/$d
+				if test x$forcelink = x1 -o \
+					! $xenomai_root/$target_dir/$f -ef $linux_tree/$link_dir/$f;
+				then
+					ln -sf $xenomai_root/$target_dir/$f $linux_tree/$link_dir/$f
+				fi
 			fi
 		else
 			if test `check_filter $link_dir/$f` = "ok"; then
@@ -118,6 +134,11 @@ patch_link() {
 			fi
 		fi
 	done
+	if test x$reverse = x1; then
+		if ! find $linux_tree/$link_dir -not -type d | grep -q . ; then
+			rm -rf $linux_tree/$link_dir
+		fi
+	fi
 	)
 }
 
@@ -133,8 +154,7 @@ generate_patch() {
 	)
 }
 
-
-usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--filterkvers=y|n] [--filterarch=y|n]] [--forcelink] [--default] [--verbose]'
+usage='usage: prepare-kernel --linux=<linux-tree> [--dovetail=<dovetail-patch>] [--arch=<arch>] [--outpatch=<file> [--filterkvers=y|n] [--filterarch=y|n]] [--forcelink] [--default] [--verbose] [--reverse]'
 me=`basename $0`
 
 while test $# -gt 0; do
@@ -169,6 +189,9 @@ while test $# -gt 0; do
 		;;
 	--verbose)
 		verbose=1
+		;;
+	--reverse)
+		reverse=1
 		;;
 	--help)
 		echo "$usage"
@@ -219,11 +242,23 @@ if test \! -r $linux_tree/Makefile; then
 	exit 2
 fi
 
+if test x$reverse = x1; then
+	if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$linux_arch/Makefile; then
+		echo "$me: $linux_tree is not prepared with Xenomai" >&2
+		exit 2
+	fi
+fi
+
 # Create an empty output patch file, and initialize the temporary tree.
 if test "x$output_patch" != "x"; then
 	temp_tree=`mktemp -d prepare-kernel-XXX --tmpdir`
 	if [ $? -ne 0 ]; then
 		echo Temporary directory could not be created.
+		exit 1
+	fi
+
+	if test x$reverse = x1; then
+		echo "$me: --reverse and --outpatch are not compatible"
 		exit 1
 	fi
 
@@ -353,15 +388,18 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 			-e "s,@SRCARCH@,$linux_arch,g" \
 			$xenomai_root/scripts/Kconfig.frag |
 			patch_append init/Kconfig
+	elif test x$reverse = x1; then
+		patch_reverse init/Kconfig
 	fi
 
 	test "x$CONFIG_XENO_REVISION_LEVEL" = "x" && CONFIG_XENO_REVISION_LEVEL=0
 
 	if ! grep -q CONFIG_XENOMAI $linux_tree/arch/$linux_arch/Makefile; then
-		p="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
-		(echo; echo $p) | patch_append arch/$linux_arch/Makefile
-		p="core-\$(CONFIG_XENOMAI)	+= arch/$linux_arch/xenomai/"
-		echo $p | patch_append arch/$linux_arch/Makefile
+		p1="KBUILD_CFLAGS += -I\$(srctree)/arch/\$(SRCARCH)/xenomai/include -I\$(srctree)/include/xenomai"
+		p2="core-\$(CONFIG_XENOMAI)	+= arch/$linux_arch/xenomai/"
+		(echo; echo $p1; echo $p2) | patch_append arch/$linux_arch/Makefile
+	elif test x$reverse = x1; then
+		patch_reverse arch/$linux_arch/Makefile
 	fi
 
 	patch_architecture_specific="n"
@@ -369,11 +407,15 @@ case $linux_VERSION.$linux_PATCHLEVEL in
 	if ! grep -q CONFIG_XENOMAI $linux_tree/drivers/Makefile; then
 		p="obj-\$(CONFIG_XENOMAI)		+= xenomai/"
 		( echo ; echo $p ) | patch_append drivers/Makefile
+	elif test x$reverse = x1; then
+		patch_reverse drivers/Makefile
 	fi
 
 	if ! grep -q CONFIG_XENOMAI $linux_tree/kernel/Makefile; then
 		p="obj-\$(CONFIG_XENOMAI)		+= xenomai/"
 		( echo ; echo $p ) | patch_append kernel/Makefile
+	elif test x$reverse = x1; then
+		patch_reverse kernel/Makefile
 	fi
 	;;
 esac
@@ -381,13 +423,15 @@ esac
 # Create local directories then symlink to the source files from
 # there, so that we don't pollute the Xenomai source tree with
 # compilation files.
+#
+# Keep link dirs (4th parameter) descending, otherwise --reverse
+# is not able to cleanup these directories!
 
 patch_kernelversion_specific="n"
 patch_architecture_specific="y"
 patch_link r m kernel/cobalt/arch/$linux_arch arch/$linux_arch/xenomai
 patch_link n n kernel/cobalt/include/dovetail arch/$linux_arch/include/dovetail
 patch_architecture_specific="n"
-patch_link n m kernel/cobalt kernel/xenomai
 patch_link n cobalt-core.h kernel/cobalt/trace include/trace/events
 patch_link n cobalt-rtdm.h kernel/cobalt/trace include/trace/events
 patch_link n cobalt-posix.h kernel/cobalt/trace include/trace/events
@@ -395,14 +439,15 @@ patch_link r n kernel/cobalt/include/asm-generic/xenomai include/asm-generic/xen
 patch_link n m kernel/cobalt/posix kernel/xenomai/posix
 patch_link n m kernel/cobalt/rtdm kernel/xenomai/rtdm
 patch_link n m kernel/cobalt/dovetail kernel/xenomai/pipeline
+patch_link n m kernel/cobalt kernel/xenomai
 patch_link r m kernel/drivers drivers/xenomai
 patch_link n n include/cobalt/kernel include/xenomai/cobalt/kernel
-patch_link r n include/cobalt/kernel/rtdm include/xenomai/rtdm
 patch_link r n include/cobalt/kernel/dovetail/pipeline include/xenomai/pipeline
 patch_link r n include/cobalt/uapi include/xenomai/cobalt/uapi
 patch_link r n include/rtdm/uapi include/xenomai/rtdm/uapi
-patch_link n version.h include/xenomai include/xenomai
+patch_link r n include/cobalt/kernel/rtdm include/xenomai/rtdm
 patch_link n stdarg.h kernel/cobalt/include/linux include/xenomai/linux
+patch_link n version.h include/xenomai include/xenomai
 
 if test "x$output_patch" != "x"; then
 	if test x$verbose = x1; then
