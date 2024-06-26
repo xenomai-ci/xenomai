@@ -169,7 +169,7 @@ variables:
     - ./scripts/config -e XENO_DRIVERS_SPI_OMAP2_MCSPI_RT
     - ./scripts/config -e XENO_DRIVERS_SPI_DEBUG
     - popd
-    - scripts/prepare-kernel.sh --arch=${ARCH} --linux=${KDIR}
+    - scripts/prepare-kernel.sh --linux=${KDIR}
     - pushd ${KDIR}
     - make -j $(nproc) olddefconfig
     - make -j $(nproc) all
