@@ -175,7 +175,7 @@ variables:
     - make -j $(nproc) all
     - popd
     - scripts/bootstrap
-    - ./configure --enable-smp ${CONFIGURE_OPTS}
+    - ./configure ${CONFIGURE_OPTS}
     - make -j $(nproc)
     - ccache -s
   interruptible: true
@@ -254,7 +254,7 @@ i386-userland:
   script:
     - export CCACHE_DIR=$(pwd)/.ccache
     - scripts/bootstrap
-    - ./configure --enable-smp ${CONFIGURE_OPTS}
+    - ./configure ${CONFIGURE_OPTS}
     - make -j $(nproc)
     - ccache -s
 
