@@ -32,6 +32,7 @@ $(obj)/syscall_entries.h: $(syscall_entries) $(wildcard $(srctree)/$(src)/*.c) F
 	$(call if_changed,syscall_entries)
 
 target += syscall_entries.h
+clean-files += syscall_entries.h
 
 $(obj)/syscall.o: $(obj)/syscall_entries.h
 
