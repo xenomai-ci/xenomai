@@ -171,6 +171,9 @@ variables:
     - ${CI_PROJECT_DIR}/scripts/prepare-kernel.sh
     - make -j $(nproc) olddefconfig
     - make -j $(nproc) all
+    - make clean
+    - ${CI_PROJECT_DIR}/scripts/prepare-kernel.sh --reverse
+    - git status --short | grep . && exit 1
     - popd
     - scripts/bootstrap
     - ./configure ${CONFIGURE_OPTS}
