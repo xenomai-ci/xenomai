@@ -1,6 +1,7 @@
 HTML_DOCS = html/xeno3prm html/xeno3prm/search
 PDF_DOCS  = xeno3prm.pdf
 EXTRA_DIST = xeno3prm-common.conf.in xeno3prm-html.conf.in xeno3prm-latex.conf.in
+CLEANFILES = xeno3prm-common.conf xeno3prm-html.conf xeno3prm-latex.conf
 
 if XENO_BUILD_DOC
 
