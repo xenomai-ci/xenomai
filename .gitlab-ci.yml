@@ -178,6 +178,8 @@ variables:
     - scripts/bootstrap
     - ./configure ${CONFIGURE_OPTS}
     - make -j $(nproc)
+    - make clean
+    - git status --short | grep . && exit 1
     - ccache -s
   interruptible: true
   cache:
