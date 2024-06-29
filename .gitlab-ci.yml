@@ -70,7 +70,7 @@ variables:
     - export PATH=/usr/lib/ccache:$PATH
     - ${CROSS_COMPILE}gcc --version
   script:
-    - export CCACHE_DIR=$(pwd)/.ccache
+    - export CCACHE_DIR=${CI_PROJECT_DIR}/.ccache
     - pushd ${KDIR}
     - make -j $(nproc) ${KERNEL_DEFCONFIG}
     # Generic settings
@@ -168,9 +168,7 @@ variables:
     - ./scripts/config -e XENO_DRIVERS_SPI_SUN6I
     - ./scripts/config -e XENO_DRIVERS_SPI_OMAP2_MCSPI_RT
     - ./scripts/config -e XENO_DRIVERS_SPI_DEBUG
-    - popd
-    - scripts/prepare-kernel.sh --linux=${KDIR}
-    - pushd ${KDIR}
+    - ${CI_PROJECT_DIR}/scripts/prepare-kernel.sh
     - make -j $(nproc) olddefconfig
     - make -j $(nproc) all
     - popd
