@@ -50,7 +50,9 @@
 }
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,14,0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,14,0) && \
+    (LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0) || \
+     LINUX_VERSION_CODE < KERNEL_VERSION(5,10,220))
 #define close_fd(__ufd)	__close_fd(current->files, __ufd)
 #endif
 
