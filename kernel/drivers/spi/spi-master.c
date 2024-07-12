@@ -379,7 +379,7 @@ int __rtdm_spi_setup_driver(struct rtdm_spi_master *master)
 #endif
 	if (IS_ERR(master->devclass)) {
 		kfree(master->classname);
-		printk(XENO_ERR "cannot create sysfs class\n");
+		pr_err("cannot create sysfs class\n");
 		return PTR_ERR(master->devclass);
 	}
 
