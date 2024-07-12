@@ -21,6 +21,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/moduleparam.h>
 #include <linux/slab.h>
 #include <rtnet_checksum.h>
@@ -125,8 +127,8 @@ EXPORT_SYMBOL_GPL(rtskb_copy_and_csum_dev);
  */
 void rtskb_over_panic(struct rtskb *skb, int sz, void *here)
 {
-	rtdm_printk("RTnet: rtskb_put :over: %p:%d put:%d dev:%s\n", here,
-		    skb->len, sz, (skb->rtdev) ? skb->rtdev->name : "<NULL>");
+	pr_err("rtskb_put :over: %p:%d put:%d dev:%s\n", here, skb->len, sz,
+	       (skb->rtdev) ? skb->rtdev->name : "<NULL>");
 }
 
 EXPORT_SYMBOL_GPL(rtskb_over_panic);
@@ -141,8 +143,8 @@ EXPORT_SYMBOL_GPL(rtskb_over_panic);
  */
 void rtskb_under_panic(struct rtskb *skb, int sz, void *here)
 {
-	rtdm_printk("RTnet: rtskb_push :under: %p:%d put:%d dev:%s\n", here,
-		    skb->len, sz, (skb->rtdev) ? skb->rtdev->name : "<NULL>");
+	pr_err("rtskb_push :under: %p:%d put:%d dev:%s\n", here, skb->len, sz,
+	       (skb->rtdev) ? skb->rtdev->name : "<NULL>");
 }
 
 EXPORT_SYMBOL_GPL(rtskb_under_panic);
@@ -370,8 +372,7 @@ unsigned int rtskb_pool_extend(struct rtskb_pool *pool, unsigned int add_rtskbs)
 	for (i = 0; i < add_rtskbs; i++) {
 		/* get rtskb from slab pool */
 		if (!(skb = kmem_cache_alloc(rtskb_slab_pool, GFP_KERNEL))) {
-			printk(KERN_ERR
-			       "RTnet: rtskb allocation from slab pool failed\n");
+			pr_err("rtskb allocation from slab pool failed\n");
 			break;
 		}
 

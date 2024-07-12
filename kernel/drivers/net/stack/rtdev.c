@@ -23,6 +23,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/spinlock.h>
 #include <linux/if.h>
 #include <linux/if_arp.h> /* ARPHRD_ETHER */
@@ -243,7 +245,7 @@ static int rtdev_init(struct rtnet_device *rtdev, unsigned dev_pool_size)
 	ret = rtskb_pool_init(&rtdev->dev_pool, dev_pool_size, &rtdev_ops,
 			      rtdev);
 	if (ret < dev_pool_size) {
-		printk(KERN_ERR "RTnet: cannot allocate rtnet device pool\n");
+		pr_err("cannot allocate rtnet device pool\n");
 		rtskb_pool_release(&rtdev->dev_pool);
 		return -ENOMEM;
 	}
@@ -287,7 +289,7 @@ static struct rtnet_device *rtdev_alloc(unsigned sizeof_priv,
 
 	rtdev = kzalloc(alloc_size, GFP_KERNEL);
 	if (rtdev == NULL) {
-		printk(KERN_ERR "RTnet: cannot allocate rtnet device\n");
+		pr_err("cannot allocate rtnet device\n");
 		return NULL;
 	}
 
@@ -403,7 +405,7 @@ static int rtskb_map(struct rtnet_device *rtdev, struct rtskb *skb)
 		return -ENOMEM;
 
 	if (skb->buf_dma_addr != RTSKB_UNMAPPED && addr != skb->buf_dma_addr) {
-		printk("RTnet: device %s maps skb differently than others. "
+		pr_err("device %s maps skb differently than others. "
 		       "Different IOMMU domain?\nThis is not supported.\n",
 		       rtdev->name);
 		return -EACCES;
@@ -589,7 +591,7 @@ int rt_register_rtnetdev(struct rtnet_device *rtdev)
 	/* Default state at registration is that the device is present. */
 	set_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
 
-	printk("RTnet: registered %s\n", rtdev->name);
+	pr_info("registered %s\n", rtdev->name);
 
 	return 0;
 
@@ -617,7 +619,7 @@ int rt_unregister_rtnetdev(struct rtnet_device *rtdev)
 	rtdm_lockctx_t context;
 
 	RTNET_ASSERT(rtdev->ifindex != 0,
-		     printk("RTnet: device %s/%p was not registered\n",
+		     pr_err("device %s/%p was not registered\n",
 			    rtdev->name, rtdev);
 		     return -ENODEV;);
 
@@ -649,9 +651,9 @@ int rt_unregister_rtnetdev(struct rtnet_device *rtdev)
 	clear_bit(__RTNET_LINK_STATE_PRESENT, &rtdev->link_state);
 
 	RTNET_ASSERT(atomic_read(&rtdev->refcount) == 0,
-		     printk("RTnet: rtdev reference counter < 0!\n"););
+		     pr_err("rtdev reference counter < 0!\n"););
 
-	printk("RTnet: unregistered %s\n", rtdev->name);
+	pr_info("unregistered %s\n", rtdev->name);
 
 	return 0;
 }
@@ -868,7 +870,7 @@ int rtdev_xmit(struct rtskb *rtskb)
 		/* on error we must free the rtskb here */
 		kfree_rtskb(rtskb);
 
-		rtdm_printk("hard_start_xmit returned %d\n", err);
+		pr_err("hard_start_xmit returned %d\n", err);
 	}
 
 	return err;
@@ -901,7 +903,7 @@ int rtdev_xmit_proxy(struct rtskb *rtskb)
 			/* on error we must free the rtskb here */
 			kfree_rtskb(rtskb);
 
-			rtdm_printk("hard_start_xmit returned %d\n", err);
+			pr_err("hard_start_xmit returned %d\n", err);
 		}
 	}
 

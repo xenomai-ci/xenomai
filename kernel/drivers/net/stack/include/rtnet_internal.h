@@ -34,7 +34,7 @@
 #ifdef CONFIG_XENO_DRIVERS_NET_CHECKED
 #define RTNET_ASSERT(expr, func)                                               \
 	if (!(expr)) {                                                         \
-		rtdm_printk("Assertion failed! %s:%s:%d %s\n", __FILE__,       \
+		pr_err("Assertion failed! %s:%s:%d %s\n", __FILE__,            \
 			    __FUNCTION__, __LINE__, (#expr));                  \
 		func                                                           \
 	}

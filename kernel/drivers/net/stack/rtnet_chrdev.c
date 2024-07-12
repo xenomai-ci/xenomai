@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/kernel.h>
 #include <linux/errno.h>
 #include <linux/if_arp.h>
@@ -218,7 +220,7 @@ int __init rtnet_chrdev_init(void)
 
 	err = misc_register(&rtnet_chr_misc_dev);
 	if (err) {
-		printk("RTnet: unable to register rtnet management device/class "
+		pr_err("unable to register rtnet management device/class "
 		       "(error %d)\n",
 		       err);
 		return err;

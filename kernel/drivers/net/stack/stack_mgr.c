@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/moduleparam.h>
 
 #include <rtdev.h>
@@ -111,7 +113,7 @@ void rtnetif_rx(struct rtskb *skb)
 	RTNET_ASSERT(skb->rtdev != NULL, return;);
 
 	if (unlikely(rtskb_fifo_insert_inirq(&rx.fifo, skb) < 0)) {
-		rtdm_printk("RTnet: dropping packet in %s()\n", __FUNCTION__);
+		pr_warn("dropping packet in %s()\n", __FUNCTION__);
 		kfree_rtskb(skb);
 	}
 }
@@ -179,9 +181,9 @@ __DELIVER_PREFIX void rt_stack_deliver(struct rtskb *rtskb)
 	/* Don't warn if ETH_P_ALL listener were present or when running in
        promiscuous mode (RTcap). */
 	if (unlikely(!eth_p_all_hit && !(rtdev->flags & IFF_PROMISC)))
-		rtdm_printk("RTnet: no one cared for packet with layer 3 "
-			    "protocol type 0x%04x\n",
-			    ntohs(rtskb->protocol));
+		pr_warn("no one cared for packet with layer 3 "
+			"protocol type 0x%04x\n",
+			ntohs(rtskb->protocol));
 
 	kfree_rtskb(rtskb);
 }

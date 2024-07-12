@@ -21,6 +21,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -298,7 +300,7 @@ error2:
 	xnvfile_destroy_dir(&rtnet_proc_root);
 
 error1:
-	printk("RTnet: unable to initialize /proc entries\n");
+	pr_err("unable to initialize /proc entries\n");
 	return err;
 }
 
@@ -322,8 +324,8 @@ static int __init rtnet_init(void)
 	if (!rtdm_available())
 		return -ENOSYS;
 
-	printk("\n*** RTnet for Xenomai v" XENO_VERSION_STRING " ***\n\n");
-	printk("RTnet: initialising real-time networking\n");
+	pr_info("\n*** RTnet for Xenomai v" XENO_VERSION_STRING " ***\n\n");
+	pr_info("initialising real-time networking\n");
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
 	rtnet_class = class_create("rtnet");
@@ -409,7 +411,7 @@ static void __exit rtnet_release(void)
 
 	class_destroy(rtnet_class);
 
-	printk("RTnet: unloaded\n");
+	pr_info("unloaded\n");
 }
 
 module_init(rtnet_init);
