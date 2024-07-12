@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTmac: " fmt
+
 #include <rtdm/driver.h>
 #include <stack_mgr.h>
 #include <rtmac/rtmac_disc.h>
@@ -41,10 +43,9 @@ static int rtmac_proto_rx(struct rtskb *skb, struct rtpacket_type *pt)
 	rtskb_pull(skb, sizeof(struct rtmac_hdr));
 
 	if (hdr->ver != RTMAC_VERSION) {
-		rtdm_printk(
-			"RTmac: received unsupported RTmac protocol version on "
-			"device %s.  Got 0x%x but expected 0x%x\n",
-			skb->rtdev->name, hdr->ver, RTMAC_VERSION);
+		pr_err("received unsupported RTmac protocol version on "
+		       "device %s.  Got 0x%x but expected 0x%x\n",
+		       skb->rtdev->name, hdr->ver, RTMAC_VERSION);
 		goto error;
 	}
 

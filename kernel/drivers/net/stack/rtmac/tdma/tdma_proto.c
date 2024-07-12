@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "TDMA: " fmt
+
 #include <linux/init.h>
 #include "asm/div64.h"
 
@@ -72,7 +74,7 @@ void tdma_xmit_sync_frame(struct tdma_priv *tdma)
 	return;
 
 err_out:
-	/*ERROR*/ rtdm_printk("TDMA: Failed to transmit sync frame!\n");
+	pr_err("Failed to transmit sync frame!\n");
 	return;
 }
 
@@ -120,8 +122,7 @@ int tdma_xmit_request_cal_frame(struct tdma_priv *tdma, u32 reply_cycle,
 	return 0;
 
 err_out:
-	/*ERROR*/ rtdm_printk("TDMA: Failed to transmit request calibration "
-			      "frame!\n");
+	pr_err("Failed to transmit request calibration frame!\n");
 	return ret;
 }
 
@@ -262,9 +263,7 @@ int tdma_packet_rx(struct rtskb *rtskb)
 				sizeof(struct tdma_frm_rpl_cal) + 15,
 			&tdma->cal_rtskb_pool);
 		if (unlikely(!reply_rtskb)) {
-			/*ERROR*/ rtdm_printk(
-				"TDMA: Too many calibration requests "
-				"pending!\n");
+			pr_err("Too many calibration requests pending!\n");
 			break;
 		}
 
@@ -370,8 +369,7 @@ int tdma_packet_rx(struct rtskb *rtskb)
 		break;
 
 	default:
-		/*ERROR*/ rtdm_printk("TDMA: Unknown frame %d!\n",
-				      ntohs(head->id));
+		pr_err("Unknown frame %d!\n", ntohs(head->id));
 	}
 
 kfree_out:

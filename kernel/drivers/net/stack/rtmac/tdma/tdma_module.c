@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTmac/TDMA: " fmt
+
 #include <asm/div64.h>
 #include <linux/delay.h>
 #include <linux/init.h>
@@ -293,8 +295,7 @@ static int __init tdma_init(void)
 {
 	int ret;
 
-	printk("RTmac/TDMA: init time division multiple access control "
-	       "mechanism\n");
+	pr_info("init time division multiple access control mechanism\n");
 
 	ret = rtmac_disc_register(&tdma_disc);
 	if (ret < 0)
@@ -307,7 +308,7 @@ static void tdma_release(void)
 {
 	rtmac_disc_deregister(&tdma_disc);
 
-	printk("RTmac/TDMA: unloaded\n");
+	pr_info("unloaded\n");
 }
 
 module_init(tdma_init);

@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "TDMA: " fmt
+
 #include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/uaccess.h>
@@ -108,7 +110,7 @@ static int tdma_ioctl_master(struct rtnet_device *rtdev,
 		tdma->sync_job.id = WAIT_ON_SYNC;
 	} else {
 		if (test_bit(TDMA_FLAG_BACKUP_MASTER, &tdma->flags))
-			printk("TDMA: warning, no primary master detected!\n");
+			pr_warn("no primary master detected!\n");
 		set_bit(TDMA_FLAG_CALIBRATED, &tdma->flags);
 		tdma->current_cycle_start = rtdm_clock_read();
 	}
@@ -255,9 +257,9 @@ static void copyback_calibration(struct rt_proc_call *call, void *priv_data)
 	do_div(min, 1000);
 	max += 500;
 	do_div(max, 1000);
-	printk("TDMA: calibrated master-to-slave packet delay: "
-	       "%ld us (min/max: %ld/%ld us)\n",
-	       (unsigned long)average, (unsigned long)min, (unsigned long)max);
+	pr_info("calibrated master-to-slave packet delay: "
+		"%ld us (min/max: %ld/%ld us)\n",
+		(unsigned long)average, (unsigned long)min, (unsigned long)max);
 }
 
 static void cleanup_calibration(void *priv_data)

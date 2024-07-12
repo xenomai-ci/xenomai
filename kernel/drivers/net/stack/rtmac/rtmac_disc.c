@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTmac: " fmt
+
 #include <linux/module.h>
 #include <linux/errno.h>
 #include <linux/slab.h>
@@ -58,8 +60,8 @@ int rtmac_disc_attach(struct rtnet_device *rtdev, struct rtmac_disc *disc)
 	RTNET_ASSERT(disc->attach != NULL, return -EINVAL;);
 
 	if (rtdev->mac_disc) {
-		printk("RTmac: another discipline for rtdev '%s' active.\n",
-		       rtdev->name);
+		pr_info("another discipline for rtdev '%s' active.\n",
+			rtdev->name);
 		return -EBUSY;
 	}
 
@@ -77,7 +79,7 @@ int rtmac_disc_attach(struct rtnet_device *rtdev, struct rtmac_disc *disc)
 	/* alloc memory */
 	priv = kmalloc(sizeof(struct rtmac_priv) + disc->priv_size, GFP_KERNEL);
 	if (!priv) {
-		printk("RTmac: kmalloc returned NULL for rtmac!\n");
+		pr_err("kmalloc returned NULL for rtmac!\n");
 		return -ENOMEM;
 	}
 	priv->orig_start_xmit = rtdev->start_xmit;
@@ -98,8 +100,7 @@ int rtmac_disc_attach(struct rtnet_device *rtdev, struct rtmac_disc *disc)
 	/* create the VNIC */
 	ret = rtmac_vnic_add(rtdev, disc->vnic_xmit);
 	if (ret < 0) {
-		printk("RTmac: Warning, VNIC creation failed for rtdev %s.\n",
-		       rtdev->name);
+		pr_warn("VNIC creation failed for rtdev %s.\n", rtdev->name);
 		goto err_disc_detach;
 	}
 
@@ -205,8 +206,7 @@ int __rtmac_disc_register(struct rtmac_disc *disc, struct module *module)
 	disc->owner = module;
 
 	if (rtmac_get_disc_by_name(disc->name) != NULL) {
-		printk("RTmac: discipline '%s' already registered!\n",
-		       disc->name);
+		pr_info("discipline '%s' already registered!\n", disc->name);
 		return -EBUSY;
 	}
 

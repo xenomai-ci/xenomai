@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTmac: " fmt
+
 #include <linux/module.h>
 
 #include <rtnet_internal.h>
@@ -118,7 +120,7 @@ err2:
 	xnvfile_destroy_dir(&rtmac_proc_root);
 
 err1:
-	/*ERRMSG*/ printk("RTmac: unable to initialize /proc entries\n");
+	pr_err("unable to initialize /proc entries\n");
 	return err;
 }
 

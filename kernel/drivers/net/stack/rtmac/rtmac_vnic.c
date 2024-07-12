@@ -19,6 +19,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#define pr_fmt(fmt) "RTmac: " fmt
+
 #include <linux/moduleparam.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h>
@@ -106,7 +108,7 @@ static void rtmac_vnic_signal_handler(rtdm_nrtsig_t *nrtsig, void *arg)
 
 			netif_rx(skb);
 		} else {
-			printk("RTmac: VNIC fails to allocate linux skb\n");
+			pr_err("VNIC fails to allocate linux skb\n");
 			kfree_rtskb(rtskb);
 		}
 	}

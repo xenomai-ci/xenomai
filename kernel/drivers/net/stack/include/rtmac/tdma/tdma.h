@@ -149,13 +149,4 @@ struct tdma_priv {
 
 extern struct rtmac_disc tdma_disc;
 
-#define print_jobs()                                                           \
-	do {                                                                   \
-		struct tdma_job *entry;                                        \
-		rtdm_printk("%s:%d - ", __FUNCTION__, __LINE__);               \
-		list_for_each_entry (entry, &tdma->first_job->entry, entry)    \
-			rtdm_printk("%d ", entry->id);                         \
-		rtdm_printk("\n");                                             \
-	} while (0)
-
 #endif /* __TDMA_H_ */

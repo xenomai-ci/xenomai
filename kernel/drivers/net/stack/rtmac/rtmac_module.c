@@ -19,6 +19,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#define pr_fmt(fmt) "RTmac: " fmt
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -34,7 +36,7 @@ static int __init rtmac_init(void)
 {
 	int ret = 0;
 
-	printk("RTmac: init realtime media access control\n");
+	pr_info("init realtime media access control\n");
 
 #ifdef CONFIG_XENO_OPT_VFILE
 	ret = rtmac_proc_register();
@@ -70,7 +72,7 @@ static void rtmac_release(void)
 	rtmac_proc_release();
 #endif
 
-	printk("RTmac: unloaded\n");
+	pr_info("unloaded\n");
 }
 
 module_init(rtmac_init);

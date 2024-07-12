@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTmac/NoMAC: " fmt
+
 #include <linux/init.h>
 #include <linux/module.h>
 
@@ -131,7 +133,7 @@ static int __init nomac_init(void)
 {
 	int ret;
 
-	printk("RTmac/NoMAC: init void media access control mechanism\n");
+	pr_info("init void media access control mechanism\n");
 
 	ret = nomac_proto_init();
 	if (ret < 0)
@@ -151,7 +153,7 @@ static void nomac_release(void)
 	rtmac_disc_deregister(&nomac_disc);
 	nomac_proto_cleanup();
 
-	printk("RTmac/NoMAC: unloaded\n");
+	pr_info("unloaded\n");
 }
 
 module_init(nomac_init);
