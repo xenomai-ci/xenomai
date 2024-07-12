@@ -17,6 +17,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define pr_fmt(fmt) "RTserial: " fmt
+
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/of.h>
@@ -1414,15 +1416,14 @@ static int __init rt_mpc52xx_uart_init(void)
 	if (!rtdm_available())
 		return -ENODEV;
 
-	printk(KERN_INFO "RTserial: MPC52xx PSC UART driver\n");
+	pr_info("MPC52xx PSC UART driver\n");
 
 	rt_mpc52xx_uart_of_enumerate();
 
 	ret = platform_driver_register(&rt_mpc52xx_uart_of_driver);
 	if (ret) {
-		printk(KERN_ERR
-		       "%s; Could not register  driver (err=%d)\n",
-		       __func__, ret);
+		pr_err("%s; Could not register driver (err=%d)\n", __func__,
+		       ret);
 		return ret;
 	}
 
