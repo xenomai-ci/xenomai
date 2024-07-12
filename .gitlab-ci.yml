@@ -135,7 +135,6 @@ variables:
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_IGC
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_R8169
     - ./scripts/config -e XENO_DRIVERS_NET_EXP_DRIVERS
-    - ./scripts/config -m XENO_DRIVERS_NET_DRV_3C59X
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_E1000_NEW
     - ./scripts/config -m XENO_DRIVERS_NET_DRV_RT2500
     - ./scripts/config -m XENO_DRIVERS_NET_FEC
