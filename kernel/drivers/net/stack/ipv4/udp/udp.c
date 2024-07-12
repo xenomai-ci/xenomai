@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/moduleparam.h>
 #include <linux/socket.h>
 #include <linux/in.h>
@@ -754,7 +756,7 @@ static void rt_udp_rcv(struct rtskb *skb)
  */
 static void rt_udp_rcv_err(struct rtskb *skb)
 {
-	rtdm_printk("RTnet: rt_udp_rcv err\n");
+	pr_err("rt_udp_rcv err\n");
 }
 
 /***

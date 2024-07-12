@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/moduleparam.h>
 #include <net/ip.h>
 
@@ -479,7 +481,7 @@ err2:
 	xnvfile_destroy_regular(&rtnet_ipv4_route_vfile);
 
 err1:
-	printk("RTnet: unable to initialize /proc entries (route)\n");
+	pr_err("unable to initialize /proc entries (route)\n");
 	return err;
 }
 
@@ -588,8 +590,7 @@ int rt_ip_route_add_host(u32 addr, unsigned char *dev_addr,
 	} else {
 		rtdm_lock_put_irqrestore(&host_table_lock, context);
 
-		/*ERRMSG*/ rtdm_printk(
-			"RTnet: no more host routes available\n");
+		pr_err("no more host routes available\n");
 		ret = -ENOBUFS;
 	}
 
@@ -806,8 +807,7 @@ int rt_ip_route_add_net(u32 addr, u32 mask, u32 gw_addr)
 	} else {
 		rtdm_lock_put_irqrestore(&net_table_lock, context);
 
-		/*ERRMSG*/ rtdm_printk(
-			"RTnet: no more network routes available\n");
+		pr_err("no more network routes available\n");
 		return -ENOBUFS;
 	}
 }
@@ -970,8 +970,7 @@ restart:
 	}
 #endif /* CONFIG_XENO_DRIVERS_NET_RTIPV4_NETROUTING */
 
-	/*ERRMSG*/ rtdm_printk("RTnet: host %u.%u.%u.%u unreachable\n",
-			       NIPQUAD(daddr));
+	pr_err("host %u.%u.%u.%u unreachable\n", NIPQUAD(daddr));
 	return -EHOSTUNREACH;
 }
 
@@ -987,15 +986,13 @@ int rt_ip_route_forward(struct rtskb *rtskb, u32 daddr)
 		return 0;
 
 	if (rtskb_acquire(rtskb, &global_pool) != 0) {
-		/*ERRMSG*/ rtdm_printk(
-			"RTnet: router overloaded, dropping packet\n");
+		pr_err("router overloaded, dropping packet\n");
 		goto error;
 	}
 
 	if (rt_ip_route_output(&dest, daddr, INADDR_ANY) < 0) {
-		/*ERRMSG*/ rtdm_printk(
-			"RTnet: unable to forward packet from %u.%u.%u.%u\n",
-			NIPQUAD(rtskb->nh.iph->saddr));
+		pr_err("unable to forward packet from %u.%u.%u.%u\n",
+		       NIPQUAD(rtskb->nh.iph->saddr));
 		goto error;
 	}
 

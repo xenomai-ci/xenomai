@@ -23,6 +23,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/socket.h>
 #include <linux/in.h>
 
@@ -80,7 +82,7 @@ int rt_inet_socket(struct rtdm_fd *fd, int protocol)
 	if ((prot != NULL) && (prot->protocol == protocol))
 		return prot->init_socket(fd);
 	else {
-		rtdm_printk("RTnet: protocol with id %d not found\n", protocol);
+		pr_err("protocol with id %d not found\n", protocol);
 
 		return -ENOPROTOOPT;
 	}

@@ -19,6 +19,8 @@
  *
  */
 
+#define pr_fmt(fmt) "timerwheel: " fmt
+
 #include <linux/delay.h>
 #include <linux/slab.h>
 
@@ -125,9 +127,7 @@ static void timerwheel_pivot(void *arg)
 	while (1) {
 		ret = timerwheel_sleep();
 		if (ret < 0) {
-			rtdm_printk(
-				"timerwheel: timerwheel_pivot interrupted %d\n",
-				-ret);
+			pr_err("timerwheel_pivot interrupted %d\n", -ret);
 			break;
 		}
 
@@ -205,8 +205,7 @@ int __init timerwheel_init(nanosecs_rel_t timeout, unsigned int granularity)
 	err = rtdm_task_init(&wheel.pivot_task, "rttcp timerwheel",
 			     timerwheel_pivot, NULL, 1, 0);
 	if (err) {
-		printk("timerwheel: error on pivot task initialization: %d\n",
-		       err);
+		pr_err("error on pivot task initialization: %d\n", err);
 		kfree(wheel.ring);
 	}
 

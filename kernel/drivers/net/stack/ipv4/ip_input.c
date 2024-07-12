@@ -21,6 +21,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/bitops.h>
 #include <net/checksum.h>
 #include <net/ip.h>
@@ -102,7 +104,7 @@ static inline void rt_ip_local_deliver(struct rtskb *skb)
 #endif /* CONFIG_XENO_DRIVERS_NET_ADDON_PROXY */
 	} else {
 		if (IS_ENABLED(CONFIG_XENO_DRIVERS_NET_RTIPV4_DEBUG))
-			rtdm_printk("RTnet: no protocol found\n");
+			pr_err("no protocol found\n");
 		kfree_rtskb(skb);
 	}
 }

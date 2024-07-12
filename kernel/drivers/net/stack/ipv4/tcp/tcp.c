@@ -19,6 +19,8 @@
  *
  */
 
+#define pr_fmt(fmt) "rttcp: " fmt
+
 #include <linux/moduleparam.h>
 #include <linux/list.h>
 #include <linux/skbuff.h>
@@ -441,7 +443,7 @@ static void rt_tcp_retransmit_handler(void *data)
 	if (unlikely(rtskb_queue_empty(&ts->retransmit_queue))) {
 		/* handled, but retransmission queue is empty */
 		rtdm_lock_get_irqsave(&ts->socket_lock, context);
-		rtdm_printk("rttcp: bug in RT TCP retransmission routine\n");
+		pr_err("bug in RT TCP retransmission routine\n");
 		return;
 	}
 
@@ -464,8 +466,7 @@ static void rt_tcp_retransmit_handler(void *data)
 		/* BUG, window changes are not respected */
 		if (unlikely(rtdev_xmit(skb)) != 0) {
 			kfree_rtskb(skb);
-			rtdm_printk(
-				"rttcp: packet retransmission from timer failed\n");
+			pr_err("packet retransmission from timer failed\n");
 		}
 	} else {
 		ts->timer_state = max_retransmits;
@@ -478,7 +479,7 @@ static void rt_tcp_retransmit_handler(void *data)
 			rt_tcp_socket_invalidate_signal(ts);
 
 		/* retransmission queue will be cleaned up in rt_tcp_socket_destruct */
-		rtdm_printk("rttcp: connection is lost by NACK timeout\n");
+		pr_err("connection is lost by NACK timeout\n");
 	}
 }
 
@@ -604,7 +605,7 @@ static int rt_ip_build_frame(struct rtskb *skb, struct rtsocket *sk,
 	rtdev_dereference(rt->rtdev);
 
 	if (ret != rtdev->hard_header_len) {
-		rtdm_printk("rttcp: rt_ip_build_frame: error on lower level\n");
+		pr_err("rt_ip_build_frame: error on lower level\n");
 		return -EINVAL;
 	}
 
@@ -670,8 +671,7 @@ static int rt_tcp_segment(struct dest_route *rt, struct tcp_socket *ts,
 	u8 *data = NULL;
 
 	if ((skb = alloc_rtskb(mtu + hh_len + 15, &sk->skb_pool)) == NULL) {
-		rtdm_printk(
-			"rttcp: no more elements in skb_pool for allocation\n");
+		pr_err("no more elements in skb_pool for allocation\n");
 		return -ENOBUFS;
 	}
 
@@ -719,7 +719,7 @@ static int rt_tcp_segment(struct dest_route *rt, struct tcp_socket *ts,
 		cloned_skb = rtskb_clone(skb, &ts->sock.skb_pool);
 		if (!cloned_skb) {
 			rtdm_lock_put_irqrestore(&ts->socket_lock, context);
-			rtdm_printk("rttcp: cann't clone skb\n");
+			pr_err("can't clone skb\n");
 			ret = -ENOMEM;
 			goto error;
 		}
@@ -769,7 +769,7 @@ static int rt_tcp_send(struct tcp_socket *ts, __be32 flags)
 		}
 	}
 	if (ret < 0)
-		rtdm_printk("rttcp: can't send a packet: err %d\n", -ret);
+		pr_err("can't send a packet: err %d\n", -ret);
 	return ret;
 }
 
@@ -833,15 +833,15 @@ static struct rtsocket *rt_tcp_dest_socket(struct rtskb *skb)
 
 	if (tcp_v4_check(skb->len, saddr, daddr,
 			 rtnet_csum(skb->data, skb->len, 0))) {
-		rtdm_printk("rttcp: invalid TCP packet checksum, dropped\n");
+		pr_err("invalid TCP packet checksum, dropped\n");
 		return NULL; /* Invalid checksum, drop the packet */
 	}
 
 	/* find the destination socket */
 	if ((skb->sk = rt_tcp_v4_lookup(daddr, dport)) == NULL) {
 		/*
-	  rtdm_printk("Not found addr:0x%08x, port: 0x%04x\n", daddr, dport);
-	*/
+		pr_debug("Not found addr:0x%08x, port: 0x%04x\n", daddr, dport);
+		*/
 		if (!th->rst) {
 			/* No listening socket found, send RST|ACK */
 			rst_socket.saddr = daddr;
@@ -984,17 +984,16 @@ static void rt_tcp_rcv(struct rtskb *skb)
 		    /* but reset ack from old connection */
 		    ts->tcp_state == TCP_ESTABLISHED) {
 			rtdm_lock_put_irqrestore(&ts->socket_lock, context);
-			rtdm_printk(
-				"rttcp: dropped unappropriate ACK packet %u\n",
-				ts->sync.ack_seq);
+			pr_debug("dropped unappropriate ACK packet %u\n",
+				 ts->sync.ack_seq);
 			goto drop;
 		}
 
 		rtdm_lock_put_irqrestore(&ts->socket_lock, context);
-		rtdm_printk("rttcp: sequence number is not in window, "
-			    "dropped (failed: %u <= %u <= %u)\n",
-			    ts->sync.ack_seq, seq,
-			    ts->sync.ack_seq + ts->sync.window);
+		pr_debug("sequence number is not in window, "
+			 "dropped (failed: %u <= %u <= %u)\n",
+			 ts->sync.ack_seq, seq,
+			 ts->sync.ack_seq + ts->sync.window);
 
 		/* That's a forced RST for a lost connection */
 		rst_socket.saddr = skb->nh.iph->daddr;
@@ -1104,7 +1103,7 @@ static void rt_tcp_rcv(struct rtskb *skb)
 	if (th->ack) {
 		/* Check ack sequence */
 		if (rt_tcp_before(ts->sync.seq + 1, ntohl(th->ack_seq))) {
-			rtdm_printk("rttcp: unexpected ACK %u %u %u\n",
+			pr_debug("unexpected ACK %u %u %u\n",
 				    ts->sync.seq, ts->nacked_first,
 				    ntohl(th->ack_seq));
 			rtdm_lock_put_irqrestore(&ts->socket_lock, context);
@@ -1183,7 +1182,7 @@ drop:
  */
 static void rt_tcp_rcv_err(struct rtskb *skb)
 {
-	rtdm_printk("rttcp: rt_tcp_rcv err\n");
+	pr_err("rt_tcp_rcv err\n");
 }
 
 static int rt_tcp_window_send(struct tcp_socket *ts, u32 data_len, u8 *data_ptr)
@@ -1196,7 +1195,7 @@ static int rt_tcp_window_send(struct tcp_socket *ts, u32 data_len, u8 *data_ptr)
 
 	if ((ret = rt_tcp_segment(&ts->rt, ts, TCP_FLAG_ACK, data_len, data_ptr,
 				  0)) < 0) {
-		rtdm_printk("rttcp: cann't send a packet: err %d\n", -ret);
+		pr_err("can't send a packet: err %d\n", -ret);
 		return ret;
 	}
 
@@ -1219,8 +1218,8 @@ static int rt_tcp_socket_create(struct tcp_socket *ts)
 	sock->prot.inet.state = TCP_CLOSE;
 	sock->prot.inet.tos = 0;
 	/*
-      rtdm_printk("rttcp: rt_tcp_socket_create 0x%p\n", ts);
-    */
+	pr_debug("rt_tcp_socket_create 0x%p\n", ts);
+	*/
 	rtdm_lock_init(&ts->socket_lock);
 
 	ts->rt.rtdev = NULL;
@@ -1325,8 +1324,8 @@ static void rt_tcp_socket_destruct(struct tcp_socket *ts)
 	struct rtsocket *sock = &ts->sock;
 
 	/*
-      rtdm_printk("rttcp: rt_tcp_socket_destruct 0x%p\n", ts);
-    */
+	pr_debug("rt_tcp_socket_destruct 0x%p\n", ts);
+	*/
 
 	rtdm_lock_get_irqsave(&tcp_socket_base_lock, context);
 	if (sock->prot.inet.reg_index >= 0) {
@@ -1570,7 +1569,7 @@ static int rt_tcp_connect(struct rtdm_fd *fd, struct tcp_socket *ts,
 	/* Complete three-way handshake */
 	ret = rt_tcp_send(ts, TCP_FLAG_SYN);
 	if (ret < 0) {
-		rtdm_printk("rttcp: cann't send SYN\n");
+		pr_err("can't send SYN\n");
 		return ret;
 	}
 
@@ -2415,7 +2414,7 @@ static int __init rt_tcp_init(void)
 	skbs = rt_bare_socket_init(rst_fd, IPPROTO_TCP, RT_TCP_RST_PRIO,
 				   RT_TCP_RST_POOL_SIZE);
 	if (skbs < RT_TCP_RST_POOL_SIZE)
-		printk("rttcp: allocated only %d RST|ACK rtskbs\n", skbs);
+		pr_debug("allocated only %d RST|ACK rtskbs\n", skbs);
 	rst_socket.sock.prot.inet.tos = 0;
 	rst_fd->refs = 1;
 	rtdm_lock_init(&rst_socket.socket_lock);
@@ -2425,14 +2424,13 @@ static int __init rt_tcp_init(void)
      */
 	ret = timerwheel_init(100000000ull, 23);
 	if (ret < 0) {
-		rtdm_printk("rttcp: cann't initialize timerwheel task: %d\n",
-			    -ret);
+		pr_err("can't initialize timerwheel task: %d\n", -ret);
 		goto out_1;
 	}
 
 #ifdef CONFIG_XENO_OPT_VFILE
 	if ((ret = rt_tcp_proc_register()) < 0) {
-		rtdm_printk("rttcp: cann't initialize proc entry: %d\n", -ret);
+		pr_err("can't initialize proc entry: %d\n", -ret);
 		goto out_2;
 	}
 #endif /* CONFIG_XENO_OPT_VFILE */
@@ -2441,7 +2439,7 @@ static int __init rt_tcp_init(void)
 
 	ret = rtdm_dev_register(&tcp_device);
 	if (ret < 0) {
-		rtdm_printk("rttcp: cann't register RT TCP: %d\n", -ret);
+		pr_err("can't register RT TCP: %d\n", -ret);
 		goto out_3;
 	}
 

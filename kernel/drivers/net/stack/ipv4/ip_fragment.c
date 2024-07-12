@@ -19,6 +19,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/module.h>
 #include <net/checksum.h>
 #include <net/ip.h>
@@ -96,7 +98,7 @@ static void alloc_collector(struct rtskb *skb, struct rtsocket *sock)
 		rtdm_lock_put_irqrestore(&p_coll->frags.lock, context);
 	}
 
-	rtdm_printk("RTnet: IP fragmentation - no collector available\n");
+	pr_err("IP fragmentation - no collector available\n");
 	kfree_rtskb(skb);
 }
 
@@ -132,10 +134,9 @@ static struct rtskb *add_to_collector(struct rtskb *skb, unsigned int offset,
 							 context);
 
 #ifdef FRAG_DBG
-				rtdm_printk(
-					"RTnet: Compensation pool empty - IP fragments "
-					"dropped (saddr:%x, daddr:%x)\n",
-					iph->saddr, iph->daddr);
+				pr_err("Compensation pool empty - IP fragments "
+				       "dropped (saddr:%x, daddr:%x)\n",
+				       iph->saddr, iph->daddr);
 #endif
 
 				kfree_rtskb(first_skb);
@@ -197,9 +198,9 @@ static struct rtskb *add_to_collector(struct rtskb *skb, unsigned int offset,
 #endif
 
 #ifdef FRAG_DBG
-	rtdm_printk("RTnet: Unordered IP fragment (saddr:%x, daddr:%x)"
-		    " - dropped\n",
-		    iph->saddr, iph->daddr);
+	pr_info("Unordered IP fragment (saddr:%x, daddr:%x)"
+		" - dropped\n",
+		iph->saddr, iph->daddr);
 #endif
 
 	kfree_rtskb(skb);

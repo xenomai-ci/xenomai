@@ -24,6 +24,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTnet: " fmt
+
 #include <linux/types.h>
 #include <linux/socket.h>
 #include <linux/in.h>
@@ -184,8 +186,7 @@ static void rt_icmp_send_reply(struct icmp_bxm *icmp_param, struct rtskb *skb)
 
 	rtdev_dereference(rt.rtdev);
 
-	RTNET_ASSERT(err == 0,
-		     rtdm_printk("RTnet: %s() error in xmit\n", __FUNCTION__););
+	RTNET_ASSERT(err == 0, pr_err("%s() error in xmit\n", __FUNCTION__););
 	(void)err;
 }
 
@@ -254,11 +255,10 @@ static int rt_icmp_glue_request_bits(const void *p, unsigned char *to,
 	unsigned long csum;
 
 	/* TODO: add support for fragmented ICMP packets */
-	RTNET_ASSERT(
-		offset == 0,
-		rtdm_printk("RTnet: %s() does not support fragmentation.\n",
+	RTNET_ASSERT(offset == 0,
+		     pr_err("%s() does not support fragmentation.\n",
 			    __FUNCTION__);
-		return -1;);
+		     return -1;);
 
 	csum = rtnet_csum_copy((void *)&icmp_param->head, to,
 			       icmp_param->head_len,
@@ -435,23 +435,22 @@ static void rt_icmp_rcv(struct rtskb *skb)
 
 	/* check header sanity and don't accept fragmented packets */
 	if ((length < sizeof(struct icmphdr)) || (skb->next != NULL)) {
-		rtdm_printk("RTnet: improper length in icmp packet\n");
+		pr_debug("improper length in icmp packet\n");
 		goto cleanup;
 	}
 
 	if (ip_compute_csum((unsigned char *)icmpHdr, length)) {
-		rtdm_printk("RTnet: invalid checksum in icmp packet %d\n",
-			    length);
+		pr_debug("invalid checksum in icmp packet %d\n", length);
 		goto cleanup;
 	}
 
 	if (!rtskb_pull(skb, sizeof(struct icmphdr))) {
-		rtdm_printk("RTnet: pull failed %p\n", (skb->sk));
+		pr_debug("pull failed %p\n", (skb->sk));
 		goto cleanup;
 	}
 
 	if (icmpHdr->type > NR_ICMP_TYPES) {
-		rtdm_printk("RTnet: invalid icmp type\n");
+		pr_debug("invalid icmp type\n");
 		goto cleanup;
 	}
 
@@ -467,7 +466,7 @@ cleanup:
  */
 static void rt_icmp_rcv_err(struct rtskb *skb)
 {
-	rtdm_printk("RTnet: rt_icmp_rcv err\n");
+	pr_err("rt_icmp_rcv err\n");
 }
 
 /***
@@ -492,7 +491,7 @@ void __init rt_icmp_init(void)
 				   ICMP_REPLY_POOL_SIZE);
 	BUG_ON(skbs < 0);
 	if (skbs < ICMP_REPLY_POOL_SIZE)
-		printk("RTnet: allocated only %d icmp rtskbs\n", skbs);
+		pr_debug("allocated only %d icmp rtskbs\n", skbs);
 
 	icmp_socket->prot.inet.tos = 0;
 	icmp_fd->refs = 1;
