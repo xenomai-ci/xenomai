@@ -393,8 +393,7 @@ struct rtnet_device *rt2x00_core_probe(struct _rt2x00_dev_handler *handler,
 
 	if ((err = rt_register_rtnetdev(rtnet_dev)) != 0) {
 		rtdev_free(rtnet_dev);
-		ERROR("rtnet_device registration failed.\n");
-		printk("err=%d\n", err);
+		ERROR("rtnet_device registration failed. err=%d\n", err);
 		goto exit_dev_remove;
 	}
 
@@ -431,13 +430,13 @@ MODULE_LICENSE("GPL");
 
 static int __init rt2x00_core_init(void)
 {
-	printk(KERN_INFO "Loading module: %s\n", version);
+	pr_info("Loading module: %s\n", version);
 	return 0;
 }
 
 static void __exit rt2x00_core_exit(void)
 {
-	printk(KERN_INFO "Unloading module: %s\n", version);
+	pr_info("Unloading module: %s\n", version);
 }
 
 module_init(rt2x00_core_init);

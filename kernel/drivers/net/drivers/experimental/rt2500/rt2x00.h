@@ -44,25 +44,6 @@
 #define DRV_NAME "rt2x00"
 #define DRV_VERSION "0.1"
 #define DRV_AUTHOR "Daniel Gregorek <dxg@gmx.de>"
-//#define CONFIG_RT2X00_DEBUG
-
-/*
- * Debug defines.
- * The debug variable will be exported by the device specific module.
- * For this reason this variable must be set to extern to make it accessible
- * to the core module as well.
- */
-#ifdef CONFIG_RT2X00_DEBUG
-extern int rt2x00_debug_level;
-#define DEBUG_PRINTK(__message...)                                             \
-	do {                                                                   \
-		rtdm_printk(__message);                                        \
-	} while (0)
-#else /* CONFIG_RT2X00_DEBUG */
-#define DEBUG_PRINTK(__message...)                                             \
-	do {                                                                   \
-	} while (0)
-#endif /* CONFIG_RT2X00_DEBUG */
 
 /*
  * Various debug levels.
@@ -70,23 +51,17 @@ extern int rt2x00_debug_level;
  * these should never be ignored and thus we will always print the message.
  */
 #define PANIC(__message, __args...)                                            \
-	rtdm_printk(KERN_PANIC DRV_NAME "->%s: Panic - " __message,            \
-		    __FUNCTION__, ##__args);
+	pr_emerg(DRV_NAME "->%s: Panic - " __message, __FUNCTION__, ##__args);
 #define ERROR(__message, __args...)                                            \
-	rtdm_printk(KERN_ERR DRV_NAME "->%s: Error - " __message,              \
-		    __FUNCTION__, ##__args);
+	pr_err(DRV_NAME "->%s: Error - " __message, __FUNCTION__, ##__args);
 #define WARNING(__message, __args...)                                          \
-	rtdm_printk(KERN_WARNING DRV_NAME "->%s: Warning - " __message,        \
-		    __FUNCTION__, ##__args);
+	pr_warn(DRV_NAME "->%s: Warning - " __message, __FUNCTION__, ##__args);
 #define NOTICE(__message, __args...)                                           \
-	rtdm_printk(KERN_NOTICE DRV_NAME "->%s: Notice - " __message,          \
-		    __FUNCTION__, ##__args);
+	pr_notice(DRV_NAME "->%s: Notice - " __message, __FUNCTION__, ##__args);
 #define INFO(__message, __args...)                                             \
-	rtdm_printk(KERN_INFO DRV_NAME "->%s: Info - " __message,              \
-		    __FUNCTION__, ##__args);
+	pr_info(DRV_NAME "->%s: Info - " __message, __FUNCTION__, ##__args);
 #define DEBUG(__message, __args...)                                            \
-	DEBUG_PRINTK(KERN_DEBUG DRV_NAME "->%s: Debug - " __message,           \
-		     __FUNCTION__, ##__args);
+	pr_debug(DRV_NAME "->%s: Debug - " __message, __FUNCTION__, ##__args);
 
 /*
  * RT2x00 ring types.
