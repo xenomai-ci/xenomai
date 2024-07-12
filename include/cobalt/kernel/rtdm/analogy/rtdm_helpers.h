@@ -35,14 +35,14 @@
 
 #define RTDM_SUBCLASS_ANALOGY 0
 
-#define __a4l_err(fmt, args...)  rtdm_printk(KERN_ERR A4L_PROMPT fmt, ##args)
-#define __a4l_warn(fmt, args...) rtdm_printk(KERN_WARNING A4L_PROMPT fmt, ##args)
+#define __a4l_err(fmt, args...)  pr_err(A4L_PROMPT fmt, ##args)
+#define __a4l_warn(fmt, args...) pr_warn(A4L_PROMPT fmt, ##args)
 
 #ifdef  CONFIG_XENO_DRIVERS_ANALOGY_DEBUG_FTRACE
 #define __a4l_info(fmt, args...) trace_printk(fmt, ##args)
 #else
-#define __a4l_info(fmt, args...) 						\
-        rtdm_printk(KERN_INFO A4L_PROMPT "%s: " fmt, __FUNCTION__, ##args)
+#define __a4l_info(fmt, args...) \
+	pr_info(A4L_PROMPT "%s: " fmt, __FUNCTION__, ##args)
 #endif
 
 #ifdef CONFIG_XENO_DRIVERS_ANALOGY_DEBUG
@@ -53,10 +53,10 @@
 		trace_printk(fmt, ##args); 				\
 	} while (0)
 #else
-#define __a4l_dbg(level, debug, fmt, args...)						\
-	do {										\
-	if ((debug) >= (level))								\
-		rtdm_printk(KERN_DEBUG A4L_PROMPT "%s: " fmt, __FUNCTION__ , ##args);	\
+#define __a4l_dbg(level, debug, fmt, args...)                                  \
+	do {                                                                   \
+		if ((debug) >= (level))                                        \
+			pr_debug(A4L_PROMPT "%s: " fmt, __FUNCTION__, ##args); \
 	} while (0)
 #endif
 

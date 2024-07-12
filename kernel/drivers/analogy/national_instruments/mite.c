@@ -41,11 +41,13 @@
  * ISSUES:
  */
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
 #include <linux/module.h>
 #include "mite.h"
 
 #ifdef CONFIG_DEBUG_MITE
-#define MDPRINTK(fmt, args...) rtdm_printk(fmt, ##args)
+#define MDPRINTK(fmt, args...) pr_debug(fmt, ##args)
 #else /* !CONFIG_DEBUG_MITE */
 #define MDPRINTK(fmt, args...)
 #endif /* CONFIG_DEBUG_MITE */
@@ -254,17 +256,14 @@ void a4l_mite_list_devices(void)
 {
 	struct list_head *this;
 
-	printk("Analogy: MITE: Available NI device IDs:");
+	pr_info("Analogy: MITE: Available NI device IDs:\n");
 	list_for_each(this, &mite_devices) {
 		struct mite_struct *mite =
 			list_entry(this, struct mite_struct, list);
 
-		printk(" 0x%04x", mite_device_id(mite));
-		if(mite->used)
-			printk("(used)");
+		pr_info(" 0x%04x%s\n", mite_device_id(mite),
+			mite->used ? " (used)" : "");
 	}
-
-	printk("\n");
 }
 
 
@@ -399,7 +398,7 @@ int a4l_mite_buf_change(struct mite_dma_descriptor_ring *ring, struct a4l_subdev
 				   n_links * sizeof(struct mite_dma_descriptor),
 				   &ring->descriptors_dma_addr, GFP_ATOMIC);
 	if (!ring->descriptors) {
-		printk("MITE: ring buffer allocation failed\n");
+		pr_err("MITE: ring buffer allocation failed\n");
 		return -ENOMEM;
 	}
 	ring->n_links = n_links;
@@ -716,52 +715,51 @@ void a4l_mite_dump_regs(struct mite_channel *mite_chan)
 	unsigned long addr = 0;
 	unsigned long temp = 0;
 
-	printk("a4l_mite_dump_regs ch%i\n", mite_chan->channel);
-	printk("mite address is  =0x%08lx\n", mite_io_addr);
+	pr_info("a4l_mite_dump_regs ch%i\n", mite_chan->channel);
+	pr_info("mite address is  =0x%08lx\n", mite_io_addr);
 
 	addr = mite_io_addr + MITE_CHOR(mite_chan->channel);
-	printk("mite status[CHOR]at 0x%08lx =0x%08lx\n", addr, temp =
-	       readl((void *)addr));
+	pr_info("mite status[CHOR]at 0x%08lx =0x%08lx\n", addr,
+		temp = readl((void *)addr));
 	a4l_mite_decode(mite_CHOR_strings, temp);
 	addr = mite_io_addr + MITE_CHCR(mite_chan->channel);
-	printk("mite status[CHCR]at 0x%08lx =0x%08lx\n", addr, temp =
-	       readl((void *)addr));
+	pr_info("mite status[CHCR]at 0x%08lx =0x%08lx\n", addr,
+		temp = readl((void *)addr));
 	a4l_mite_decode(mite_CHCR_strings, temp);
 	addr = mite_io_addr + MITE_TCR(mite_chan->channel);
-	printk("mite status[TCR] at 0x%08lx =0x%08x\n", addr,
-	       readl((void *)addr));
+	pr_info("mite status[TCR] at 0x%08lx =0x%08x\n", addr,
+		readl((void *)addr));
 	addr = mite_io_addr + MITE_MCR(mite_chan->channel);
-	printk("mite status[MCR] at 0x%08lx =0x%08lx\n", addr, temp =
-	       readl((void *)addr));
+	pr_info("mite status[MCR] at 0x%08lx =0x%08lx\n", addr,
+		temp = readl((void *)addr));
 	a4l_mite_decode(mite_MCR_strings, temp);
 
 	addr = mite_io_addr + MITE_MAR(mite_chan->channel);
-	printk("mite status[MAR] at 0x%08lx =0x%08x\n", addr,
-	       readl((void *)addr));
+	pr_info("mite status[MAR] at 0x%08lx =0x%08x\n", addr,
+		readl((void *)addr));
 	addr = mite_io_addr + MITE_DCR(mite_chan->channel);
-	printk("mite status[DCR] at 0x%08lx =0x%08lx\n", addr, temp =
-	       readl((void *)addr));
+	pr_info("mite status[DCR] at 0x%08lx =0x%08lx\n", addr,
+		temp = readl((void *)addr));
 	a4l_mite_decode(mite_DCR_strings, temp);
 	addr = mite_io_addr + MITE_DAR(mite_chan->channel);
-	printk("mite status[DAR] at 0x%08lx =0x%08x\n", addr,
-	       readl((void *)addr));
+	pr_info("mite status[DAR] at 0x%08lx =0x%08x\n", addr,
+		readl((void *)addr));
 	addr = mite_io_addr + MITE_LKCR(mite_chan->channel);
-	printk("mite status[LKCR]at 0x%08lx =0x%08lx\n", addr, temp =
-	       readl((void *)addr));
+	pr_info("mite status[LKCR]at 0x%08lx =0x%08lx\n", addr,
+		temp = readl((void *)addr));
 	a4l_mite_decode(mite_LKCR_strings, temp);
 	addr = mite_io_addr + MITE_LKAR(mite_chan->channel);
-	printk("mite status[LKAR]at 0x%08lx =0x%08x\n", addr,
-	       readl((void *)addr));
+	pr_info("mite status[LKAR]at 0x%08lx =0x%08x\n", addr,
+		readl((void *)addr));
 
 	addr = mite_io_addr + MITE_CHSR(mite_chan->channel);
-	printk("mite status[CHSR]at 0x%08lx =0x%08lx\n", addr, temp =
-	       readl((void *)addr));
+	pr_info("mite status[CHSR]at 0x%08lx =0x%08lx\n", addr,
+		temp = readl((void *)addr));
 	a4l_mite_decode(mite_CHSR_strings, temp);
 	addr = mite_io_addr + MITE_FCR(mite_chan->channel);
-	printk("mite status[FCR] at 0x%08lx =0x%08x\n\n", addr,
-	       readl((void *)addr));
+	pr_info("mite status[FCR] at 0x%08lx =0x%08x\n\n", addr,
+		readl((void *)addr));
 }
-
 
 static void a4l_mite_decode(const char *const bit_str[], unsigned int bits)
 {
@@ -769,10 +767,9 @@ static void a4l_mite_decode(const char *const bit_str[], unsigned int bits)
 
 	for (i = 31; i >= 0; i--) {
 		if (bits & (1 << i)) {
-			printk(" %s", bit_str[i]);
+			pr_info(" %s\n", bit_str[i]);
 		}
 	}
-	printk("\n");
 }
 
 #endif /* CONFIG_DEBUG_MITE */

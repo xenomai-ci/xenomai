@@ -42,6 +42,9 @@
  *   as yet. Terry Barnaby, BEAM Ltd.
  *
  */
+
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
 #include <linux/module.h>
 #include <linux/slab.h>
 #include "../intel/8255.h"

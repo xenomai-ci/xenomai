@@ -80,6 +80,8 @@
  *
  */
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
 #include <linux/module.h>
 #include <rtdm/analogy/device.h>
 
@@ -1224,7 +1226,7 @@ static void m_series_stc_writew(struct a4l_device *dev, uint16_t data, int reg)
 		offset = M_Offset_AO_FIFO_Clear;
 		break;
 	case DIO_Control_Register:
-		rtdm_printk("%s: FIXME: register 0x%x does not map cleanly on to m-series boards.\n", __FUNCTION__, reg);
+		pr_warn("%s: FIXME: register 0x%x does not map cleanly on to m-series boards.\n", __FUNCTION__, reg);
 		return;
 		break;
 	case G_Autoincrement_Register(0):
@@ -1285,8 +1287,8 @@ static void m_series_stc_writew(struct a4l_device *dev, uint16_t data, int reg)
 		by M_Offset_Static_Digital_Output (32 bit) and
 		M_Offset_SCXI_Serial_Data_Out (8 bit) */
 	default:
-		rtdm_printk("%s: bug! unhandled register=0x%x in switch.\n",
-			    __FUNCTION__, reg);
+		pr_err("%s: bug! unhandled register=0x%x in switch.\n",
+		       __FUNCTION__, reg);
 		BUG();
 		return;
 	}
@@ -1320,9 +1322,8 @@ static uint16_t m_series_stc_readw(struct a4l_device *dev, int reg)
 		offset = M_Offset_G01_Status;
 		break;
 	default:
-		rtdm_printk("%s: bug! "
-			    "unhandled register=0x%x in switch.\n",
-			    __FUNCTION__, reg);
+		pr_err("%s: bug! unhandled register=0x%x in switch.\n",
+		       __FUNCTION__, reg);
 		BUG();
 		return 0;
 		break;
@@ -1364,8 +1365,8 @@ static void m_series_stc_writel(struct a4l_device *dev, uint32_t data, int reg)
 		offset = M_Offset_G1_Load_B;
 		break;
 	default:
-		rtdm_printk("%s: bug! unhandled register=0x%x in switch.\n",
-			    __FUNCTION__, reg);
+		pr_err("%s: bug! unhandled register=0x%x in switch.\n",
+		       __FUNCTION__, reg);
 		BUG();
 		return;
 	}
@@ -1390,8 +1391,8 @@ static uint32_t m_series_stc_readl(struct a4l_device *dev, int reg)
 		offset = M_Offset_G1_Save;
 		break;
 	default:
-		rtdm_printk("%s: bug! unhandled register=0x%x in switch.\n",
-			    __FUNCTION__, reg);
+		pr_err("%s: bug! unhandled register=0x%x in switch.\n",
+		       __FUNCTION__, reg);
 		BUG();
 		return 0;
 	}

@@ -327,8 +327,8 @@ static inline unsigned int RTSI_Output_Bit(unsigned channel, int is_mseries)
 	}
 	if(channel > max_channel)
 	{
-		rtdm_printk("%s: bug, invalid RTSI_channel=%i\n",
-			    __FUNCTION__, channel);
+		pr_err("%s: bug, invalid RTSI_channel=%i\n", __FUNCTION__,
+		       channel);
 		return 0;
 	}
 	return 1 << (base_bit_shift + channel);
@@ -1029,7 +1029,7 @@ static inline int M_Offset_Static_AI_Control(int i)
 	};
 	if(((unsigned)i) >= ARRAY_SIZE(offset))
 	{
-		rtdm_printk("%s: invalid channel=%i\n", __FUNCTION__, i);
+		pr_err("%s: invalid channel=%i\n", __FUNCTION__, i);
 		return offset[0];
 	}
 	return offset[i];
@@ -1045,7 +1045,7 @@ static inline int M_Offset_AO_Reference_Attenuation(int channel)
 	};
 	if(((unsigned)channel) >= ARRAY_SIZE(offset))
 	{
-		rtdm_printk("%s: invalid channel=%i\n", __FUNCTION__, channel);
+		pr_err("%s: invalid channel=%i\n", __FUNCTION__, channel);
 		return offset[0];
 	}
 	return offset[channel];
@@ -1054,7 +1054,8 @@ static inline unsigned M_Offset_PFI_Output_Select(unsigned n)
 {
 	if(n < 1 || n > NUM_PFI_OUTPUT_SELECT_REGS)
 	{
-		rtdm_printk("%s: invalid pfi output select register=%i\n", __FUNCTION__, n);
+		pr_err("%s: invalid pfi output select register=%i\n",
+		       __FUNCTION__, n);
 		return M_Offset_PFI_Output_Select_1;
 	}
 	return M_Offset_PFI_Output_Select_1 + (n - 1) * 2;
@@ -1102,7 +1103,8 @@ unsigned int MSeries_PLL_In_Source_Select_RTSI_Bits(unsigned int RTSI_channel)
 {
 	if(RTSI_channel > 7)
 	{
-		rtdm_printk("%s: bug, invalid RTSI_channel=%i\n", __FUNCTION__, RTSI_channel);
+		pr_err("%s: bug, invalid RTSI_channel=%i\n", __FUNCTION__,
+		       RTSI_channel);
 		return 0;
 	}
 	if(RTSI_channel == 7) return MSeries_PLL_In_Source_Select_RTSI7_Bits;
@@ -1121,7 +1123,7 @@ unsigned int MSeries_PLL_Divisor_Bits(unsigned int divisor)
 	static const unsigned int max_divisor = 0x10;
 	if(divisor < 1 || divisor > max_divisor)
 	{
-		rtdm_printk("%s: bug, invalid divisor=%i\n", __FUNCTION__, divisor);
+		pr_err("%s: bug, invalid divisor=%i\n", __FUNCTION__, divisor);
 		return 0;
 	}
 	return (divisor & 0xf) << 8;
@@ -1132,7 +1134,8 @@ unsigned int MSeries_PLL_Multiplier_Bits(unsigned int multiplier)
 	static const unsigned int max_multiplier = 0x100;
 	if(multiplier < 1 || multiplier > max_multiplier)
 	{
-		rtdm_printk("%s: bug, invalid multiplier=%i\n", __FUNCTION__, multiplier);
+		pr_err("%s: bug, invalid multiplier=%i\n", __FUNCTION__,
+		       multiplier);
 		return 0;
 	}
 	return multiplier & 0xff;

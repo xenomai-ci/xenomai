@@ -22,7 +22,7 @@
 /* Debug stuff */
 
 #ifdef CONFIG_DEBUG_MIO
-#define MDPRINTK(fmt, args...) rtdm_printk(format, ##args)
+#define MDPRINTK(fmt, args...) pr_debug(fmt, ##args)
 #else /* !CONFIG_DEBUG_MIO */
 #define MDPRINTK(fmt, args...)
 #endif /* CONFIG_DEBUG_MIO */
