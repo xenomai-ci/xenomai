@@ -5,14 +5,16 @@
  * Copyright (C) 2001-2021 PEAK System-Technik GmbH
  * Copyright (C) 2019-2021 Stephane Grosjean <s.grosjean@peak-system.com>
  */
+
+#define DRV_NAME "xeno_peak_canfd"
+#define RTCAN_DEV_NAME "rtcan%d"
+#define RTCAN_CTRLR_NAME "peak_canfd"
+
+#define pr_fmt(fmt) DRV_NAME ": " fmt
+
 #include "rtcan_dev.h"
 #include "rtcan_raw.h"
 #include "rtcan_peak_canfd_user.h"
-
-#define DRV_NAME		"xeno_peak_canfd"
-
-#define RTCAN_DEV_NAME		"rtcan%d"
-#define RTCAN_CTRLR_NAME	"peak_canfd"
 
 /* bittiming ranges of the PEAK-System PC CAN-FD interfaces */
 static const struct can_bittiming_const peak_canfd_nominal_const = {
@@ -261,8 +263,7 @@ static int pucan_handle_status(struct peak_canfd_priv *priv,
 
 	/* test state error bits according to their priority */
 	if (pucan_status_is_busoff(msg)) {
-		rtdm_printk(DRV_NAME " CAN%u: Bus-off entry status\n",
-			    priv->index+1);
+		pr_info("CAN%u: Bus-off entry status\n", priv->index + 1);
 		rdev->state = CAN_STATE_BUS_OFF;
 		cf->can_id |= CAN_ERR_BUSOFF;
 
@@ -270,8 +271,7 @@ static int pucan_handle_status(struct peak_canfd_priv *priv,
 		rtdm_sem_destroy(&rdev->tx_sem);
 
 	} else if (pucan_status_is_passive(msg)) {
-		rtdm_printk(DRV_NAME " CAN%u: Error passive status\n",
-			    priv->index+1);
+		pr_info("CAN%u: Error passive status\n", priv->index + 1);
 		rdev->state = CAN_STATE_ERROR_PASSIVE;
 		cf->can_id |= CAN_ERR_CRTL;
 		cf->data[1] = (priv->bec.txerr > priv->bec.rxerr) ?
@@ -281,8 +281,7 @@ static int pucan_handle_status(struct peak_canfd_priv *priv,
 		cf->data[7] = priv->bec.rxerr;
 
 	} else if (pucan_status_is_warning(msg)) {
-		rtdm_printk(DRV_NAME " CAN%u: Error warning status\n",
-			    priv->index+1);
+		pr_info("CAN%u: Error warning status\n", priv->index + 1);
 		rdev->state = CAN_STATE_ERROR_WARNING;
 
 		cf->can_id |= CAN_ERR_CRTL;
@@ -294,8 +293,7 @@ static int pucan_handle_status(struct peak_canfd_priv *priv,
 
 	} else if (rdev->state != CAN_STATE_ERROR_ACTIVE) {
 		/* back to ERROR_ACTIVE */
-		rtdm_printk(DRV_NAME " CAN%u: Error active status\n",
-			    priv->index+1);
+		pr_info("CAN%u: Error active status\n", priv->index + 1);
 		rdev->state = CAN_STATE_ERROR_ACTIVE;
 	}
 
@@ -456,8 +454,7 @@ static int peak_canfd_stop(struct rtcan_device *rdev,
 		/* go back to RESET mode */
 		err = pucan_set_reset_mode(priv);
 		if (err) {
-			rtdm_printk(DRV_NAME " CAN%u: reset failed\n",
-				    priv->index+1);
+			pr_err("CAN%u: reset failed\n", priv->index + 1);
 			break;
 		}
 
@@ -511,9 +508,8 @@ static int peak_canfd_set_bittiming(struct rtcan_device *rdev,
 
 	/* can't support BTR0BTR1 mode with clock greater than 8 MHz */
 	if (pbt->type != CAN_BITTIME_STD) {
-		rtdm_printk(DRV_NAME
-			    " CAN%u: unsupported bittiming mode %u\n",
-			    priv->index+1, pbt->type);
+		pr_err("CAN%u: unsupported bittiming mode %u\n",
+		       priv->index + 1, pbt->type);
 		return -EINVAL;
 	}
 
@@ -530,8 +526,8 @@ static int peak_canfd_set_bittiming(struct rtcan_device *rdev,
 
 	cmd->ewl = 96;	/* default */
 
-	rtdm_printk(DRV_NAME ": nominal: brp=%u tseg1=%u tseg2=%u sjw=%u\n",
-		   le16_to_cpu(cmd->brp), cmd->tseg1, cmd->tseg2, cmd->sjw_t);
+	pr_debug("nominal: brp=%u tseg1=%u tseg2=%u sjw=%u\n",
+		 le16_to_cpu(cmd->brp), cmd->tseg1, cmd->tseg2, cmd->sjw_t);
 
 	return pucan_write_cmd(priv);
 }
@@ -553,9 +549,8 @@ static netdev_tx_t peak_canfd_start_xmit(struct rtcan_device *rdev,
 	 * (auto-)restart mechanism
 	 */
 	if (!msg) {
-		rtdm_printk(DRV_NAME
-			    " CAN%u: skb lost (No room left in tx buffer)\n",
-			    priv->index+1);
+		pr_err("CAN%u: skb lost (No room left in tx buffer)\n",
+		       priv->index + 1);
 		return 0;
 	}
 
