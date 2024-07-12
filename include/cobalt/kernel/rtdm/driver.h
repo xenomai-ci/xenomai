@@ -1230,8 +1230,6 @@ void rtdm_mutex_destroy(rtdm_mutex_t *mutex);
 
 /* --- utility functions --- */
 
-#define rtdm_printk(format, ...)	printk(format, ##__VA_ARGS__)
-
 #define rtdm_printk_ratelimited(fmt, ...)  do {				\
 	if (xnclock_ratelimit())					\
 		printk(fmt, ##__VA_ARGS__);				\

@@ -149,8 +149,7 @@ waiting on hardware events.
     interrupt handler
 
 
-20. replace printk in xmit function, interrupt handler, and any function called
-    within this context with rtdm_printk. Where avoidable, disable output in
+20. Where avoidable, disable output (like printk(), pr_*()), in
     critical functions (i.e. when interrupts are off) completely.
 
 
