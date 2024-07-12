@@ -131,20 +131,6 @@
 	((u8 *)(x))[0], ((u8 *)(x))[1], ((u8 *)(x))[2], ((u8 *)(x))[3],        \
 		((u8 *)(x))[4], ((u8 *)(x))[5]
 
-#ifdef CONFIG_RTWLAN_DEBUG
-#define RTWLAN_DEBUG_PRINTK(__message...)                                      \
-	do {                                                                   \
-		rtdm_printk(__message);                                        \
-	} while (0)
-#define RTWLAN_DEBUG(__message, __args...)                                     \
-	RTWLAN_DEBUG_PRINTK(KERN_DEBUG "rtwlan->%s: Debug - " __message,       \
-			    __FUNCTION__, ##__args);
-#else
-#define RTWLAN_DEBUG(__message...)                                             \
-	do {                                                                   \
-	} while (0)
-#endif
-
 struct rtwlan_stats {
 	unsigned long rx_packets; /* total packets received	*/
 	unsigned long tx_packets; /* total packets transmitted	*/

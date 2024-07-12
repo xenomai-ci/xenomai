@@ -19,6 +19,8 @@
  *
  */
 
+#define pr_fmt(fmt) "rtwlan: " fmt
+
 #include <linux/module.h>
 
 #include <rtnet_port.h>
@@ -100,7 +102,7 @@ struct rtnet_device *rtwlan_alloc_dev(unsigned sizeof_priv,
 {
 	struct rtnet_device *rtnet_dev;
 
-	RTWLAN_DEBUG("Start.\n");
+	pr_debug("Start.\n");
 
 	rtnet_dev = rt_alloc_etherdev(
 		sizeof(struct rtwlan_device) + sizeof_priv, dev_pool_size);
@@ -208,7 +210,7 @@ struct rtnet_ioctls rtnet_wlan_ioctls = {
 int __init rtwlan_init(void)
 {
 	if (rtnet_register_ioctls(&rtnet_wlan_ioctls))
-		rtdm_printk(KERN_ERR "Failed to register rtnet_wlan_ioctl!\n");
+		pr_err("Failed to register rtnet_wlan_ioctl!\n");
 
 	return 0;
 }
