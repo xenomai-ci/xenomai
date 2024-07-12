@@ -460,11 +460,11 @@ MODULE_PARM_DESC(pciif, "PCI Interface: 'all' (default), 'pci', 'pcie'");
 static int __init e1000_init_module(void)
 {
 	int ret;
-    strcpy(e1000_driver_name, THIS_MODULE->name);
-	printk(KERN_INFO "%s - %s version %s (pciif: %s)\n",
-	       e1000_driver_string, e1000_driver_name, e1000_driver_version, pciif);
+	strcpy(e1000_driver_name, THIS_MODULE->name);
+	pr_info("%s - %s version %s (pciif: %s)\n", e1000_driver_string,
+		e1000_driver_name, e1000_driver_version, pciif);
 
-	printk(KERN_INFO "%s\n", e1000_copyright);
+	pr_info("%s\n", e1000_copyright);
 
 
     if (0 == strcmp(pciif, "pcie"))
@@ -486,10 +486,11 @@ static int __init e1000_init_module(void)
 #endif
 	if (copybreak != COPYBREAK_DEFAULT) {
 		if (copybreak == 0)
-			printk(KERN_INFO "e1000: copybreak disabled\n");
+			pr_info("e1000: copybreak disabled\n");
 		else
-			printk(KERN_INFO "e1000: copybreak enabled for "
-			       "packets <= %u bytes\n", copybreak);
+			pr_info("e1000: copybreak enabled for "
+				"packets <= %u bytes\n",
+				copybreak);
 	}
 	return ret;
 }
@@ -1376,8 +1377,9 @@ static int e1000_probe(struct pci_dev *pdev,
 		 "32-bit"));
 	}
 
-	for (i = 0; i < 6; i++)
-		printk("%2.2x%c", netdev->dev_addr[i], i == 5 ? '\n' : ':');
+	pr_debug("%2.2x:%2.2x:%2.2x:%2.2x:%2.2x:%2.2x\n", netdev->dev_addr[0],
+		 netdev->dev_addr[1], netdev->dev_addr[2], netdev->dev_addr[3],
+		 netdev->dev_addr[4], netdev->dev_addr[5]);
 
 	/* reset the hardware with the new settings */
 	e1000_reset(adapter);
@@ -3848,7 +3850,7 @@ static int e1000_xmit_frame_ring(struct sk_buff *skb,
 	 * head, otherwise try next time */
 	if (unlikely(e1000_maybe_stop_tx(netdev, tx_ring, count + 2))) {
 		rtdm_lock_put_irqrestore(&tx_ring->tx_lock, irq_flags);
-		rtdm_printk("FATAL: rt_e1000 ran into tail close to head situation!\n");
+		pr_crit("FATAL: rt_e1000 ran into tail close to head situation!\n");
 		return NETDEV_TX_BUSY;
 	}
 
@@ -3859,7 +3861,7 @@ static int e1000_xmit_frame_ring(struct sk_buff *skb,
 			if (!test_bit(__E1000_DOWN, &adapter->state))
 				schedule_delayed_work(&adapter->fifo_stall_task,
 						      1);
-		    rtdm_printk("FATAL: rt_e1000 ran into tail 82547 controller bug!\n");
+			pr_crit("FATAL: rt_e1000 ran into tail 82547 controller bug!\n");
 			return NETDEV_TX_BUSY;
 		}
 	}
@@ -4897,7 +4899,7 @@ static bool e1000_clean_rx_irq(struct e1000_adapter *adapter,
 	bool cleaned = FALSE;
 	unsigned int total_rx_bytes=0, total_rx_packets=0;
 
-	// rtdm_printk("<2> e1000_clean_rx_irq %i\n", __LINE__);
+	// pr_debug("<2> e1000_clean_rx_irq %i\n", __LINE__);
 
 	i = rx_ring->next_to_clean;
 	rx_desc = E1000_RX_DESC(*rx_ring, i);
@@ -5808,7 +5810,7 @@ static int e1000_resume(struct pci_dev *pdev)
 	pci_set_power_state(pdev, PCI_D0);
 	pci_restore_state(pdev);
 	if ((err = pci_enable_device(pdev))) {
-		printk(KERN_ERR "e1000: Cannot enable PCI device from suspend\n");
+		pr_err("Cannot enable PCI device from suspend\n");
 		return err;
 	}
 	pci_set_master(pdev);
@@ -5909,7 +5911,7 @@ static pci_ers_result_t e1000_io_slot_reset(struct pci_dev *pdev)
 	struct e1000_adapter *adapter = netdev->priv;
 
 	if (pci_enable_device(pdev)) {
-		printk(KERN_ERR "e1000: Cannot re-enable PCI device after reset.\n");
+		pr_err("Cannot re-enable PCI device after reset.\n");
 		return PCI_ERS_RESULT_DISCONNECT;
 	}
 	pci_set_master(pdev);
@@ -5940,7 +5942,7 @@ static void e1000_io_resume(struct pci_dev *pdev)
 
 	if (rtnetif_running(netdev)) {
 		if (e1000_up(adapter)) {
-			printk("e1000: can't bring device back up after reset\n");
+			pr_err("can't bring device back up after reset\n");
 			return;
 		}
 	}

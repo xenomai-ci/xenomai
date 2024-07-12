@@ -47,13 +47,15 @@ struct e1000_adapter;
 
 #define E1000_DBG(args...)
 
-#define E1000_ERR(args...) printk(KERN_ERR "e1000: " args)
+#define E1000_ERR(args...) pr_err(args)
 
-#define PFX "e1000: "
-#define DPRINTK(nlevel, klevel, fmt, args...) \
-	(void)((NETIF_MSG_##nlevel & adapter->msg_enable) && \
-	printk(KERN_##klevel PFX "%s: %s: " fmt, adapter->netdev->name, \
-		__FUNCTION__ , ## args))
+#undef pr_fmt
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
+#define DPRINTK(nlevel, klevel, fmt, args...)                           \
+	(void)((NETIF_MSG_##nlevel & adapter->msg_enable) &&            \
+	       printk(KERN_##klevel "%s: %s: %s: " fmt, KBUILD_MODNAME, \
+		      adapter->netdev->name, __FUNCTION__, ##args))
 
 #define E1000_MAX_INTR 10
 
