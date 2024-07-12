@@ -21,6 +21,10 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define driver_name "RT-ETH1394"
+
+#define pr_fmt(fmt) driver_name ": " fmt
+
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/if_arp.h>
@@ -44,26 +48,6 @@
 #include <ieee1394.h>
 #include <highlevel.h>
 #include <iso.h>
-
-#define driver_name	"RT-ETH1394"
-
-
-#define ETH1394_PRINT_G(level, fmt, args...) \
-	rtdm_printk(level "%s: " fmt, driver_name, ## args)
-
-#define ETH1394_PRINT(level, dev_name, fmt, args...) \
-	rtdm_printk(level "%s: %s: " fmt, driver_name, dev_name, ## args)
-
-//#define ETH1394_DEBUG 1
-
-#ifdef ETH1394_DEBUG
-#define DEBUGP(fmt, args...) \
-	rtdm_printk(KERN_ERR "%s:%s[%d]: " fmt "\n", driver_name, __FUNCTION__, __LINE__, ## args)
-#else
-#define DEBUGP(fmt, args...)
-#endif
-
-#define TRACE() rtdm_printk(KERN_ERR "%s:%s[%d] ---- TRACE\n", driver_name, __FUNCTION__, __LINE__)
 
 /* Change this to IEEE1394_SPEED_S100 to make testing easier */
 #define ETH1394_SPEED_DEF	0x03 /*IEEE1394_SPEED_MAX*/
@@ -169,9 +153,9 @@ static int eth1394_init_bc(struct rtnet_device *dev)
 
 		if ((bc & 0x80000000) != 0x80000000) { //used to be 0xc0000000
 			/* broadcast channel not validated yet */
-			ETH1394_PRINT(KERN_WARNING, dev->name,
-				      "Error BROADCAST_CHANNEL register valid "
-				      "bit not set, can't send IP traffic\n");
+			pr_warn("%s: Error BROADCAST_CHANNEL register valid "
+				"bit not set, can't send IP traffic\n",
+				dev->name);
 
 			eth1394_iso_shutdown(priv);
 
@@ -188,24 +172,22 @@ static int eth1394_init_bc(struct rtnet_device *dev)
 				//~ return -EAGAIN;
 
 			priv->broadcast_channel = bc & 0x3f;
-			ETH1394_PRINT(KERN_INFO, dev->name,
-				      "Changing to broadcast channel %d...\n",
-				      priv->broadcast_channel);
+			pr_info("%s: Changing to broadcast channel %d...\n",
+				dev->name, priv->broadcast_channel);
 
 			priv->iso = hpsb_iso_recv_init(priv->host, 16 * 4096,
 						       16, priv->broadcast_channel, HPSB_ISO_DMA_PACKET_PER_BUFFER,
 						       1, eth1394_iso, 0, "eth1394_iso", IEEE1394_PRIORITY_HIGHEST);
 
 			if (priv->iso == NULL) {
-				ETH1394_PRINT(KERN_ERR, dev->name,
-					      "failed to change broadcast "
-					      "channel\n");
+				pr_err("%s: failed to change broadcast channel\n",
+				       dev->name);
 				return -EAGAIN;
 			}
 		}
 		if (hpsb_iso_recv_start(priv->iso, -1, (1 << 3), -1) < 0) {
-			ETH1394_PRINT(KERN_ERR, dev->name,
-				      "Could not start data stream reception\n");
+			pr_err("%s: Could not start data stream reception\n",
+			       dev->name);
 
 			eth1394_iso_shutdown(priv);
 
@@ -258,7 +240,7 @@ static inline void eth1394_register_limits(int nodeid, u16 maxpayload,
 {
 
 	if (nodeid < 0 || nodeid >= ALL_NODES) {
-		ETH1394_PRINT_G (KERN_ERR, "Cannot register invalid nodeid %d\n", nodeid);
+		pr_err("Cannot register invalid nodeid %d\n", nodeid);
 		return;
 	}
 
@@ -343,8 +325,8 @@ static void eth1394_add_host (struct hpsb_host *host)
 	dev = rt_alloc_etherdev(sizeof (struct eth1394_priv),
 				RX_RING_SIZE * 2 + TX_RING_SIZE);
 	if (dev == NULL) {
-		ETH1394_PRINT_G (KERN_ERR, "Out of memory trying to allocate "
-				 "etherdevice for IEEE 1394 device\n");
+		pr_err("Out of memory trying to allocate "
+		       "etherdevice for IEEE 1394 device\n");
 		goto free_dev;
 	}
 	rtdev_alloc_name(dev, "rteth%d");
@@ -378,18 +360,18 @@ static void eth1394_add_host (struct hpsb_host *host)
 
 	hi = hpsb_create_hostinfo(&eth1394_highlevel, host, sizeof(*hi));
 	if (hi == NULL) {
-		ETH1394_PRINT_G (KERN_ERR, "Out of memory trying to create "
-				 "hostinfo for IEEE 1394 device\n");
+		pr_err("Out of memory trying to create "
+		       "hostinfo for IEEE 1394 device\n");
 		goto free_hi;
 	}
 
 	if(rt_register_rtnetdev(dev))
 	{
-		ETH1394_PRINT (KERN_ERR, dev->name, "Error registering network driver\n");
+		pr_err("%s: Error registering network driver\n", dev->name);
 		goto free_hi;
 	}
 
-	ETH1394_PRINT (KERN_ERR, dev->name, "IEEE-1394 IPv4 over 1394 Ethernet\n");
+	pr_err("%s: IEEE-1394 IPv4 over 1394 Ethernet\n", dev->name);
 
 	hi->host = host;
 	hi->dev = dev;
@@ -411,9 +393,9 @@ static void eth1394_add_host (struct hpsb_host *host)
 
 
 	if (priv->iso == NULL) {
-		ETH1394_PRINT(KERN_ERR, dev->name,
-			      "Could not allocate isochronous receive context "
-			      "for the broadcast channel\n");
+		pr_err("%s: Could not allocate isochronous receive context "
+		       "for the broadcast channel\n",
+		       dev->name);
 		priv->bc_state = ETHER1394_BC_ERROR;
 		goto unregister_dev;
 	} else {
@@ -826,7 +808,7 @@ static int eth1394_data_handler(struct rtnet_device *dev, int srcid, int destid,
 
 		skb = rtnetdev_alloc_rtskb(dev, len + dev->hard_header_len + 15);
 		if (!skb) {
-			ETH1394_PRINT_G(KERN_ERR, "eth1394 rx: low on mem\n");
+			pr_err("rx: low on mem\n");
 			priv->stats.rx_dropped++;
 			return -1;
 		}
@@ -992,8 +974,8 @@ static int eth1394_write(struct hpsb_host *host, struct hpsb_packet *packet, uns
 	int ret;
 
 	if (hi == NULL) {
-		ETH1394_PRINT_G(KERN_ERR, "Could not find net device for host %s\n",
-				host->driver->name);
+		pr_err("Could not find net device for host %s\n",
+		       host->driver->name);
 		return RCODE_ADDRESS_ERROR;
 	}
 
@@ -1028,8 +1010,8 @@ static void eth1394_iso(struct hpsb_iso *iso, void *arg)
 
 	struct host_info *hi = hpsb_get_hostinfo(&eth1394_highlevel, iso->host);
 	if (hi == NULL) {
-		ETH1394_PRINT_G(KERN_ERR, "Could not find net device for host %s\n",
-				iso->host->driver->name);
+		pr_err("Could not find net device for host %s\n",
+		       iso->host->driver->name);
 		return;
 	}
 
@@ -1196,8 +1178,9 @@ static inline int eth1394_prep_write_packet(struct hpsb_packet *p,
 	p->expect_response = 1;
 
 	if (hpsb_get_tlabel(p)) {
-		ETH1394_PRINT_G(KERN_ERR, "No more tlabels left while sending "
-				"to node " NODE_BUS_FMT "\n", NODE_BUS_ARGS(host, node));
+		pr_err("No more tlabels left while sending "
+		       "to node " NODE_BUS_FMT "\n",
+		       NODE_BUS_ARGS(host, node));
 		return -1;
 	}
 	p->header[0] = (p->node_id << 16) | (p->tlabel << 10)
@@ -1380,8 +1363,8 @@ static int eth1394_tx (struct rtskb *skb, struct rtnet_device *dev)
 
 	rtdm_lock_get_irqsave(&priv->lock, context);
 	if (priv->bc_state == ETHER1394_BC_CLOSED) {
-		ETH1394_PRINT(KERN_ERR, dev->name,
-			      "Cannot send packet, no broadcast channel available.\n");
+		pr_err("%s: Cannot send packet, no broadcast channel available.\n",
+		       dev->name);
 		ret = -EAGAIN;
 		rtdm_lock_put_irqrestore(&priv->lock, context);
 		goto fail;
