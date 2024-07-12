@@ -22,6 +22,7 @@
 #include <asm/cpu_device_id.h>
 #include <asm/msr.h>
 #include <asm/xenomai/c1e.h>
+#include <cobalt/kernel/assert.h>
 
 #define ICPU(model) \
 	{ X86_VENDOR_INTEL, 6, model, X86_FEATURE_MWAIT, 1UL }
@@ -63,7 +64,8 @@ void mach_x86_c1e_disable(void)
 
 	id = x86_match_cpu(c1e_ids);
 	if (id) {
-		printk("[Xenomai] disabling automatic C1E state promotion on Intel processor\n");
+		printk(XENO_INFO
+		       "disabling automatic C1E state promotion on Intel processor\n");
 		/*
 		 * cpu uses C1E, disable this feature (copied from
 		 * intel_idle driver)
