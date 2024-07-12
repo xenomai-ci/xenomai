@@ -99,12 +99,8 @@ RTL8169_VERSION "2.2"	<2004/08/09>
 #ifdef RTL8169_DEBUG
 	#define assert(expr) \
 		if(!(expr)) { pr_err("Assertion failed! %s,%s,%s,line=%d\n", #expr,__FILE__,__FUNCTION__,__LINE__); }
-	/*** RTnet / <kk>: rt_assert must be used instead of assert() within interrupt context! ***/
-	#define rt_assert(expr) \
-		if(!(expr)) { pr_err("Assertion failed! %s,%s,%s,line=%d\n", #expr,__FILE__,__FUNCTION__,__LINE__); }
 #else
 	#define assert(expr) do {} while (0)
-	#define rt_assert(expr) do {} while (0)
 #endif	// end of #ifdef RTL8169_DEBUG
 
 /* media options */
@@ -1490,9 +1486,9 @@ static void rtl8169_tx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 	//int entry = priv->cur_tx % NUM_TX_DESC;	/* <kk> */
 	int txloop_cnt = 0;
 
-	rt_assert (rtdev != NULL);
-	rt_assert (priv != NULL);
-	rt_assert (ioaddr != 0);
+	assert(rtdev != NULL);
+	assert(priv != NULL);
+	assert(ioaddr != 0);
 
 	rtdm_lock_get(&priv->lock); /*** RTnet ***/
 
@@ -1551,9 +1547,9 @@ static void rtl8169_rx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 	struct rtskb *rx_skb;
 	struct	RxDesc	*rxdesc;
 
-	rt_assert (rtdev != NULL);
-	rt_assert (priv != NULL);
-	rt_assert (ioaddr != 0);
+	assert(rtdev != NULL);
+	assert(priv != NULL);
+	assert(ioaddr != 0);
 
 
 	cur_rx = priv->cur_rx;
