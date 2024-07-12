@@ -20,6 +20,8 @@
 #define DRV_VERSION	"0.9.15-pre11-rt"
 #define DRV_RELDATE	"May 11, 2002"
 
+#define pr_fmt(fmt) DRV_NAME ": " fmt
+
 #include <linux/module.h>
 #include "tulip.h"
 #include <linux/pci.h>
@@ -299,7 +301,7 @@ static void tulip_up(/*RTnet*/struct rtnet_device *rtdev)
 	udelay(100);
 
 	if (tulip_debug > 1)
-		printk(KERN_DEBUG "%s: tulip_up(), irq==%d.\n", rtdev->name, rtdev->irq);
+		pr_debug("%s: tulip_up(), irq==%d.\n", rtdev->name, rtdev->irq);
 
 	outl(tp->rx_ring_dma, ioaddr + CSR3);
 	outl(tp->tx_ring_dma, ioaddr + CSR4);
@@ -360,8 +362,8 @@ static void tulip_up(/*RTnet*/struct rtnet_device *rtdev)
 			(rtdev->if_port == 12 ? 0 : rtdev->if_port);
 		for (i = 0; i < tp->mtable->leafcount; i++)
 			if (tp->mtable->mleaf[i].media == looking_for) {
-				printk(KERN_INFO "%s: Using user-specified media %s.\n",
-					   rtdev->name, medianame[rtdev->if_port]);
+				pr_info("%s: Using user-specified media %s.\n",
+					rtdev->name, medianame[rtdev->if_port]);
 				goto media_picked;
 			}
 	}
@@ -369,8 +371,8 @@ static void tulip_up(/*RTnet*/struct rtnet_device *rtdev)
 		int looking_for = tp->mtable->defaultmedia & MEDIA_MASK;
 		for (i = 0; i < tp->mtable->leafcount; i++)
 			if (tp->mtable->mleaf[i].media == looking_for) {
-				printk(KERN_INFO "%s: Using EEPROM-set media %s.\n",
-					   rtdev->name, medianame[looking_for]);
+				pr_info("%s: Using EEPROM-set media %s.\n",
+					rtdev->name, medianame[looking_for]);
 				goto media_picked;
 			}
 	}
@@ -410,8 +412,9 @@ media_picked:
 		if (tp->mii_cnt) {
 			tulip_select_media(rtdev, 1);
 			if (tulip_debug > 1)
-				printk(KERN_INFO "%s: Using MII transceiver %d, status %4.4x.\n",
-					   rtdev->name, tp->phys[0], tulip_mdio_read(rtdev, tp->phys[0], 1));
+				pr_info("%s: Using MII transceiver %d, status %4.4x.\n",
+					rtdev->name, tp->phys[0],
+					tulip_mdio_read(rtdev, tp->phys[0], 1));
 			outl(csr6_mask_defstate, ioaddr + CSR6);
 			tp->csr6 = csr6_mask_hdcap;
 			rtdev->if_port = 11;
@@ -474,9 +477,10 @@ media_picked:
 	outl(0, ioaddr + CSR2);		/* Rx poll demand */
 
 	if (tulip_debug > 2) {
-		printk(KERN_DEBUG "%s: Done tulip_up(), CSR0 %8.8x, CSR5 %8.8x CSR6 %8.8x.\n",
-			   rtdev->name, inl(ioaddr + CSR0), inl(ioaddr + CSR5),
-			   inl(ioaddr + CSR6));
+		pr_debug(
+			"%s: Done tulip_up(), CSR0 %8.8x, CSR5 %8.8x CSR6 %8.8x.\n",
+			rtdev->name, inl(ioaddr + CSR0), inl(ioaddr + CSR5),
+			inl(ioaddr + CSR6));
 	}
 }
 
@@ -490,8 +494,8 @@ tulip_open(/*RTnet*/struct rtnet_device *rtdev)
 	if ((retval = /*RTnet*/rtdm_irq_request(&tp->irq_handle, rtdev->irq,
 						tulip_interrupt, 0, "rt_tulip",
 						rtdev))) {
-		printk("%s: Unable to install ISR for IRQ %d\n",
-			  rtdev->name,rtdev->irq);
+		pr_err("%s: Unable to install ISR for IRQ %d\n", rtdev->name,
+		       rtdev->irq);
 		return retval;
 	}
 
@@ -716,8 +720,8 @@ static int tulip_close (/*RTnet*/struct rtnet_device *rtdev)
 	tulip_down (rtdev);
 
 	if (tulip_debug > 1)
-		printk(KERN_DEBUG "%s: Shutting down ethercard, status was %2.2x.\n",
-			rtdev->name, inl (ioaddr + CSR5));
+		pr_debug("%s: Shutting down ethercard, status was %2.2x.\n",
+			 rtdev->name, inl(ioaddr + CSR5));
 
 	rtdm_irq_free(&tp->irq_handle);
 
@@ -757,8 +761,7 @@ static int tulip_close (/*RTnet*/struct rtnet_device *rtdev)
 }
 
 #ifdef XXX_CONFIG_TULIP_MWI
-static void tulip_mwi_config (struct pci_dev *pdev,
-					struct net_device *dev)
+static void tulip_mwi_config(struct pci_dev *pdev, struct net_device *dev)
 {
 	struct tulip_private *tp = rtdev->priv;
 	u8 cache;
@@ -766,7 +769,7 @@ static void tulip_mwi_config (struct pci_dev *pdev,
 	u32 csr0;
 
 	if (tulip_debug > 3)
-		printk(KERN_DEBUG "%s: tulip_mwi_config()\n", pci_name(pdev));
+		pr_debug("%s: tulip_mwi_config()\n", pci_name(pdev));
 
 	tp->csr0 = csr0 = 0;
 
@@ -780,8 +783,10 @@ static void tulip_mwi_config (struct pci_dev *pdev,
 	/* set or disable MWI in the standard PCI command bit.
 	 * Check for the case where  mwi is desired but not available
 	 */
-	if (csr0 & MWI)	pci_set_mwi(pdev);
-	else		pci_clear_mwi(pdev);
+	if (csr0 & MWI)
+		pci_set_mwi(pdev);
+	else
+		pci_clear_mwi(pdev);
 
 	/* read result from hardware (in case bit refused to enable) */
 	pci_read_config_word(pdev, PCI_COMMAND, &pci_command);
@@ -833,8 +838,8 @@ static void tulip_mwi_config (struct pci_dev *pdev,
 out:
 	tp->csr0 = csr0;
 	if (tulip_debug > 2)
-		printk(KERN_DEBUG "%s: MWI config cacheline=%d, csr0=%08x\n",
-		       pci_name(pdev), cache, csr0);
+		pr_debug("%s: MWI config cacheline=%d, csr0=%08x\n",
+			 pci_name(pdev), cache, csr0);
 }
 #endif
 
@@ -866,8 +871,8 @@ static int tulip_init_one (struct pci_dev *pdev,
 
 #ifndef MODULE
 	static int did_version;		/* Already printed version info. */
-	if (tulip_debug > 0  &&  did_version++ == 0)
-		printk(KERN_INFO "%s", version);
+	if (tulip_debug > 0 && did_version++ == 0)
+		pr_info("%s", version);
 #endif
 
 	board_idx++;
@@ -881,7 +886,7 @@ static int tulip_init_one (struct pci_dev *pdev,
 	 */
 
 	if (pdev->subsystem_vendor == PCI_VENDOR_ID_LMC) {
-		printk(KERN_ERR PFX "skipping LMC card.\n");
+		pr_err("skipping LMC card.\n");
 		return -ENODEV;
 	}
 
@@ -896,7 +901,7 @@ static int tulip_init_one (struct pci_dev *pdev,
 		pci_read_config_dword(pdev, PCI_REVISION_ID, &dev_rev);
 		if(dev_rev < 0x02000030)
 		{
-			printk(KERN_ERR PFX "skipping early DM9100 with Crc bug (use dmfe)\n");
+			pr_err("skipping early DM9100 with Crc bug (use dmfe)\n");
 			return -ENODEV;
 		}
 	}
@@ -943,9 +948,7 @@ static int tulip_init_one (struct pci_dev *pdev,
 
 	i = pci_enable_device(pdev);
 	if (i) {
-		printk(KERN_ERR PFX
-			"Cannot enable tulip board #%d, aborting\n",
-			board_idx);
+		pr_err("Cannot enable tulip board #%d, aborting\n", board_idx);
 		return i;
 	}
 
@@ -956,7 +959,7 @@ static int tulip_init_one (struct pci_dev *pdev,
 	rtdev = /*RTnet*/rt_alloc_etherdev (sizeof (*tp),
 					RX_RING_SIZE * 2 + TX_RING_SIZE);
 	if (!rtdev) {
-		printk(KERN_ERR PFX "ether device alloc failed, aborting\n");
+		pr_err("ether device alloc failed, aborting\n");
 		return -ENOMEM;
 	}
 	//rtdev_alloc_name(rtdev, "eth%d");//Done by register_rtdev()
@@ -965,10 +968,10 @@ static int tulip_init_one (struct pci_dev *pdev,
 	rtdev->sysbind = &pdev->dev;
 
 	if (pci_resource_len (pdev, 0) < tulip_tbl[chip_idx].io_size) {
-		printk(KERN_ERR PFX "%s: I/O region (0x%llx@0x%llx) too small, "
-			"aborting\n", pci_name(pdev),
-			(unsigned long long)pci_resource_len (pdev, 0),
-			(unsigned long long)pci_resource_start (pdev, 0));
+		pr_err("%s: I/O region (0x%llx@0x%llx) too small, aborting\n",
+		       pci_name(pdev),
+		       (unsigned long long)pci_resource_len(pdev, 0),
+		       (unsigned long long)pci_resource_start(pdev, 0));
 		goto err_out_free_netdev;
 	}
 
@@ -1177,8 +1180,8 @@ static int tulip_init_one (struct pci_dev *pdev,
 	if (rtdev->mem_start & MEDIA_MASK)
 		tp->default_port = rtdev->mem_start & MEDIA_MASK;
 	if (tp->default_port) {
-		printk(KERN_INFO "tulip%d: Transceiver selection forced to %s.\n",
-		       board_idx, medianame[tp->default_port & MEDIA_MASK]);
+		pr_info("tulip%d: Transceiver selection forced to %s.\n",
+			board_idx, medianame[tp->default_port & MEDIA_MASK]);
 		tp->medialock = 1;
 		if (tulip_media_cap[tp->default_port] & MediaAlwaysFD)
 			tp->full_duplex = 1;
@@ -1230,21 +1233,18 @@ static int tulip_init_one (struct pci_dev *pdev,
 		goto err_out_free_ring;
 	}
 
-	printk(KERN_INFO "%s: %s rev %d at %#3lx,",
-	       rtdev->name, tulip_tbl[chip_idx].chip_name, chip_rev, ioaddr);
 	pci_set_drvdata(pdev, rtdev);
 
-	if (t2104x_mode == 1)
-		printk(" 21040 compatible mode,");
-	else if (t2104x_mode == 2)
-		printk(" 21041 mode,");
-	if (eeprom_missing)
-		printk(" EEPROM not present,");
-	for (i = 0; i < 6; i++)
-		printk("%c%2.2X", i ? ':' : ' ', rtdev->dev_addr[i]);
-	printk(", IRQ %d.\n", irq);
+	pr_info("%s: %s rev %d at %#3lx,%s%s%s %2.2X:%2.2X:%2.2X:%2.2X:%2.2X:%2.2X, IRQ %d",
+		rtdev->name, tulip_tbl[chip_idx].chip_name, chip_rev, ioaddr,
+		t2104x_mode == 1 ? " 21040 compatible mode," : "",
+		t2104x_mode == 2 ? " 21041 mode," : "",
+		eeprom_missing ? " EEPROM not present," : "",
+		rtdev->dev_addr[0], rtdev->dev_addr[1], rtdev->dev_addr[2],
+		rtdev->dev_addr[3], rtdev->dev_addr[4], rtdev->dev_addr[5],
+		irq);
 
-/*RTnet
+	/*RTnet
 	if (tp->chip_id == PNIC2)
 		tp->link_change = pnic2_lnk_change;
 	else if ((tp->flags & HAS_NWAY)  || tp->chip_id == DC21041)
@@ -1384,7 +1384,7 @@ static struct pci_driver tulip_driver = {
 static int __init tulip_init (void)
 {
 #ifdef MODULE
-	printk(KERN_INFO "%s", version);
+	pr_info("%s", version);
 #endif
 
 	/* copy module parms into globals */

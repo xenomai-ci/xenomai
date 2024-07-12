@@ -16,6 +16,8 @@
 */
 /* Ported to RTnet by Wittawat Yamwong <wittawat@web.de> */
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
 
 /* Understanding the PNIC_II - everything is this file is based
  * on the PNIC_II_PDF datasheet which is sorely lacking in detail
@@ -111,10 +113,10 @@ void pnic2_start_nway(/*RTnet*/struct rtnet_device *rtdev)
         csr14 |= 0x00001184;
 
 	if (tulip_debug > 1)
-		printk(KERN_DEBUG "%s: Restarting PNIC2 autonegotiation, "
-                      "csr14=%8.8x.\n", rtdev->name, csr14);
+		pr_debug("%s: Restarting PNIC2 autonegotiation, csr14=%8.8x.\n",
+			 rtdev->name, csr14);
 
-        /* tell pnic2_lnk_change we are doing an nway negotiation */
+	/* tell pnic2_lnk_change we are doing an nway negotiation */
 	rtdev->if_port = 0;
 	tp->nway = tp->mediasense = 1;
 	tp->nwayset = tp->lpar = 0;
@@ -123,10 +125,10 @@ void pnic2_start_nway(/*RTnet*/struct rtnet_device *rtdev)
 
 	tp->csr6 = inl(ioaddr + CSR6);
 	if (tulip_debug > 1)
-		printk(KERN_DEBUG "%s: On Entry to Nway, "
-                      "csr6=%8.8x.\n", rtdev->name, tp->csr6);
+		pr_debug("%s: On Entry to Nway, csr6=%8.8x.\n", rtdev->name,
+			 tp->csr6);
 
-        /* mask off any bits not to touch
+	/* mask off any bits not to touch
          * comment at top of file explains mask value
          */
 	tp->csr6 = tp->csr6 & 0xfe3bd1fd;

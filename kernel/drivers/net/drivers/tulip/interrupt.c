@@ -15,6 +15,8 @@
 */
 /* Ported to RTnet by Wittawat Yamwong <wittawat@web.de> */
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
 #include "tulip.h"
 #include <linux/etherdevice.h>
 #include <linux/pci.h>
@@ -107,15 +109,15 @@ static int tulip_rx(/*RTnet*/struct rtnet_device *rtdev, nanosecs_abs_t *time_st
 	int received = 0;
 
 	if (tulip_debug > 4)
-		/*RTnet*/rtdm_printk(KERN_DEBUG " In tulip_rx(), entry %d %8.8x.\n", entry,
-			   tp->rx_ring[entry].status);
+		/*RTnet*/pr_debug(" In tulip_rx(), entry %d %8.8x.\n", entry,
+				  tp->rx_ring[entry].status);
 	/* If we own the next entry, it is a new packet. Send it up. */
 	while ( ! (tp->rx_ring[entry].status & cpu_to_le32(DescOwned))) {
 		s32 status = le32_to_cpu(tp->rx_ring[entry].status);
 
 		if (tulip_debug > 5)
-			/*RTnet*/rtdm_printk(KERN_DEBUG "%s: In tulip_rx(), entry %d %8.8x.\n",
-				   rtdev->name, entry, status);
+			/*RTnet*/pr_debug("%s: In tulip_rx(), entry %d %8.8x.\n",
+					  rtdev->name, entry, status);
 		if (--rx_work_limit < 0)
 			break;
 		if ((status & 0x38008300) != 0x0300) {
@@ -123,7 +125,7 @@ static int tulip_rx(/*RTnet*/struct rtnet_device *rtdev, nanosecs_abs_t *time_st
 				/* Ingore earlier buffers. */
 				if ((status & 0xffff) != 0x7fff) {
 					if (tulip_debug > 1)
-						/*RTnet*/rtdm_printk(KERN_WARNING "%s: Oversized Ethernet frame "
+						/*RTnet*/pr_warn("%s: Oversized Ethernet frame "
 							   "spanned multiple buffers, status %8.8x!\n",
 							   rtdev->name, status);
 					tp->stats.rx_length_errors++;
@@ -131,7 +133,7 @@ static int tulip_rx(/*RTnet*/struct rtnet_device *rtdev, nanosecs_abs_t *time_st
 			} else if (status & RxDescFatalErr) {
 				/* There was a fatal error. */
 				if (tulip_debug > 2)
-					/*RTnet*/rtdm_printk(KERN_DEBUG "%s: Receive error, Rx status %8.8x.\n",
+					/*RTnet*/pr_warn("%s: Receive error, Rx status %8.8x.\n",
 						   rtdev->name, status);
 				tp->stats.rx_errors++; /* end of a packet.*/
 				if (status & 0x0890) tp->stats.rx_length_errors++;
@@ -146,7 +148,7 @@ static int tulip_rx(/*RTnet*/struct rtnet_device *rtdev, nanosecs_abs_t *time_st
 
 #ifndef final_version
 			if (pkt_len > 1518) {
-				/*RTnet*/rtdm_printk(KERN_WARNING "%s: Bogus packet size of %d (%#x).\n",
+				/*RTnet*/pr_warn("%s: Bogus packet size of %d (%#x).\n",
 					   rtdev->name, pkt_len, pkt_len);
 				pkt_len = 1518;
 				tp->stats.rx_length_errors++;
@@ -159,7 +161,7 @@ static int tulip_rx(/*RTnet*/struct rtnet_device *rtdev, nanosecs_abs_t *time_st
 #ifndef final_version
 				if (tp->rx_buffers[entry].mapping !=
 				    le32_to_cpu(tp->rx_ring[entry].buffer1)) {
-					/*RTnet*/rtdm_printk(KERN_ERR "%s: Internal fault: The skbuff addresses "
+					/*RTnet*/pr_err("%s: Internal fault: The skbuff addresses "
 					       "do not match in tulip_rx: %08x vs. %08llx ? / %p.\n",
 					       rtdev->name,
 					       le32_to_cpu(tp->rx_ring[entry].buffer1),
@@ -212,7 +214,7 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 	csr5 = inl(ioaddr + CSR5);
 
 	if ((csr5 & (NormalIntr|AbnormalIntr)) == 0) {
-		rtdm_printk("%s: unexpected IRQ!\n",rtdev->name);
+		pr_debug("%s: unexpected IRQ!\n",rtdev->name);
 		return RTDM_IRQ_NONE;
 	}
 
@@ -223,7 +225,7 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 		outl(csr5 & 0x0001ffff, ioaddr + CSR5);
 
 		if (tulip_debug > 4)
-			/*RTnet*/rtdm_printk(KERN_DEBUG "%s: interrupt  csr5=%#8.8x new csr5=%#8.8x.\n",
+			/*RTnet*/pr_debug("%s: interrupt  csr5=%#8.8x new csr5=%#8.8x.\n",
 				   rtdev->name, csr5, inl(rtdev->base_addr + CSR5));
 
 		if (csr5 & (RxIntr | RxNoBuf)) {
@@ -259,7 +261,7 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 					/* There was an major error, log it. */
 #ifndef final_version
 					if (tulip_debug > 1)
-						/*RTnet*/rtdm_printk(KERN_DEBUG "%s: Transmit error, Tx status %8.8x.\n",
+						/*RTnet*/pr_debug("%s: Transmit error, Tx status %8.8x.\n",
 							   rtdev->name, status);
 #endif
 					tp->stats.tx_errors++;
@@ -291,7 +293,7 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 
 #ifndef final_version
 			if (tp->cur_tx - dirty_tx > TX_RING_SIZE) {
-				/*RTnet*/rtdm_printk(KERN_ERR "%s: Out-of-sync dirty pointer, %d vs. %d.\n",
+				/*RTnet*/pr_err("%s: Out-of-sync dirty pointer, %d vs. %d.\n",
 					   rtdev->name, dirty_tx, tp->cur_tx);
 				dirty_tx += TX_RING_SIZE;
 			}
@@ -303,7 +305,7 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 			tp->dirty_tx = dirty_tx;
 			if (csr5 & TxDied) {
 				if (tulip_debug > 2)
-					/*RTnet*/rtdm_printk(KERN_WARNING "%s: The transmitter stopped."
+					/*RTnet*/pr_warn("%s: The transmitter stopped."
 						   "  CSR5 is %x, CSR6 %x, new CSR6 %x.\n",
 						   rtdev->name, csr5, inl(ioaddr + CSR6), tp->csr6);
 				tulip_restart_rxtx(tp);
@@ -315,7 +317,7 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 		if (csr5 & AbnormalIntr) {	/* Abnormal error summary bit. */
 			if (csr5 == 0xffffffff)
 				break;
-			/*RTnet*/rtdm_printk(KERN_ERR "%s: Error detected, "
+			/*RTnet*/pr_err("%s: Error detected, "
 			    "device may not work any more (csr5=%08x)!\n", rtdev->name, csr5);
 			/* Clear all error sources, included undocumented ones! */
 			outl(0x0800f7ba, ioaddr + CSR5);
@@ -324,7 +326,7 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 		if (csr5 & TimerInt) {
 
 			if (tulip_debug > 2)
-				/*RTnet*/rtdm_printk(KERN_ERR "%s: Re-enabling interrupts, %8.8x.\n",
+				/*RTnet*/pr_err("%s: Re-enabling interrupts, %8.8x.\n",
 					   rtdev->name, csr5);
 			outl(tulip_tbl[tp->chip_id].valid_intrs, ioaddr + CSR7);
 			tp->ttimer = 0;
@@ -332,7 +334,7 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 		}
 		if (tx > maxtx || rx > maxrx || oi > maxoi) {
 			if (tulip_debug > 1)
-				/*RTnet*/rtdm_printk(KERN_WARNING "%s: Too much work during an interrupt, "
+				/*RTnet*/pr_warn("%s: Too much work during an interrupt, "
 					   "csr5=0x%8.8x. (%lu) (%d,%d,%d)\n", rtdev->name, csr5, tp->nir, tx, rx, oi);
 
 		       /* Acknowledge all interrupt sources. */
@@ -364,13 +366,13 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 	entry = tp->dirty_rx % RX_RING_SIZE;
 	if (tp->rx_buffers[entry].skb == NULL) {
 		if (tulip_debug > 1)
-			/*RTnet*/rtdm_printk(KERN_WARNING "%s: in rx suspend mode: (%lu) (tp->cur_rx = %u, ttimer = %d, rx = %d) go/stay in suspend mode\n", rtdev->name, tp->nir, tp->cur_rx, tp->ttimer, rx);
+			/*RTnet*/pr_warn("%s: in rx suspend mode: (%lu) (tp->cur_rx = %u, ttimer = %d, rx = %d) go/stay in suspend mode\n", rtdev->name, tp->nir, tp->cur_rx, tp->ttimer, rx);
 		if (tp->chip_id == LC82C168)
 			outl(0x00, ioaddr + CSR7);
 		else {
 			if (tp->ttimer == 0 || (inl(ioaddr + CSR11) & 0xffff) == 0) {
 				if (tulip_debug > 1)
-					/*RTnet*/rtdm_printk(KERN_WARNING "%s: in rx suspend mode: (%lu) set timer\n", rtdev->name, tp->nir);
+					/*RTnet*/pr_warn("%s: in rx suspend mode: (%lu) set timer\n", rtdev->name, tp->nir);
 				outl(tulip_tbl[tp->chip_id].valid_intrs | TimerInt,
 					ioaddr + CSR7);
 				outl(TimerInt, ioaddr + CSR5);
@@ -385,8 +387,8 @@ int tulip_interrupt(rtdm_irq_t *irq_handle)
 	}
 
 	if (tulip_debug > 4)
-		/*RTnet*/rtdm_printk(KERN_DEBUG "%s: exiting interrupt, csr5=%#4.4x.\n",
-			   rtdev->name, inl(ioaddr + CSR5));
+		/*RTnet*/pr_debug("%s: exiting interrupt, csr5=%#4.4x.\n",
+				  rtdev->name, inl(ioaddr + CSR5));
 	if (rx)
 		rt_mark_stack_mgr(rtdev);
 	return RTDM_IRQ_HANDLED;

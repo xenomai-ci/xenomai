@@ -15,6 +15,8 @@
 */
 /* Ported to RTnet by Wittawat Yamwong <wittawat@web.de> */
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
 #include <linux/kernel.h>
 #include "tulip.h"
 
@@ -41,7 +43,7 @@ void pnic_do_nway(/*RTnet*/struct rtnet_device *rtdev)
 			new_csr6 |= 0x00000200;
 		}
 		if (tulip_debug > 1)
-			/*RTnet*/printk(KERN_DEBUG "%s: PNIC autonegotiated status %8.8x, %s.\n",
+			/*RTnet*/pr_debug("%s: PNIC autonegotiated status %8.8x, %s.\n",
 				   rtdev->name, phy_reg, medianame[rtdev->if_port]);
 		if (tp->csr6 != new_csr6) {
 			tp->csr6 = new_csr6;

@@ -15,6 +15,8 @@
 */
 /* Ported to RTnet by Wittawat Yamwong <wittawat@web.de> */
 
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+
 #include "tulip.h"
 #include <linux/pci.h>
 #include <linux/delay.h>
@@ -33,8 +35,8 @@ void t21142_start_nway(/*RTnet*/struct rtnet_device *rtdev)
 	tp->nway = tp->mediasense = 1;
 	tp->nwayset = tp->lpar = 0;
 	if (tulip_debug > 1)
-		printk(KERN_DEBUG "%s: Restarting 21143 autonegotiation, csr14=%8.8x.\n",
-			   rtdev->name, csr14);
+		pr_debug("%s: Restarting 21143 autonegotiation, csr14=%8.8x.\n",
+			 rtdev->name, csr14);
 	outl(0x0001, ioaddr + CSR13);
 	udelay(100);
 	outl(csr14, ioaddr + CSR14);
