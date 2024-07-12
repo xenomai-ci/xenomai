@@ -20,6 +20,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define pr_fmt(fmt) "RTcan: " fmt
+
 #include <linux/module.h>
 #include <linux/ioport.h>
 #include <linux/delay.h>
@@ -140,8 +142,8 @@ static void rtcan_esd_pci_del_chan(struct rtcan_device *dev)
 
 	board = (struct rtcan_esd_pci *)dev->board_priv;
 
-	printk("Removing %s %s device %s\n",
-		esd_pci_board_name, dev->ctrl_name, dev->name);
+	pr_info("Removing %s %s device %s\n", esd_pci_board_name,
+		dev->ctrl_name, dev->name);
 
 	rtcan_sja1000_unregister(dev);
 
@@ -198,8 +200,8 @@ static int rtcan_esd_pci_add_chan(struct pci_dev *pdev, int channel,
 	/* Register SJA1000 device */
 	ret = rtcan_sja1000_register(dev);
 	if (ret) {
-		printk(KERN_ERR "ERROR %d while trying to register SJA1000 "
-				"device!\n", ret);
+		pr_err("ERROR %d while trying to register SJA1000 device!\n",
+		       ret);
 		goto failure;
 	}
 

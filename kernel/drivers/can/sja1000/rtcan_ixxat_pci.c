@@ -16,6 +16,11 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define RTCAN_DEV_NAME "rtcan%d"
+#define RTCAN_DRV_NAME "IXXAT-PCI-CAN"
+
+#define pr_fmt(fmt) RTCAN_DRV_NAME ": " fmt
+
 #include <linux/module.h>
 #include <linux/ioport.h>
 #include <linux/delay.h>
@@ -31,9 +36,6 @@
 #include <rtcan_internal.h>
 #include <rtcan_sja1000.h>
 #include <rtcan_sja1000_regs.h>
-
-#define RTCAN_DEV_NAME "rtcan%d"
-#define RTCAN_DRV_NAME "IXXAT-PCI-CAN"
 
 static char *ixxat_pci_board_name = "IXXAT-PCI";
 
@@ -102,8 +104,8 @@ static void rtcan_ixxat_pci_del_chan(struct rtcan_device *dev)
 
     board = (struct rtcan_ixxat_pci *)dev->board_priv;
 
-    printk("Removing %s %s device %s\n",
-	   ixxat_pci_board_name, dev->ctrl_name, dev->name);
+    pr_info("Removing %s %s device %s\n", ixxat_pci_board_name, dev->ctrl_name,
+	    dev->name);
 
     rtcan_sja1000_unregister(dev);
 
@@ -188,9 +190,8 @@ static int rtcan_ixxat_pci_add_chan(struct pci_dev *pdev,
     /* Register SJA1000 device */
     ret = rtcan_sja1000_register(dev);
     if (ret) {
-	printk(KERN_ERR "ERROR %d while trying to register SJA1000 device!\n",
-	       ret);
-	goto failure;
+	    pr_err("ERROR %d while trying to register SJA1000 device!\n", ret);
+	    goto failure;
     }
 
     if (channel != CHANNEL_SLAVE)

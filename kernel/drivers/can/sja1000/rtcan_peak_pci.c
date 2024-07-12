@@ -21,6 +21,11 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define RTCAN_DEV_NAME    "rtcan%d"
+#define RTCAN_DRV_NAME    "PEAK-PCI-CAN"
+
+#define pr_fmt(fmt) RTCAN_DRV_NAME ": " fmt
+
 #include <linux/module.h>
 #include <linux/ioport.h>
 #include <linux/delay.h>
@@ -36,8 +41,7 @@
 #include <rtcan_sja1000.h>
 #include <rtcan_sja1000_regs.h>
 
-#define RTCAN_DEV_NAME    "rtcan%d"
-#define RTCAN_DRV_NAME    "PEAK-PCI-CAN"
+
 
 static char *peak_pci_board_name = "PEAK-PCI";
 
@@ -138,7 +142,7 @@ static void rtcan_peak_pci_del_chan(struct rtcan_device *dev,
 
     switch (init_step) {
     case 0:			/* Full cleanup */
-	printk("Removing %s %s device %s\n",
+	pr_info("Removing %s %s device %s\n",
 	       peak_pci_board_name, dev->ctrl_name, dev->name);
 	rtcan_sja1000_unregister(dev);
 	fallthrough;
@@ -260,15 +264,14 @@ static int rtcan_peak_pci_add_chan(struct pci_dev *pdev, int channel,
     writew(pita_icr_high, board->conf_addr + PITA_ICR + 2);
     init_step = 5;
 
-    printk("%s: base_addr=%p conf_addr=%p irq=%d\n", RTCAN_DRV_NAME,
-	   board->base_addr, board->conf_addr, chip->irq_num);
+    pr_info("base_addr=%p conf_addr=%p irq=%d\n", board->base_addr,
+	    board->conf_addr, chip->irq_num);
 
     /* Register SJA1000 device */
     ret = rtcan_sja1000_register(dev);
     if (ret) {
-	printk(KERN_ERR
-	       "ERROR %d while trying to register SJA1000 device!\n", ret);
-	goto failure;
+	    pr_err("ERROR %d while trying to register SJA1000 device!\n", ret);
+	    goto failure;
     }
 
     if (channel != CHANNEL_SLAVE)
@@ -291,8 +294,7 @@ static int peak_pci_init_one(struct pci_dev *pdev,
     if (!rtdm_available())
 	return -ENODEV;
 
-    printk("%s: initializing device %04x:%04x\n",
-	   RTCAN_DRV_NAME,  pdev->vendor, pdev->device);
+    pr_info("initializing device %04x:%04x\n", pdev->vendor, pdev->device);
 
     if ((ret = pci_enable_device (pdev)))
 	goto failure;

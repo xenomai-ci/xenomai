@@ -34,6 +34,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define pr_fmt(fmt) "RTcan: " fmt
+
 #include <linux/module.h>
 
 #include <rtdm/driver.h>
@@ -634,7 +636,7 @@ static int rtcan_sja_set_bit_time(struct rtcan_device *dev,
 	return -EINVAL;
     }
 
-    printk("%s: btr0=%#x btr1=%#x\n", __func__, btr0, btr1);
+    pr_debug("%s: btr0=%#x btr1=%#x\n", __func__, btr0, btr1);
     chip->write_reg(dev, SJA_BTR0, btr0);
     chip->write_reg(dev, SJA_BTR1, btr1);
 
@@ -759,7 +761,7 @@ int rtcan_sja1000_register(struct rtcan_device *dev)
 
     if ((chip->read_reg(dev, SJA_SR) &
 	 (SJA_SR_RBS | SJA_SR_DOS | SJA_SR_TBS)) != SJA_SR_TBS) {
-	printk("ERROR! No SJA1000 device found!\n");
+	pr_err("ERROR! No SJA1000 device found!\n");
 	return -ENODEV;
     }
 
@@ -780,10 +782,10 @@ int rtcan_sja1000_register(struct rtcan_device *dev)
 			   chip->irq_num, rtcan_sja_interrupt,
 			   chip->irq_flags, sja_ctrl_name, dev);
     if (ret) {
-	printk(KERN_ERR "ERROR %d: IRQ %d is %s!\n",
-	       ret, chip->irq_num, ret == -EBUSY ?
-	       "busy, check shared interrupt support" : "invalid");
-	return ret;
+	    pr_err("ERROR %d: IRQ %d is %s!\n", ret, chip->irq_num,
+		   ret == -EBUSY ? "busy, check shared interrupt support" :
+				   "invalid");
+	    return ret;
     }
 
     sja1000_chip_config(dev);
@@ -791,9 +793,8 @@ int rtcan_sja1000_register(struct rtcan_device *dev)
     /* Register RTDM device */
     ret = rtcan_dev_register(dev);
     if (ret) {
-	    printk(KERN_ERR
-		   "ERROR %d while trying to register RTCAN device!\n", ret);
-	goto out_irq_free;
+	    pr_err("ERROR %d while trying to register RTCAN device!\n", ret);
+	    goto out_irq_free;
     }
 
     rtcan_sja_create_proc(dev);
@@ -810,7 +811,7 @@ int rtcan_sja1000_register(struct rtcan_device *dev)
 /* Cleanup module */
 void rtcan_sja1000_unregister(struct rtcan_device *dev)
 {
-    printk("Unregistering SJA1000 device %s\n", dev->name);
+    pr_info("Unregistering SJA1000 device %s\n", dev->name);
 
     rtdm_irq_disable(&dev->irq_handle);
     rtcan_sja_mode_stop(dev, NULL);
@@ -824,14 +825,14 @@ static int __init rtcan_sja_init(void)
 	if (!rtdm_available())
 		return -ENOSYS;
 
-	printk("RTCAN SJA1000 driver initialized\n");
+	pr_info("RTCAN SJA1000 driver initialized\n");
 	return 0;
 }
 
 
 static void __exit rtcan_sja_exit(void)
 {
-	printk("%s removed\n", sja_ctrl_name);
+	pr_info("%s removed\n", sja_ctrl_name);
 }
 
 module_init(rtcan_sja_init);

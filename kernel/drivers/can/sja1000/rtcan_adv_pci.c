@@ -18,6 +18,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define pr_fmt(fmt) "RTcan: " fmt
+
 #include <linux/module.h>
 #include <linux/ioport.h>
 #include <linux/delay.h>
@@ -217,7 +219,7 @@ static int rtcan_adv_pci_add_chan(struct pci_dev *pdev,
 	/* Register SJA1000 device */
 	ret = rtcan_sja1000_register(dev);
 	if (ret) {
-		printk(KERN_ERR "ERROR %d while trying to register SJA1000 device!\n",
+		pr_err("ERROR %d while trying to register SJA1000 device!\n",
 		       ret);
 		goto failure_iounmap;
 	}

@@ -21,6 +21,11 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define RTCAN_DEV_NAME    "rtcan%d"
+#define RTCAN_DRV_NAME    "PEAK-Dongle"
+
+#define pr_fmt(fmt) RTCAN_DRV_NAME ": " fmt
+
 #include <linux/module.h>
 #include <linux/ioport.h>
 #include <linux/version.h>
@@ -35,9 +40,6 @@
 #include <rtcan_raw.h>
 #include <rtcan_sja1000.h>
 #include <rtcan_sja1000_regs.h>
-
-#define RTCAN_DEV_NAME    "rtcan%d"
-#define RTCAN_DRV_NAME    "PEAK-Dongle"
 
 #define RTCAN_PEAK_DNG_MAX_DEV 1
 
@@ -164,7 +166,7 @@ static void dongle_set_ecr(u16 port, struct rtcan_peak_dng *dng)
     outb((dng->old_ecr & 0x1F) | 0x20, ecr);
 
     if (dng->old_ecr == 0xff)
-	printk(KERN_DEBUG "%s: realy ECP mode configured?\n", RTCAN_DRV_NAME);
+	pr_debug("really ECP mode configured?\n");
 }
 
 static void dongle_restore_ecr(u16 port, struct rtcan_peak_dng *dng)
@@ -173,7 +175,7 @@ static void dongle_restore_ecr(u16 port, struct rtcan_peak_dng *dng)
 
     outb(dng->old_ecr, ecr);
 
-    printk(KERN_DEBUG "%s: restore ECR\n", RTCAN_DRV_NAME);
+    pr_debug("restore ECR\n");
 }
 
 static inline void rtcan_peak_dng_enable(struct rtcan_device *dev)
@@ -220,8 +222,7 @@ static int __init rtcan_peak_dng_init_one(int idx)
     else if (strncmp(type[idx], "epp", 3) == 0)
 	dtype = DONGLE_TYPE_EPP;
     else {
-	printk("%s: type %s is invalid, use \"sp\" or \"epp\".",
-	       RTCAN_DRV_NAME, type[idx]);
+	pr_debug("type %s is invalid, use \"sp\" or \"epp\".", type[idx]);
 	return -EINVAL;
     }
 
@@ -283,9 +284,8 @@ static int __init rtcan_peak_dng_init_one(int idx)
     /* Register RTDM device */
     ret = rtcan_sja1000_register(dev);
     if (ret) {
-	printk(KERN_ERR "ERROR while trying to register SJA1000 device %d!\n",
-	       ret);
-	goto out_free_region2;
+	    pr_err("ERROR while trying to register SJA1000 device %d!\n", ret);
+	    goto out_free_region2;
     }
 
     rtcan_peak_dng_devs[idx] = dev;
@@ -369,7 +369,7 @@ static int __init rtcan_peak_dng_init(void)
 	 i++) {
 
 	if ((ret = rtcan_peak_dng_init_one(i)) != 0) {
-	    printk(KERN_ERR "%s: Init failed with %d\n", RTCAN_DRV_NAME, ret);
+	    pr_err("Init failed with %d\n", ret);
 	    goto cleanup;
 	}
 	done++;
@@ -377,8 +377,7 @@ static int __init rtcan_peak_dng_init(void)
     if (done)
 	return 0;
 
-    printk(KERN_ERR "%s: Please specify type=epp or type=sp\n",
-	   RTCAN_DRV_NAME);
+    pr_err("Please specify type=epp or type=sp\n");
 
 cleanup:
     rtcan_peak_dng_exit();

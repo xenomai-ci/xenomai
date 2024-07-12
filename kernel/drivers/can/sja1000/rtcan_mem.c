@@ -28,6 +28,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define pr_fmt(fmt) "RTcan: " fmt
+
 #include <linux/module.h>
 #include <linux/ioport.h>
 #include <linux/delay.h>
@@ -144,8 +146,8 @@ static int __init rtcan_mem_init_one(int idx)
 
 	ret = rtcan_sja1000_register(dev);
 	if (ret) {
-		printk(KERN_ERR "ERROR %d while trying to register SJA1000 "
-		       "device!\n", ret);
+		pr_err("ERROR %d while trying to register SJA1000 device!\n",
+		       ret);
 		goto out_iounmap;
 	}
 
@@ -186,7 +188,7 @@ static int __init rtcan_mem_init(void)
 	if (devices)
 		return 0;
 
-	printk(KERN_ERR "ERROR! No devices specified! "
+	pr_err("ERROR! No devices specified! "
 	       "Use mem=<port1>[,...] irq=<irq1>[,...]\n");
 	return -EINVAL;
 }
