@@ -32,7 +32,7 @@
 #ifdef CONFIG_XENO_DRIVERS_CAN_DEBUG
 #define RTCAN_ASSERT(expr, func) \
     if (!(expr)) { \
-	rtdm_printk("Assertion failed! %s:%s:%d %s\n", \
+	pr_debug("Assertion failed! %s:%s:%d %s\n", \
 	__FILE__, __FUNCTION__, __LINE__, (#expr)); \
 	func \
     }
@@ -41,8 +41,8 @@
 #endif /* CONFIG_RTCAN_CHECKED */
 
 #ifdef CONFIG_XENO_DRIVERS_CAN_DEBUG
-# define RTCAN_DBG(fmt,args...) do { printk(fmt ,##args); } while (0)
-# define RTCAN_RTDM_DBG(fmt,args...) do { rtdm_printk(fmt ,##args); } while (0)
+# define RTCAN_DBG(fmt,args...) do { pr_debug(fmt ,##args); } while (0)
+# define RTCAN_RTDM_DBG(fmt,args...) do { pr_debug(fmt ,##args); } while (0)
 #else
 # define RTCAN_DBG(fmt,args...) do {} while (0)
 # define RTCAN_RTDM_DBG(fmt,args...) do {} while (0)
@@ -50,12 +50,12 @@
 
 #define rtcan_priv(dev)			(dev)->priv
 #define rtcandev_dbg(dev, fmt, args...)				\
-	printk(KERN_DEBUG "%s: " fmt, (dev)->name, ##args)
+	pr_debug("%s: " fmt, (dev)->name, ##args)
 #define rtcandev_info(dev, fmt, args...)			\
-	printk(KERN_INFO "%s: " fmt, (dev)->name, ##args)
+	pr_info("%s: " fmt, (dev)->name, ##args)
 #define rtcandev_warn(dev, fmt, args...)			\
-	printk(KERN_WARNING "%s: " fmt, (dev)->name, ##args)
+	pr_warn("%s: " fmt, (dev)->name, ##args)
 #define rtcandev_err(dev, fmt, args...)				\
-	printk(KERN_ERR "%s: " fmt, (dev)->name, ##args)
+	pr_err("%s: " fmt, (dev)->name, ##args)
 
 #endif /* __RTCAN_INTERNAL_H_ */

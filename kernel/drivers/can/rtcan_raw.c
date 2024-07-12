@@ -34,6 +34,8 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define pr_fmt(fmt) "RTcan: " fmt
+
 #include <linux/module.h>
 #include <linux/delay.h>
 #include <linux/stringify.h>
@@ -176,7 +178,7 @@ void rtcan_tx_push(struct rtcan_device *dev, struct rtcan_socket *sock,
     struct rtcan_rb_frame *rb_frame = &dev->tx_skb.rb_frame;
 
     RTCAN_ASSERT(dev->tx_socket == 0,
-		 rtdm_printk("(%d) TX skb still in use", dev->ifindex););
+		 pr_err("(%d) TX skb still in use", dev->ifindex););
 
     rb_frame->can_id = frame->can_id;
     rb_frame->can_dlc = frame->can_dlc;

@@ -23,6 +23,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#define pr_fmt(fmt) "RTcan: " fmt
+
 #include <linux/spinlock.h>
 #include <linux/if.h>
 #include <linux/if_arp.h>
@@ -151,7 +153,7 @@ struct rtcan_device *rtcan_dev_alloc(int sizeof_priv, int sizeof_board_priv)
 
     dev = (struct rtcan_device *)kmalloc(alloc_size, GFP_KERNEL);
     if (dev == NULL) {
-	printk(KERN_ERR "rtcan: cannot allocate rtcan device\n");
+	pr_err("cannot allocate rtcan device\n");
 	return NULL;
     }
 
@@ -235,7 +237,7 @@ int rtcan_dev_register(struct rtcan_device *dev)
 
     mutex_unlock(&rtcan_devices_nrt_lock);
 
-    printk("rtcan: registered %s\n", dev->name);
+    pr_info("registered %s\n", dev->name);
 
     return 0;
 }
@@ -247,7 +249,7 @@ int rtcan_dev_unregister(struct rtcan_device *dev)
 
 
     RTCAN_ASSERT(dev->ifindex != 0,
-		 printk("RTCAN: device %s/%p was not registered\n",
+		 pr_err("device %s/%p was not registered\n",
 			dev->name, dev); return -ENODEV;);
 
     /* If device is running, close it first. */
@@ -281,10 +283,10 @@ int rtcan_dev_unregister(struct rtcan_device *dev)
 
 #ifdef RTCAN_USE_REFCOUNT
     RTCAN_ASSERT(atomic_read(&dev->refcount) == 0,
-		 printk("RTCAN: dev reference counter < 0!\n"););
+		 pr_err("dev reference counter < 0!\n"););
 #endif
 
-    printk("RTCAN: unregistered %s\n", dev->name);
+    pr_info("unregistered %s\n", dev->name);
 
     return 0;
 }

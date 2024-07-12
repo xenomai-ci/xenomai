@@ -17,16 +17,17 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#define RTCAN_DEV_NAME          "rtcan%d"
+#define RTCAN_DRV_NAME          "VIRT"
+#define RTCAN_MAX_VIRT_DEVS     8
+
+#define pr_fmt(fmt) RTCAN_DRV_NAME ": " fmt
 
 #include <linux/module.h>
 #include <rtdm/driver.h>
 #include <rtdm/can.h>
 #include "rtcan_dev.h"
 #include "rtcan_raw.h"
-
-#define RTCAN_DEV_NAME          "rtcan%d"
-#define RTCAN_DRV_NAME          "VIRT"
-#define RTCAN_MAX_VIRT_DEVS     8
 
 #define VIRT_TX_BUFS            1
 
@@ -136,14 +137,15 @@ static int __init rtcan_virt_init_one(int idx)
 	/* Register RTDM device */
 	err = rtcan_dev_register(dev);
 	if (err) {
-	    printk(KERN_ERR "ERROR %d while trying to register RTCAN device!\n", err);
+		pr_err("ERROR %d while trying to register RTCAN device!\n",
+		       err);
 		goto error_out;
 	}
 
 	/* Remember initialized devices */
 	rtcan_virt_devs[idx] = dev;
 
-	printk("%s: %s driver loaded\n", dev->name, RTCAN_DRV_NAME);
+	pr_info("%s driver loaded\n", dev->name);
 
 	return 0;
 
@@ -187,7 +189,7 @@ static void __exit rtcan_virt_exit(void)
 	for (i = 0; i < devices; i++) {
 		dev = rtcan_virt_devs[i];
 
-		printk("Unloading %s device %s\n", RTCAN_DRV_NAME, dev->name);
+		pr_info("Unloading device %s\n", dev->name);
 
 		rtcan_virt_set_mode(dev, CAN_MODE_STOP, NULL);
 		rtcan_dev_unregister(dev);

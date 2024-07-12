@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTcan: " fmt
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -358,7 +360,7 @@ int rtcan_dev_create_proc(struct rtcan_device* dev)
 
     dev->proc_root = proc_mkdir(dev->name, rtcan_proc_root);
     if (!dev->proc_root) {
-	printk("%s: unable to create /proc device entries\n", dev->name);
+	pr_err("%s: unable to create /proc device entries\n", dev->name);
 	return -1;
     }
 
@@ -375,7 +377,7 @@ static int rtcan_proc_register(void)
 {
     rtcan_proc_root = proc_mkdir("rtcan", NULL);
     if (!rtcan_proc_root) {
-	printk("rtcan: unable to initialize /proc entries\n");
+	pr_err("unable to initialize /proc entries\n");
 	return -1;
     }
 
@@ -408,7 +410,7 @@ static int __init rtcan_init(void)
     if (!rtdm_available())
 	return -ENOSYS;
 
-    printk("RT-Socket-CAN %d.%d.%d - %s\n",
+    pr_info("RT-Socket-CAN %d.%d.%d - %s\n",
 	   RTCAN_MAJOR_VER, RTCAN_MINOR_VER, RTCAN_BUGFIX_VER,
 	   rtcan_rtdm_provider_name);
 
@@ -436,7 +438,7 @@ static void __exit rtcan_exit(void)
     rtcan_proc_unregister();
 #endif
 
-    printk("rtcan: unloaded\n");
+    pr_info("unloaded\n");
 }
 
 

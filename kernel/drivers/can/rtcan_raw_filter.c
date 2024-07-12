@@ -39,12 +39,11 @@ void rtcan_raw_print_filter(struct rtcan_device *dev)
     int i;
     struct rtcan_recv *r = dev->receivers;
 
-    rtdm_printk("%s: recv_list=%p empty_list=%p free_entries=%d\n",
-		dev->name, dev->recv_list, dev->empty_list, dev->free_entries);
+    pr_debug("%s: recv_list=%p empty_list=%p free_entries=%d\n",
+	     dev->name, dev->recv_list, dev->empty_list, dev->free_entries);
     for (i = 0; i < RTCAN_MAX_RECEIVERS; i++, r++) {
-	rtdm_printk("%2d %p sock=%p next=%p id=%x mask=%x\n",
-		    i, r, r->sock, r->next,
-		    r->can_filter.can_id, r->can_filter.can_mask);
+	    pr_debug("%2d %p sock=%p next=%p id=%x mask=%x\n", i, r, r->sock,
+		     r->next, r->can_filter.can_id, r->can_filter.can_mask);
     }
 }
 #else
