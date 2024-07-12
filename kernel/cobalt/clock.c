@@ -81,7 +81,7 @@ int __xnclock_ratelimit(struct xnclock_ratelimit_state *rs, const char *func)
 		rs->begin = xnclock_read_realtime(&nkclock);
 	if (xnclock_read_realtime(&nkclock) >= rs->begin + rs->interval) {
 		if (rs->missed)
-			printk(KERN_WARNING "%s: %d callbacks suppressed\n",
+			printk(XENO_WARNING "%s: %d callbacks suppressed\n",
 			       func, rs->missed);
 		rs->begin   = 0;
 		rs->printed = 0;
