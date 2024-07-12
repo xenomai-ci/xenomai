@@ -103,18 +103,20 @@ struct e1000_adapter;
 #include "e1000_hw.h"
 
 #ifdef DBG
-#define E1000_DBG(args...) printk(KERN_DEBUG "e1000: " args)
+#define E1000_DBG(args...) pr_debug(args)
 #else
 #define E1000_DBG(args...)
 #endif
 
-#define E1000_ERR(args...) printk(KERN_ERR "e1000: " args)
+#undef pr_fmt
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
-#define PFX "e1000: "
-#define DPRINTK(nlevel, klevel, fmt, args...) \
-	(void)((NETIF_MSG_##nlevel & adapter->msg_enable) && \
-	printk(KERN_##klevel PFX "%s: %s: " fmt, adapter->netdev->name, \
-		__FUNCTION__ , ## args))
+#define DPRINTK(nlevel, klevel, fmt, args...)                           \
+	(void)((NETIF_MSG_##nlevel & adapter->msg_enable) &&            \
+	       printk(KERN_##klevel "%s: %s: %s: " fmt, KBUILD_MODNAME, \
+		      adapter->netdev->name, __FUNCTION__, ##args))
+
+#define E1000_ERR(args...) pr_err(args)
 
 #define E1000_MAX_INTR 10
 

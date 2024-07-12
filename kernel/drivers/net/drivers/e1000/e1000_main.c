@@ -264,10 +264,9 @@ static int __init
 e1000_init_module(void)
 {
 	int ret;
-	printk(KERN_INFO "%s - version %s\n",
-	       e1000_driver_string, e1000_driver_version);
+	pr_info("%s - version %s\n", e1000_driver_string, e1000_driver_version);
 
-	printk(KERN_INFO "%s\n", e1000_copyright);
+	pr_info("%s\n", e1000_copyright);
 
 	ret = pci_register_driver(&e1000_driver);
 	return ret;
@@ -911,9 +910,9 @@ static int e1000_probe(struct pci_dev *pdev,
 		 "32-bit"));
 	}
 
-	printk(KERN_INFO "e1000: hw ");
-	for (i = 0; i < 6; i++)
-		printk(KERN_CONT "%2.2x%c", netdev->dev_addr[i], i == 5 ? '\n' : ':');
+	pr_info("e1000: hw %2.2x:%2.2x:%2.2x:%2.2x:%2.2x:%2.2x\n",
+		netdev->dev_addr[0], netdev->dev_addr[1], netdev->dev_addr[2],
+		netdev->dev_addr[3], netdev->dev_addr[4], netdev->dev_addr[5]);
 
 	/* reset the hardware with the new settings */
 	e1000_reset(adapter);
@@ -2557,7 +2556,8 @@ e1000_xmit_frame(struct rtskb *skb, struct rtnet_device *netdev)
 	if (unlikely(E1000_DESC_UNUSED(tx_ring) < count + 2)) {
 		rtnetif_stop_queue(netdev);
 		rtdm_lock_put_irqrestore(&tx_ring->tx_lock, context);
-		rtdm_printk("FATAL: rt_e1000 ran into tail close to head situation!\n");
+		pr_err("FATAL: rt_e1000 ran into tail close to"
+		       "head situation!\n");
 		return NETDEV_TX_BUSY;
 	}
 
@@ -2568,8 +2568,8 @@ e1000_xmit_frame(struct rtskb *skb, struct rtnet_device *netdev)
 
 			/* FIXME: warn the user earlier, i.e. on startup if
 			   half-duplex is detected! */
-			rtdm_printk("FATAL: rt_e1000 ran into 82547 "
-				    "controller bug!\n");
+			pr_err("FATAL: rt_e1000 ran into 82547 "
+			       "controller bug!\n");
 			return NETDEV_TX_BUSY;
 		}
 	}

@@ -70,7 +70,7 @@ typedef enum {
     TRUE = 1
 } boolean_t;
 
-#define MSGOUT(S, A, B)	printk(KERN_DEBUG S "\n", A, B)
+#define MSGOUT(S, A, B)	pr_debug(S "\n", A, B)
 
 #ifdef DBG
 #define DEBUGOUT(S)		printk(KERN_DEBUG S "\n")
