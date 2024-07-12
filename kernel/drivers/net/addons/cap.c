@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTcap: " fmt
+
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/netdevice.h>
@@ -250,7 +252,7 @@ static void rtcap_signal_handler(rtdm_nrtsig_t *nrtsig, void *arg)
 				rtcap_kfree_rtskb(rtskb);
 			}
 		} else {
-			printk("RTcap: unable to allocate linux skb\n");
+			pr_err("unable to allocate linux skb\n");
 			rtcap_kfree_rtskb(rtskb);
 		}
 	}
@@ -351,7 +353,7 @@ static int __init rtcap_init(void)
 	int devices = 0;
 	int i;
 
-	printk("RTcap: real-time capturing interface\n");
+	pr_info("real-time capturing interface\n");
 
 	rtskb_queue_init(&cap_queue);
 
@@ -366,8 +368,8 @@ static int __init rtcap_init(void)
 
 			if (test_bit(PRIV_FLAG_UP, &rtdev->priv_flags)) {
 				mutex_unlock(&rtdev->nrt_lock);
-				printk("RTcap: %s busy, skipping device!\n",
-				       rtdev->name);
+				pr_info("%s busy, skipping device!\n",
+					rtdev->name);
 				rtdev_dereference(rtdev);
 				continue;
 			}
@@ -375,9 +377,9 @@ static int __init rtcap_init(void)
 			if (rtdev->mac_priv != NULL) {
 				mutex_unlock(&rtdev->nrt_lock);
 
-				printk("RTcap: RTmac discipline already active on device %s. "
-				       "Load RTcap before RTmac!\n",
-				       rtdev->name);
+				pr_info("RTmac discipline already active on device %s. "
+					"Load RTcap before RTmac!\n",
+					rtdev->name);
 
 				rtdev_dereference(rtdev);
 				continue;
@@ -447,7 +449,7 @@ static int __init rtcap_init(void)
 	}
 
 	if (devices == 0) {
-		printk("RTcap: no real-time devices found!\n");
+		pr_err("no real-time devices found!\n");
 		ret = -ENODEV;
 		goto error2;
 	}
@@ -468,7 +470,7 @@ static int __init rtcap_init(void)
 error3:
 	mutex_unlock(&rtdev->nrt_lock);
 	rtdev_dereference(rtdev);
-	printk("RTcap: unable to register %s!\n", dev->name);
+	pr_err("unable to register %s!\n", dev->name);
 
 error2:
 	cleanup_tap_devices();
@@ -496,7 +498,7 @@ static void rtcap_cleanup(void)
 
 	rtskb_pool_release(&cap_pool);
 
-	printk("RTcap: unloaded\n");
+	pr_info("unloaded\n");
 }
 
 module_init(rtcap_init);

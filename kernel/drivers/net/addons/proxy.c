@@ -36,6 +36,8 @@
  * Mathias Koehrer - mathias_koehrer@yahoo.de
 */
 
+#define pr_fmt(fmt) "RTproxy: " fmt
+
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/kernel.h>
@@ -213,7 +215,7 @@ static void rtnetproxy_recv(struct rtskb *rtskb)
 	/* Acquire rtskb (JK) */
 	if (rtskb_acquire(rtskb, &rtskb_pool) != 0) {
 		dev_rtnetproxy->stats.rx_dropped++;
-		rtdm_printk("rtnetproxy_recv: No free rtskb in pool\n");
+		pr_err("rtnetproxy_recv: No free rtskb in pool\n");
 		kfree_rtskb(rtskb);
 		return;
 	}
@@ -341,10 +343,10 @@ static int __init rtnetproxy_init_module(void)
 
 #ifdef CONFIG_XENO_DRIVERS_NET_ADDON_PROXY_ARP
 	if ((rtnetproxy_rtdev = rtdev_get_by_name(rtdev_attach)) == NULL) {
-		printk("Couldn't attach to %s\n", rtdev_attach);
+		pr_err("Couldn't attach to %s\n", rtdev_attach);
 		return -EINVAL;
 	}
-	printk("RTproxy attached to %s\n", rtdev_attach);
+	pr_info("RTproxy attached to %s\n", rtdev_attach);
 #endif
 
 	/* Initialize the proxy's rtskb pool (JK) */
@@ -381,7 +383,7 @@ static int __init rtnetproxy_init_module(void)
 	/* Register with RTnet */
 	rt_ip_fallback_handler = rtnetproxy_recv;
 
-	printk("rtnetproxy installed as \"%s\"\n", dev_rtnetproxy->name);
+	pr_info("rtnetproxy installed as \"%s\"\n", dev_rtnetproxy->name);
 
 	return 0;
 
