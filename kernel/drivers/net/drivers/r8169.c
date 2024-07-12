@@ -102,14 +102,11 @@ RTL8169_VERSION "2.2"	<2004/08/09>
 	/*** RTnet / <kk>: rt_assert must be used instead of assert() within interrupt context! ***/
 	#define rt_assert(expr) \
 		if(!(expr)) { pr_err("Assertion failed! %s,%s,%s,line=%d\n", #expr,__FILE__,__FUNCTION__,__LINE__); }
-	/*** RTnet / <kk>: RT_DBG_PRINT must be used instead of DBG_PRINT() within interrupt context! ***/
 	#define DBG_PRINT( fmt, args...)   pr_debug(fmt, ## args);
-	#define RT_DBG_PRINT( fmt, args...)   pr_debug(fmt, ## args);
 #else
 	#define assert(expr) do {} while (0)
 	#define rt_assert(expr) do {} while (0)
 	#define DBG_PRINT( fmt, args...)   ;
-	#define RT_DBG_PRINT( fmt, args...)   ;
 #endif	// end of #ifdef RTL8169_DEBUG
 
 /* media options */
@@ -1427,7 +1424,7 @@ static int rtl8169_start_xmit (struct rtskb *skb, struct rtnet_device *rtdev)
 			}
 
 			/* print frame informations */
-			RT_DBG_PRINT("%s: TX len = %d, skb->len = %d, eth_proto=%04x\n", __FUNCTION__, len, skb->len, proto);
+			DBG_PRINT("%s: TX len = %d, skb->len = %d, eth_proto=%04x\n", __FUNCTION__, len, skb->len, proto);
 
 			break;	/* leave loop */
 		}
@@ -1621,7 +1618,7 @@ static void rtl8169_rx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 					priv->Rx_skbuff[cur_rx] = n_skb;
 				}
 				else{
-					RT_DBG_PRINT("%s: Allocate n_skb failed! (priv->rx_buf_size = %d)\n",__FUNCTION__, priv->rx_buf_size );
+					DBG_PRINT("%s: Allocate n_skb failed! (priv->rx_buf_size = %d)\n",__FUNCTION__, priv->rx_buf_size );
 					priv->Rx_skbuff[cur_rx] = rx_skb;
 				}
 
@@ -1641,7 +1638,7 @@ static void rtl8169_rx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 					rxdesc->buf_addr = cpu_to_le32(priv->rx_skbuff_dma_addr[cur_rx]);
 				}
 				else{
-					RT_DBG_PRINT("%s: %s() cur_skb == NULL\n", rtdev->name, __FUNCTION__);
+					DBG_PRINT("%s: %s() cur_skb == NULL\n", rtdev->name, __FUNCTION__);
 				}
 
 			}//------------------------------------------------------------
@@ -1655,7 +1652,7 @@ static void rtl8169_rx_interrupt (struct rtnet_device *rtdev, struct rtl8169_pri
 	}// end of while ( (priv->RxDescArray[cur_rx].status & 0x80000000)== 0)
 
 	if( rxdesc_cnt >= max_interrupt_work ){
-		RT_DBG_PRINT("%s: Too much work at Rx interrupt.\n", rtdev->name);
+		DBG_PRINT("%s: Too much work at Rx interrupt.\n", rtdev->name);
 	}
 
 	priv->cur_rx = cur_rx;
@@ -1707,7 +1704,7 @@ static int rtl8169_interrupt(rtdm_irq_t *irq_handle)
 		}
 
 		if (unlikely(status & SYSErr)) {
-			RT_DBG_PRINT("PCI error...!? %i\n", __LINE__);
+			DBG_PRINT("PCI error...!? %i\n", __LINE__);
 			rtl8169_pcierr_interrupt(rtdev);
 			break;
 		}
