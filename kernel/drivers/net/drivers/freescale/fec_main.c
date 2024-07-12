@@ -395,7 +395,7 @@ static int fec_rt_txq_submit_skb(struct fec_enet_priv_tx_q *txq,
 
 	entries_free = fec_enet_get_free_txdesc_num(txq);
 	if (entries_free < MAX_SKB_FRAGS + 1) {
-		rtdm_printk_ratelimited("%s: NOT enough BD for SG!\n",
+		rtdm_printk_ratelimited(KERN_ERR "%s: NOT enough BD for SG!\n",
 					dev_name(&fep->pdev->dev));
 		return NETDEV_TX_BUSY;
 	}
@@ -431,7 +431,8 @@ static int fec_rt_txq_submit_skb(struct fec_enet_priv_tx_q *txq,
 	if (dma_mapping_error(&fep->pdev->dev, addr)) {
 		rtdm_lock_put_irqrestore(&frt->lock, c);
 		dev_kfree_rtskb(skb);
-		rtdm_printk_ratelimited("%s: Tx DMA memory map failed\n",
+		rtdm_printk_ratelimited(KERN_ERR
+					"%s: Tx DMA memory map failed\n",
 					dev_name(&fep->pdev->dev));
 		return NETDEV_TX_BUSY;
 	}
@@ -1018,7 +1019,8 @@ fec_rt_new_rxbdp(struct net_device *ndev, struct bufdesc *bdp, struct rtskb *skb
 
 	bdp->cbd_bufaddr = cpu_to_fec32(dma_map_single(&fep->pdev->dev, skb->data, RTSKB_SIZE - fep->rx_align, DMA_FROM_DEVICE));
 	if (dma_mapping_error(&fep->pdev->dev, fec32_to_cpu(bdp->cbd_bufaddr))) {
-		rtdm_printk_ratelimited("%s: Rx DMA memory map failed\n",
+		rtdm_printk_ratelimited(KERN_ERR
+					"%s: Rx DMA memory map failed\n",
 					dev_name(&fep->pdev->dev));
 		return -ENOMEM;
 	}
