@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTcfg: " fmt
+
 #include <rtdev.h>
 #include <rtnet_internal.h>
 #include <rtnet_port.h>
@@ -325,7 +327,7 @@ int rtcfg_init_proc(void)
 	return 0;
 
 err1:
-	printk("RTcfg: unable to initialise /proc entries\n");
+	pr_err("unable to initialise /proc entries\n");
 	return err;
 }
 

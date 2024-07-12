@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTcfg: " fmt
+
 #include <ipv4/route.h>
 #include <rtcfg/rtcfg.h>
 #include <rtcfg/rtcfg_event.h>
@@ -882,8 +884,7 @@ static void rtcfg_client_recv_stage_2_cfg(int ifindex, struct rtskb *rtskb)
 		}
 
 		if (ret < 0)
-			/*ERRMSG*/ rtdm_printk(
-				"RTcfg: unable to create timer task\n");
+			pr_err("unable to create timer task\n");
 		else
 			set_bit(FLAG_TIMER_STARTED, &rtcfg_dev->flags);
 	}

@@ -22,6 +22,8 @@
  *
  */
 
+#define pr_fmt(fmt) "RTcfg: " fmt
+
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/kernel.h>
@@ -37,7 +39,7 @@ static int __init rtcfg_init(void)
 {
 	int ret;
 
-	printk("RTcfg: init real-time configuration distribution protocol\n");
+	pr_info("init real-time configuration distribution protocol\n");
 
 	ret = rtcfg_init_ioctls();
 	if (ret != 0)
@@ -76,7 +78,7 @@ static void rtcfg_cleanup(void)
 	rtcfg_cleanup_state_machines();
 	rtcfg_cleanup_ioctls();
 
-	printk("RTcfg: unloaded\n");
+	pr_info("unloaded\n");
 }
 
 module_init(rtcfg_init);
