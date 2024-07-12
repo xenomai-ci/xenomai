@@ -31,6 +31,8 @@
 #define DRV_NAME            "rt_8139too"
 #define DRV_VERSION         "0.9.24-rt0.7"
 
+#define pr_fmt(fmt) DRV_NAME ": " fmt
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/compiler.h>
@@ -70,7 +72,6 @@ MODULE_PARM_DESC(rx_pool_size, "number of receive buffers");
 
 
 #define RTL8139_DRIVER_NAME   DRV_NAME " Fast Ethernet driver " DRV_VERSION
-#define PFX DRV_NAME ": "
 
 /* enable PIO instead of MMIO, if CONFIG_8139TOO_PIO is selected */
 /* *** RTnet ***
@@ -639,7 +640,7 @@ static int rtl8139_init_board (struct pci_dev *pdev,
 	rtdev=rt_alloc_etherdev(sizeof (struct rtl8139_private),
 				rx_pool_size + NUM_TX_DESC);
 	if (rtdev==NULL) {
-		rtdm_printk (KERN_ERR PFX "%s: Unable to alloc new net device\n", pci_name(pdev));
+		pr_err("%s: Unable to alloc new net device\n", pci_name(pdev));
 		return -ENOMEM;
 	}
 	rtdev_alloc_name(rtdev, "rteth%d");
@@ -677,25 +678,25 @@ static int rtl8139_init_board (struct pci_dev *pdev,
 
 	/* make sure PCI base addr 0 is PIO */
 	if (!(pio_flags & IORESOURCE_IO)) {
-		rtdm_printk (KERN_ERR PFX "%s: region #0 not a PIO resource, aborting\n", pci_name(pdev));
+		pr_err("%s: region #0 not a PIO resource, aborting\n", pci_name(pdev));
 		rc = -ENODEV;
 		goto err_out;
 	}
 	/* check for weird/broken PCI region reporting */
 	if (pio_len < RTL_MIN_IO_SIZE) {
-		rtdm_printk (KERN_ERR PFX "%s: Invalid PCI I/O region size(s), aborting\n", pci_name(pdev));
+		pr_err("%s: Invalid PCI I/O region size(s), aborting\n", pci_name(pdev));
 		rc = -ENODEV;
 		goto err_out;
 	}
 #else
 	/* make sure PCI base addr 1 is MMIO */
 	if (!(mmio_flags & IORESOURCE_MEM)) {
-		rtdm_printk(KERN_ERR PFX "%s: region #1 not an MMIO resource, aborting\n", pci_name(pdev));
+		pr_err("%s: region #1 not an MMIO resource, aborting\n", pci_name(pdev));
 		rc = -ENODEV;
 		goto err_out;
 	}
 	if (mmio_len < RTL_MIN_IO_SIZE) {
-		rtdm_printk(KERN_ERR PFX "%s: Invalid PCI mem region size(s), aborting\n", pci_name(pdev));
+		pr_err("%s: Invalid PCI mem region size(s), aborting\n", pci_name(pdev));
 		rc = -ENODEV;
 		goto err_out;
 	}
@@ -709,7 +710,7 @@ static int rtl8139_init_board (struct pci_dev *pdev,
 	/* ioremap MMIO region */
 	ioaddr = ioremap (mmio_start, mmio_len);
 	if (ioaddr == NULL) {
-		rtdm_printk(KERN_ERR PFX "%s: cannot remap MMIO, aborting\n", pci_name(pdev));
+		pr_err("%s: cannot remap MMIO, aborting\n", pci_name(pdev));
 		rc = -EIO;
 		goto err_out;
 	}
@@ -722,7 +723,7 @@ static int rtl8139_init_board (struct pci_dev *pdev,
 
 	/* check for missing/broken hardware */
 	if (RTL_R32 (TxConfig) == 0xFFFFFFFF) {
-		rtdm_printk(KERN_ERR PFX "%s: Chip not responding, ignoring board\n", pci_name(pdev));
+		pr_err("%s: Chip not responding, ignoring board\n", pci_name(pdev));
 		rc = -EIO;
 		goto err_out;
 	}
@@ -735,8 +736,8 @@ static int rtl8139_init_board (struct pci_dev *pdev,
 			goto match;
 		}
 
-	rtdm_printk("rt8139too: unknown chip version, assuming RTL-8139\n");
-	rtdm_printk("rt8139too: TxConfig = 0x%08x\n", RTL_R32 (TxConfig));
+	pr_info("%s: unknown chip version, assuming RTL-8139\n", pci_name(pdev));
+	pr_info("%s: TxConfig = 0x%08x\n", pci_name(pdev), RTL_R32 (TxConfig));
 
 	tp->chipset = 0;
 
@@ -808,7 +809,7 @@ static int rtl8139_init_one (struct pci_dev *pdev,
 	{
 		static int printed_version;
 		if (!printed_version++)
-			rtdm_printk (KERN_INFO RTL8139_DRIVER_NAME "\n");
+			pr_info(RTL8139_DRIVER_NAME "\n");
 	}
 #endif
 
@@ -861,7 +862,7 @@ static int rtl8139_init_one (struct pci_dev *pdev,
 			tp->medialock = 1;
 	}
 	if (tp->default_port) {
-		rtdm_printk(KERN_INFO "  Forcing %dMbps %s-duplex operation.\n",
+		pr_info("  Forcing %dMbps %s-duplex operation.\n",
 			    (option & 0x20 ? 100 : 10),
 			    (option & 0x10 ? "full" : "half"));
 		mdio_write(rtdev, tp->phys[0], 0,
@@ -1297,7 +1298,7 @@ static int rtl8139_start_xmit (struct rtskb *skb, struct rtnet_device *rtdev)
 	dev_kfree_rtskb(skb);
 
 #ifdef DEBUG
-	rtdm_printk ("%s: Queued Tx packet size %u to slot %d.\n", rtdev->name, len, entry);
+	pr_debug("%s: Queued Tx packet size %u to slot %d.\n", rtdev->name, len, entry);
 #endif
 	return 0;
 }
@@ -1356,7 +1357,7 @@ static void rtl8139_tx_interrupt (struct rtnet_device *rtdev,
 		/* Note: TxCarrierLost is always asserted at 100mbps. */
 		if (txstatus & (TxOutOfWindow | TxAborted)) {
 			/* There was an major error, log it. */
-			rtdm_printk("%s: Transmit error, Tx status %8.8x.\n",
+			pr_err("%s: Transmit error, Tx status %8.8x.\n",
 				    rtdev->name, txstatus);
 			tp->stats.tx_errors++;
 			if (txstatus & TxAborted) {
@@ -1409,8 +1410,8 @@ static void rtl8139_rx_err
 #endif */
 
 	/* RTnet-TODO: We really need an error manager to handle such issues... */
-	rtdm_printk("%s: FATAL - Ethernet frame had errors, status %8.8x.\n",
-		    rtdev->name, rx_status);
+	pr_err("%s: FATAL - Ethernet frame had errors, status %8.8x.\n",
+       	       rtdev->name, rx_status);
 }
 
 
@@ -1482,7 +1483,7 @@ static void rtl8139_rx_interrupt (struct rtnet_device *rtdev,
 			tp->stats.rx_bytes += pkt_size;
 			tp->stats.rx_packets++;
 		} else {
-			rtdm_printk (KERN_WARNING"%s: Memory squeeze, dropping packet.\n", rtdev->name);
+			pr_warn("%s: Memory squeeze, dropping packet.\n", rtdev->name);
 			tp->stats.rx_dropped++;
 		}
 
@@ -1502,8 +1503,7 @@ static void rtl8139_weird_interrupt (struct rtnet_device *rtdev,
 				     void *ioaddr,
 				     int status, int link_changed)
 {
-	rtdm_printk ("%s: Abnormal interrupt, status %8.8x.\n",
-		      rtdev->name, status);
+	pr_err("%s: Abnormal interrupt, status %8.8x.\n", rtdev->name, status);
 
 	/* Update the error count. */
 	tp->stats.rx_missed_errors += RTL_R32 (RxMissed);
@@ -1530,7 +1530,7 @@ static void rtl8139_weird_interrupt (struct rtnet_device *rtdev,
 		pci_read_config_word (tp->pci_dev, PCI_STATUS, &pci_cmd_status);
 		pci_write_config_word (tp->pci_dev, PCI_STATUS, pci_cmd_status);
 
-		rtdm_printk (KERN_ERR "%s: PCI Bus error %4.4x.\n", rtdev->name, pci_cmd_status);
+		pr_err("%s: PCI Bus error %4.4x.\n", rtdev->name, pci_cmd_status);
 	}
 }
 
@@ -1611,7 +1611,7 @@ static int rtl8139_close (struct rtnet_device *rtdev)
 	void *ioaddr = tp->mmio_addr;
 	rtdm_lockctx_t context;
 
-	printk ("%s: Shutting down ethercard, status was 0x%4.4x.\n", rtdev->name, RTL_R16 (IntrStatus));
+	pr_info("%s: Shutting down ethercard, status was 0x%4.4x.\n", rtdev->name, RTL_R16 (IntrStatus));
 
 	rtnetif_stop_queue (rtdev);
 
@@ -1660,14 +1660,14 @@ static void __set_rx_mode (struct rtnet_device *rtdev)
 	u32 tmp;
 
 #ifdef DEBUG
-	rtdm_printk ("%s:   rtl8139_set_rx_mode(%4.4x) done -- Rx config %8.8lx.\n",
-			rtdev->name, rtdev->flags, RTL_R32 (RxConfig));
+	pr_debug("%s:   rtl8139_set_rx_mode(%4.4x) done -- Rx config %8.8lx.\n",
+		 rtdev->name, rtdev->flags, RTL_R32 (RxConfig));
 #endif
 
 	/* Note: do not reorder, GCC is clever about common statements. */
 	if (rtdev->flags & IFF_PROMISC) {
 		/* Unconditionally log net taps. */
-		/*printk (KERN_NOTICE "%s: Promiscuous mode enabled.\n", rtdev->name);*/
+		/*pr_notice("%s: Promiscuous mode enabled.\n", rtdev->name);*/
 		rx_mode = AcceptBroadcast | AcceptMulticast | AcceptMyPhys | AcceptAllPhys;
 		mc_filter[1] = mc_filter[0] = 0xffffffff;
 	} else if (rtdev->flags & IFF_ALLMULTI) {
@@ -1716,7 +1716,7 @@ static int __init rtl8139_init_module (void)
 	 */
 
 #ifdef MODULE
-	printk (KERN_INFO RTL8139_DRIVER_NAME "\n");
+	pr_info(RTL8139_DRIVER_NAME "\n");
 #endif
 
 	return pci_register_driver (&rtl8139_pci_driver);
