@@ -95,13 +95,18 @@ RTL8169_VERSION "2.2"	<2004/08/09>
 #undef RTL8169_DYNAMIC_CONTROL
 #undef RTL8169_USE_IO
 
-
 #ifdef RTL8169_DEBUG
-	#define assert(expr) \
-		if(!(expr)) { pr_err("Assertion failed! %s,%s,%s,line=%d\n", #expr,__FILE__,__FUNCTION__,__LINE__); }
+#define assert(expr)                                                          \
+	do {                                                                  \
+		if (!(expr))                                                  \
+			pr_err("Assertion failed! %s,%s,%s,line=%d\n", #expr, \
+			       __FILE__, __FUNCTION__, __LINE__);             \
+	} while (0)
 #else
-	#define assert(expr) do {} while (0)
-#endif	// end of #ifdef RTL8169_DEBUG
+#define assert(expr) \
+	do {         \
+	} while (0)
+#endif /* ! RTL8169_DEBUG */
 
 /* media options */
 #define MAX_UNITS 8
