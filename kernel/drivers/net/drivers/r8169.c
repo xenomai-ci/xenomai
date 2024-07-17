@@ -201,7 +201,7 @@ static int max_interrupt_work = 20;
 #endif  //end #ifdef RTL8169_DYNAMIC_CONTROL
 
 
-const static struct {
+static const struct {
 	const char *name;
 	u8 mcfg;                 /* depend on RTL8169 docs */
 	u32 RxConfigMask;       /* should clear the bits supported by this chip */
