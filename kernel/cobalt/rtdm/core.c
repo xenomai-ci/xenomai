@@ -29,7 +29,6 @@
 #include "rtdm/internal.h"
 #define CREATE_TRACE_POINTS
 #include <trace/events/cobalt-rtdm.h>
-#include "posix/process.h"
 
 /**
  * @ingroup rtdm
