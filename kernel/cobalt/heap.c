@@ -149,7 +149,7 @@ enum xnheap_pgtype {
 	page_list =2
 };
 
-static inline u32 __always_inline
+static inline __always_inline u32
 gen_block_mask(int log2size)
 {
 	return -1U >> (32 - (XNHEAP_PAGE_SIZE >> log2size));
