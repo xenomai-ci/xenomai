@@ -6,4 +6,4 @@ xenomai-y :=	core.o		\
 		drvlib.o	\
 		fd.o
 
-ccflags-y += -I$(srctree)/$(src)/.. -I$(srctree)/kernel
+ccflags-y += -I$(srctree)/kernel/xenomai -I$(srctree)/kernel
