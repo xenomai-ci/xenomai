@@ -1307,10 +1307,10 @@ typedef struct ni_board_struct{
 #define NUM_GPCT 2
 
 #define NI_PRIVATE_COMMON					\
-	uint16_t (*stc_readw)(struct a4l_device *dev, int register);	\
-	uint32_t (*stc_readl)(struct a4l_device *dev, int register);	\
-	void (*stc_writew)(struct a4l_device *dev, uint16_t value, int register);	\
-	void (*stc_writel)(struct a4l_device *dev, uint32_t value, int register);	\
+	uint16_t (*stc_readw)(struct a4l_device *dev, register int);	\
+	uint32_t (*stc_readl)(struct a4l_device *dev, register int);	\
+	void (*stc_writew)(struct a4l_device *dev, uint16_t value, register int);	\
+	void (*stc_writel)(struct a4l_device *dev, uint32_t value, register int);	\
 	\
 	int dio_state;						\
 	int pfi_state;						\
