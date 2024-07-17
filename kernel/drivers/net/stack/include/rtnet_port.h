@@ -42,8 +42,9 @@ static inline void rtnetif_start_queue(struct rtnet_device *rtdev)
 
 static inline void rtnetif_wake_queue(struct rtnet_device *rtdev)
 {
-	if (test_and_clear_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state))
+	if (test_and_clear_bit(__RTNET_LINK_STATE_XOFF, &rtdev->link_state)) {
 		/*TODO __netif_schedule(dev); */;
+	}
 }
 
 static inline void rtnetif_stop_queue(struct rtnet_device *rtdev)
