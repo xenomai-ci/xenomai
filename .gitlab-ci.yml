@@ -75,6 +75,7 @@ variables:
     - make -j $(nproc) ${KERNEL_DEFCONFIG}
     # Generic settings
     - ./scripts/config -d DEBUG_INFO
+    - ./scripts/config -d DRM
     # Dovetail and Xenomai settings
     - ./scripts/config -e DOVETAIL
     - ./scripts/config -e XENOMAI
