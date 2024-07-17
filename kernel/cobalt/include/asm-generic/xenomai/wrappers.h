@@ -76,4 +76,10 @@
 #define MAX_PAGE_ORDER	MAX_ORDER
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,10,0)
+#define __wrap_assign_str		__assign_str
+#else
+#define __wrap_assign_str(dst, src)	__assign_str(dst)
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */

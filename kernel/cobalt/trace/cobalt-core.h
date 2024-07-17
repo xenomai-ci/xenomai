@@ -160,7 +160,7 @@ DECLARE_EVENT_CLASS(registry_event,
 	),
 
 	TP_fast_assign(
-		__assign_str(key, key ?: "(anon)");
+		__wrap_assign_str(key, key ?: "(anon)");
 		__entry->addr = addr;
 	),
 
@@ -215,12 +215,12 @@ TRACE_EVENT(cobalt_switch_context,
 
 	TP_fast_assign(
 		__entry->prev = prev;
-		__assign_str(prev_name, prev->name);
+		__wrap_assign_str(prev_name, prev->name);
 		__entry->prev_pid = xnthread_host_pid(prev);
 		__entry->prev_prio = xnthread_current_priority(prev);
 		__entry->prev_state = prev->state;
 		__entry->next = next;
-		__assign_str(next_name, next->name);
+		__wrap_assign_str(next_name, next->name);
 		__entry->next_pid = xnthread_host_pid(next);
 		__entry->next_prio = xnthread_current_priority(next);
 	),
@@ -347,9 +347,9 @@ TRACE_EVENT(cobalt_thread_init,
 
 	TP_fast_assign(
 		__entry->thread = thread;
-		__assign_str(thread_name, thread->name);
+		__wrap_assign_str(thread_name, thread->name);
 		__entry->flags = attr->flags;
-		__assign_str(class_name, sched_class->name);
+		__wrap_assign_str(class_name, sched_class->name);
 		__entry->cprio = thread->cprio;
 	),
 
@@ -395,7 +395,7 @@ TRACE_EVENT(cobalt_thread_resume,
 	),
 
 	TP_fast_assign(
-		__assign_str(name, thread->name);
+		__wrap_assign_str(name, thread->name);
 		__entry->pid = xnthread_host_pid(thread);
 		__entry->mask = mask;
 	),
@@ -716,7 +716,7 @@ TRACE_EVENT(cobalt_timer_start,
 	TP_fast_assign(
 		__entry->timer = timer;
 #ifdef CONFIG_XENO_OPT_STATS
-		__assign_str(name, timer->name);
+		__wrap_assign_str(name, timer->name);
 #endif
 		__entry->value = value;
 		__entry->interval = interval;
@@ -839,7 +839,7 @@ TRACE_EVENT(cobalt_trace,
 		__string(msg, msg)
 	),
 	TP_fast_assign(
-		__assign_str(msg, msg);
+		__wrap_assign_str(msg, msg);
 	),
 	TP_printk("%s", __get_str(msg))
 );
@@ -894,7 +894,7 @@ TRACE_EVENT(cobalt_trigger,
 		__string(issuer, issuer)
 	),
 	TP_fast_assign(
-		__assign_str(issuer, issuer);
+		__wrap_assign_str(issuer, issuer);
 	),
 	TP_printk("%s", __get_str(issuer))
 );

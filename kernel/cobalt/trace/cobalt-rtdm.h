@@ -115,7 +115,7 @@ DECLARE_EVENT_CLASS(task_op,
 
 	TP_fast_assign(
 		__entry->task = task;
-		__assign_str(task_name, task->name);
+		__wrap_assign_str(task_name, task->name);
 	),
 
 	TP_printk("task %p(%s)", __entry->task, __get_str(task_name))
@@ -181,7 +181,7 @@ TRACE_EVENT(cobalt_device_register,
 
 	TP_fast_assign(
 		__entry->dev	= dev;
-		__assign_str(device_name, dev->name);
+		__wrap_assign_str(device_name, dev->name);
 		__entry->flags = dev->driver->device_flags;
 		__entry->class_id = dev->driver->profile_info.class_id;
 		__entry->subclass_id = dev->driver->profile_info.subclass_id;
@@ -207,7 +207,7 @@ TRACE_EVENT(cobalt_device_unregister,
 
 	TP_fast_assign(
 		__entry->dev	= dev;
-		__assign_str(device_name, dev->name);
+		__wrap_assign_str(device_name, dev->name);
 	),
 
 	TP_printk("device %s=%p",
@@ -434,7 +434,7 @@ TRACE_EVENT(cobalt_driver_event_wait,
 
 	TP_fast_assign(
 		__entry->task = task;
-		__assign_str(task_name, task->name);
+		__wrap_assign_str(task_name, task->name);
 		__entry->ev = ev;
 	),
 
@@ -492,7 +492,7 @@ TRACE_EVENT(cobalt_driver_sem_wait,
 
 	TP_fast_assign(
 		__entry->task = task;
-		__assign_str(task_name, task->name);
+		__wrap_assign_str(task_name, task->name);
 		__entry->sem = sem;
 	),
 
@@ -537,7 +537,7 @@ TRACE_EVENT(cobalt_driver_mutex_wait,
 
 	TP_fast_assign(
 		__entry->task = task;
-		__assign_str(task_name, task->name);
+		__wrap_assign_str(task_name, task->name);
 		__entry->mutex = mutex;
 	),
 

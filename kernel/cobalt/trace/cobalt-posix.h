@@ -367,7 +367,7 @@ TRACE_EVENT(cobalt_pthread_setname,
 	),
 	TP_fast_assign(
 		__entry->pth = pth;
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 	),
 	TP_printk("pth=%p name=%s", (void *)__entry->pth, __get_str(name))
 );
@@ -436,7 +436,7 @@ TRACE_EVENT(cobalt_pthread_extend,
 	),
 	TP_fast_assign(
 		__entry->pth = pth;
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 	),
 	TP_printk("pth=%p +personality=%s", (void *)__entry->pth, __get_str(name))
 );
@@ -450,7 +450,7 @@ TRACE_EVENT(cobalt_pthread_restrict,
 	),
 	TP_fast_assign(
 		__entry->pth = pth;
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 	),
 	TP_printk("pth=%p -personality=%s", (void *)__entry->pth, __get_str(name))
 );
@@ -618,7 +618,7 @@ TRACE_EVENT(cobalt_psem_init,
 		__field(unsigned int, value)
 	),
 	TP_fast_assign(
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 		__entry->handle = handle;
 		__entry->flags = flags;
 		__entry->value = value;
@@ -641,7 +641,7 @@ TRACE_EVENT(cobalt_psem_init_failed,
 		__field(int, status)
 	),
 	TP_fast_assign(
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 		__entry->flags = flags;
 		__entry->value = value;
 		__entry->status = status;
@@ -676,7 +676,7 @@ TRACE_EVENT(cobalt_psem_open,
 		__field(unsigned int, value)
 	),
 	TP_fast_assign(
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 		__entry->handle = handle;
 		__entry->oflags = oflags;
 		if (oflags & O_CREAT) {
@@ -705,7 +705,7 @@ TRACE_EVENT(cobalt_psem_open_failed,
 		__field(int, status)
 	),
 	TP_fast_assign(
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 		__entry->oflags = oflags;
 		__entry->status = status;
 		if (oflags & O_CREAT) {
@@ -734,7 +734,7 @@ TRACE_EVENT(cobalt_psem_unlink,
 		__string(name, name)
 	),
 	TP_fast_assign(
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 	),
 	TP_printk("name=%s", __get_str(name))
 );
@@ -829,7 +829,7 @@ DECLARE_EVENT_CLASS(cobalt_clock_ident,
 		__field(clockid_t, clk_id)
 	),
 	TP_fast_assign(
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 		__entry->clk_id = clk_id;
 	),
 	TP_printk("name=%s, id=%#x", __get_str(name), __entry->clk_id)
@@ -929,7 +929,7 @@ TRACE_EVENT(cobalt_mq_open,
 	),
 
 	TP_fast_assign(
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 		__entry->oflags = oflags;
 		__entry->mode = (oflags & O_CREAT) ? mode : 0;
 	),
@@ -983,7 +983,7 @@ TRACE_EVENT(cobalt_mq_unlink,
 	),
 
 	TP_fast_assign(
-		__assign_str(name, name);
+		__wrap_assign_str(name, name);
 	),
 
 	TP_printk("name=%s", __get_str(name))
