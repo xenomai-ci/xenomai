@@ -139,7 +139,9 @@ const char e1000_driver_version[] = DRV_VERSION;
 static const char e1000_copyright[] = "Copyright (c) 1999-2008 Intel Corporation.";
 
 // RTNET wrappers
+#undef kmalloc
 #define kmalloc(a,b) rtdm_malloc(a)
+#undef vmalloc
 #define vmalloc(a) rtdm_malloc(a)
 #define kfree(a) rtdm_free(a)
 #define vfree(a) rtdm_free(a)

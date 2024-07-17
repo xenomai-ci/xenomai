@@ -247,7 +247,9 @@ module_param_array(cards, int, NULL, 0444);
 MODULE_PARM_DESC(cards, "array of cards to be supported (eg. 1,0,1)");
 
 
+#undef kmalloc
 #define kmalloc(a,b) rtdm_malloc(a)
+#undef vmalloc
 #define vmalloc(a) rtdm_malloc(a)
 #define kfree(a) rtdm_free(a)
 #define vfree(a) rtdm_free(a)
