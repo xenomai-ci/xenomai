@@ -177,7 +177,7 @@ static inline
 size_t pvheapobj_validate(struct heapobj *hobj, void *ptr)
 {
 	ssize_t size = heapmem_check((struct heap_memory *)hobj->pool, ptr);
-	return size < 0 ? 0 : size;
+	return size < 0 ? 0 : (size_t)size;
 }
 
 static inline
