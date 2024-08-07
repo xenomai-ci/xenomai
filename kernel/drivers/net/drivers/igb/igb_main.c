@@ -121,10 +121,10 @@
 #undef IGB_FRAMES_SUPPORT
 #endif
 
-#define MAJ 5
-#define MIN 2
+#define MAJ_VER 5
+#define MIN_VER 2
 #define BUILD 18
-#define DRV_VERSION __stringify(MAJ) "." __stringify(MIN) "." \
+#define DRV_VERSION __stringify(MAJ_VER) "." __stringify(MIN_VER) "." \
 __stringify(BUILD) "-k"
 char igb_driver_name[] = "rt_igb";
 char igb_driver_version[] = DRV_VERSION;
