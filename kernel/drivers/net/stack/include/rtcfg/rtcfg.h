@@ -27,7 +27,9 @@
 
 #include <rtdm/driver.h>
 
+#ifndef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
 
 /***
  * RTcfg debugging
