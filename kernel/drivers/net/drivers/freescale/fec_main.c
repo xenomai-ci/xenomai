@@ -3522,8 +3522,11 @@ failed_rt_init:
 	return ret;
 }
 
-static int
-fec_drv_remove(struct platform_device *pdev)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
+static int fec_drv_remove(struct platform_device *pdev)
+#else
+static void fec_drv_remove(struct platform_device *pdev)
+#endif
 {
 	struct net_device *ndev = platform_get_drvdata(pdev);
 	struct fec_enet_private *fep = netdev_priv(ndev);
@@ -3532,7 +3535,9 @@ fec_drv_remove(struct platform_device *pdev)
 
 	ret = pm_runtime_resume_and_get(&pdev->dev);
 	if (ret < 0)
-		return ret;
+		dev_err(&pdev->dev,
+			"Failed to resume device in remove callback (%pe)\n",
+			ERR_PTR(ret));
 
 	cancel_work_sync(&fep->tx_timeout_work);
 	fec_ptp_stop(pdev);
@@ -3547,13 +3552,20 @@ fec_drv_remove(struct platform_device *pdev)
 		of_phy_deregister_fixed_link(np);
 	of_node_put(fep->phy_node);
 
-	clk_disable_unprepare(fep->clk_ahb);
-	clk_disable_unprepare(fep->clk_ipg);
+        /* After pm_runtime_get_sync() failed, the clks are still off, so skip
+         * disabling them again.
+         */
+	if (ret >= 0) {
+		clk_disable_unprepare(fep->clk_ahb);
+		clk_disable_unprepare(fep->clk_ipg);
+	}
 	pm_runtime_put_noidle(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
 
 	free_netdev(ndev);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 	return 0;
+#endif
 }
 
 static int __maybe_unused fec_suspend(struct device *dev)

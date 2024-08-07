@@ -1769,7 +1769,11 @@ err_out:
 	return err;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 static int __exit macb_remove(struct platform_device *pdev)
+#else
+static void __exit macb_remove(struct platform_device *pdev)
+#endif
 {
 	struct rtnet_device *dev;
 	struct macb *bp;
@@ -1795,7 +1799,9 @@ static int __exit macb_remove(struct platform_device *pdev)
 		rtdev_free(dev);
 	}
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 	return 0;
+#endif
 }
 
 static struct platform_driver macb_driver = {

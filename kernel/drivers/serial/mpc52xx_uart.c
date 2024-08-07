@@ -1360,7 +1360,11 @@ out_kfree_port:
 	return ret;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 static int rt_mpc52xx_uart_of_remove(struct platform_device *op)
+#else
+static void rt_mpc52xx_uart_of_remove(struct platform_device *op)
+#endif
 {
 	struct rtdm_device *dev = dev_get_drvdata(&op->dev);
 	struct rt_mpc52xx_uart_port *port = dev->device_data;
@@ -1376,7 +1380,9 @@ static int rt_mpc52xx_uart_of_remove(struct platform_device *op)
 	kfree(port);
 	kfree(dev);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 	return 0;
+#endif
 }
 
 static struct of_device_id rt_mpc52xx_uart_of_match[] = {

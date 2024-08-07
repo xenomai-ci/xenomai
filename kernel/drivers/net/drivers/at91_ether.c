@@ -421,7 +421,11 @@ err_free_dev:
 	return res;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 static int at91ether_remove(struct platform_device *pdev)
+#else
+static void at91ether_remove(struct platform_device *pdev)
+#endif
 {
 	struct rtnet_device *dev = platform_get_drvdata(pdev);
 	struct macb *lp = rtnetdev_priv(dev);
@@ -440,7 +444,9 @@ static int at91ether_remove(struct platform_device *pdev)
 	clk_disable(lp->pclk);
 	rtdev_free(dev);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 	return 0;
+#endif
 }
 
 static struct platform_driver at91ether_driver = {

@@ -1482,14 +1482,20 @@ static int flexcan_probe(struct platform_device *pdev)
 	return err;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 static int flexcan_remove(struct platform_device *pdev)
+#else
+static void flexcan_remove(struct platform_device *pdev)
+#endif
 {
 	struct rtcan_device *dev = platform_get_drvdata(pdev);
 
 	unregister_flexcandev(dev);
 	rtcan_dev_free(dev);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 	return 0;
+#endif
 }
 
 static struct platform_driver flexcan_driver = {

@@ -1597,7 +1597,11 @@ static int rt_imx_uart_probe(struct platform_device *pdev)
 	return 0;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 static int rt_imx_uart_remove(struct platform_device *pdev)
+#else
+static void rt_imx_uart_remove(struct platform_device *pdev)
+#endif
 {
 	struct imxuart_platform_data *pdata;
 	struct rt_imx_uart_port *port = platform_get_drvdata(pdev);
@@ -1610,7 +1614,9 @@ static int rt_imx_uart_remove(struct platform_device *pdev)
 	clk_disable_unprepare(port->clk_per);
 	rtdm_dev_unregister(dev);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 	return 0;
+#endif
 }
 
 static struct platform_driver rt_imx_uart_driver = {

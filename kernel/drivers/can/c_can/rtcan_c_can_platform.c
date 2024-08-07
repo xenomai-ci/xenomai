@@ -432,13 +432,19 @@ exit:
 	return ret;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 static int c_can_plat_remove(struct platform_device *pdev)
+#else
+static void c_can_plat_remove(struct platform_device *pdev)
+#endif
 {
 	struct rtcan_device *dev = platform_get_drvdata(pdev);
 
 	rtcan_c_can_unregister(dev);
 	rtcan_c_can_dev_free(dev);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,11,0)
 	return 0;
+#endif
 }
 
 static struct platform_driver c_can_plat_driver = {
