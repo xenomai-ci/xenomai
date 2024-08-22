@@ -65,7 +65,7 @@
 
 #else /* !CONFIG_XENO_DRIVERS_ANALOGY_DEBUG */
 
-#define __a4l_dbg(level, debug, fmt, args...)
+#define __a4l_dbg(level, debug, fmt, args...)	do {} while (0)
 
 #endif /* CONFIG_XENO_DRIVERS_ANALOGY_DEBUG */
 
