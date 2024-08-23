@@ -48,7 +48,7 @@ for +stdin+.
 
 *--path <dir[:dir...]>*::
 Search directory list for executables and dynamic
-libraries. Directories are separatared by a semi-colon within the
+libraries. Directories are separated by a semi-colon within the
 list.  Each directory may be scanned for binary executables when
 resolving symbols found in stack backtraces.
 

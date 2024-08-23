@@ -54,12 +54,12 @@ name of pin controller
 number of gpio pin as output
 
 *-i <interrupt-pin>*::
-number of gpin pin as interrupt
+number of gpio pin as interrupt
 
 *-p <priority>*::
 default = 99, task priority
 
-*-b <bracktrace>*::
+*-b <breaktrace>*::
 default = 1000, send break trace command when latency > breaktrace
 
 
