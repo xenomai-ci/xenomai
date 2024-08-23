@@ -37,8 +37,8 @@ or the runtime target.
 The `kernel/` sub-tree which implements the in-kernel support code is
 seen as a built-in extension of the Linux kernel.  Therefore, the
 standard Linux kernel configuration process should be used to define
-the various settings for the Xenomai kernel components. All of the
-kernel code Xenomai currently introduces implements the _Cobalt_ core
+the various settings for the Xenomai kernel components. All the
+kernel code Xenomai currently introduces, implements the _Cobalt_ core
 (i.e. dual kernel configuration). As of today, the _Mercury_ core
 needs no Xenomai-specific code in kernel space.
 

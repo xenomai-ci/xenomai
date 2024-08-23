@@ -174,7 +174,7 @@ a set of source-level compatibility wrappers when present.
 Dump information about the running Xenomai-enabled system. Unlike most
 other options, *--info* is aimed at being used on the target system
 running Xenomai, for retrieving the current setup information. The
-output of such command is a valuable information when reporting any
+output of such command is valuable information when reporting any
 runtime issue to mailto:xenomai@xenomai.org[the Xenomai mailing
 list]. The command exits immediately after completion.
 
