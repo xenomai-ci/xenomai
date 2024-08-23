@@ -166,7 +166,7 @@ remains, periodic timing is now controlled locally from the Xenomai
 libraries in user-space.
 
 Xenomai {xenover} defines a built-in clock named _coreclk_, which has
-the same properties than the former _master_ time base available with
+the same properties as the former _master_ time base available with
 Xenomai 2.x (i.e. tickless with nanosecond resolution).
 
 The settings of existing clocks can be read from entries under the new
@@ -278,7 +278,7 @@ variables may be accessed from any code module.
 
 Any application linked against +libcobalt+ has its main thread
 attached to the real-time system automatically, this operation is
-called _auto-shadowing_. As a side-effect, the entire process's memory
+called _auto-shadowing_. As a side effect, the entire process's memory
 is locked, for current and future mappings
 (i.e. +mlockall(MCL_CURRENT|MCL_FUTURE)+).
 
@@ -666,7 +666,7 @@ mainly for the sake of consistency:
 .Rationale
 **********************************************************************
 Opening a device instance most often requires allocating resources
-managed by the Linux kernel (memory mappings, DMA etc), which is only
+managed by the Linux kernel (memory mappings, DMA etc.), which is only
 available to regular calling contexts.
 **********************************************************************
 
@@ -819,7 +819,7 @@ Recent evolutions of the Linux kernel with respect to IRQ management
 involve complex processing for basic operations
 (e.g. enabling/disabling the interrupt line) with some interrupt types
 like MSI. Such processing cannot be made dual-kernel safe at a
-reasonable cost, without encurring measurable latency or significant
+reasonable cost, without incurring measurable latency or significant
 code updates in the kernel.
 
 Since allocating, releasing, enabling or disabling real-time
@@ -1113,7 +1113,7 @@ unsigned int rtskb_pool_init(struct rtskb_pool *pool,
 			  void *lock_cookie);
 -----------------------------------------------------------------------
 
-  * for the typical case where an skb pool locks the containing
+  * for the typical case where a skb pool locks the containing
     module, the function rtskb_module_pool_init() was added which has
     the same interface as the old rtskb_poll_init() function. Its
     prototype is:
@@ -1229,7 +1229,7 @@ kernel Cobalt environment.
   This is a requirement for maintaining both the *glibc* and the
   Xenomai scheduler in sync, with respect to thread priorities, since
   the former maintains a process-local priority cache for the threads
-  it knows about. Therefore, an explicit call to the the regular
+  it knows about. Therefore, an explicit call to the regular
   `pthread_setschedparam(3)` shall be issued upon each priority change
   Xenomai-wise, for maintaining consistency.
 
@@ -1620,7 +1620,7 @@ rt_task_wait_period() may block the caller.
 
 [TIP]
 In the unusual case where you do need to have the current task wait
-for the initial release point outside of its periodic work loop, you
+for the initial release point outside its periodic work loop, you
 can issue a call to +rt_task_wait_period()+ separately, exclusively
 for this purpose, i.e.
 ---------------------------------------------------------------

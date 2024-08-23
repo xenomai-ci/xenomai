@@ -23,7 +23,7 @@ When configuring the Linux kernel, some options should be avoided.
 CONFIG_CPU_FREQ:: This allows the CPU frequency to be modulated with
 workload, but many CPUs change the TSC counting frequency also, which
 makes it useless for accurate timing when the CPU clock can
-change. Also some CPUs can take several milliseconds to ramp up to
+change. Also, some CPUs can take several milliseconds to ramp up to
 full speed.
 
 CONFIG_CPU_IDLE:: Allows the CPU to enter deep sleep states,
@@ -456,7 +456,7 @@ threads, for which a large default amount of stack space memory is
 commonly reserved by the POSIX threading library (8MiB per thread by
 the _glibc_). Therefore, the kernel will commit as much as
 _8MiB{nbsp}*{nbsp}nr_threads_ bytes to RAM space for the application,
-as a side-effect of calling the +mlockall()+ service to lock the
+as a side effect of calling the +mlockall()+ service to lock the
 process memory, as Xenomai requires.
 
 This behaviour can be controlled in two ways:
@@ -508,7 +508,7 @@ the kernel to have been configured with the
 
 ==== the _latency_ test hangs
 
-The most common reason for this issues is a too short period passed
+The most common reason for these issues is a too short period passed
 with the +-p+ option, try increasing the period. If you enable the
 watchdog (option +CONFIG_XENO_OPT_WATCHDOG+, in your kernel
 configuration), you should see the <<short-period, "watchdog triggered
