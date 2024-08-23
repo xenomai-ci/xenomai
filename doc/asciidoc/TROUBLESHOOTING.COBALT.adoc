@@ -289,7 +289,7 @@ placeholder such as _i586_, for which _rdtsc_ is not available.
 
 If your processor does not provide the _rdtsc_ instruction, you have
 to pass +--disable-x86-tsc+ option to the configure script for
-building the user librairies. In this case, Xenomai will provide a
+building the user libraries. In this case, Xenomai will provide a
 (much slower) emulation of the hardware TSC.
 
 [NOTE]
@@ -543,7 +543,7 @@ USB legacy mode if set in the same move.
 hardware acceleration in the X-window server file. With recent
 versions of X-window, try using the 'fbdev' driver. Install it
 (Debian package named 'xserver-xorg-video-fbdev' for instance), then
-modifiy the +Device+ section to use this driver in
+modify the +Device+ section to use this driver in
 '/etc/X11/xorg.conf', as in:
 -------------------------------------------------------------------------------
 Section "Device"
@@ -551,7 +551,7 @@ Section "Device"
 	Driver      "fbdev"
 EndSection
 -------------------------------------------------------------------------------
-With olders versions of X-window, keep the existing driver, but
+With older versions of X-window, keep the existing driver, but
 add the following line to the +Device+ section:
 -------------------------------------------------------------------------------
 	Option "NoAccel"

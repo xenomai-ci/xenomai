@@ -462,7 +462,7 @@ Generic configuration options (both cores)
 	CONFIG_FUSE_FS must be enabled in the target kernel.
 
 [normal]
-When this option is enabled, the system creates a file hierachy at
+When this option is enabled, the system creates a file hierarchy at
 `<user>/<session>/<pid>` under the registry root path, where you
 can access the internal state of the active real-time objects. The
 session label is obtained from the --session runtime switch. If no
@@ -587,7 +587,7 @@ client applications are running over a SMP-capable kernel.
 
 	Turns off the sanity checks performed at application startup
 	by the Xenomai libraries. This option sets a default, which
-	can later be overriden using the --[no-]sanity options passed
+	can later be overridden using the --[no-]sanity options passed
 	to a Copperplate-based Xenomai application. Sanity checks are
 	enabled by default when configuring.
 
@@ -735,7 +735,7 @@ $ make install
 ------------------------------------------------------------------------------
 
 After installing the build tree (i.e. using "make install"), the
-installation root should be populated with the librairies, programs
+installation root should be populated with the libraries, programs
 and header files you can use to build Xenomai-based real-time
 applications.  This directory path defaults to `/usr/xenomai`.
 
@@ -778,7 +778,7 @@ expected to pass them using the CFLAGS and LDFLAGS variables as
 demonstrated above, where the AT91RM9200 is based on the ARM920T core,
 implementing the `armv4` architecture. The following table summarizes
 the CFLAGS and options which were automatically passed in previous
-revisions and which now need to be explicitely passed to configure,
+revisions and which now need to be explicitly passed to configure,
 for the supported SOCs:
 
 .ARM configure options and compilation flags
