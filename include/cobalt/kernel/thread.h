@@ -64,6 +64,11 @@ struct lostage_signal {
 	int signo, sigval;
 };
 
+struct lostage_wakeup {
+	struct pipeline_inband_work inband_work; /* Must be first. */
+	struct task_struct *task;
+};
+
 struct xnthread_init_attr {
 	struct xnthread_personality *personality;
 	cpumask_t affinity;
@@ -214,6 +219,7 @@ struct xnthread {
 	u32 proghash;		/* Hash value for exe_path */
 #endif
 	struct lostage_signal sigarray[XNTHREAD_MAX_SIGNALS];
+	struct lostage_wakeup relax_work;
 };
 
 static inline int xnthread_get_state(const struct xnthread *thread)

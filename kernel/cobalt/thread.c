@@ -1974,11 +1974,6 @@ int xnthread_harden(void)
 }
 EXPORT_SYMBOL_GPL(xnthread_harden);
 
-struct lostage_wakeup {
-	struct pipeline_inband_work inband_work; /* Must be first. */
-	struct task_struct *task;
-};
-
 static void lostage_task_wakeup(struct pipeline_inband_work *inband_work)
 {
 	struct lostage_wakeup *rq;
@@ -2052,10 +2047,6 @@ void __xnthread_propagate_schedparam(struct xnthread *curr)
 void xnthread_relax(int notify, int reason)
 {
 	struct task_struct *p = current;
-	struct lostage_wakeup wakework = {
-		.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(lostage_task_wakeup),
-		.task = p,
-	};
 	struct xnthread *thread = xnthread_current();
 	int cpu __maybe_unused, suspension;
 	kernel_siginfo_t si;
@@ -2069,6 +2060,10 @@ void xnthread_relax(int notify, int reason)
 	 */
 	trace_cobalt_shadow_gorelax(reason);
 
+	thread->relax_work.inband_work = (struct pipeline_inband_work)
+		PIPELINE_INBAND_WORK_INITIALIZER(lostage_task_wakeup);
+	thread->relax_work.task = p;
+
 	/*
 	 * If you intend to change the following interrupt-free
 	 * sequence, /first/ make sure to check the special handling
@@ -2081,7 +2076,7 @@ void xnthread_relax(int notify, int reason)
 	 */
 	splmax();
 	trace_cobalt_lostage_request("wakeup", p);
-	pipeline_post_inband_work(&wakework);
+	pipeline_post_inband_work(&thread->relax_work);
 	/*
 	 * Grab the nklock to synchronize the Linux task state
 	 * manipulation with handle_sigwake_event. This lock will be
