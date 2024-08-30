@@ -29,4 +29,7 @@ struct pipeline_inband_work {
 #define pipeline_post_inband_work(__work)	\
 	ipipe_post_work_root(__work, inband_work.work)
 
+/* unsafe, but I-pipe provided no equivalent */
+#define pipeline_sync_inband_work(__work)	do {} while(0)
+
 #endif /* !_COBALT_KERNEL_IPIPE_INBAND_WORK_H */

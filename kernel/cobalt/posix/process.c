@@ -838,6 +838,7 @@ static void __handle_taskexit_event(struct task_struct *p)
 {
 	struct cobalt_ppd *sys_ppd;
 	struct xnthread *thread;
+	unsigned int n;
 	spl_t s;
 
 	/*
@@ -860,6 +861,10 @@ static void __handle_taskexit_event(struct task_struct *p)
 	xnlock_put_irqrestore(&nklock, s);
 
 	xnthread_run_handler_stack(thread, exit_thread);
+
+	for (n = 0; n < XNTHREAD_MAX_SIGNALS; n++)
+		pipeline_sync_inband_work(&thread->sigarray[n]);
+	pipeline_sync_inband_work(&thread->relax_work);
 
 	if (xnthread_test_state(thread, XNUSER)) {
 		cobalt_umm_free(&cobalt_kernel_ppd.umm, thread->u_window);

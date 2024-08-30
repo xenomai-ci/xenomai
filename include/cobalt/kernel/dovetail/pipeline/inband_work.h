@@ -25,4 +25,7 @@ struct pipeline_inband_work {
 #define pipeline_post_inband_work(__work)				\
 			irq_work_queue(&(__work)->inband_work.work)
 
+#define pipeline_sync_inband_work(__work)				\
+			irq_work_sync(&(__work)->inband_work.work)
+
 #endif /* !_COBALT_KERNEL_DOVETAIL_INBAND_WORK_H */
