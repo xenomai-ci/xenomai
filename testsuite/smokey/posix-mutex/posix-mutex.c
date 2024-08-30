@@ -551,17 +551,20 @@ struct multicore_low_context {
 	struct smokey_barrier *locker1_barrier;
 	struct smokey_barrier *locker2_barrier;
 	struct smokey_barrier *medium_barrier;
+	struct smokey_barrier *ready_barrier;
 	int *medium_flag;
 };
 
 struct multicore_mutex_locker_context {
 	pthread_mutex_t *mutex;
 	struct smokey_barrier *barrier;
+	struct smokey_barrier *ready_barrier;
 };
 
 struct multicore_medium_context {
 	int *flag;
 	struct smokey_barrier *barrier;
+	struct smokey_barrier *ready_barrier;
 };
 
 static void *pi_nesting_contend_multicore_low(void *arg)
@@ -569,6 +572,8 @@ static void *pi_nesting_contend_multicore_low(void *arg)
 	struct multicore_low_context *context =
 		(struct multicore_low_context *)arg;
 	int ret;
+
+	smokey_barrier_release(context->ready_barrier);
 
 	if (!__T(ret, smokey_barrier_wait(context->low_barrier)))
 		return (void *)(long)ret;
@@ -604,6 +609,8 @@ static void *pi_nesting_contend_multicore_mutex_locker(void *arg)
 		(struct multicore_mutex_locker_context *)arg;
 	int ret;
 
+	smokey_barrier_release(context->ready_barrier);
+
 	if (!__T(ret, smokey_barrier_wait(context->barrier)))
 		return (void *)(long)ret;
 
@@ -621,6 +628,8 @@ static void *pi_nesting_contend_multicore_medium(void *arg)
 	struct multicore_medium_context *context =
 		(struct multicore_medium_context *)arg;
 	int ret;
+
+	smokey_barrier_release(context->ready_barrier);
 
 	if (!__T(ret, smokey_barrier_wait(context->barrier)))
 		return (void *)(long)ret;
@@ -687,9 +696,11 @@ static int pi_nesting_contend_multicore_getcpu(cpu_set_t *rt_cpus,
 static int pi_nesting_contend_multicore(void)
 {
 	struct multicore_mutex_locker_context locker1_args, locker2_args;
-	int cpu, num_cpus, low_medium_cpu, locker1_cpu, locker2_cpu;
-	struct smokey_barrier locker1_barrier, locker2_barrier;
-	struct smokey_barrier low_barrier, medium_barrier;
+	int ret, cpu, num_cpus, low_medium_cpu, locker1_cpu, locker2_cpu;
+	struct smokey_barrier locker1_barrier, locker1_ready_barrier;
+	struct smokey_barrier locker2_barrier, locker2_ready_barrier;
+	struct smokey_barrier medium_barrier, medium_ready_barrier;
+	struct smokey_barrier low_barrier, low_ready_barrier;
 	struct multicore_medium_context medium_args;
 	pthread_t low, locker1, locker2, medium;
 	struct multicore_low_context low_args;
@@ -697,7 +708,6 @@ static int pi_nesting_contend_multicore(void)
 	cpu_set_t rt_cpus, online_cpus;
 	int medium_flag = 0;
 	void *status;
-	int ret;
 
 	/* setup test */
 
@@ -718,16 +728,31 @@ static int pi_nesting_contend_multicore(void)
 	locker2_cpu = pi_nesting_contend_multicore_getcpu(
 		&rt_cpus, &online_cpus, num_cpus, locker1_cpu);
 
+	smokey_trace("low_medium_cpu: %d, locker1_cpu: %d, locker2_cpu: %d\n",
+		low_medium_cpu, locker1_cpu, locker2_cpu);
+
 	if (!__T(ret, smokey_barrier_init(&low_barrier)))
+		return ret;
+
+	if (!__T(ret, smokey_barrier_init(&low_ready_barrier)))
 		return ret;
 
 	if (!__T(ret, smokey_barrier_init(&locker1_barrier)))
 		return ret;
 
+	if (!__T(ret, smokey_barrier_init(&locker1_ready_barrier)))
+		return ret;
+
 	if (!__T(ret, smokey_barrier_init(&locker2_barrier)))
 		return ret;
 
+	if (!__T(ret, smokey_barrier_init(&locker2_ready_barrier)))
+		return ret;
+
 	if (!__T(ret, smokey_barrier_init(&medium_barrier)))
+		return ret;
+
+	if (!__T(ret, smokey_barrier_init(&medium_ready_barrier)))
 		return ret;
 
 	ret = do_init_mutex(&mutex1, PTHREAD_MUTEX_NORMAL,
@@ -746,20 +771,27 @@ static int pi_nesting_contend_multicore(void)
 	low_args.locker1_barrier = &locker1_barrier;
 	low_args.locker2_barrier = &locker2_barrier;
 	low_args.medium_barrier = &medium_barrier;
+	low_args.ready_barrier = &low_ready_barrier;
 	low_args.medium_flag = &medium_flag;
 
 	locker1_args.mutex = &mutex1;
 	locker1_args.barrier = &locker1_barrier;
+	locker1_args.ready_barrier = &locker1_ready_barrier;
 
 	locker2_args.mutex = &mutex2;
 	locker2_args.barrier = &locker2_barrier;
+	locker2_args.ready_barrier = &locker2_ready_barrier;
 
 	medium_args.barrier = &medium_barrier;
 	medium_args.flag = &medium_flag;
+	medium_args.ready_barrier = &medium_ready_barrier;
 
 	if (!__T(ret, create_thread(
 			      &low, SCHED_FIFO, THREAD_PRIO_LOW, low_medium_cpu,
 			      pi_nesting_contend_multicore_low, &low_args)))
+		return ret;
+
+	if (!__T(ret, smokey_barrier_wait(&low_ready_barrier)))
 		return ret;
 
 	if (!__T(ret, create_thread(&locker1, SCHED_FIFO, THREAD_PRIO_HIGH,
@@ -768,16 +800,25 @@ static int pi_nesting_contend_multicore(void)
 				    &locker1_args)))
 		return ret;
 
+	if (!__T(ret, smokey_barrier_wait(&locker1_ready_barrier)))
+		return ret;
+
 	if (!__T(ret, create_thread(&locker2, SCHED_FIFO, THREAD_PRIO_VERY_HIGH,
 				    locker2_cpu,
 				    pi_nesting_contend_multicore_mutex_locker,
 				    &locker2_args)))
 		return ret;
 
+	if (!__T(ret, smokey_barrier_wait(&locker2_ready_barrier)))
+		return ret;
+
 	if (!__T(ret, create_thread(&medium, SCHED_FIFO, THREAD_PRIO_MEDIUM,
 				    low_medium_cpu,
 				    pi_nesting_contend_multicore_medium,
 				    &medium_args)))
+		return ret;
+
+	if (!__T(ret, smokey_barrier_wait(&medium_ready_barrier)))
 		return ret;
 
 	/* start test */
@@ -812,6 +853,11 @@ static int pi_nesting_contend_multicore(void)
 	smokey_barrier_destroy(&locker1_barrier);
 	smokey_barrier_destroy(&locker2_barrier);
 	smokey_barrier_destroy(&medium_barrier);
+
+	smokey_barrier_destroy(&low_ready_barrier);
+	smokey_barrier_destroy(&locker1_ready_barrier);
+	smokey_barrier_destroy(&locker2_ready_barrier);
+	smokey_barrier_destroy(&medium_ready_barrier);
 
 	if (!__T(ret, pthread_mutex_destroy(&mutex1)))
 		return ret;
