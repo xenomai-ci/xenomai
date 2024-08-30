@@ -19,11 +19,11 @@
 #ifndef _COBALT_KERNEL_THREAD_H
 #define _COBALT_KERNEL_THREAD_H
 
+#include <linux/irq_work.h>
 #include <linux/wait.h>
 #include <linux/sched.h>
 #include <linux/sched/rt.h>
 #include <pipeline/thread.h>
-#include <pipeline/inband_work.h>
 #include <cobalt/kernel/list.h>
 #include <cobalt/kernel/stat.h>
 #include <cobalt/kernel/timer.h>
@@ -59,13 +59,13 @@ struct xnthread_personality;
 struct completion;
 
 struct lostage_signal {
-	struct pipeline_inband_work inband_work; /* Must be first. */
+	struct irq_work inband_work;
 	struct task_struct *task;
 	int signo, sigval;
 };
 
 struct lostage_wakeup {
-	struct pipeline_inband_work inband_work; /* Must be first. */
+	struct irq_work inband_work;
 	struct task_struct *task;
 };
 

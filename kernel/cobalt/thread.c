@@ -40,7 +40,6 @@
 #include <cobalt/kernel/lock.h>
 #include <cobalt/kernel/thread.h>
 #include <pipeline/kevents.h>
-#include <pipeline/inband_work.h>
 #include <pipeline/sched.h>
 #include <trace/events/cobalt-core.h>
 #include "debug.h"
@@ -86,12 +85,12 @@ static inline void enlist_new_thread(struct xnthread *thread)
 }
 
 struct kthread_arg {
-	struct pipeline_inband_work inband_work; /* Must be first. */
+	struct irq_work inband_work;
 	struct xnthread *thread;
 	struct completion *done;
 };
 
-static void do_parent_wakeup(struct pipeline_inband_work *inband_work)
+static void do_parent_wakeup(struct irq_work *inband_work)
 {
 	struct kthread_arg *ka;
 
@@ -150,9 +149,8 @@ static int map_kthread(struct xnthread *thread, struct kthread_arg *ka)
 
 	trace_cobalt_lostage_request("wakeup", current);
 
-	ka->inband_work = (struct pipeline_inband_work)
-		PIPELINE_INBAND_WORK_INITIALIZER(do_parent_wakeup);
-	pipeline_post_inband_work(ka);
+	ka->inband_work = IRQ_WORK_INIT(do_parent_wakeup);
+	irq_work_queue(&ka->inband_work);
 
 	xnlock_get_irqsave(&nklock, s);
 
@@ -1974,7 +1972,7 @@ int xnthread_harden(void)
 }
 EXPORT_SYMBOL_GPL(xnthread_harden);
 
-static void lostage_task_wakeup(struct pipeline_inband_work *inband_work)
+static void lostage_task_wakeup(struct irq_work *inband_work)
 {
 	struct lostage_wakeup *rq;
 	struct task_struct *p;
@@ -2060,8 +2058,7 @@ void xnthread_relax(int notify, int reason)
 	 */
 	trace_cobalt_shadow_gorelax(reason);
 
-	thread->relax_work.inband_work = (struct pipeline_inband_work)
-		PIPELINE_INBAND_WORK_INITIALIZER(lostage_task_wakeup);
+	thread->relax_work.inband_work = IRQ_WORK_INIT(lostage_task_wakeup);
 	thread->relax_work.task = p;
 
 	/*
@@ -2076,7 +2073,7 @@ void xnthread_relax(int notify, int reason)
 	 */
 	splmax();
 	trace_cobalt_lostage_request("wakeup", p);
-	pipeline_post_inband_work(&thread->relax_work);
+	irq_work_queue(&thread->relax_work.inband_work);
 	/*
 	 * Grab the nklock to synchronize the Linux task state
 	 * manipulation with handle_sigwake_event. This lock will be
@@ -2154,7 +2151,7 @@ void xnthread_relax(int notify, int reason)
 }
 EXPORT_SYMBOL_GPL(xnthread_relax);
 
-static void lostage_task_signal(struct pipeline_inband_work *inband_work)
+static void lostage_task_signal(struct irq_work *inband_work)
 {
 	struct lostage_signal *rq;
 	struct task_struct *p;
@@ -2387,15 +2384,14 @@ void __xnthread_signal(struct xnthread *thread, int sig, int arg)
 	if (sigwork->task)
 		return;
 
-	sigwork->inband_work = (struct pipeline_inband_work)
-			PIPELINE_INBAND_WORK_INITIALIZER(lostage_task_signal);
+	sigwork->inband_work = IRQ_WORK_INIT(lostage_task_signal);
 	sigwork->task = xnthread_host_task(thread);
 	sigwork->signo = sig;
 	sigwork->sigval = sig == SIGDEBUG ? arg | sigdebug_marker : arg;
 
 	trace_cobalt_lostage_request("signal", sigwork->task);
 
-	pipeline_post_inband_work(sigwork);
+	irq_work_queue(&sigwork->inband_work);
 }
 
 void xnthread_signal(struct xnthread *thread, int sig, int arg)

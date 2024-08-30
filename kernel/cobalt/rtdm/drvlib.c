@@ -31,7 +31,6 @@
 #include <linux/anon_inodes.h>
 #include <rtdm/driver.h>
 #include <rtdm/compat.h>
-#include <pipeline/inband_work.h>
 #include "internal.h"
 #include <trace/events/cobalt-rtdm.h>
 
@@ -1616,7 +1615,7 @@ int rtdm_nrtsig_init(rtdm_nrtsig_t *nrt_sig, rtdm_nrtsig_handler_t handler,
 void rtdm_nrtsig_destroy(rtdm_nrtsig_t *nrt_sig);
 #endif /* DOXYGEN_CPP */
 
-void __rtdm_nrtsig_execute(struct pipeline_inband_work *inband_work)
+void __rtdm_nrtsig_execute(struct irq_work *inband_work)
 {
 	struct rtdm_nrtsig *nrt_sig;
 
@@ -1634,14 +1633,14 @@ EXPORT_SYMBOL_GPL(__rtdm_nrtsig_execute);
  */
 void rtdm_nrtsig_pend(rtdm_nrtsig_t *nrt_sig)
 {
-	pipeline_post_inband_work(nrt_sig);
+	irq_work_queue(&nrt_sig->inband_work);
 }
 EXPORT_SYMBOL_GPL(rtdm_nrtsig_pend);
 
 static LIST_HEAD(nrt_work_list);
 DEFINE_PRIVATE_XNLOCK(nrt_work_lock);
 
-static void lostage_schedule_work(struct pipeline_inband_work *inband_work)
+static void lostage_schedule_work(struct irq_work *inband_work)
 {
 	struct work_struct *lostage_work;
 	spl_t s;
@@ -1663,11 +1662,7 @@ static void lostage_schedule_work(struct pipeline_inband_work *inband_work)
 	xnlock_put_irqrestore(&nrt_work_lock, s);
 }
 
-static struct lostage_trigger_work {
-	struct pipeline_inband_work inband_work; /* Must be first. */
-} nrt_work =  {
-	.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(lostage_schedule_work),
-};
+static DEFINE_IRQ_WORK(nrt_work, lostage_schedule_work);
 
 /**
  * Put a work task in Linux non real-time global workqueue from primary mode.
@@ -1686,7 +1681,7 @@ void rtdm_schedule_nrt_work(struct work_struct *lostage_work)
 	xnlock_get_irqsave(&nrt_work_lock, s);
 
 	list_add_tail(&lostage_work->entry, &nrt_work_list);
-	pipeline_post_inband_work(&nrt_work);
+	irq_work_queue(&nrt_work);
 
 	xnlock_put_irqrestore(&nrt_work_lock, s);
 }

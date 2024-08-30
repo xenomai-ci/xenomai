@@ -17,6 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <linux/irq_work.h>
 #include <linux/list.h>
 #include <linux/err.h>
 #include <linux/slab.h>
@@ -29,7 +31,6 @@
 #include <cobalt/kernel/lock.h>
 #include <cobalt/kernel/ppd.h>
 #include <cobalt/kernel/time.h>
-#include <pipeline/inband_work.h>
 #include <trace/events/cobalt-rtdm.h>
 #include <rtdm/compat.h>
 #include <rtdm/fd.h>
@@ -297,16 +298,12 @@ static int fd_cleanup_thread(void *data)
 	return 0;
 }
 
-static void lostage_trigger_close(struct pipeline_inband_work *inband_work)
+static void lostage_trigger_close(struct irq_work *inband_work)
 {
 	up(&rtdm_fd_cleanup_sem);
 }
 
-static struct lostage_trigger_close {
-	struct pipeline_inband_work inband_work; /* Must be first. */
-} fd_closework =  {
-	.inband_work = PIPELINE_INBAND_WORK_INITIALIZER(lostage_trigger_close),
-};
+static DEFINE_IRQ_WORK(fd_closework, lostage_trigger_close);
 
 static void __put_fd(struct rtdm_fd *fd, spl_t s)
 {
@@ -331,7 +328,7 @@ static void __put_fd(struct rtdm_fd *fd, spl_t s)
 		xnlock_put_irqrestore(&fdtree_lock, s);
 
 		if (trigger)
-			pipeline_post_inband_work(&fd_closework);
+			irq_work_queue(&fd_closework);
 	}
 }
 

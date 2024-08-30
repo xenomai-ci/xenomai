@@ -17,6 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include <linux/irq_work.h>
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/slab.h>
@@ -24,7 +26,6 @@
 #include <rtdm/cobalt.h>
 #include <rtdm/driver.h>
 #include <rtdm/udd.h>
-#include <pipeline/inband_work.h>
 
 struct udd_context {
 	u32 event_count;
@@ -516,13 +517,13 @@ void udd_notify_event(struct udd_device *udd)
 EXPORT_SYMBOL_GPL(udd_notify_event);
 
 struct irqswitch_work {
-	struct pipeline_inband_work inband_work;
+	struct irq_work inband_work;
 	rtdm_irq_t *irqh;
 	int enabled;
 	rtdm_event_t *done;
 };
 
-static void lostage_irqswitch_line(struct pipeline_inband_work *inband_work)
+static void lostage_irqswitch_line(struct irq_work *inband_work)
 {
 	struct irqswitch_work *rq;
 
@@ -550,8 +551,7 @@ static void switch_irq_line(rtdm_irq_t *irqh, int enable, rtdm_event_t *done)
 	if (WARN_ON(rq == NULL))
 		return;
 
-	rq->inband_work = (struct pipeline_inband_work)
-		PIPELINE_INBAND_WORK_INITIALIZER(lostage_irqswitch_line);
+	rq->inband_work = IRQ_WORK_INIT(lostage_irqswitch_line);
 	rq->irqh = irqh;
 	rq->enabled = enable;
 	rq->done = done;
@@ -561,7 +561,7 @@ static void switch_irq_line(rtdm_irq_t *irqh, int enable, rtdm_event_t *done)
 	 * enabling/disabling IRQ lines from primary mode. Defer this
 	 * to the root context.
 	 */
-	pipeline_post_inband_work(rq);
+	irq_work_queue(&rq->inband_work);
 }
 
 /**
