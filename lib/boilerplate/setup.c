@@ -383,6 +383,18 @@ void xenomai_usage(void)
         fprintf(stderr, "--help				display help\n");
 }
 
+static int set_affinity_from_env(void)
+{
+	char *affinity_env;
+	int ret = 0;
+
+	affinity_env = getenv("XENO_CPU_AFFINITY");
+	if (affinity_env)
+		ret = collect_cpu_affinity(affinity_env);
+
+	return ret;
+}
+
 static int parse_base_options(int *argcp, char **uargv,
 			      const struct option *options,
 			      int base_opt_start)
@@ -559,6 +571,11 @@ static void __xenomai_init(int *argcp, char *const **argvp, const char *me)
 
 	/* Retrieve the default CPU affinity. */
 	retrieve_default_cpu_affinity();
+
+	/* Environment variables can be overruled by arguments */
+	ret = set_affinity_from_env();
+	if (ret)
+		goto fail;
 
 	/*
 	 * Parse the base options first, to bootstrap the core with
