@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <string.h>
+#include <stdlib.h>
 #include <smokey/smokey.h>
 
 static const char * const tests[] = {
@@ -31,11 +32,18 @@ static const char * const tests[] = {
 
 static int run_alchemytests(struct smokey_test *t, int argc, char *const argv[])
 {
-	const char *args = "--vm --cpu-affinity=0";
 	const char *const mod = "xeno_rtipc";
+	const char *args = "--vm";
 	int test_ret = 0;
 	int ret = 0;
 	int tmp;
+
+	ret = setenv("XENO_CPU_AFFINITY", "0", 0);
+	if (ret != 0) {
+		fprintf(stderr, "%s failed to set XENO_CPU_AFFINITY: %m\n",
+			__func__);
+		return ret;
+	}
 
 	/* Try loading the xeno_rtipc module as the pipe test depends on it */
 	tmp = smokey_modprobe(mod, true);
