@@ -370,17 +370,21 @@ void xenomai_usage(void)
 		}
 	}
 
-        fprintf(stderr, "--cpu-affinity=<cpu[,cpu]...>	set CPU affinity of threads\n");
-        fprintf(stderr, "--[no-]sanity			disable/enable sanity checks\n");
-        fprintf(stderr, "--verbose[=level] 		set verbosity to desired level [=1]\n");
-        fprintf(stderr, "--silent, --quiet 		same as --verbose=0\n");
-        fprintf(stderr, "--trace[=level] 		set tracing to desired level [=1]\n");
-        fprintf(stderr, "--version			get version information\n");
-        fprintf(stderr, "--dump-config			dump configuration settings\n");
+	fprintf(stderr, "--session=<label>[/<group>]	enable shared session\n");
+	fprintf(stderr, "--cpu-affinity=<cpu[,cpu]...>	set CPU affinity of threads\n");
+	fprintf(stderr, "--[no-]sanity			disable/enable sanity checks\n");
+	fprintf(stderr, "--verbose[=level]		set verbosity to desired level [=1]\n");
+	fprintf(stderr, "--silent, --quiet		same as --verbose=0\n");
+	fprintf(stderr, "--trace[=level]		set tracing to desired level [=1]\n");
+	fprintf(stderr, "--version			get version information\n");
+	fprintf(stderr, "--dump-config			dump configuration settings\n");
 #ifdef CONFIG_XENO_MERCURY
-        fprintf(stderr, "--no-mlock			do not lock memory at init\n");
+	fprintf(stderr, "--no-mlock			do not lock memory at init\n");
 #endif
-        fprintf(stderr, "--help				display help\n");
+	fprintf(stderr, "--help				display help\n");
+	fprintf(stderr, "\nEnvironment variables (arguments take priority):\n"
+			"XENO_SESSION_NAME=<label>[/<group>]	enable shared session\n"
+			"XENO_CPU_AFFINITY=<cpu[,cpu]...>	set CPU affinity of threads\n");
 }
 
 static int set_affinity_from_env(void)

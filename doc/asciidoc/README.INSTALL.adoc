@@ -428,9 +428,10 @@ Generic configuration options (both cores)
 When this option is enabled, the system creates a file hierarchy at
 `<user>/<session>/<pid>` under the registry root path, where you
 can access the internal state of the active real-time objects. The
-session label is obtained from the --session runtime switch. If no
-session name is specified, `anon@<pid>` will be used. E.g. looking at
-the properties of a VxWorks task could be done as follows:
+session label is obtained from the `--session` runtime switch, which
+takes precedence over the environment variable `XENO_SESSION_NAME`.
+If neither of these are specified, `anon@<pid>` will be used. E.g.
+looking at the properties of a VxWorks task could be done as follows:
 
 If not specified in the configuration switch, the registry root path
 will be +/var/run/xenomai+.
