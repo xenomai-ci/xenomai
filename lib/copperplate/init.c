@@ -114,6 +114,7 @@ static int get_session_root(int *regflags_r)
 {
 	char *sessdir, *session;
 	struct passwd *pw;
+	char *sn_env;
 	int ret;
 
 	pw = getpwuid(geteuid());
@@ -121,12 +122,20 @@ static int get_session_root(int *regflags_r)
 		return -errno;
 
 	if (__copperplate_setup_data.session_label == NULL) {
-		ret = asprintf(&session, "anon@%d", __node_id);
-		if (ret < 0)
-			return -ENOMEM;
-		__copperplate_setup_data.session_label = session;
-		*regflags_r |= REGISTRY_ANON;
-	} else if (strchr(__copperplate_setup_data.session_label, '/')) {
+		sn_env = getenv("XENO_SESSION_NAME");
+		if (sn_env) {
+			__copperplate_setup_data.session_label = strdup(sn_env);
+			if (__copperplate_setup_data.session_label == NULL)
+				return -ENOMEM;
+		} else {
+			ret = asprintf(&session, "anon@%d", __node_id);
+			if (ret < 0)
+				return -ENOMEM;
+			__copperplate_setup_data.session_label = session;
+			*regflags_r |= REGISTRY_ANON;
+		}
+	}
+	if (strchr(__copperplate_setup_data.session_label, '/')) {
 		warning("session name may not contain slashes");
 		return -EINVAL;
 	}
