@@ -282,7 +282,7 @@ while : ; do
       fi
    fi
    case "$linux_arch" in
-   x86*|i*86|amd*)
+   x86*|amd*)
       linux_arch=x86
       ;;
    powerpc*|ppc*)
