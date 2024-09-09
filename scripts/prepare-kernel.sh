@@ -217,7 +217,7 @@ if test x$linux_arch = x; then
 	target_linux_archs="x86 arm arm64"
 else
 	case "$linux_arch" in
-		x86*|i*86|amd*)
+		x86*|amd*)
 		target_linux_archs="x86"
 		;;
 	arm)
