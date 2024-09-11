@@ -2,12 +2,10 @@
 /*
  * y2038 tests
  *
- * Copyright (c) Siemens AG 2021
+ * Copyright (c) Siemens AG 2021-2024
  *
  * Authors:
  *  Florian Bezdeka <florian.bezdeka@siemens.com>
- *
- * Released under the terms of GPLv2.
  */
 #include <asm/xenomai/syscall.h>
 #include <smokey/smokey.h>
@@ -161,11 +159,11 @@ static int run_thread(void *(*thread)(void *), void *arg, int exp_result)
 
 static int test_sc_cobalt_sem_timedwait64(void)
 {
-	int ret;
-	sem_t sem;
 	int sc_nr = sc_cobalt_sem_timedwait64;
 	struct xn_timespec64 ts64, ts_wu;
 	struct timespec ts_nat;
+	sem_t sem;
+	int ret;
 
 	sem_init(&sem, 0, 0);
 
@@ -245,9 +243,9 @@ static int test_sc_cobalt_sem_timedwait64(void)
 
 static int test_sc_cobalt_clock_gettime64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_clock_gettime64;
 	struct xn_timespec64 ts64 = {0};
+	int ret;
 
 	/* Make sure we don't crash because of NULL pointers */
 	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
@@ -276,8 +274,8 @@ static int test_sc_cobalt_clock_gettime64(void)
 
 static int test_sc_cobalt_clock_settime64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_clock_settime64;
+	int ret;
 
 	/* Make sure we don't crash because of NULL pointers */
 	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
@@ -294,11 +292,11 @@ static int test_sc_cobalt_clock_settime64(void)
 
 static int test_sc_cobalt_clock_nanosleep64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_clock_nanosleep64;
 	struct xn_timespec64 next, rmt;
 	struct timespec ts1, ts2, delta;
 	long interval = 1;
+	int ret;
 
 	/* Make sure we don't crash because of NULL pointers */
 	ret = XENOMAI_SYSCALL4(sc_nr, NULL, NULL, NULL, NULL);
@@ -358,9 +356,9 @@ static int test_sc_cobalt_clock_nanosleep64(void)
 
 static int test_sc_cobalt_clock_getres64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_clock_getres64;
 	struct xn_timespec64 ts64;
+	int ret;
 
 	/* Make sure we don't crash because of NULL pointers */
 	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
@@ -389,9 +387,9 @@ static int test_sc_cobalt_clock_getres64(void)
 
 static int test_sc_cobalt_clock_adjtime64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_clock_adjtime64;
 	struct xn_timex64 tx64 = {};
+	int ret;
 
 	/* Make sure we don't crash because of NULL pointers */
 	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
@@ -461,11 +459,11 @@ static void *timedlock64_thread(void *arg)
 
 static int test_sc_cobalt_mutex_timedlock64(void)
 {
-	int ret;
-	pthread_mutex_t mutex;
 	int sc_nr = sc_cobalt_mutex_timedlock64;
-	struct xn_timespec64 ts64;
 	struct thread_context ctx = {0};
+	struct xn_timespec64 ts64;
+	pthread_mutex_t mutex;
+	int ret;
 
 	if (!__T(ret, pthread_mutex_init(&mutex, NULL)))
 		return ret;
@@ -567,10 +565,10 @@ static int test_sc_cobalt_mutex_timedlock64(void)
 
 static int test_sc_cobalt_mq_timedsend64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_mq_timedsend64;
 	struct xn_timespec64 t1, t2;
 	struct timespec ts_nat;
+	int ret;
 
 	mqd_t mq;
 	struct mq_attr qa;
@@ -650,10 +648,10 @@ static int test_sc_cobalt_mq_timedsend64(void)
 
 static int test_sc_cobalt_mq_timedreceive64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_mq_timedreceive64;
 	struct xn_timespec64 t1, t2;
 	struct timespec ts_nat;
+	int ret;
 
 	mqd_t mq;
 	struct mq_attr qa;
@@ -746,11 +744,11 @@ static int test_sc_cobalt_mq_timedreceive64(void)
 
 static int test_sc_cobalt_sigtimedwait64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_sigtimedwait64;
 	struct xn_timespec64 t1, t2;
 	struct timespec ts_nat;
 	sigset_t set;
+	int ret;
 
 	sigaddset(&set, SIGINT);
 
@@ -821,11 +819,11 @@ static int test_sc_cobalt_sigtimedwait64(void)
 
 static int test_sc_cobalt_monitor_wait64(void)
 {
-	int ret, opret;
 	int sc_nr = sc_cobalt_monitor_wait64;
+	struct cobalt_monitor_shadow mon;
 	struct xn_timespec64 t1, t2, to;
 	struct timespec ts_nat;
-	struct cobalt_monitor_shadow mon;
+	int ret, opret;
 
 	ret = cobalt_monitor_init(&mon, CLOCK_REALTIME, 0);
 	if (ret)
@@ -893,12 +891,12 @@ static int test_sc_cobalt_monitor_wait64(void)
 
 static int test_sc_cobalt_event_wait64(void)
 {
-	int ret;
 	int sc_nr = sc_cobalt_event_wait64;
+	struct cobalt_event_shadow evt;
 	struct xn_timespec64 t1, t2;
 	struct timespec ts_nat;
-	struct cobalt_event_shadow evt;
 	unsigned int flags;
+	int ret;
 
 	ret = cobalt_event_init(&evt, 0, COBALT_EVENT_FIFO);
 	if (ret)
@@ -972,14 +970,14 @@ static int test_sc_cobalt_event_wait64(void)
 
 static int test_sc_cobalt_recvmmsg64(void)
 {
-	int ret = 0;
-	int sock;
 	int sc_nr = sc_cobalt_recvmmsg64;
-	long data;
-	struct xn_timespec64 t1, t2;
-	struct timespec ts_nat;
 	struct rtipc_port_label plabel;
+	struct xn_timespec64 t1, t2;
 	struct sockaddr_ipc saddr;
+	struct timespec ts_nat;
+	int ret = 0;
+	long data;
+	int sock;
 
 	struct iovec iov = {
 		.iov_base = &data,
@@ -1097,14 +1095,14 @@ out:
 
 static int test_sc_cobalt_cond_wait_prologue64(void)
 {
-	int ret = 0;
-	int err = 0;
 	int sc_nr = sc_cobalt_cond_wait_prologue64;
+	struct xn_timespec64 t1, t2;
+	pthread_condattr_t attr;
+	struct timespec ts_nat;
 	pthread_mutex_t m;
 	pthread_cond_t c;
-	pthread_condattr_t attr;
-	struct xn_timespec64 t1, t2;
-	struct timespec ts_nat;
+	int ret = 0;
+	int err = 0;
 
 	if (!__T(ret, pthread_mutex_init(&m, NULL)))
 		return ret;
