@@ -19,6 +19,7 @@
 #define _XENOMAI_SMOKEY_SMOKEY_H
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include <boilerplate/list.h>
 #include <boilerplate/libc.h>
