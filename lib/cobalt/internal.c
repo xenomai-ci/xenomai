@@ -269,7 +269,7 @@ int cobalt_monitor_wait(cobalt_monitor_t *mon, int event,
 	 * we need to redo. In the meantime, any pending linux signal
 	 * has been processed.
 	 */
-	if (ret == -EINTR)
+	if (opret == -EINTR)
 		ret = cobalt_monitor_enter(mon);
 
 	return ret ?: opret;
