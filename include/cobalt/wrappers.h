@@ -29,7 +29,7 @@
 	__typeof__(T) __STD(FN) I;                                             \
 	__typeof__(T) __WRAP(FN) I
 
-#if __USE_TIME_BITS64
+#if __USE_TIME_BITS64 && __TIMESIZE == 32
 /*
  * Make __RT() and __STD() usable in combination with time64_t related services.
  */
