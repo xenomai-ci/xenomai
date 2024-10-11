@@ -86,7 +86,7 @@ static inline uint64_t read_reference_clock(void)
 	 * Make sure we do not pick the vsyscall variant. It won't
 	 * switch us into secondary mode and can easily deadlock.
 	 */
-#if __USE_TIME_BITS64
+#if __USE_TIME_BITS64 && __TIMESIZE == 32
 	syscall(SYS_clock_gettime64, CLOCK_REALTIME, &ts);
 #else
 	syscall(SYS_clock_gettime, CLOCK_REALTIME, &ts);
