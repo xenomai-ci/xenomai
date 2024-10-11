@@ -21,7 +21,7 @@
 #include <sys/select.h>
 #include <asm/xenomai/syscall.h>
 
-#if __USE_TIME_BITS64
+#if __USE_TIME_BITS64 && __TIMESIZE == 32
 /*
  * The time64 wrapper for select() is a little different:
  * There is no y2038 safe syscall for select() itself, but we have pselect()

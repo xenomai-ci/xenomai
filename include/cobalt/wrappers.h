@@ -38,6 +38,7 @@
 		__attribute__((alias("__cobalt_" __stringify(FN)), weak));     \
 	COBALT_IMPL(T, FN, I)
 #define COBALT_DECL_TIME64(T, FN, A, I)                                        \
+	__typeof__(T) __STD(A) I;                                              \
 	extern T __REDIRECT_NTH(__STD(FN), I, __real_##A);                     \
 	COBALT_DECL(T, FN, I)
 #else
