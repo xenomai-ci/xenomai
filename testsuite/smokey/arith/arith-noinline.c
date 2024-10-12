@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <cobalt/arith.h>
 #include "arith-noinline.h"
 

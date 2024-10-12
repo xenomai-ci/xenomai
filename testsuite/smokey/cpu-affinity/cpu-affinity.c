@@ -5,10 +5,9 @@
  *
  * Released under the terms of GPLv2.
  */
+
 #include <pthread.h>
 #include <sched.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <semaphore.h>
 #include <rtdm/testing.h>

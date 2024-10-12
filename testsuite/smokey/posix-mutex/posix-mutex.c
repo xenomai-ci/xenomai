@@ -8,12 +8,11 @@
  *
  * Released under the terms of GPLv2.
  */
+
 #include <stdio.h>
-#include <limits.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include <signal.h>
 #include <pthread.h>

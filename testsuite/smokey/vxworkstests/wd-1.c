@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <copperplate/traceobj.h>
 #include <vxworks/errnoLib.h>
-#include <vxworks/taskLib.h>
 #include <vxworks/wdLib.h>
 #include <vxworks/intLib.h>
 

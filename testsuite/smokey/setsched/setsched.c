@@ -8,8 +8,8 @@
  *
  * Released under the terms of GPLv2.
  */
+
 #include <stdio.h>
-#include <stdbool.h>
 #include <pthread.h>
 #include <error.h>
 #include <semaphore.h>

@@ -20,6 +20,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -27,16 +28,13 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <semaphore.h>
 #include <mqueue.h>
-#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/ioctl.h>
 #include <linux/unistd.h>
-#include <boilerplate/compiler.h>
 #include <rtdm/rtdm.h>
 #include <cobalt/uapi/kernel/heap.h>
 #include <xeno_config.h>

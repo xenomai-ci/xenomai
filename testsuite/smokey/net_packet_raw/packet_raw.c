@@ -12,7 +12,6 @@
 #include <net/ethernet.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <netpacket/packet.h>
 
 #include <sys/cobalt.h>
 #include <smokey/smokey.h>

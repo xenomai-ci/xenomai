@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
+
 #include <time.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -10,7 +11,6 @@
 #include <memory.h>
 #include <sched.h>
 #include <pthread.h>
-#include <boilerplate/time.h>
 #include "memcheck.h"
 
 enum pattern {

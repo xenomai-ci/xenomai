@@ -20,10 +20,9 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #include <alchemy/queue.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include <xenomai/init.h>
 #include <xenomai/tunables.h>

@@ -5,9 +5,8 @@
  *
  * Released under the terms of GPLv2.
  */
+
 #include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
 #include <unistd.h>
 #include <math.h>
 #include <pthread.h>

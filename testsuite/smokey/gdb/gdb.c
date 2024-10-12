@@ -8,6 +8,7 @@
  *
  * Released under the terms of GPLv2.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -18,7 +19,6 @@
 #include <semaphore.h>
 #include <sys/wait.h>
 #include <xeno_config.h>
-#include <boilerplate/libc.h>
 #include <smokey/smokey.h>
 #include "lib/cobalt/current.h"
 

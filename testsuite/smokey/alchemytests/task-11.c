@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <copperplate/traceobj.h>
 #include <alchemy/task.h>
-#include <alchemy/timer.h>
 
 #define TEST_ITERATIONS (10)
 #define PERIOD_SWITCH_ITERATION (5)

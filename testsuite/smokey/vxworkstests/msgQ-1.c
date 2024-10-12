@@ -4,7 +4,6 @@
 #include <boilerplate/ancillaries.h>
 #include <copperplate/traceobj.h>
 #include <vxworks/errnoLib.h>
-#include <vxworks/taskLib.h>
 #include <vxworks/msgQLib.h>
 
 static struct traceobj trobj;

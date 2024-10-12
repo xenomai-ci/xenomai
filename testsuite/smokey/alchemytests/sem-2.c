@@ -4,6 +4,7 @@
 #include <copperplate/traceobj.h>
 #include <alchemy/task.h>
 #include <alchemy/sem.h>
+
 static struct traceobj trobj;
 
 static int tseq[] = {

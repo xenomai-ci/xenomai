@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <copperplate/traceobj.h>
 #include <vxworks/errnoLib.h>
-#include <vxworks/taskLib.h>
 #include <vxworks/rngLib.h>
 
 static struct traceobj trobj;

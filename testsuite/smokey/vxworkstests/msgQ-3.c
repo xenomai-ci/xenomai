@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <copperplate/traceobj.h>
 #include <vxworks/errnoLib.h>
-#include <vxworks/taskLib.h>
 #include <vxworks/msgQLib.h>
 
 #define NMESSAGES  10

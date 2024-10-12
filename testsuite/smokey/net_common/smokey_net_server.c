@@ -13,7 +13,6 @@
 #include <getopt.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <sys/socket.h>
 #include <netinet/ether.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -21,8 +20,6 @@
 #include <rtcfg_chrdev.h>
 #include <sys/cobalt.h>
 #include <smokey/smokey.h>
-#include <xenomai/init.h>
-#include "smokey_net.h"
 #include "smokey_net_server.h"
 
 static const char *intf = "rteth0";

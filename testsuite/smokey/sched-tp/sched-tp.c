@@ -5,15 +5,11 @@
  *
  * Released under the terms of GPLv2.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <memory.h>
+
 #include <time.h>
 #include <malloc.h>
 #include <unistd.h>
 #include <string.h>
-#include <signal.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <sched.h>

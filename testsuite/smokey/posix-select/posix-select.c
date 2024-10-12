@@ -20,10 +20,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include <stdio.h>
-#include <stdlib.h>
+
 #include <string.h>
-#include <time.h>
 #include <errno.h>
 #include <unistd.h>
 #include <mqueue.h>
@@ -31,7 +29,6 @@
 #include <boilerplate/atomic.h>
 #include <sys/select.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <smokey/smokey.h>
 

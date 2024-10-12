@@ -26,13 +26,8 @@
 
 #include <unistd.h>
 #include <sched.h>
-#include <sys/mman.h>
 
 #include <smokey/smokey.h>
-
-#include <cobalt/sys/cobalt.h>
-
-#define DURATION 10000000
 
 #if CONFIG_SMP
 #define smp_sched_setaffinity(pid,len,mask) sched_setaffinity(pid,len,mask)

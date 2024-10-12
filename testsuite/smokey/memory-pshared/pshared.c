@@ -3,6 +3,7 @@
  *
  * SPDX-License-Identifier: MIT
  */
+
 #include <xenomai/init.h>
 #include <xenomai/tunables.h>
 #include <copperplate/heapobj.h>
