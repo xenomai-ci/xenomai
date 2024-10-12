@@ -15,6 +15,7 @@
  * along with Xenomai; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
 #include <errno.h>
 #include <pthread.h>
 #include <sched.h>
@@ -30,7 +31,6 @@
 #include <sys/syscall.h>
 #include <sys/time.h>
 #include <boilerplate/ancillaries.h>
-#include <boilerplate/atomic.h>
 #include <xeno_config.h>
 
 /*

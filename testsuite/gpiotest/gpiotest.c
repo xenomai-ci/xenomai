@@ -20,6 +20,7 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #include <stdio.h>
 #include <error.h>
 #include <errno.h>
@@ -28,7 +29,6 @@
 #include <fcntl.h>
 #include <smokey/smokey.h>
 #include <rtdm/gpio.h>
-#include <boilerplate/time.h>
 
 smokey_test_plugin(interrupt,
 		   SMOKEY_ARGLIST(

@@ -20,15 +20,14 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <sys/timerfd.h>
 #include <stdio.h>
-#include <error.h>
 #include <semaphore.h>
 #include <errno.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <smokey/smokey.h>

@@ -20,25 +20,19 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #include <stdlib.h>
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
-#include <error.h>
 #include <signal.h>
 #include <sched.h>
 #include <time.h>
 #include <sys/time.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <semaphore.h>
-#include <sys/timerfd.h>
-#include <xeno_config.h>
 #include <rtdm/testing.h>
 #include <rtdm/gpio.h>
 #include <boilerplate/trace.h>
-#include <xenomai/init.h>
 #include <sys/mman.h>
 #include <getopt.h>
 
