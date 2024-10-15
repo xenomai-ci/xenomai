@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <copperplate/traceobj.h>
@@ -14,6 +15,8 @@ static int tseq[] = {
 static struct traceobj trobj;
 
 static RT_TASK t_bgnd, t_fgnd;
+
+static bool on_vm;
 
 static void background_task(void *arg)
 {
@@ -76,7 +79,7 @@ static void foreground_task(void *arg)
 	ret = rt_heap_free(&heap, p2);
 	traceobj_check(&trobj, ret, 0);
 
-	rt_task_sleep(1000000ULL);
+	rt_task_sleep(on_vm ? 100000000ULL : 1000000ULL);
 
 	ret = rt_heap_delete(&heap);
 	traceobj_check(&trobj, ret, 0);
@@ -88,6 +91,8 @@ int main(int argc, char *const argv[])
 {
 	RT_HEAP heap;
 	int ret;
+
+	on_vm = argc > 1 && strcmp(argv[1], "--vm") == 0;
 
 	traceobj_init(&trobj, argv[0], sizeof(tseq) / sizeof(int));
 
