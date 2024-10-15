@@ -39,7 +39,6 @@
 
 #define SMI_CTRL_ADDR	0x30
 
-static int smi_state;
 static char smi_state_arg[16] = "detect";
 module_param_string(smi, smi_state_arg, sizeof(smi_state_arg), 0444);
 
@@ -111,7 +110,7 @@ static const char *smi_state_labels[] = {
 	"enabled",
 };
 
-static void setup_smi_state(void)
+static int setup_smi_state(void)
 {
 	static char warn_bad_state[] =
 		XENO_WARNING "invalid SMI state '%s'\n";
@@ -120,27 +119,25 @@ static void setup_smi_state(void)
 
 	/* Backward compat with legacy state specifiers. */
 	n = simple_strtol(smi_state_arg, &p, 10);
-	if (*p == '\0') {
-		smi_state = n;
-		return;
-	}
+	if (*p == '\0')
+		return n;
 
 	for (n = 0; n < ARRAY_SIZE(smi_state_labels); n++)
-		if (strcmp(smi_state_labels[n], smi_state_arg) == 0) {
-			smi_state = n - 1;
-			return;
-		}
+		if (strcmp(smi_state_labels[n], smi_state_arg) == 0)
+			return n - 1;
 
 	printk(warn_bad_state, smi_state_arg);
+
+	return -1;
 }
 
 void mach_x86_smi_init(void)
 {
 	struct pci_dev *dev = NULL;
+	int state;
 
-	setup_smi_state();
-
-	if (smi_state < 0)
+	state = setup_smi_state();
+	if (state < 0)
 		return;
 
 	/*
@@ -154,7 +151,7 @@ void mach_x86_smi_init(void)
 		return;
 	}
 
-	if (smi_state == 0) {
+	if (state == 0) {
 		printk(XENO_WARNING "SMI-enabled chipset found, but SMI workaround disabled\n"
 		       "          (see xenomai.smi parameter). You might encounter\n"
 		       "          high latencies!\n");
