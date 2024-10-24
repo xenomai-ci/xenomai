@@ -42,14 +42,14 @@ COBALT_DECL(int, mq_setattr,
 COBALT_DECL(int, mq_send,
 	    (mqd_t qd, const char *buffer, size_t len, unsigned prio));
 
-COBALT_DECL_TIME64(int, mq_timedsend, __mq_timedsend64,
+COBALT_DECL_TIME64(int, mq_timedsend, __mq_timedsend_time64,
 		   (mqd_t q, const char *buffer, size_t len, unsigned prio,
 		    const struct timespec *timeout));
 
 COBALT_DECL(ssize_t, mq_receive,
 	    (mqd_t q, char *buffer, size_t len, unsigned *prio));
 
-COBALT_DECL_TIME64(ssize_t, mq_timedreceive, __mq_timedsend_time64,
+COBALT_DECL_TIME64(ssize_t, mq_timedreceive, __mq_timedreceive_time64,
 	    (mqd_t q, char *__restrict__ buffer, size_t len,
 	     unsigned *__restrict__ prio,
 	     const struct timespec *__restrict__ timeout));
