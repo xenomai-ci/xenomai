@@ -47,7 +47,7 @@ EXPORT_SYMBOL_GPL(cobalt_debug_vfroot);
 
 struct hashed_symbol {
 	struct hashed_symbol *next;
-	char symbol[0];
+	char symbol[];
 };
 
 static struct hashed_symbol *symbol_jhash[SYMBOL_HSLOTS];
