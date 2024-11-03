@@ -32,7 +32,11 @@
 #include <linux/ethtool.h>
 #include <linux/crc32.h>
 #include <linux/uaccess.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,12,0)
+#include <linux/unaligned.h>
+#else
 #include <asm/unaligned.h>
+#endif
 
 #ifdef __sparc__
 #include <asm/pbm.h>
