@@ -39,7 +39,11 @@
 #include "rtcan_dev.h"
 #include "rtcan_raw.h"
 #include "rtcan_internal.h"
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,12,0)
+#include <linux/unaligned.h>
+#else
 #include <asm/unaligned.h>
+#endif
 
 #define DRV_NAME	"flexcan"
 #define DEV_NAME	"rtcan%d"
