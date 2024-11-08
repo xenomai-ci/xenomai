@@ -36,7 +36,7 @@ typedef unsigned long spl_t;
 
 irqreturn_t pipeline_reschedule_ipi_handler(int irq, void *dev_id);
 
-static inline int pipeline_request_resched_ipi(void (*handler)(void))
+static inline int pipeline_request_resched_ipi(void)
 {
 	if (num_possible_cpus() == 1)
 		return 0;
@@ -75,7 +75,7 @@ static inline void pipeline_send_timer_ipi(const struct cpumask *dest)
 
 #else  /* !CONFIG_SMP */
 
-static inline int pipeline_request_resched_ipi(void (*handler)(void))
+static inline int pipeline_request_resched_ipi(void)
 {
 	return 0;
 }

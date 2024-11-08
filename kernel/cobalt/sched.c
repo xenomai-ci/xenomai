@@ -235,7 +235,7 @@ void xnsched_init_all(void)
 		xnsched_init(sched, cpu);
 	}
 
-	pipeline_request_resched_ipi(__xnsched_run_handler);
+	pipeline_request_resched_ipi();
 }
 
 static void xnsched_destroy(struct xnsched *sched)
@@ -886,12 +886,6 @@ static inline void leave_root(struct xnthread *root)
 	xntimer_start(&root->sched->wdtimer, get_watchdog_timeout(),
 		      XN_INFINITE, XN_RELATIVE);
 #endif
-}
-
-void __xnsched_run_handler(void) /* hw interrupts off. */
-{
-	trace_cobalt_schedule_remote(xnsched_current());
-	xnsched_run();
 }
 
 static inline void do_lazy_user_work(struct xnthread *curr)

@@ -294,8 +294,6 @@ static inline int xnsched_threading_cpu(int cpu)
 
 int ___xnsched_run(struct xnsched *sched);
 
-void __xnsched_run_handler(void);
-
 static inline int __xnsched_run(struct xnsched *sched)
 {
 	/*
