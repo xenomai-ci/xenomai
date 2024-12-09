@@ -129,7 +129,7 @@ int pthread_create_ex(pthread_t *ptid_r,
 		      const pthread_attr_ex_t *attr_ex,
 		      void *(*start) (void *), void *arg)
 {
-	int inherit, detachstate, ret;
+	int inherit, ret;
 	struct pthread_iargs iargs;
 	struct sched_param param;
 	struct timespec timeout;
@@ -167,7 +167,6 @@ int pthread_create_ex(pthread_t *ptid_r,
 		 */
 		pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED);
 
-	pthread_attr_getdetachstate(&attr, &detachstate);
 	pthread_attr_getpersonality_ex(attr_ex, &iargs.personality);
 
 	/*
