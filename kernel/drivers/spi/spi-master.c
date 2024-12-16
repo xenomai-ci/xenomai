@@ -349,13 +349,21 @@ static char *spi_slave_devnode(struct device *dev, umode_t *mode)
 			 dev_name(dev));
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0)
+static inline struct spi_controller *spi_alloc_host(struct device *dev,
+						    unsigned int size)
+{
+	return spi_alloc_master(dev, size);
+}
+#endif
+
 struct rtdm_spi_master *
 __rtdm_spi_alloc_master(struct device *dev, size_t size, int off)
 {
 	struct rtdm_spi_master *master;
 	struct spi_controller *ctlr;
 
-	ctlr = spi_alloc_master(dev, size);
+	ctlr = spi_alloc_host(dev, size);
 	if (ctlr == NULL)
 		return NULL;
 
