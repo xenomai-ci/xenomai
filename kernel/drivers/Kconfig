@@ -4,21 +4,21 @@ config XENO_OPT_RTDM_COMPAT_DEVNODE
 	bool "Enable legacy pathnames for named RTDM devices"
 	default y
 	help
-	This compatibility option allows applications to open named
-	RTDM devices using the legacy naming scheme, i.e.
+	  This compatibility option allows applications to open named
+	  RTDM devices using the legacy naming scheme, i.e.
 
-	fd = open("devname", ...);
-	   or
-	fd = open("/dev/devname", ...);
+	  fd = open("devname", ...);
+	     or
+	  fd = open("/dev/devname", ...);
 
-	When such a request is received by RTDM, a warning message is
-	issued to the kernel log whenever XENO_OPT_DEBUG_LEGACY is
-	also enabled in the kernel configuration.
+	  When such a request is received by RTDM, a warning message is
+	  issued to the kernel log whenever XENO_OPT_DEBUG_LEGACY is
+	  also enabled in the kernel configuration.
 
-	Applications should open named devices via their actual device
-	nodes instead, i.e.
+	  Applications should open named devices via their actual device
+	  nodes instead, i.e.
 
-	fd = open("/dev/rtdm/devname", ...);
+	  fd = open("/dev/rtdm/devname", ...);
 
 source "drivers/xenomai/autotune/Kconfig"
 source "drivers/xenomai/serial/Kconfig"

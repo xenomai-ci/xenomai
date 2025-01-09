@@ -5,9 +5,9 @@ config XENO_ARCH_FPU
 	def_bool y
 
 config XENO_ARCH_SYS3264
-        def_bool COMPAT
-        depends on COMPAT_VDSO
+	def_bool COMPAT
+	depends on COMPAT_VDSO
 
 config XENO_ARCH_OUTOFLINE_XNLOCK
-       bool
-       default y
+	bool
+	default y

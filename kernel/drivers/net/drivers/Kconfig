@@ -1,119 +1,119 @@
 menu "Drivers"
-    depends on XENO_DRIVERS_NET
+	depends on XENO_DRIVERS_NET
 
 comment "Common PCI Drivers"
-    depends on PCI
+	depends on PCI
 
 config XENO_DRIVERS_NET_DRV_PCNET32
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "AMD PCnet32"
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "AMD PCnet32"
 
 
 config XENO_DRIVERS_NET_DRV_TULIP
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "DEC Tulip"
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "DEC Tulip"
 
 
 config XENO_DRIVERS_NET_DRV_EEPRO100
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "Intel EtherExpress PRO/100"
-    default y
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "Intel EtherExpress PRO/100"
+	default y
 
 config XENO_DRIVERS_NET_DRV_EEPRO100_CMDTIMEOUT
-    depends on XENO_DRIVERS_NET && PCI
-    int "Command Timeout"
-    depends on XENO_DRIVERS_NET_DRV_EEPRO100
-    default 20
-    help
-    Timeout in microseconds of transmission or configuration commands that
-    are issued in real-time contexts.
+	depends on XENO_DRIVERS_NET && PCI
+	int "Command Timeout"
+	depends on XENO_DRIVERS_NET_DRV_EEPRO100
+	default 20
+	help
+	  Timeout in microseconds of transmission or configuration commands
+	  that are issued in real-time contexts.
 
 config XENO_DRIVERS_NET_DRV_EEPRO100_DBG
-    depends on XENO_DRIVERS_NET && PCI
-    bool "Enable debugging and instrumentation"
-    depends on XENO_DRIVERS_NET_DRV_EEPRO100
-    help
-    This option switches on internal debugging code of the EEPRO/100 driver.
-    It also enables the collection of worst-case command delays in real-time
-    contexts in order to reduce the command timeout (which, effectively, will
-    also reduce the worst-case transmission latency).
+	depends on XENO_DRIVERS_NET && PCI
+	bool "Enable debugging and instrumentation"
+	depends on XENO_DRIVERS_NET_DRV_EEPRO100
+	help
+	  This option switches on internal debugging code of the EEPRO/100
+	  driver. It also enables the collection of worst-case command delays
+	  in real-time contexts in order to reduce the command timeout (which,
+	  effectively, will also reduce the worst-case transmission latency).
 
 
 config XENO_DRIVERS_NET_DRV_E1000
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "Intel(R) PRO/1000 (Gigabit)"
-    default y
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "Intel(R) PRO/1000 (Gigabit)"
+	default y
 
 config XENO_DRIVERS_NET_DRV_E1000E
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "New Intel(R) PRO/1000 PCIe (Gigabit)"
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "New Intel(R) PRO/1000 PCIe (Gigabit)"
 
 
 config XENO_DRIVERS_NET_DRV_NATSEMI
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "NatSemi"
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "NatSemi"
 
 
 config XENO_DRIVERS_NET_DRV_8139
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "Realtek 8139"
-    default y
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "Realtek 8139"
+	default y
 
 
 config XENO_DRIVERS_NET_DRV_VIA_RHINE
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "VIA Rhine"
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "VIA Rhine"
 
 
 config XENO_DRIVERS_NET_DRV_IGB
-    select I2C
-    select I2C_ALGOBIT
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "Intel(R) 82575 (Gigabit)"
+	select I2C
+	select I2C_ALGOBIT
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "Intel(R) 82575 (Gigabit)"
 
 config XENO_DRIVERS_NET_DRV_IGC
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "Intel(R) Ethernet Controller I225-LM/I225-V support"
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "Intel(R) Ethernet Controller I225-LM/I225-V support"
 
 config XENO_DRIVERS_NET_DRV_R8169
-    depends on XENO_DRIVERS_NET && PCI
-    tristate "Realtek 8169 (Gigabit)"
+	depends on XENO_DRIVERS_NET && PCI
+	tristate "Realtek 8169 (Gigabit)"
 
 
 comment "Misc Drivers"
 
 config XENO_DRIVERS_NET_DRV_LOOPBACK
-    depends on XENO_DRIVERS_NET
-    tristate "Loopback"
-    default y
+	depends on XENO_DRIVERS_NET
+	tristate "Loopback"
+	default y
 
 if ARM
 
 config XENO_DRIVERS_NET_DRV_AT91_ETHER
-    depends on XENO_DRIVERS_NET && SOC_AT91RM9200
-    select XENO_DRIVERS_NET_DRV_MACB
-    tristate "AT91RM9200 Board Ethernet Driver"
+	depends on XENO_DRIVERS_NET && SOC_AT91RM9200
+	select XENO_DRIVERS_NET_DRV_MACB
+	tristate "AT91RM9200 Board Ethernet Driver"
 
 config XENO_DRIVERS_NET_DRV_MACB
-    depends on XENO_DRIVERS_NET
-    select AT91_PROGRAMMABLE_CLOCKS if ARCH_AT91
-    tristate "Cadence MACB/GEM devices"
-    help
-    Driver for internal MAC-controller on AT91SAM926x microcontrollers.
-    Porting by Cristiano Mantovani and Stefano Banzi (Marposs SpA).
+	depends on XENO_DRIVERS_NET
+	select AT91_PROGRAMMABLE_CLOCKS if ARCH_AT91
+	tristate "Cadence MACB/GEM devices"
+	help
+	  Driver for internal MAC-controller on AT91SAM926x microcontrollers.
+	  Porting by Cristiano Mantovani and Stefano Banzi (Marposs SpA).
 
 endif
 
 config XENO_DRIVERS_NET_FEC
-    depends on XENO_DRIVERS_NET
-    depends on BROKEN || $(VERSION) < 6 || ($(VERSION) = 6 && $(PATCHLEVEL) < 3)
-    tristate "Freescale FEC"
-    depends on ARCH_MXC || SOC_IMX28
-    select PHYLIB
-    imply PTP_1588_CLOCK
-    help
-    For built-in 10/100 Fast ethernet controller on Freescale i.MX
-    processors.
+	depends on XENO_DRIVERS_NET
+	depends on BROKEN || $(VERSION) < 6 || ($(VERSION) = 6 && $(PATCHLEVEL) < 3)
+	tristate "Freescale FEC"
+	depends on ARCH_MXC || SOC_IMX28
+	select PHYLIB
+	imply PTP_1588_CLOCK
+	help
+	  For built-in 10/100 Fast ethernet controller on Freescale i.MX
+	  processors.
 
 source "drivers/xenomai/net/drivers/experimental/Kconfig"
 
