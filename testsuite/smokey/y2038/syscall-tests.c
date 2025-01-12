@@ -832,7 +832,7 @@ static int test_sc_cobalt_monitor_wait64(void)
 		return -errno;
 
 	/* Make sure we don't crash because of NULL pointers */
-	ret = XENOMAI_SYSCALL4(sc_nr, NULL, NULL, NULL, NULL);
+	ret = XENOMAI_SYSCALL4(sc_nr, NULL, NULL, NULL, &opret);
 	if (ret == -ENOSYS) {
 		smokey_note("monitor_wait64: skipped. (no kernel support)");
 		return 0; // Not implemented, nothing to test, success
@@ -842,14 +842,14 @@ static int test_sc_cobalt_monitor_wait64(void)
 
 	/* Providing an invalid address has to deliver EFAULT */
 	ret = XENOMAI_SYSCALL4(sc_nr, &mon, COBALT_MONITOR_WAITGRANT,
-			       (void *)0xdeadbeefUL, NULL);
+			       (void *)0xdeadbeefUL, &opret);
 	if (!smokey_assert(ret == -EFAULT))
 		return ret ? ret : -EINVAL;
 
 	/* providing an invalid timeout has to deliver EINVAL */
 	t1.tv_sec = -1;
 	ret = XENOMAI_SYSCALL4(sc_nr, &mon, COBALT_MONITOR_WAITGRANT, &t1,
-			       NULL);
+			       &opret);
 	if (!smokey_assert(ret == -EINVAL))
 		return ret ? ret : -EINVAL;
 
