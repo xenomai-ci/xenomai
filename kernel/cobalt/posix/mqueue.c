@@ -1031,7 +1031,8 @@ int __cobalt_mq_timedreceive(mqd_t uqd, void __user *u_buf,
 
 	cobalt_mqd_put(mqd);
 
-	if (u_prio && __xn_put_user(prio, u_prio))
+	if (u_prio && (!access_ok(u_prio, sizeof(*u_prio)) ||
+		       __xn_put_user(prio, u_prio)))
 		return -EFAULT;
 
 	return 0;
