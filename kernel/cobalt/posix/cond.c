@@ -309,7 +309,9 @@ int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 		return -EINVAL;
 
 	if (cond->mutex == NULL) {
-		__xn_get_user(offset, &u_mx->state_offset);
+		if (!access_ok(&u_mx->state_offset, sizeof(u_mx->state_offset))
+		    || __xn_get_user(offset, &u_mx->state_offset))
+			return -EFAULT;
 		cond->state->mutex_state_offset = offset;
 	}
 
@@ -348,8 +350,9 @@ int __cobalt_cond_wait_prologue(struct cobalt_cond_shadow __user *u_cnd,
 	if (cond->mutex == NULL)
 		cond->state->mutex_state_offset = ~0U;
 
-	if (err == -EINTR)
-		__xn_put_user(d.err, u_err);
+	if (err == -EINTR &&
+	    (!access_ok(u_err, sizeof(*u_err)) || __xn_put_user(d.err, u_err)))
+		err = -EFAULT;
 
 	return err == 0 ? perr : err;
 }
