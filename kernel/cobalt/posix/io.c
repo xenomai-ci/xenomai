@@ -146,6 +146,8 @@ static int put_mmsglen(void __user **u_mmsg_p, const struct mmsghdr *mmsg)
 	struct mmsghdr __user **p = (struct mmsghdr **)u_mmsg_p,
 		*q __user = (*p)++;
 
+	if (!access_ok(&q->msg_len, sizeof(q->msg_len)))
+		return -EFAULT;
 	return __xn_put_user(mmsg->msg_len, &q->msg_len);
 }
 
