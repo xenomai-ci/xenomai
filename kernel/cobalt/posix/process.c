@@ -617,8 +617,11 @@ int cobalt_map_user(struct xnthread *thread, __u32 __user *u_winoff)
 	if (u_window == NULL)
 		return -ENOMEM;
 
+	if (__xn_put_user(cobalt_umm_offset(umm, u_window), u_winoff)) {
+		cobalt_umm_free(umm, u_window);
+		return -EFAULT;
+	}
 	thread->u_window = u_window;
-	__xn_put_user(cobalt_umm_offset(umm, u_window), u_winoff);
 	xnthread_pin_initial(thread);
 
 	/*

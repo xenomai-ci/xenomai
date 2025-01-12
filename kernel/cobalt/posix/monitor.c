@@ -289,7 +289,8 @@ int __cobalt_monitor_wait(struct cobalt_monitor_shadow __user *u_mon,
 out:
 	xnlock_put_irqrestore(&nklock, s);
 
-	__xn_put_user(opret, u_ret);
+	if (!access_ok(u_ret, sizeof(*u_ret)) || __xn_put_user(opret, u_ret))
+		ret = -EFAULT;
 
 	return ret;
 }
