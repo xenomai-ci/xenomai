@@ -309,7 +309,6 @@ EXPORT_SYMBOL_GPL(xnselector_init);
  * than expected if the sleep is interrupted.
  * @param timeout_mode the mode of @a timeout.
  *
- * @retval -EINVAL if @a nfds is negative;
  * @retval -ECHRNG if some of the descriptors passed in @a in_fds have not yet
  * been registered with xnselect_bind(), @a out_fds contains the set of such
  * descriptors;
@@ -328,9 +327,6 @@ int xnselect(struct xnselector *selector,
 	unsigned int i, not_empty = 0, count;
 	int info = 0;
 	spl_t s;
-
-	if ((unsigned) nfds > __FD_SETSIZE)
-		return -EINVAL;
 
 	for (i = 0; i < XNSELECT_MAX_TYPES; i++)
 		if (out_fds[i])
