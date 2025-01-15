@@ -5,7 +5,7 @@ Running a Xenomai 3 application
 -------------------------------
 
 For _Cobalt_, you will need the real-time core built into the target
-Linux kernel as described in link:installing-xenomai-3-x[this
+Linux kernel as described in link:../README.INSTALL/index.html[this
 document].
 
 For _Mercury_, you need no Xenomai-specific kernel support so far,
@@ -17,7 +17,7 @@ latencies.
 
 Any Xenomai-based application recognizes a set of standard options
 that may be passed on the command line, described in
-link:application-setup-and-init#Standard_Xenomai_command_line_options[this document].
+https://v3.xenomai.org/application/#x3-command-line[this document].
 
 In addition, the *Alchemy*, *pSOS (TM)* and *VxWorks (TM)* APIs running
 over the Xenomai core can define the clock resolution to be used,
@@ -36,7 +36,7 @@ i.e. +--alchemy-clock-resolution=1+.
 Specifying a resolution greater than 1 nanosecond requires the low
 resolution clock support to be available from the Xenomai libraries
 (see the +--enable-lores-clock+
-link:installing-xenomai-3-x#Generic_configuration_options_both_cores[configuration
+link:../README.INSTALL/index.html#_generic_configuration_options_both_cores[configuration
 switch]).
 
 Valgrind support
