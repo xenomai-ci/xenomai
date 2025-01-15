@@ -16,12 +16,6 @@ One of the two available real-time cores is selected at build
 time. The dual kernel core is codenamed _Cobalt_, the native Linux
 implementation is called _Mercury_.
 
-[NOTE]
-If you are looking for detailed information about installing a legacy
-Xenomai 2.x release, please refer to link:installing-xenomai-2.x[this
-document] instead. Please note that Xenomai 2.x is discontinued and
-not maintained anymore.
-
 Installation steps
 ------------------
 
@@ -70,8 +64,8 @@ $ scripts/prepare-kernel.sh [--linux=<linux-srctree>]
 
 `--dovetail`:: specifies the path of the interrupt pipeline (aka Dovetail)
     patch to apply against the kernel tree. Suitable patches are
-    available from the project's link:/downloads/dovetail/[download
-    area].  This parameter can be omitted if the Dovetail has already
+    available from https://source.denx.de/Xenomai/linux-dovetail[here].
+    This parameter can be omitted if the Dovetail has already
     been patched in, or the script shall suggest an appropriate
     one. The script will detect whether the interrupt pipeline code is
     already present into the kernel tree, and skip this operation if
@@ -106,7 +100,7 @@ Xenomai configuration options are available from the "Xenomai"
 toplevel Kconfig menu.
 
 There are several important kernel configuration options, documented
-in the link:troubleshooting-a-dual-kernel-configuration#kconf[TROUBLESHOOTING]
+in the link:../TROUBLESHOOTING.COBALT/index.html#kconf[TROUBLESHOOTING]
 guide.
 
 Once configured, the kernel can be compiled as usual.
@@ -143,7 +137,7 @@ is expressed in kilo-bytes. | 256
 |xenomai.state=<state> | Set the initial state of the Cobalt core at
 boot up, which may be _enabled_, _stopped_ or _disabled_. See the
 documentation about the
-link:../documentation/xenomai-3/html/man1/corectl/index.html[corectl(1)]
+link:../man1/corectl/index.html[corectl(1)]
 utility for a description of these states. | enabled
 
 |xenomai.smi=<state> | *x86-specific*: Set the state of the SMI
@@ -167,60 +161,25 @@ The examples in following sections use the following conventions:
 
 
 [[cobalt-core-x86]]
-Building a _Cobalt/x86_ kernel (32/64bit)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Building a _Cobalt/x86_ kernel
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Building _Xenomai/cobalt_ for x86 is almost the same for 32bit and 64bit
-platforms. You should note, however, that it is not possible to run
-Xenomai libraries compiled for x86_32 on a kernel compiled for x86_64,
-and conversely.
+_Xenomai/cobalt_ only supports 64-bit x86 platforms. You should note, however,
+that it is possible to run Xenomai libraries compiled for x86_32 on a kernel
+compiled for x86_64 if that kernel supports compat mode
+(CONFIG_IA32_EMULATION).
 
-Assuming that you want to build natively for a x86_64 system (x86_32
-cross-build options from x86_64 appear between brackets), you would
+Assuming that you want to build natively for a x86_64 system, you would
 typically run:
 
 ------------------------------------------------------------------------------
 $ cd $linux_tree
 $ $xenomai_root/scripts/prepare-kernel.sh --arch=x86 \
   --dovetail=patch-X.Y.Z-dovetail.patch
-$ make [ARCH=i386] xconfig/gconfig/menuconfig
-------------------------------------------------------------------------------
-...configure the kernel (see also the recommended settings
-link:configuring-for-x86-based-dual-kernels[here]).
-
-Enable Xenomai options, then build with:
-------------------------------------------------------------------------------
-$ make [ARCH=i386] bzImage modules
-------------------------------------------------------------------------------
-
-Now, let's say that you really want to build Xenomai for a
-Pentium-based x86 32bit platform, using the native host toolchain; the
-typical steps would be as follows:
-
-------------------------------------------------------------------------------
-$ cd $linux_tree
-$ $xenomai_root/scripts/prepare-kernel.sh --arch=i386 \
-  --dovetail=patch-X.Y.Z-dovetail.patch
 $ make xconfig/gconfig/menuconfig
 ------------------------------------------------------------------------------
 ...configure the kernel (see also the recommended settings
-link:configuring-for-x86-based-dual-kernels[here]).
-
-Enable Xenomai options, then build with:
-------------------------------------------------------------------------------
-$ make bzImage modules
-------------------------------------------------------------------------------
-
-Similarly, for a 64bit platform, you would use:
-
-------------------------------------------------------------------------------
-$ cd $linux_tree
-$ $xenomai_root/scripts/prepare-kernel.sh --arch=x86_64 \
-  --dovetail=patch-X.Y.Z-dovetail.patch
-$ make xconfig/gconfig/menuconfig
-------------------------------------------------------------------------------
-...configure the kernel (see also the recommended settings
-link:configuring-for-x86-based-dual-kernels[here]).
+link:../TROUBLESHOOTING.COBALT/index.html#kconf[here]).
 
 Enable Xenomai options, then build with:
 ------------------------------------------------------------------------------
@@ -293,9 +252,7 @@ although this is not mandatory if building with `--disable-tls`.
 
 - If you plan to build from the sources available from the Xenomai GIT
   tree (git.xenomai.org), the autoconf (>= 2.62), automake and libtool
-  packages must be available on your build system. This is not
-  required when building from a source tree extracted from a
-  link:/downloads/xenomai/[release tarball].
+  packages must be available on your build system.
 
 _Cobalt_-specific requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -304,7 +261,7 @@ _Cobalt_-specific requirements
 
 - An interrupt pipeline (Dovetail) patch must be available for your
   target kernel. You can find the official patches issued by the
-  Xenomai project link:/downloads/dovetail/[there].
+  Xenomai project https://source.denx.de/Xenomai/linux-dovetail[here].
 
 - A timestamp counter (TSC) is required from running on a x86_32
   hardware. Unlike with Xenomai 2.x, TSC-emulation using a PIT
@@ -328,10 +285,6 @@ source tree:
 ---------------------
 $ ./scripts/bootstrap
 ---------------------
-
-If building from a link:/downloads/xenomai/[release tarball], a set of
-autoconf-generated file will be readily available from the extracted
-source tree, and therefore reconfiguring will not be required.
 
 When run, the generated `configure` script prepares for building the
 libraries and programs, for both the _Cobalt_ and _Mercury_ cores. The
@@ -776,7 +729,7 @@ $ dmesg | grep -i xenomai
 
 If the kernel fails booting, or the log messages indicates an error
 status instead, see the
-link:troubleshooting-a-dual-kernel-configuration#Kernel_log_displays_Xenomai_or_I-pipe_error_messages[TROUBLESHOOTING]
+link:../TROUBLESHOOTING.COBALT/index.html#kerror[TROUBLESHOOTING]
 guide.
 
 
@@ -792,7 +745,7 @@ $ /usr/xenomai/bin/latency
 The latency test should display a message every second with minimum,
 maximum and average latency values. If this test displays an error
 message, hangs, or displays unexpected values, see the
-link:troubleshooting-a-dual-kernel-configuration#the_latency_test_shows_high_latencies[TROUBLESHOOTING]
+link:../TROUBLESHOOTING.COBALT/index.html#_the_em_latency_em_test_shows_high_latencies[TROUBLESHOOTING]
 guide.
 
 If the latency test succeeds, you should try next to run the
@@ -813,7 +766,7 @@ recommended to calibrate the core timer specifically for the target
 system.
 
 See the documentation about the
-link:../documentation/xenomai-3/html/man1/autotune/index.html[autotune(1)]
+link:../man1/autotune/index.html[autotune(1)]
 utility.
 
 Building and running Xenomai 3 applications
@@ -823,11 +776,11 @@ Once the latency test behaves as expected on your target system, it is
 deemed ready to run real-time applications.
 
 You may want to have a look at
-link:building-applications-with-xenomai-3.x/[this
-document] for details about the application build process.
+https://v3.xenomai.org/application/#x3-building-app[this
+page] for details about the application build process.
 
 In addition, you may refer to
-link:running-applications-with-xenomai-3.x/[this document] to learn
+https://v3.xenomai.org/application/#x3-running-app[this page] to learn
 about the command line options available with Xenomai 3 applications.
 
 Migrating applications to Xenomai 3
@@ -835,4 +788,4 @@ Migrating applications to Xenomai 3
 
 If you plan to port an existing application based on Xenomai 2.x to
 Xenomai 3.x, you should have a look at
-link:migrating-from-xenomai-2.x-to-3.x/[this migration guide].
+https://v3.xenomai.org/legacy/migrating-to-xenomai3/[this migration guide].
