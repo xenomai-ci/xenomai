@@ -277,6 +277,9 @@ int __cobalt_select(int nfds, void __user *u_rfds, void __user *u_wfds,
 		mode = XN_ABSOLUTE;
 	}
 
+	if ((unsigned)nfds > __FD_SETSIZE)
+		return -EINVAL;
+
 	fds_size = __FDELT__(nfds + __NFDBITS__ - 1) * sizeof(long);
 
 	for (i = 0; i < XNSELECT_MAX_TYPES; i++)
