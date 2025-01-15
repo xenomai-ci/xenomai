@@ -274,6 +274,9 @@ COBALT_SYSCALL(select, primary,
 		mode = XN_ABSOLUTE;
 	}
 
+	if ((unsigned)nfds > __FD_SETSIZE)
+		return -EINVAL;
+
 	fds_size = __FDELT__(nfds + __NFDBITS__ - 1) * sizeof(long);
 
 	for (i = 0; i < XNSELECT_MAX_TYPES; i++)
