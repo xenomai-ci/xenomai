@@ -167,12 +167,18 @@ static int vfile_snapshot_open(struct inode *inode, struct file *file)
 		return 0;
 	}
 
-	if ((file->f_flags & O_EXCL) != 0 && xnvfile_nref(vfile) > 0)
-		return -EBUSY;
+	mutex_lock(&vfile->entry.mutex);
+
+	if ((file->f_flags & O_EXCL) != 0 && xnvfile_nref(vfile) > 0) {
+		ret = -EBUSY;
+		goto unlock_exit;
+	}
 
 	it = kzalloc(sizeof(*it) + vfile->privsz, GFP_KERNEL);
-	if (it == NULL)
-		return -ENOMEM;
+	if (it == NULL) {
+		ret = -ENOMEM;
+		goto unlock_exit;
+	}
 
 	it->vfile = vfile;
 	xnvfile_file(vfile) = file;
@@ -228,8 +234,8 @@ redo:
 		XENO_BUG_ON(COBALT, ops->end == NULL);
 		data = ops->begin(it);
 		if (data == NULL) {
-			kfree(it);
-			return -ENOMEM;
+			ret = -ENOMEM;
+			goto fail;
 		}
 		if (data != VFILE_SEQ_EMPTY) {
 			it->databuf = data;
@@ -239,8 +245,8 @@ redo:
 		/* We have a hint for auto-allocation. */
 		data = kmalloc(vfile->datasz * nrdata, GFP_KERNEL);
 		if (data == NULL) {
-			kfree(it);
-			return -ENOMEM;
+			ret = -ENOMEM;
+			goto fail;
 		}
 		it->databuf = data;
 		it->endfn = vfile_snapshot_free;
@@ -283,14 +289,17 @@ done:
 	seq->private = it;
 	xnvfile_nref(vfile)++;
 
-	return 0;
+unlock_exit:
+	mutex_unlock(&vfile->entry.mutex);
+
+	return ret;
 
 fail:
 	if (it->databuf)
 		it->endfn(it, it->databuf);
 	kfree(it);
 
-	return ret;
+	goto unlock_exit;
 }
 
 static int vfile_snapshot_release(struct inode *inode, struct file *file)
@@ -416,6 +425,7 @@ int xnvfile_init_snapshot(const char *name,
 		return -ENOMEM;
 
 	vfile->entry.pde = pde;
+	mutex_init(&vfile->entry.mutex);
 
 	return 0;
 }
@@ -503,20 +513,29 @@ static int vfile_regular_open(struct inode *inode, struct file *file)
 	struct seq_file *seq;
 	int ret;
 
-	if ((file->f_flags & O_EXCL) != 0 && xnvfile_nref(vfile) > 0)
-		return -EBUSY;
+	mutex_lock(&vfile->entry.mutex);
 
-	if ((file->f_mode & FMODE_WRITE) != 0 && ops->store == NULL)
-		return -EACCES;
+	if ((file->f_flags & O_EXCL) != 0 && xnvfile_nref(vfile) > 0) {
+		ret = -EBUSY;
+		goto unlock_exit;
+	}
+
+	if ((file->f_mode & FMODE_WRITE) != 0 && ops->store == NULL) {
+		ret = -EACCES;
+		goto unlock_exit;
+	}
 
 	if ((file->f_mode & FMODE_READ) == 0) {
 		file->private_data = NULL;
-		return 0;
+		ret = 0;
+		goto unlock_exit;
 	}
 
 	it = kzalloc(sizeof(*it) + vfile->privsz, GFP_KERNEL);
-	if (it == NULL)
-		return -ENOMEM;
+	if (it == NULL) {
+		ret = -ENOMEM;
+		goto unlock_exit;
+	}
 
 	it->vfile = vfile;
 	it->pos = -1;
@@ -527,7 +546,7 @@ static int vfile_regular_open(struct inode *inode, struct file *file)
 		if (ret) {
 		fail:
 			kfree(it);
-			return ret;
+			goto unlock_exit;
 		}
 	}
 
@@ -540,7 +559,10 @@ static int vfile_regular_open(struct inode *inode, struct file *file)
 	seq->private = it;
 	xnvfile_nref(vfile)++;
 
-	return 0;
+unlock_exit:
+	mutex_unlock(&vfile->entry.mutex);
+
+	return ret;
 }
 
 static int vfile_regular_release(struct inode *inode, struct file *file)
@@ -645,6 +667,7 @@ int xnvfile_init_regular(const char *name,
 		return -ENOMEM;
 
 	vfile->entry.pde = pde;
+	mutex_init(&vfile->entry.mutex);
 
 	return 0;
 }
