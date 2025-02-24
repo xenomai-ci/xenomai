@@ -39,6 +39,7 @@ struct xnvfile {
 	struct proc_dir_entry *pde;
 	struct file *file;
 	struct xnvfile_lock_ops *lockops;
+	struct mutex mutex;
 	int refcnt;
 	void *private;
 };
