@@ -86,6 +86,7 @@ EXPORT_SYMBOL_GPL(xnintr_destroy);
 int xnintr_attach(struct xnintr *intr, void *cookie, const cpumask_t *cpumask)
 {
 	cpumask_t tmp_mask, *effective_mask;
+	unsigned long flags = IRQF_OOB;
 	int ret;
 
 	secondary_mode_only();
@@ -105,9 +106,11 @@ int xnintr_attach(struct xnintr *intr, void *cookie, const cpumask_t *cpumask)
 	if (ret)
 		return ret;
 #endif
+	if (intr->flags & XN_IRQTYPE_SHARED)
+		flags |= IRQF_SHARED;
 
-	return request_irq(intr->irq, xnintr_irq_handler, IRQF_OOB,
-			intr->name, intr);
+	return request_irq(intr->irq, xnintr_irq_handler, flags,
+			   intr->name, intr);
 }
 EXPORT_SYMBOL_GPL(xnintr_attach);
 
