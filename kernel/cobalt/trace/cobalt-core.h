@@ -822,14 +822,14 @@ TRACE_EVENT(cobalt_tick_shot,
 	),
 
 	TP_fast_assign(
-		__entry->delta = delta;
+		__entry->delta = div_s64(delta, 1000);
 		__entry->secs = div_u64_rem(trace_clock_local() + delta,
 					    NSEC_PER_SEC, &__entry->nsecs);
 	),
 
 	TP_printk("next tick at %Lu.%06u (delay: %Ld us)",
 		  (unsigned long long)__entry->secs,
-		  __entry->nsecs / 1000, div_s64(__entry->delta, 1000))
+		  __entry->nsecs / 1000, __entry->delta)
 );
 
 TRACE_EVENT(cobalt_trace,
