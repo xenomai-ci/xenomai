@@ -13,6 +13,7 @@
 #include <sys/timerfd.h>
 #include <sys/utsname.h>
 #include <mqueue.h>
+#include <sched.h>
 #include <rtdm/ipc.h>
 
 smokey_test_plugin(y2038, SMOKEY_NOARGS, "Validate correct y2038 support");
@@ -1422,9 +1423,11 @@ static void pselect64_sig_handler(int sig)
 static void *pselect64_waiting_thread(void *arg)
 {
 	struct thread_context *ctx = (struct thread_context *)arg;
+	struct sched_param schedp = {.sched_priority = 99};
 	struct xn_timespec64 ts;
 	int sock = ctx->sock;
 	struct sigaction sa;
+	cpu_set_t cpuset;
 	fd_set rfds;
 	int ret;
 
@@ -1437,6 +1440,18 @@ static void *pselect64_waiting_thread(void *arg)
 
 	ret = smokey_check_errno(sigaction(SIGUSR1, &sa, NULL));
 	if (ret)
+		goto out;
+
+	CPU_ZERO(&cpuset);
+	CPU_SET(0, &cpuset);
+	ret = sched_setaffinity(0, sizeof(cpuset), &cpuset);
+	if (!smokey_assert(ret == 0)) {
+		ret = -errno;
+		goto out;
+	}
+
+	ret = sched_setscheduler(0, SCHED_FIFO, &schedp);
+	if (!smokey_assert(ret == 0))
 		goto out;
 
 	/* Waiting for 1sec should be enough to get a signal */
@@ -1461,9 +1476,9 @@ out:
 
 static int test_pselect64_interruption(void)
 {
-	struct timespec ts = { .tv_sec = 0, .tv_nsec = 100000 };
 	struct thread_context ctx = { 0 };
 	void *w_ret = NULL;
+	cpu_set_t cpuset;
 	pthread_t w;
 	sem_t sem;
 	int sock;
@@ -1481,6 +1496,12 @@ static int test_pselect64_interruption(void)
 	if (ret)
 		return ret;
 
+	CPU_ZERO(&cpuset);
+	CPU_SET(0, &cpuset);
+	ret = sched_setaffinity(0, sizeof(cpuset), &cpuset);
+	if (!smokey_assert(ret == 0))
+		return -errno;
+
 	ctx.sock = sock;
 	ctx.sc_nr = sc_cobalt_pselect64;
 	ctx.sem = &sem;
@@ -1492,9 +1513,6 @@ static int test_pselect64_interruption(void)
 
 	/* Wait for the waiting thread to be ready */
 	sem_wait(&sem);
-
-	/* Allow the waiting thread to enter the pselect64() syscall */
-	nanosleep(&ts, NULL);
 
 	/* Send a signal to interrupt the syscall and trigger -EINTR */
 	__STD(pthread_kill(w, SIGUSR1));
