@@ -630,10 +630,11 @@ static int via_rhine_init_one (struct pci_dev *pdev,
 {
 	struct rtnet_device *dev; /*** RTnet ***/
 	struct netdev_private *np;
+	void __iomem *ioaddr;
 	int i, option;
 	int chip_id = (int) ent->driver_data;
 	static int card_idx = -1;
-	void *ioaddr;
+	long pioaddr;
 	long memaddr;
 	unsigned int io_size;
 	int pci_flags;
@@ -674,7 +675,7 @@ static int via_rhine_init_one (struct pci_dev *pdev,
 		goto err_out;
 	}
 
-	ioaddr = (void *)pci_resource_start (pdev, 0);
+	pioaddr = pci_resource_start (pdev, 0);
 	memaddr = pci_resource_start (pdev, 1);
 
 	if (pci_flags & PCI_USES_MASTER)
@@ -697,7 +698,7 @@ static int via_rhine_init_one (struct pci_dev *pdev,
 		goto err_out_free_netdev;
 
 #ifdef USE_MEM
-	ioaddr0 = (long)ioaddr;
+	ioaddr0 = pioaddr;
 	enable_mmio(ioaddr0, chip_id);
 
 	ioaddr = ioremap (memaddr, io_size);
