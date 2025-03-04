@@ -641,36 +641,18 @@ out:
 }
 EXPORT_SYMBOL_GPL(rtdm_fd_recvmsg);
 
-struct cobalt_recvmmsg_timer {
-	struct xntimer timer;
-	struct xnthread *waiter;
-};
-
-static void recvmmsg_timeout_handler(struct xntimer *timer)
-{
-	struct cobalt_recvmmsg_timer *rq;
-
-	rq = container_of(timer, struct cobalt_recvmmsg_timer, timer);
-	xnthread_set_info(rq->waiter, XNTIMEO);
-	xnthread_resume(rq->waiter, XNDELAY);
-}
-
 int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		       unsigned int flags, void __user *u_timeout,
 		       int (*get_mmsg)(struct mmsghdr *mmsg, void __user *u_mmsg),
 		       int (*put_mmsg)(void __user **u_mmsg_p, const struct mmsghdr *mmsg),
 		       int (*get_timespec)(struct timespec64 *ts, const void __user *u_ts))
 {
-	struct cobalt_recvmmsg_timer rq;
-	xntmode_t tmode = XN_RELATIVE;
 	struct timespec64 ts = { 0 };
 	int ret = 0, datagrams = 0;
-	xnticks_t timeout = 0;
 	struct mmsghdr mmsg;
 	struct rtdm_fd *fd;
 	void __user *u_p;
 	ssize_t len;
-	spl_t s;
 
 	fd = rtdm_fd_get(ufd, 0);
 	if (IS_ERR(fd)) {
@@ -687,25 +669,15 @@ int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		if (ret)
 			goto fail;
 
-		if (!timespec64_valid(&ts)) {
+		if (ts.tv_sec == 0 && ts.tv_nsec == 0) {
+			flags |= MSG_DONTWAIT;
+		} else {
+			/*
+			 * The timeout parameter is not supported.
+			 * Use recvmsg timeouts instead.
+			 */
 			ret = -EINVAL;
 			goto fail;
-		}
-
-		tmode = XN_ABSOLUTE;
-		timeout = ts2ns(&ts);
-		if (timeout == 0)
-			flags |= MSG_DONTWAIT;
-		else {
-			timeout += xnclock_read_monotonic(&nkclock);
-			rq.waiter = xnthread_current();
-			xntimer_init(&rq.timer, &nkclock,
-				     recvmmsg_timeout_handler,
-				     NULL, XNTIMER_IGRAVITY);
-			xnlock_get_irqsave(&nklock, s);
-			ret = xntimer_start(&rq.timer, timeout,
-					    XN_INFINITE, tmode);
-			xnlock_put_irqrestore(&nklock, s);
 		}
 	}
 
@@ -731,12 +703,6 @@ int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 			break;
 		if (flags & MSG_WAITFORONE)
 			flags |= MSG_DONTWAIT;
-	}
-
-	if (timeout) {
-		xnlock_get_irqsave(&nklock, s);
-		xntimer_destroy(&rq.timer);
-		xnlock_put_irqrestore(&nklock, s);
 	}
 
 fail:
