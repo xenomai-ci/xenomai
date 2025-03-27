@@ -12,6 +12,7 @@
 #include <smokey/smokey.h>
 #include <sys/timerfd.h>
 #include <sys/utsname.h>
+#include <sys/syscall.h> /* For __NR_gettid definitions */
 #include <mqueue.h>
 #include <sched.h>
 #include <rtdm/ipc.h>
@@ -1176,7 +1177,7 @@ static int test_sc_cobalt_timer_settime64(void)
 
 	sev.sigev_signo = sig;
 	sev.sigev_notify = SIGEV_THREAD_ID | SIGEV_SIGNAL;
-	sev.sigev_notify_thread_id = gettid();
+	sev.sigev_notify_thread_id = syscall(__NR_gettid);
 
 	ret = smokey_check_errno(timer_create(CLOCK_REALTIME, &sev, &t));
 	if (ret)
@@ -1239,7 +1240,7 @@ static int test_sc_cobalt_timer_gettime64(void)
 
 	sev.sigev_signo = sig;
 	sev.sigev_notify = SIGEV_THREAD_ID | SIGEV_SIGNAL;
-	sev.sigev_notify_thread_id = gettid();
+	sev.sigev_notify_thread_id = syscall(__NR_gettid);
 
 	ret = smokey_check_errno(timer_create(CLOCK_REALTIME, &sev, &t));
 	if (ret)
