@@ -482,10 +482,17 @@ const char *rt_print_buffer_name(void)
 /* *** Deferred Output Management *** */
 void rt_print_flush_buffers(void)
 {
+	int old_state;
+
 	cobalt_thread_relax();
+
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &old_state);
+
 	pthread_mutex_lock(&buffer_lock);
 	print_buffers();
 	pthread_mutex_unlock(&buffer_lock);
+
+	pthread_setcancelstate(old_state, NULL);
 }
 
 static void release_buffer(struct print_buffer *buffer)
