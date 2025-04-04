@@ -43,6 +43,8 @@ void handle_oob_trap_entry(unsigned int trapnr, struct pt_regs *regs)
 	 */
 	trace_cobalt_thread_fault(xnarch_fault_pc(regs), trapnr);
 
+	raw_cpu_ptr(&cobalt_machine_cpudata)->faults[trapnr]++;
+
 	if (xnthread_test_state(thread, XNROOT))
 		return;
 
