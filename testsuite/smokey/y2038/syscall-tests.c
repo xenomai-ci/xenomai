@@ -1054,6 +1054,7 @@ static int test_sc_cobalt_recvmmsg64(void)
 	ret = XENOMAI_SYSCALL5(sc_nr, sock, &msg, sizeof(msg), 0, &t1);
 	if (!smokey_assert(ret == -EWOULDBLOCK)) {
 		ret = ret ? ret : -EINVAL;
+		goto out;
 	}
 
 	ret = 0;
