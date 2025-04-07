@@ -997,8 +997,7 @@ static int test_sc_cobalt_recvmmsg64(void)
 	int sock;
 	int sc_nr = sc_cobalt_recvmmsg64;
 	long data;
-	struct xn_timespec64 t1, t2;
-	struct timespec ts_nat;
+	struct xn_timespec64 t1;
 	struct rtipc_port_label plabel;
 	struct sockaddr_ipc saddr;
 
@@ -1057,9 +1056,9 @@ static int test_sc_cobalt_recvmmsg64(void)
 	}
 
 	/*
-	 * providing an invalid timeout has to deliver EINVAL
+	 * providing a non-zero timeout has to deliver EINVAL
 	 */
-	t1.tv_sec = -1;
+	t1.tv_nsec = 1;
 	ret = XENOMAI_SYSCALL5(sc_nr, sock, &msg, sizeof(msg), 0, &t1);
 	if (!smokey_assert(ret == -EINVAL)) {
 		ret = ret ? ret : -EINVAL;
@@ -1078,38 +1077,7 @@ static int test_sc_cobalt_recvmmsg64(void)
 		goto out;
 	}
 
-	/*
-	 * Providing a valid timeout, waiting for it to time out and check
-	 * that we didn't come back to early.
-	 */
-	ret = smokey_check_errno(clock_gettime(CLOCK_MONOTONIC, &ts_nat));
-	if (ret)
-		goto out;
-
-	t1.tv_sec = 0;
-	t1.tv_nsec = 500000;
-
-	ret = XENOMAI_SYSCALL5(sc_nr, sock, &msg, sizeof(msg), 0, &t1);
-	if (!smokey_assert(ret == -ETIMEDOUT)) {
-		ret = ret ? ret : -EINVAL;
-		goto out;
-	}
-
-	t1.tv_sec = ts_nat.tv_sec;
-	t1.tv_nsec = ts_nat.tv_nsec;
-
-	ret = smokey_check_errno(clock_gettime(CLOCK_MONOTONIC, &ts_nat));
-	if (ret)
-		goto out;
-
-	t2.tv_sec = ts_nat.tv_sec;
-	t2.tv_nsec = ts_nat.tv_nsec;
-
-	if (ts_less(&t2, &t1))
-		smokey_warning("recvmmsg64 returned to early!\n"
-			       "Expected wakeup at: %lld sec %lld nsec\n"
-			       "Back at           : %lld sec %lld nsec\n",
-			       t1.tv_sec, t1.tv_nsec, t2.tv_sec, t2.tv_nsec);
+	ret = 0;
 
 out:
 	close(sock);

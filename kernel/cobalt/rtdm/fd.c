@@ -701,6 +701,14 @@ int __rtdm_fd_recvmmsg(int ufd, void __user *u_msgvec, unsigned int vlen,
 		if (timeout == 0)
 			flags |= MSG_DONTWAIT;
 		else {
+			if (!IS_ENABLED(CONFIG_XENO_OPT_BROKEN_RECVMMSG_TIMEOUT)) {
+				/*
+				 * The timeout parameter is not supported.
+				 * Use recvmsg timeouts instead.
+				 */
+				ret = -EINVAL;
+				goto fail;
+			}
 			timeout += xnclock_read_monotonic(&nkclock);
 			rq.waiter = xnthread_current();
 			xntimer_init(&rq.timer, &nkclock,

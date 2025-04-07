@@ -229,6 +229,17 @@ config XENO_OPT_VFILE
        depends on PROC_FS
        default y
 
+config XENO_OPT_BROKEN_RECVMMSG_TIMEOUT
+	bool "Provide support for broken recvmmsg timeout parameter"
+	help
+	  The implementation of the timeout parameter for recvmmsg may
+	  cause infinit blocking even if not requested. If your workload
+	  is relying on this parameter AND can rule out being affecting
+	  by the race, you may keep this feature enabled. Note, though,
+	  that later major releases will likely remove it completely.
+
+	  See also https://source.denx.de/Xenomai/xenomai/-/commit/3d6121a5f5dc5eee80945856fccadc6dd9e2e104
+
 endmenu
 
 menu "Sizes and static limits"
