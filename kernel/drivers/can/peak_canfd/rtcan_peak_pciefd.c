@@ -242,13 +242,8 @@ MODULE_PARM_DESC(irqtl,
 
 #ifdef PCIEFD_USES_MSI
 
-#ifdef CONFIG_XENO_OPT_SHIRQ
-/* default behaviour: run as mainline driver in INTx mode */
-#define PCIEFD_USEMSI_DEFAULT	0
-#else
 /* default behaviour: run in MSI mode (one IRQ per channel) */
 #define PCIEFD_USEMSI_DEFAULT	1
-#endif
 
 static uint usemsi = PCIEFD_USEMSI_DEFAULT;
 module_param(usemsi, uint, 0644);

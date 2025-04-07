@@ -84,7 +84,6 @@ variables:
     - ./scripts/config -e XENO_OPT_SCHED_TP
     - ./scripts/config -e XENO_OPT_SCHED_SPORADIC
     - ./scripts/config -e XENO_OPT_SCHED_QUOTA
-    - ./scripts/config -e XENO_OPT_SHIRQ
     - ./scripts/config -e XENO_OPT_SCALABLE_SCHED
     - ./scripts/config -e XENO_OPT_DEBUG
     - ./scripts/config -e XENO_OPT_DEBUG_COBALT

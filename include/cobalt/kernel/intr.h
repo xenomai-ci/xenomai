@@ -62,10 +62,6 @@ struct xnirqstat {
 };
 
 struct xnintr {
-#ifdef CONFIG_XENO_OPT_SHIRQ
-	/** Next object in the IRQ-sharing chain. */
-	struct xnintr *next;
-#endif
 	/** Number of consequent unhandled interrupts */
 	unsigned int unhandled;
 	/** Interrupt service routine. */

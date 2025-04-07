@@ -135,14 +135,6 @@ config XENO_OPT_STATS
 	  per-thread runtime statistics, which are accessible through
 	  the /proc/xenomai/sched/stat interface.
 
-config XENO_OPT_SHIRQ
-	bool "Shared interrupts"
-	help
-	  Enables support for both level- and edge-triggered shared
-	  interrupts, so that multiple real-time interrupt handlers
-	  are allowed to control dedicated hardware devices which are
-	  configured to share the same interrupt line.
-
 config XENO_OPT_RR_QUANTUM
 	int "Round-robin quantum (us)"
 	default 1000
