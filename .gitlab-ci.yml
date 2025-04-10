@@ -1,7 +1,7 @@
 #
 # Xenomai Real-Time System
 #
-# Copyright (c) Siemens AG, 2020-2021
+# Copyright (c) Siemens AG, 2020-2025
 #
 # Authors:
 #  Quirin Gylstorff <quirin.gylstorff@siemens.com>
@@ -31,6 +31,8 @@ variables:
 
 .build:
   stage: build
+  tags:
+    - build
   rules:
     - if: $CI_COMMIT_BRANCH != "master"
     - if: $CI_COMMIT_TAG
