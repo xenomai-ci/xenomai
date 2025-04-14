@@ -139,6 +139,7 @@ while test $# -gt 0; do
 		;;
 	--outpatch=*)
 		output_patch=`echo $1|sed -e 's,^--outpatch=\\(.*\\)$,\\1,g'`
+		output_patch=`eval "echo $output_patch"`
 		;;
 	--filterkvers=*)
 		echo "$me: warning: --filterkvers= is deprecated and now a no-op" >&2
