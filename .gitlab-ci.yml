@@ -272,7 +272,7 @@ i386-userland-y2038-unavailable:
 trigger-xenomai-images:
   stage: test
   variables:
-    ONLY_RUN: xenomai-3/${CI_COMMIT_BRANCH}
+    ONLY_RUN: ${CI_COMMIT_BRANCH}
   trigger:
     project: xenomai/xenomai-images
     branch: next
