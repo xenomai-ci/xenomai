@@ -132,7 +132,7 @@ whose members should be allowed such access by the Cobalt core. | None
 
 |xenomai.sysheap_size=<kbytes> | Set the size of the memory heap used
 internally by the Cobalt core to allocate runtime objects.  This value
-is expressed in kilo-bytes. | 256
+is expressed in kilo-bytes. | 4096
 		
 |xenomai.state=<state> | Set the initial state of the Cobalt core at
 boot up, which may be _enabled_, _stopped_ or _disabled_. See the
