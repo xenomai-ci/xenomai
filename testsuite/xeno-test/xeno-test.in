@@ -97,7 +97,14 @@ if which systemctl > /dev/null && systemctl is-active --quiet systemd-timesyncd;
     systemctl stop systemd-timesyncd
 fi
 
+if [ -n "$run_on_vm" ]; then
+    wd_timeout=$(cat /sys/module/xenomai/parameters/watchdog_timeout)
+    echo 60 > /sys/module/xenomai/parameters/watchdog_timeout
+fi
 $testdir/smokey --run $run_on_vm $keep_going random_alloc_rounds=64 pattern_check_rounds=64
+if [ -n "$run_on_vm" ]; then
+    echo "$wd_timeout" > /sys/module/xenomai/parameters/watchdog_timeout
+fi
 
 start_timesyncd
 
