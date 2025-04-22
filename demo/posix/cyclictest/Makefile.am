@@ -21,7 +21,6 @@ cyclictest_SOURCES =	\
 	error.c		\
 	error.h		\
 	rt_numa.h	\
-	rt-sched.h	\
 	rt-utils.c	\
 	rt-utils.h
 
