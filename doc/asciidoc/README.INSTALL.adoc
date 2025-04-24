@@ -126,6 +126,10 @@ should be passed on the kernel command line by the boot loader.
 |============================================================================
 ^|NAME              ^|DESCRIPTION                    ^|DEFAULT
 
+|xenomai.supported_cpus=<mask> | *SMP only*: Bitmask of CPUs allowed
+to run real-time tasks. Each bit represents a CPU logical core
+(bit 0=CPU0). | -1 (all CPUs)
+
 |xenomai.allowed_group=<gid> | Enable non-root access to Xenomai
 services from user-space.  <gid> is the ID of the Linux user group
 whose members should be allowed such access by the Cobalt core. | None
