@@ -123,6 +123,11 @@ int registry_add_dir(const char *fmt, ...)
 	}
 	pvholder_init(&d->link);
 	d->path = pvstrdup(path);
+	if (!d->path) {
+		pvfree(d);
+		ret = -ENOMEM;
+		goto done;
+	}
 
 	if (strcmp(path, "/")) {
 		d->basename = d->path + (basename - path) + 1;
@@ -204,6 +209,8 @@ int registry_add_file(struct fsobj *fsobj, int mode, const char *fmt, ...)
 		return __bt(-EINVAL);
 
 	fsobj->path = pvstrdup(path);
+	if (!fsobj->path)
+		return __bt(-ENOMEM);
 	fsobj->basename = fsobj->path + (basename - path) + 1;
 	fsobj->mode = mode & O_ACCMODE;
 	__RT(clock_gettime(CLOCK_COPPERPLATE, &fsobj->ctime));
