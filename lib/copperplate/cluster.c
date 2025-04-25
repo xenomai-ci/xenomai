@@ -372,6 +372,10 @@ int syncluster_findobj(struct syncluster *sc,
 		if (wait == NULL) {
 			wait = threadobj_prepare_wait(struct syncluster_wait_struct);
 			wait->name_ref = __moff(xnstrdup(name));
+			if (!__mptr(wait->name_ref)) {
+				ret = -ENOMEM;
+				break;
+			}
 		}
 		ret = syncobj_wait_grant(&sc->d->sobj, timeout, &syns);
 		if (ret) {
