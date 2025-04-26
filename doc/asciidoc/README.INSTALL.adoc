@@ -144,6 +144,12 @@ documentation about the
 link:../man1/corectl/index.html[corectl(1)]
 utility for a description of these states. | enabled
 
+|xenomai.watchdog_timeout=<seconds> | Watchdog timeout value in seconds.
+Requires CONFIG_XENO_OPT_WATCHDOG to be enabled in kernel configuration.
+This option activates a watchdog aimed at detecting runaway Cobalt threads.
+Timeout value can be set via CONFIG_XENO_OPT_WATCHDOG_TIMEOUT, with a range
+from 1 to 60. | 4
+
 |xenomai.smi=<state> | *x86-specific*: Set the state of the SMI
 workaround. The possible values are _disabled_, _detect_ and
 _enabled_. See the discussion about link:dealing-with-x86-SMI[SMIs]
