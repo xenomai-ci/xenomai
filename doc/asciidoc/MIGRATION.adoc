@@ -75,7 +75,6 @@ System parameters renamed::
 
 * xeno_hal.supported_cpus -> xenomai.supported_cpus
 * xeno_hal.disable -> xenomai.state=disabled
-* xeno_hal.cpufreq -> xenomai.cpufreq
 * xeno_nucleus.watchdog_timeout -> xenomai.watchdog_timeout
 * xeno_nucleus.xenomai_gid -> xenomai.allowed_group
 * xeno_nucleus.sysheap_size -> xenomai.sysheap_size
