@@ -112,6 +112,8 @@ html/asciidoc-icons:
 		cp -a /usr/share/doc/asciidoc/images/icons/ html/asciidoc-icons; \
 	elif test -d /usr/share/asciidoc/images/icons/; then \
 		cp -a /usr/share/asciidoc/images/icons/ html/asciidoc-icons; \
+	elif test -d /usr/share/asciidoc/icons/; then \
+		cp -a /usr/share/asciidoc/icons/ html/asciidoc-icons; \
 	else \
 		cp -a /etc/asciidoc/images/icons/ html/asciidoc-icons; \
 	fi
