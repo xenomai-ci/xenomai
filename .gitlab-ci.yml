@@ -187,11 +187,11 @@ variables:
     paths:
       - .ccache
 
-arm-6.xx-latest:
+arm-6.12-head:
   extends: .build
   variables:
     ARCH: arm
-    PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
+    PIPELINE_REV: v6.12.y-dovetail-rebase
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
 arm-6.1-head:
@@ -208,11 +208,11 @@ arm-5.10-head:
     PIPELINE_REV: v5.10.y-cip-dovetail-rebase
     KERNEL_DEFCONFIG: multi_v7_defconfig
 
-arm64-6.xx-latest:
+arm64-6.12-head:
   extends: .build
   variables:
     ARCH: arm64
-    PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
+    PIPELINE_REV: v6.12.y-dovetail-rebase
     KERNEL_DEFCONFIG: defconfig
 
 arm64-6.1-head:
@@ -229,11 +229,11 @@ arm64-5.10-head:
     PIPELINE_REV: v5.10.y-cip-dovetail-rebase
     KERNEL_DEFCONFIG: defconfig
 
-x86-6.xx-latest:
+x86-6.12-head:
   extends: .build
   variables:
     ARCH: x86
-    PIPELINE_REV: "v6\\.[0-9].*-dovetail-rebase"
+    PIPELINE_REV: v6.12.y-dovetail-rebase
     KERNEL_DEFCONFIG: x86_64_defconfig
 
 x86-6.1-head:
