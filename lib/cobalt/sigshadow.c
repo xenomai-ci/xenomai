@@ -32,6 +32,9 @@ static inline int backtrace(void **buffer, int size)
 
 static struct sigaction sigshadow_action_orig;
 
+static bool request_backtrace_init;
+static bool past_constructors;
+
 /*
  * The following handler is part of the inner user-interface: should
  * remain extern.
@@ -95,19 +98,35 @@ static void sigshadow_handler(int sig, siginfo_t *si, void *ctxt)
 	pthread_sigmask(SIG_SETMASK, &saved_sigset, NULL);
 }
 
-static void install_sigshadow(void)
+/*
+ * Kickstart backtrace() so that it may call malloc() from a safe context right
+ * now, not later on from the sigshadow handler.
+ *
+ * We can only trigger this after main() started or very late during
+ * construction because, when statically linked, frame_dummy in ctrstuff must
+ * have run already.
+ */
+static void __attribute__((constructor(65535))) trigger_backtrace(void)
 {
 	void *dummy[SIGSHADOW_BACKTRACE_DEPTH];
+
+	if (request_backtrace_init)
+		backtrace(dummy, SIGSHADOW_BACKTRACE_DEPTH);
+
+	past_constructors = true;
+	/* ensure visibility of past_constructors after init phase */
+	smp_mb();
+}
+
+static void install_sigshadow(void)
+{
 	struct sigaction new_sigshadow_action;
 	sigset_t saved_sigset;
 	sigset_t mask_sigset;
 
-	/*
-	 * Kickstart backtrace() so that it may call malloc() from a
-	 * safe context right now, not later on from the sigshadow
-	 * handler.
-	 */
-	backtrace(dummy, SIGSHADOW_BACKTRACE_DEPTH);
+	request_backtrace_init = true;
+	if (past_constructors)
+		trigger_backtrace();
 
 	sigemptyset(&mask_sigset);
 	sigaddset(&mask_sigset, SIGSHADOW);
