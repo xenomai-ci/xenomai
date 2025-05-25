@@ -17,6 +17,7 @@ Options:
 -q be quiet
 -v be verbose (print each command before running it)
 -n dry run (print all commands but don't run any)
+-h, --help show this help message and exit
 
 Example:
 $1 -v gcc -o foo foo.o -Wl,@/usr/xenomai/lib/cobalt.wrappers -L/usr/xenomai/lib -lcobalt -lmodechk -lpthread -lrt
@@ -83,6 +84,11 @@ while test $# -gt 0; do
 
 	-n) 
 	    dryrun="echo # "
+	    ;;
+
+	-h|--help)
+	    usage "$progname"
+	    exit 0
 	    ;;
 
 	-*)
