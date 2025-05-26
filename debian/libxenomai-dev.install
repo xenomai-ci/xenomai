@@ -5,5 +5,6 @@ usr/lib/*.a
 usr/lib/*.so
 usr/lib/modechk.wrappers
 usr/lib/cobalt.wrappers
+usr/lib/cobalt-glibc-time64.wrappers
 usr/lib/dynlist.ld
 usr/lib/xenomai/bootstrap*.o
