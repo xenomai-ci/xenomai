@@ -2501,8 +2501,8 @@ void e1000e_down(struct e1000_adapter *adapter)
 
 	e1000_irq_disable(adapter);
 
-	del_timer_sync(&adapter->watchdog_timer);
-	del_timer_sync(&adapter->phy_info_timer);
+	timer_delete_sync(&adapter->watchdog_timer);
+	timer_delete_sync(&adapter->phy_info_timer);
 
 	rtnetif_carrier_off(netdev);
 
@@ -4198,8 +4198,8 @@ static void e1000_remove(struct pci_dev *pdev)
 	 */
 	if (!down)
 		set_bit(__E1000_DOWN, &adapter->state);
-	del_timer_sync(&adapter->watchdog_timer);
-	del_timer_sync(&adapter->phy_info_timer);
+	timer_delete_sync(&adapter->watchdog_timer);
+	timer_delete_sync(&adapter->phy_info_timer);
 
 	rtdm_nrtsig_destroy(&adapter->downshift_sig);
 	rtdm_nrtsig_destroy(&adapter->mod_timer_sig);
