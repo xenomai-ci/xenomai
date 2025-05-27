@@ -363,13 +363,13 @@ static int test_sc_cobalt_clock_getres64(void)
 	struct xn_timespec64 ts64;
 	int ret;
 
-	/* Make sure we don't crash because of NULL pointers */
-	ret = XENOMAI_SYSCALL2(sc_nr, NULL, NULL);
+	/* Make sure we accept a NULL pointer */
+	ret = XENOMAI_SYSCALL2(sc_nr, CLOCK_MONOTONIC, NULL);
 	if (ret == -ENOSYS) {
 		smokey_note("clock_getres64: skipped. (no kernel support)");
 		return 0; // Not implemented, nothing to test, success
 	}
-	if (!smokey_assert(ret == -EFAULT))
+	if (!smokey_assert(ret == 0))
 		return ret ? ret : -EINVAL;
 
 	/* Providing an invalid address has to deliver EFAULT */

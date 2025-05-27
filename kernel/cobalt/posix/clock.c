@@ -103,7 +103,7 @@ COBALT_SYSCALL(clock_getres64, current,
 	if (ret)
 		return ret;
 
-	if (cobalt_put_timespec64(&ts, u_ts))
+	if (u_ts && cobalt_put_timespec64(&ts, u_ts))
 		return -EFAULT;
 
 	trace_cobalt_clock_getres(clock_id, &ts);
