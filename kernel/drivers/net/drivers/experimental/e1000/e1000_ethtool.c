@@ -1997,7 +1997,7 @@ static int e1000_phys_id(struct net_device *netdev, u32 data)
 		e1000_setup_led(&adapter->hw);
 		mod_timer(&adapter->blink_timer, jiffies);
 		msleep_interruptible(data * 1000);
-		del_timer_sync(&adapter->blink_timer);
+		timer_delete_sync(&adapter->blink_timer);
 	} else if (adapter->hw.phy.type == e1000_phy_ife) {
 		if (!adapter->blink_timer.function) {
 			init_timer(&adapter->blink_timer);
@@ -2006,7 +2006,7 @@ static int e1000_phys_id(struct net_device *netdev, u32 data)
 		}
 		mod_timer(&adapter->blink_timer, jiffies);
 		msleep_interruptible(data * 1000);
-		del_timer_sync(&adapter->blink_timer);
+		timer_delete_sync(&adapter->blink_timer);
 		e1000_write_phy_reg(&(adapter->hw), IFE_PHY_SPECIAL_CONTROL_LED, 0);
 	} else {
 		e1000_blink_led(&adapter->hw);
