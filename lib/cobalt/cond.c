@@ -300,7 +300,6 @@ COBALT_IMPL(int, pthread_cond_wait, (pthread_cond_t *cond, pthread_mutex_t *mute
 		.err = 0,
 	};
 	int err, oldtype;
-	unsigned count;
 
 	if (_mx->magic != COBALT_MUTEX_MAGIC)
 		return EINVAL;
@@ -319,9 +318,9 @@ COBALT_IMPL(int, pthread_cond_wait, (pthread_cond_t *cond, pthread_mutex_t *mute
 			return EPERM;
 	}
 
-	pthread_cleanup_push(&__pthread_cond_cleanup, &c);
+	c.count = _mx->lockcnt;
 
-	count = _mx->lockcnt;
+	pthread_cleanup_push(&__pthread_cond_cleanup, &c);
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
@@ -331,12 +330,12 @@ COBALT_IMPL(int, pthread_cond_wait, (pthread_cond_t *cond, pthread_mutex_t *mute
 
 	pthread_cleanup_pop(0);
 
-	while (err == -EINTR)
+	while (err == -EINTR) {
 		err = XENOMAI_SYSCALL2(sc_cobalt_cond_wait_epilogue, _cnd, _mx);
+		pthread_testcancel();
+	}
 
-	_mx->lockcnt = count;
-
-	pthread_testcancel();
+	_mx->lockcnt = c.count;
 
 	return -err ?: -c.err;
 }
@@ -388,7 +387,6 @@ COBALT_IMPL_TIME64(int, pthread_cond_timedwait, __pthread_cond_timedwait64,
 		.mutex = _mx,
 	};
 	int err, oldtype;
-	unsigned count;
 
 	if (_mx->magic != COBALT_MUTEX_MAGIC)
 		return EINVAL;
@@ -407,9 +405,9 @@ COBALT_IMPL_TIME64(int, pthread_cond_timedwait, __pthread_cond_timedwait64,
 			return EPERM;
 	}
 
-	pthread_cleanup_push(&__pthread_cond_cleanup, &c);
+	c.count = _mx->lockcnt;
 
-	count = _mx->lockcnt;
+	pthread_cleanup_push(&__pthread_cond_cleanup, &c);
 
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldtype);
 
@@ -419,12 +417,12 @@ COBALT_IMPL_TIME64(int, pthread_cond_timedwait, __pthread_cond_timedwait64,
 
 	pthread_cleanup_pop(0);
 
-	while (err == -EINTR)
+	while (err == -EINTR) {
 		err = XENOMAI_SYSCALL2(sc_cobalt_cond_wait_epilogue, _cnd, _mx);
+		pthread_testcancel();
+	}
 
-	_mx->lockcnt = count;
-
-	pthread_testcancel();
+	_mx->lockcnt = c.count;
 
 	return -err ?: -c.err;
 }
