@@ -218,7 +218,12 @@ struct cobalt_cond_cleanup_t {
 static void __pthread_cond_cleanup(void *data)
 {
 	struct cobalt_cond_cleanup_t *c = (struct cobalt_cond_cleanup_t *)data;
+	xnhandle_t cur = cobalt_get_current();
 	int err;
+
+	/* if we still own the mutex, cond_wait_prologue wasn't called yet */
+	if (xnsynch_fast_owner_check(mutex_get_ownerp(c->mutex), cur) == 0)
+		return;
 
 	do {
 		err = XENOMAI_SYSCALL2(sc_cobalt_cond_wait_epilogue,
