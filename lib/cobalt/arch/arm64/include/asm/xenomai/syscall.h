@@ -74,31 +74,31 @@ DEFINE_XENOMAI_SYSCALL(5)
 	__xenomai_do_syscall0(__op)
 #define XENOMAI_SYSCALL1(__op, __a1)				\
 	__xenomai_do_syscall1(__op,				\
-			      (unsigned long)__a1)
+			      (unsigned long)(__a1))
 #define XENOMAI_SYSCALL2(__op, __a1, __a2)			\
 	__xenomai_do_syscall2(__op,				\
-			      (unsigned long)__a1,		\
-			      (unsigned long)__a2)
+			      (unsigned long)(__a1),		\
+			      (unsigned long)(__a2))
 #define XENOMAI_SYSCALL3(__op, __a1, __a2, __a3)		\
 	__xenomai_do_syscall3(__op,				\
-			      (unsigned long)__a1,		\
-			      (unsigned long)__a2,		\
-			      (unsigned long)__a3)
+			      (unsigned long)(__a1),		\
+			      (unsigned long)(__a2),		\
+			      (unsigned long)(__a3))
 #define XENOMAI_SYSCALL4(__op, __a1, __a2, __a3, __a4)		\
 	__xenomai_do_syscall4(__op,				\
-			      (unsigned long)__a1,		\
-			      (unsigned long)__a2,		\
-			      (unsigned long)__a3,		\
-			      (unsigned long)__a4)
+			      (unsigned long)(__a1),		\
+			      (unsigned long)(__a2),		\
+			      (unsigned long)(__a3),		\
+			      (unsigned long)(__a4))
 #define XENOMAI_SYSCALL5(__op, __a1, __a2, __a3, __a4, __a5)	\
 	__xenomai_do_syscall5(__op,				\
-			      (unsigned long)__a1,		\
-			      (unsigned long)__a2,		\
-			      (unsigned long)__a3,		\
-			      (unsigned long)__a4,		\
-			      (unsigned long)__a5)
+			      (unsigned long)(__a1),		\
+			      (unsigned long)(__a2),		\
+			      (unsigned long)(__a3),		\
+			      (unsigned long)(__a4),		\
+			      (unsigned long)(__a5))
 #define XENOMAI_SYSBIND(__breq)					\
 	__xenomai_do_syscall1(sc_cobalt_bind,			\
-			      (unsigned long)__breq)
+			      (unsigned long)(__breq))
 
 #endif /* !_LIB_COBALT_ARM64_SYSCALL_H */
