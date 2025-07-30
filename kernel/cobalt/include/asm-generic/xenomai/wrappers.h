@@ -91,4 +91,8 @@
 	(__mm)->get_unmapped_area(__filp, __addr, __len, __pgoff, __flags)
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,16,0)
+#define timer_container_of	from_timer
+#endif
+
 #endif /* _COBALT_ASM_GENERIC_WRAPPERS_H */
