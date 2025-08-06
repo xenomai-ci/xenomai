@@ -64,7 +64,7 @@ $ scripts/prepare-kernel.sh [--linux=<linux-srctree>]
 
 `--dovetail`:: specifies the path of the interrupt pipeline (aka Dovetail)
     patch to apply against the kernel tree. Suitable patches are
-    available from https://source.denx.de/Xenomai/linux-dovetail[here].
+    available from https://gitlab.com/Xenomai/linux-dovetail[here].
     This parameter can be omitted if the Dovetail has already
     been patched in, or the script shall suggest an appropriate
     one. The script will detect whether the interrupt pipeline code is
@@ -271,7 +271,7 @@ _Cobalt_-specific requirements
 
 - An interrupt pipeline (Dovetail) patch must be available for your
   target kernel. You can find the official patches issued by the
-  Xenomai project https://source.denx.de/Xenomai/linux-dovetail[here].
+  Xenomai project https://gitlab.com/Xenomai/linux-dovetail[here].
 
 - A timestamp counter (TSC) is required from running on a x86_32
   hardware. Unlike with Xenomai 2.x, TSC-emulation using a PIT

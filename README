@@ -39,7 +39,7 @@ https://v3.xenomai.org/installation/
 
 - GIT clone:
 
-  https://source.denx.de/Xenomai/xenomai.git
+  https://gitlab.com/Xenomai/xenomai.git
 
   Once the repository is cloned, make sure to bootstrap the autoconf
   system in the top-level directory by running scripts/bootstrap.  In
@@ -53,7 +53,7 @@ https://v3.xenomai.org/installation/
 
 - Tarballs:
 
-  https://source.denx.de/Xenomai/xenomai/-/tags
+  https://gitlab.com/Xenomai/xenomai/-/tags
 
   Source tarballs are self-contained and ready for building.
 
