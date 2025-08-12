@@ -33,7 +33,7 @@ build: build-arch build-indep
 build-arch: build-arch-stamp
 build-arch-stamp: config.status
 	dh_testdir
-	$(MAKE)
+	$(MAKE) $(PARALLEL_MAKE)
 	touch build-arch-stamp
 
 build-indep: build-indep-stamp
